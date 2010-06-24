@@ -9,6 +9,7 @@ require 'erb'
 task :generate_java_classes do
 
   @callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))
+  @class = "Activity"
 
 
   ##############################################################################################
@@ -94,7 +95,7 @@ task :generate_java_classes do
   ##############################################################################################
 
 
-  File.open("src/org/ruboto/embedded/RubotoActivity.java", "w") do |file|
-    file.write ERB.new(IO.read("callback_gen/RubotoActivity.erb"), 0, "%").result
+  File.open("src/org/ruboto/RubotoActivity.java", "w") do |file|
+    file.write ERB.new(IO.read("lib/java_class_gen/RubotoClass.java.erb"), 0, "%").result
   end
 end
