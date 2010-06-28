@@ -7,8 +7,7 @@
 require 'erb'
 
 task :generate_java_classes do
-
-  @callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))
+  @callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))['android.app.Activity']
   @class = "Activity"
 
 

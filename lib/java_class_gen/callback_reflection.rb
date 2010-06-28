@@ -8,38 +8,79 @@
 # names and values of yet another hash, which gives the argument types
 # (and thus implicitly the number of args), the return type, etc.
 
-result = {}
-@count = 0
+require 'java'
 
-def hash_methods(klass, callbacks_only=false)
-  rv = {}
-  klass.getDeclaredMethods.each do |method|
-    if !callbacks_only or method.getName[0..1] == "on"
-      rv[method.getName] = {}
-      rv[method.getName]["return_type"] = method.getReturnType.getName unless method.getReturnType.getName == "void" 
-      rv[method.getName]["args"] = method.getParameterTypes.map{|i| i.getName} unless method.getParameterTypes.empty?
-      @count += 1
+class ReflectionBuilder
+  attr_reader :methods
+
+  def initialize(class_name, callbacks_only=false)
+    @methods = {}
+    @@count = 0 unless defined?(@@count)
+    reflect class_name, callbacks_only
+  end
+
+  def reflect(klass, callbacks_only=false)
+    # klass can be the java class object or a string
+    klass = java_class klass if klass.class == String
+
+    hash = @methods[klass.getName] = {}
+
+    # iterate over the public methods of the class
+    klass.getDeclaredMethods.select {|method| java.lang.reflect.Modifier.isPublic(method.getModifiers) }.each do |method|
+      if !callbacks_only or method.getName[0..1] == "on"
+        hash[method.getName] = {}
+        hash[method.getName]["return_type"] = method.getReturnType.getName unless method.getReturnType.getName == "void" 
+        hash[method.getName]["args"] = method.getParameterTypes.map{|i| i.getName} unless method.getParameterTypes.empty?
+        hash[method.getName]["abstract"] = java.lang.reflect.Modifier.isAbstract(method.getModifiers)
+        @@count += 1
+      end
     end
   end
-  rv
+
+  def interfaces(*args)
+    args.each {|arg| reflect arg}
+  end
+
+  def interfaces_under(*args)
+    args.each do |name|
+      interfaces *java.lang.Class.forName(name).getClasses.select {|klass| klass.isInterface}
+    end
+  end
+
+  def self.count
+    @@count
+  end
+
+  def self.reset_count
+    @@count = 0
+  end
+  
+  protected
+  def java_class(class_name)
+    java.lang.Class.forName(class_name)
+  end
 end
 
-%w(
-  android.app.Activity
-).each do |name|
-  h = hash_methods(java.lang.Class.forName(name), true)
-  result[name] = h unless h.empty?
+def java_reflect(class_name, callbacks_only=false, &block)
+  r = ReflectionBuilder.new(class_name, callbacks_only)
+  yield r
+  $result[class_name] = r.methods
 end
 
-%w(
+def unprefixed_class(class_name)
+  /\.([^\.]+)\z/.match(class_name)[1]
+end
+
+$result = {}
+ReflectionBuilder.reset_count
+
+java_reflect 'android.app.Activity', true do |r|
+  r.interfaces *%w(
   android.hardware.SensorEventListener
   java.lang.Runnable
-).each do |name|
-  h = hash_methods(java.lang.Class.forName(name))
-  result[name] = h unless h.empty?
-end
+  )
 
-%w(
+  r.interfaces_under *%w(
   android.view.View
   android.widget.AdapterView
   android.widget.TabHost
@@ -49,17 +90,13 @@ end
   android.app.DatePickerDialog
   android.app.TimePickerDialog
   android.content.DialogInterface
-).each do |name|
-  java.lang.Class.forName(name).getClasses.each do |klass|
-    if klass.isInterface
-      h = hash_methods(klass)
-      result[klass.getName] = h unless h.empty?
-    end
-  end
+  )
 end
+
 
 File.open("/sdcard/jruby/interfaces.txt", "w") do |file|
-  file.write result.inspect
+  file.write $result.inspect
 end
 
-puts @count
+puts ReflectionBuilder.count
+
