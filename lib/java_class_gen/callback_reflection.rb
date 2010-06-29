@@ -26,7 +26,7 @@ class ReflectionBuilder
     hash = @methods[klass.getName] = {}
 
     # iterate over the public methods of the class
-    klass.getDeclaredMethods.select {|method| java.lang.reflect.Modifier.isPublic(method.getModifiers) }.each do |method|
+    klass.getDeclaredMethods.reject {|method| java.lang.reflect.Modifier.isPrivate(method.getModifiers) }.each do |method|
       if !callbacks_only or method.getName[0..1] == "on"
         hash[method.getName] = {}
         hash[method.getName]["return_type"] = method.getReturnType.getName unless method.getReturnType.getName == "void" 
