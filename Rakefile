@@ -6,6 +6,10 @@
 
 require 'erb'
 
+def unprefixed_class(class_name)
+  /\.([^\.]+)\z/.match(class_name)[1]
+end
+
 task :generate_java_classes do
   @callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))['android.app.Activity']
   @class = "Activity"

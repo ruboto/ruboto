@@ -67,10 +67,6 @@ def java_reflect(class_name, callbacks_only=false, &block)
   $result[class_name] = r.methods
 end
 
-def unprefixed_class(class_name)
-  /\.([^\.]+)\z/.match(class_name)[1]
-end
-
 $result = {}
 ReflectionBuilder.reset_count
 
