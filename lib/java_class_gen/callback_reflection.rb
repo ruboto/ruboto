@@ -63,8 +63,12 @@ end
 
 def java_reflect(class_name, callbacks_only=false, &block)
   r = ReflectionBuilder.new(class_name, callbacks_only)
-  yield r
+  yield r if block
   $result[class_name] = r.methods
+end
+
+def reflect_multiple(*classes)
+  classes.each {|c| java_reflect c }
 end
 
 $result = {}
@@ -88,6 +92,12 @@ java_reflect 'android.app.Activity', true do |r|
   android.content.DialogInterface
   )
 end
+
+reflect_multiple *%w(
+android.app.Service
+android.content.BroadcastReceiver
+)
+
 
 
 File.open("/sdcard/jruby/interfaces.txt", "w") do |file|
