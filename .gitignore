@@ -1,0 +1,5 @@
+bin
+gen
+tmp
+local.properties
+.DS_Store
