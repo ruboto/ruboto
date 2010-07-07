@@ -15,8 +15,12 @@ end
 
 require 'java'
 
-java_import "org.ruboto.embedded.RubotoActivity"
-java_import "org.ruboto.embedded.RubotoDialog"
+each do |klass|
+  java_import "org.ruboto.Ruboto#{klass}"
+end
+
+
+# Automate this?
 java_import "org.ruboto.embedded.RubotoView"
 
 java_import "android.app.Activity"
@@ -47,10 +51,12 @@ AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 class Activity
   attr_accessor :init_block
 
+  #dificult
   def start_ruboto_dialog(remote_variable, &block)
     start_ruboto_activity(remote_variable, true, &block)
   end
 
+  #metaprogram so it works for everything
   def start_ruboto_activity(remote_variable, dialog=false, &block)
     @@init_block = block
 
@@ -76,10 +82,12 @@ class Activity
     self
   end
 
+  #plugin
   def toast(text, duration=5000)
     Toast.makeText(self, text, duration).show
   end
 
+  #plugin
   def toast_result(result, success, failure, duration=5000)
     toast(result ? success : failure, duration)
   end
@@ -90,11 +98,13 @@ end
 # RubotoActivity
 #
 
+# metaprogram so it does it to all classes
 class RubotoActivity
   #
   # Initialize
   #
 
+  #metaprogram. probalby rename not to have the class name in it
   def initialize_activity()
     instance_eval &@@init_block
     @initialized = true
@@ -110,6 +120,7 @@ class RubotoActivity
     instance_eval {@create_block.call} if @create_block
   end
 
+  # plugin or something
   def setup_content &block
     @view_parent = nil
     @content_view_block = block

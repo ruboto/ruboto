@@ -1,4 +1,4 @@
-package org.ruboto.embedded;
+package org.ruboto;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -273,5 +273,9 @@ public class Script {
 
     public boolean delete() {
         return getFile().delete();
+    }
+
+    public Integer getState() {
+        return state;
     }
 }

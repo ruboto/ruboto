@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Handler;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
@@ -134,6 +135,8 @@ public class RubotoActivity extends Activity
     private IRubyObject __this__;
     private Ruby __ruby__;
 
+    private static final String TAG = "Ruboto";
+
 	public RubotoActivity setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
 		return this;
@@ -159,50 +162,57 @@ public class RubotoActivity extends Activity
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
-		
-		if (getIntent().getAction() != null  && 
-				getIntent().getAction().equals("org.ruboto.intent.action.LAUNCH_SCRIPT")) {
+
+		/*if (getIntent().getAction() != null  && 
+				getIntent().getAction().equals("android.intent.action.MAIN") ||
+                                getIntent().getAction().equals("android.intent.category.LAUNCHER")) {*/
 			/* Launched from a shortcut */
-		    Thread t = new Thread() {
-				public void run(){
-		            Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
+                /*Thread t = new Thread() {
+                  public void run(){*/
+                                    Log.d(TAG, IRB.SDCARD_SCRIPTS_DIR);
+                                    Log.d(TAG, getFilesDir().getAbsolutePath());
+		            Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/lib/scripts");
 					Script.setUpJRuby(null);
-				    loadingHandler.post(loadingComplete);
-				}
+                                        boolean temp = loadingHandler.post(loadingComplete);
+                                        Log.d(TAG, (temp ? "posted fine" : "didn't post"));
+                                    Log.v(TAG, "posted to loadingHandler");
+                                    /*}
 	        };
-	        t.start();
+	        t.start();*/
 			loadingDialog = ProgressDialog.show(this, "Launching Script", "Initializing Ruboto...", true, false);
-		} else {
-			Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
-			if (configBundle != null) {
-				setRemoteVariable(configBundle.getString("Remote Variable"));
-				if (configBundle.getBoolean("Define Remote Variable")) {
-			        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
-				}
-				if (configBundle.getString("Initialize Script") != null) {
-					Script.execute(configBundle.getString("Initialize Script"));
-				}
-			} else {
+                        //} else {
+			//Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
+			//if (configBundle != null) {
+				setRemoteVariable("$hello");
+				
+			        Script.defineGlobalVariable("$hello", this);
+				
+
+					Script.execute("start.rb");
+
+
 		        Script.defineGlobalVariable("$activity", this);
-			}
+
 
 		    __ruby__ = Script.getRuby();
 		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, this);
 			Script.defineGlobalVariable("$bundle", savedState);
 			Script.execute(remoteVariable + "on_create($bundle)");
 //            RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create", JavaUtil.convertJavaToRuby(__ruby__, savedState));
-		}
+
 	}
 	
     protected final Runnable loadingComplete = new Runnable(){
         public void run(){
+            Log.d(TAG, "in loadingComplete");
             loadingDialog.dismiss();
 		    __ruby__ = Script.getRuby();
 		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
-			Script script = new Script(getIntent().getExtras().getString("org.ruboto.extra.SCRIPT_NAME"));
+			Script script = new Script("start.rb");
 	        Script.defineGlobalVariable("$activity", RubotoActivity.this);
-			try {script.execute();}
-			catch (IOException e) {finish();}
+                Log.d(TAG, script.getState().toString());
+                  try {script.execute(); Log.d(TAG, "script ran supposedly");}
+                  catch (IOException e) {Log.d(TAG, "script threw IOException");finish();}
         }
     };
 
@@ -316,7 +326,7 @@ public class RubotoActivity extends Activity
 	 * none
 	 */
 
-	public void onSizeChanged(RubotoView arg0, int arg1, int arg2, int arg3, int arg4) {
+	public void onSizeChanged(android.view.View arg0, int arg1, int arg2, int arg3, int arg4) {
 		if (callbackOptions[CB_SIZE_CHANGED]) {
 			
             try {

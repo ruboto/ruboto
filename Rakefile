@@ -110,7 +110,7 @@ task :generate_java_classes do
   end
 end
 
-task :default => :generate_java_classes
+#task :default => :generate_java_classes
 
 raise "Needs JRuby 1.5" unless RUBY_PLATFORM =~ /java/
 require 'ant'

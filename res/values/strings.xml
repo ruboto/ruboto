@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ruboto Test</string>
+    <string name="version_name">0.3dev</string>
+
+    <string name="IRB_Tab">IRB</string>
+    <string name="Editor_Tab">Editor</string>
+    <string name="Scripts_Tab">Scripts</string>
+
+    <string name="Enter_source">Enter source code here.</string>
+    <string name="No_scripts">No scripts loaded yet.</string>
+
+    <string name="Menu_run">Execute</string>
+    <string name="Menu_save">Save</string>
+    <string name="Menu_new">New</string>
+    <string name="Menu_history">Edit history</string>
+    <string name="Menu_about">About</string>
+    <string name="Menu_edit">Edit</string>
+    <string name="Menu_delete">Delete</string>
+    <string name="Menu_rescan">Reload scripts list</string>
+    <string name="Menu_reload">Reload demos from assets</string>
+    <string name="Menu_clear_irb">Clear IRB output</string>
+    <string name="Menu_edit_irb">Copy IRB output to editor</string>
+    <string name="Menu_max_screen">Toggle usable screen</string>
+
+    <string name="About_dismiss">Ok</string>
+    <string name="Delete_confirm">Yes</string>
+    <string name="Delete_cancel">No</string>
+    
+    <string name="About_text">Ruboto IRB is a UI for scripting Android using the Ruby language through JRuby.\n\nSource code:\nhttp://github.com/ruboto/ruboto-irb\n\nJoin us or give feedback:\nhttp://groups.google.com/group/ruboto\n\nDevelopers:\nCharlie Nutter\nJan Berkel\nPascal Chatterjee (jruby-for-android project)\nScott Moyer\n\nJRuby Project:\nhttp://jruby.org\n\nIcon:\nRuby Visual Identity Team\nhttp://rubyidentity.org\nCC ShareAlike 2.5</string>
+</resources>
