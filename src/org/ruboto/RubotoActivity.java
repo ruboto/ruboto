@@ -1388,7 +1388,7 @@ public class RubotoActivity extends Activity
 		}
 	}
 	
-	public void onSizeChanged(RubotoView arg0, int arg1, int arg2, int arg3, int arg4) {
+	public void onSizeChanged(android.view.View arg0, int arg1, int arg2, int arg3, int arg4) {
 		if (callbackOptions[CB_SIZE_CHANGED]) {
 			
             try {
