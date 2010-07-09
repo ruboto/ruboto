@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Handler;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
@@ -134,6 +135,8 @@ public class RubotoActivity extends Activity
     private IRubyObject __this__;
     private Ruby __ruby__;
 
+    private String TAG = "RUBOTO";
+
 	public RubotoActivity setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
 		return this;
@@ -159,22 +162,32 @@ public class RubotoActivity extends Activity
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
+
+                if (Script.getRuby() == null)
+                    Log.d(TAG, "fail");
+                else
+                    Log.d(TAG, "win");
 		
-		if (getIntent().getAction() != null  && 
-				getIntent().getAction().equals("org.ruboto.intent.action.LAUNCH_SCRIPT")) {
-			/* Launched from a shortcut */
-		    Thread t = new Thread() {
-				public void run(){
-		            Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
-					Script.setUpJRuby(null);
-				    loadingHandler.post(loadingComplete);
-				}
-	        };
-	        t.start();
-			loadingDialog = ProgressDialog.show(this, "Launching Script", "Initializing Ruboto...", true, false);
+		if (Script.getRuby() == null){
+                    Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
+                    Script.setUpJRuby(null);
+                    Script.defineGlobalVariable("$activity", this);
+                    try {
+                        Log.v(TAG, "script executed:" + (new Script("start.rb").execute()));
+                    }
+                    catch(IOException e){
+                        Log.v(TAG, e.toString());
+                    }
 		} else {
+
+                        if (Script.getRuby() == null)
+                            Log.d(TAG, "fail");
+                        else
+                            Log.d(TAG, "win");
+
 			Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 			if (configBundle != null) {
+                            Log.d(TAG, "configBundle != null");
 				setRemoteVariable(configBundle.getString("Remote Variable"));
 				if (configBundle.getBoolean("Define Remote Variable")) {
 			        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
@@ -183,8 +196,14 @@ public class RubotoActivity extends Activity
 					Script.execute(configBundle.getString("Initialize Script"));
 				}
 			} else {
-		        Script.defineGlobalVariable("$activity", this);
+
 			}
+                        Script.defineGlobalVariable("$hello", this);
+                        setRemoteVariable("$hello");
+                        Script.execute("start.rb");
+
+
+
 
 		    __ruby__ = Script.getRuby();
 		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, this);

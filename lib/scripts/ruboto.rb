@@ -15,13 +15,13 @@ end
 
 require 'java'
 
-each do |klass|
+%w(Activity).each do |klass|
   java_import "org.ruboto.Ruboto#{klass}"
 end
 
 
 # Automate this?
-java_import "org.ruboto.embedded.RubotoView"
+#java_import "org.ruboto.embedded.RubotoView"
 
 java_import "android.app.Activity"
 java_import "android.content.Intent"
@@ -38,8 +38,8 @@ java_import "java.util.ArrayList"
 java_import "android.R"
 
 module Ruboto
-  java_import "org.ruboto.irb.R"
-  Id = JavaUtilities.get_proxy_class("org.ruboto.irb.R$id")
+  java_import "org.ruboto.R"
+  Id = JavaUtilities.get_proxy_class("org.ruboto.R$id")
 end
 AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
