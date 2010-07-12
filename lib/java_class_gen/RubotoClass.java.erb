@@ -70,52 +70,28 @@ public class Ruboto<%= @class %> extends <%= @class %>
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
-		
-		if (getIntent().getAction() != null  && 
-				getIntent().getAction().equals("org.ruboto.intent.action.LAUNCH_SCRIPT")) {
-			/* Launched from a shortcut */
-		    Thread t = new Thread() {
-				public void run(){
-		            Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
-					Script.setUpJRuby(null);
-				    loadingHandler.post(loadingComplete);
-				}
-	        };
-	        t.start();
-			loadingDialog = ProgressDialog.show(this, "Launching Script", "Initializing Ruboto...", true, false);
-		} else {
-			Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
-			if (configBundle != null) {
-				setRemoteVariable(configBundle.getString("Remote Variable"));
-				if (configBundle.getBoolean("Define Remote Variable")) {
-			        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
-				}
-				if (configBundle.getString("Initialize Script") != null) {
-					Script.execute(configBundle.getString("Initialize Script"));
-				}
-			} else {
-		        Script.defineGlobalVariable("$activity", this);
-			}
 
-		    __ruby__ = Script.getRuby();
-		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, this);
-			Script.defineGlobalVariable("$bundle", savedState);
-			Script.execute(remoteVariable + "on_create($bundle)");
+		if (Script.getRuby() == null){
+                    Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
+                    Script.setUpJRuby(null);
+                    Script.defineGlobalVariable("$activity", this);
+                    try {
+                        new Script("start.rb").execute();
+                    }
+                    catch(IOException e){
+                        ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
+                    }
+		} else {
+                    Script.defineGlobalVariable("$hello", this);
+                    setRemoteVariable("$hello");
+                    Script.execute("start.rb");
+                    Script.defineGlobalVariable("$bundle", savedState);
+                    Script.execute(remoteVariable + "on_create($bundle)");
 //            RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create", JavaUtil.convertJavaToRuby(__ruby__, savedState));
 		}
 	}
 	
-    protected final Runnable loadingComplete = new Runnable(){
-        public void run(){
-            loadingDialog.dismiss();
-		    __ruby__ = Script.getRuby();
-		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
-			Script script = new Script(getIntent().getExtras().getString("org.ruboto.extra.SCRIPT_NAME"));
-	        Script.defineGlobalVariable("$activity", RubotoActivity.this);
-			try {script.execute();}
-			catch (IOException e) {finish();}
-        }
-    };
+
 
 	/*********************************************************************************
 	 *
