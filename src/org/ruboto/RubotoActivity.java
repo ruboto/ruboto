@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Handler;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
