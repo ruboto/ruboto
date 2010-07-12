@@ -63,7 +63,7 @@ task :generate_java_classes do
       #
       @callbacks["none"] = {
         "onDraw" => {"args" => ["android.view.View", "android.graphics.Canvas"]}, 
-        "onSizeChanged" => {"args" => ["RubotoView", "int", "int", "int", "int"]}
+        "onSizeChanged" => {"args" => ["android.view.View", "int", "int", "int", "int"]}
       }
     end
     #
