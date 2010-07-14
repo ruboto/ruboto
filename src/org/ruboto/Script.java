@@ -27,24 +27,15 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 public class Script {
-    public static final String UNTITLED_RB = "untitled.rb";
-
     private static String scriptsDir = null;
     private static File scriptsDirFile = null;
-    private static long scriptsDirModified = 0;
   
-    private static final int STATE_EMPTY = 1;
-    private static final int STATE_ON_DISK = 2;
-    private static final int STATE_IN_MEMORY = 3;
-    private static final int STATE_IN_MEMORY_DIRTY = 4;
-
     private String name = null;
     private static Ruby ruby;
     private static DynamicScope scope;
     private static boolean initialized = false;
 
     private String contents = null;
-    private Integer state = null;
 
     /*************************************************************************************************
      *
@@ -128,45 +119,6 @@ public class Script {
     	return scriptsDirFile;
     }
 
-    public static Boolean configDir(String sdcard, String noSdcard) {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-        	setDir(sdcard);
-        } else {
-        	setDir(noSdcard);
-        }
-
-        /* Create directory if it doesn't exist */
-        if (!scriptsDirFile.exists()) {
-            // TODO check return code
-            scriptsDirFile.mkdir();
-            return true;
-        }
-
-        return false;
-    }
-    
-    /*************************************************************************************************
-     *
-     * Static Methods: Scripts List
-     */
-    
-    public static boolean scriptsDirChanged() {
-    	return scriptsDirModified != scriptsDirFile.lastModified();
-    }
-
-    public static List<String> list() throws SecurityException {
-        return Script.list(new ArrayList<String>());
-    }
-
-    public static List<String> list(List<String> list) throws SecurityException {
-    	scriptsDirModified = scriptsDirFile.lastModified();
-        list.clear();
-        String[] tmpList = scriptsDirFile.list(RUBY_FILES);
-        Arrays.sort(tmpList, 0, tmpList.length, String.CASE_INSENSITIVE_ORDER);
-        list.addAll(Arrays.asList(tmpList));
-        return list;
-    }
-
     /*************************************************************************************************
     *
     * Constructors
@@ -191,20 +143,6 @@ public class Script {
         } else {
             // TODO: Exception
         }
-    }
-
-    /* Create a Script from a URL */
-    public static Script fromURL(String url) {
-    	try {
-            String [] temp = url.split("/");
-        	DefaultHttpClient client = new DefaultHttpClient();
-        	HttpGet get = new HttpGet(url);
-        	BasicResponseHandler handler = new BasicResponseHandler();
-        	return new Script(temp[temp.length -1], client.execute(get, handler));
-    	}
-    	catch (Throwable t) {
-    		return null;
-    	}
     }
 
     /*************************************************************************************************
@@ -243,36 +181,13 @@ public class Script {
         return contents;
     }
 
-    public Script setContents(String contents) {
-        if (contents == null || contents.equals("")) {
-            this.contents = "";
-        } else {
-            this.contents = contents;
-        }
-        state = STATE_IN_MEMORY_DIRTY;
-        return this;
-    }
-
     /*************************************************************************************************
      *
      * Script Actions
      */
 
-    public void save() throws IOException {
-        if (state != STATE_ON_DISK) {
-            BufferedWriter buffer = new BufferedWriter(new FileWriter(getFile()));
-            buffer.write(contents);
-            buffer.close();
-            state = STATE_IN_MEMORY;
-        }
-    }
-
     public String execute() throws IOException {
         return Script.execute(getContents());
-    }
-
-    public boolean delete() {
-        return getFile().delete();
     }
 
     public Integer getState() {
