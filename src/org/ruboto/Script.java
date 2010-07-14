@@ -2,12 +2,16 @@ package org.ruboto;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,12 +26,14 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.scope.ManyVarsDynamicScope;
 
 import android.os.Environment;
+import android.util.Log;
+import android.content.res.AssetManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 public class Script {
-    private static String scriptsDir = null;
+    private static String scriptsDir = "scripts";
     private static File scriptsDirFile = null;
   
     private String name = null;
@@ -36,6 +42,8 @@ public class Script {
     private static boolean initialized = false;
 
     private String contents = null;
+
+    public static final String TAG = "RUBOTO"; //for logging
 
     /*************************************************************************************************
      *
@@ -119,6 +127,52 @@ public class Script {
     	return scriptsDirFile;
     }
 
+    public static Boolean configDir(String noSdcard) {
+        setDir(noSdcard);
+
+        /* Create directory if it doesn't exist */
+        if (!scriptsDirFile.exists()) {
+            // TODO check return code
+            scriptsDirFile.mkdir();
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void copyScripts(String from, File to, AssetManager assets) {
+        try {
+            byte[] buffer = new byte[8192];
+            for (String f : assets.list(from)) {
+                File dest = new File(to, f);
+
+                if (dest.exists())
+                    continue;
+
+                Log.d(TAG, "copying file " + f);
+
+                InputStream is = assets.open(from+ "/" +f);
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
+
+                int n;
+                while ((n = is.read(buffer, 0, buffer.length)) != -1)
+                    fos.write(buffer, 0, n);
+
+                is.close();
+                fos.close();
+            }
+        } catch (IOException iox) {
+            Log.e(TAG, "error copying demo scripts", iox);
+        }
+    }
+
+    public static void copyScriptsIfNeeded(String to, AssetManager assets) {
+        /* the if makes sure we only do this the first time */
+        if (configDir(to))
+            copyScripts("scripts", scriptsDirFile, assets);
+    }
+
+
     /*************************************************************************************************
     *
     * Constructors
@@ -132,17 +186,6 @@ public class Script {
         this.name = name;
         this.contents = contents;
         File file = getFile();
-
-        if (contents == null && !file.exists()) {
-            state = STATE_EMPTY;
-            this.contents = "";
-        } else if (contents == null && file.exists()) {
-            state = STATE_ON_DISK;
-        } else if (contents != null) {
-            state = STATE_IN_MEMORY_DIRTY;
-        } else {
-            // TODO: Exception
-        }
     }
 
     /*************************************************************************************************
@@ -160,24 +203,20 @@ public class Script {
 
     public Script setName(String name) {
         this.name = name;
-        state = STATE_IN_MEMORY_DIRTY;
         // TODO: Other states possible
         return this;
     }
 
     public String getContents() throws IOException {
-        if (state == STATE_ON_DISK) {
-            BufferedReader buffer = new BufferedReader(new FileReader(getFile()));
-            StringBuilder source = new StringBuilder();
-            while (true) {
-                String line = buffer.readLine();
-                if (line == null) break;
-                source.append(line).append("\n");
-            }
-            buffer.close();
-            contents = source.toString();
-            state = STATE_IN_MEMORY;
+        BufferedReader buffer = new BufferedReader(new FileReader(getFile()));
+        StringBuilder source = new StringBuilder();
+        while (true) {
+            String line = buffer.readLine();
+            if (line == null) break;
+            source.append(line).append("\n");
         }
+        buffer.close();
+        contents = source.toString();
         return contents;
     }
 
@@ -188,9 +227,5 @@ public class Script {
 
     public String execute() throws IOException {
         return Script.execute(getContents());
-    }
-
-    public Integer getState() {
-        return state;
     }
 }

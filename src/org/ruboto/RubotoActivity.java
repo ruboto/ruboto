@@ -160,8 +160,9 @@ public class RubotoActivity extends Activity
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
 
+                Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
+
 		if (Script.getRuby() == null){
-                    Script.configDir(IRB.SDCARD_SCRIPTS_DIR, getFilesDir().getAbsolutePath() + "/scripts");
                     Script.setUpJRuby(null);
                     Script.defineGlobalVariable("$activity", this);
                     try {
