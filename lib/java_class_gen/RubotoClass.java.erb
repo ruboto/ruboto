@@ -9,7 +9,9 @@ package org.ruboto;
 
 import java.io.IOException;
 import <%= @full_class %>;
+% if @class == "Activity"
 import android.app.ProgressDialog;
+% end
 import android.os.Handler;
 import android.os.Bundle;
 
@@ -40,7 +42,7 @@ public class Ruboto<%= @class %> extends <%= @class %>
 	private boolean[] callbackOptions = new boolean [CB_LAST];
     
 	private String remoteVariable = "";
-	private ProgressDialog loadingDialog; 
+
     private final Handler loadingHandler = new Handler();
     private IRubyObject __this__;
     private Ruby __ruby__;
@@ -80,7 +82,9 @@ public class Ruboto<%= @class %> extends <%= @class %>
                         new Script("start.rb").execute();
                     }
                     catch(IOException e){
+%                     if @class == "Activity"
                         ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
+%                     end
                     }
 		} else {
                     Script.defineGlobalVariable("$hello", this);
