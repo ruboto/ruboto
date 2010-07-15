@@ -116,8 +116,7 @@ public class Ruboto<%= @class %> extends <%= @class %>
 	 */
 
 %      i_info.each do |method,v|
-%      # the gsub turns "[Ljava.lang.String;" into java.lang.String[]. Might want to change to doing this at reflection time
-	public <%= "#{v["return_type"]} #{v["interface_method"]}(#{v["args_with_types"].gsub(/\[Ljava\.[\w\.]+;/) {|m| "#{m[2..-2]}[]"} })" %> {
+	public <%= "#{v["return_type"]} #{v["interface_method"]}(#{v["args_with_types"] })" %> {
 		if (callbackOptions[<%= v['constant']%>]) {
 			<%= "super.#{v["method"]}(#{v["args_alone"].join(", ")});" if v["interface"] == "Activity" %>
             try {
