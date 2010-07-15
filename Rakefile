@@ -15,6 +15,7 @@ task :generate_java_classes do
   all_callbacks.each do |full_class, method_hash|
     @class = unprefixed_class full_class
     @callbacks = method_hash
+    @full_class = full_class
 
 
     ##############################################################################################
