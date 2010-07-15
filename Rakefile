@@ -166,6 +166,8 @@ task :tag => :release do
   #sh "gem push pkg/#{name}-#{version}.gem"
 end
 
+task :gen => :generate_java_classes
+
 def manifest
   @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
 end
