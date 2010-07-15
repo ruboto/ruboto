@@ -131,14 +131,26 @@ public class Ruboto<%= @class %> extends <%= @class %>
 %             end
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        <%= (v["return_type"] == "boolean" ? "return false;" : "return null;") unless v["return_type"] == "void" %>
+                <%= case v["return_type"]
+                           when "boolean": "return false;"
+                           when "int":     "return 0;"
+                           when "void":    ""
+                           else            "return null;"
+                           end
+                                  %>
             }
 %     if v["interface"] == "Activity" 
 		} else {
 			<%= "return " unless v["return_type"] == "void" %><%= "super.#{v["method"]}(#{v["args_alone"].join(", ")});" %>
 %     elsif v["return_type"] != "void"
 		} else {
-	        return <%= v["return_type"] == "boolean" ? "false" : "null" %>;
+                <%= case v["return_type"]
+                           when "boolean": "return false;"
+                           when "int":     "return 0;"
+                           when "void":    ""
+                           else            "return null;"
+                           end
+                                  %>
 %     end
 		}
 	}

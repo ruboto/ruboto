@@ -129,7 +129,7 @@ public class RubotoActivity extends Activity
 	private boolean[] callbackOptions = new boolean [CB_LAST];
     
 	private String remoteVariable = "";
-	private ProgressDialog loadingDialog; 
+
     private final Handler loadingHandler = new Handler();
     private IRubyObject __this__;
     private Ruby __ruby__;
@@ -199,7 +199,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_activity_result", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onActivityResult(arg0, arg1, arg2);
@@ -213,7 +213,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_apply_theme_resource", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onApplyThemeResource(arg0, arg1, arg2);
@@ -227,7 +227,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_attached_to_window");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onAttachedToWindow();
@@ -241,7 +241,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_back_pressed");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onBackPressed();
@@ -255,7 +255,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_child_title_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onChildTitleChanged(arg0, arg1);
@@ -269,7 +269,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_configuration_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onConfigurationChanged(arg0);
@@ -283,7 +283,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_content_changed");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onContentChanged();
@@ -297,7 +297,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_context_item_selected", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onContextItemSelected(arg0);
@@ -311,7 +311,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_context_menu_closed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onContextMenuClosed(arg0);
@@ -325,7 +325,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_context_menu", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onCreateContextMenu(arg0, arg1, arg2);
@@ -339,7 +339,7 @@ public class RubotoActivity extends Activity
             	return (java.lang.CharSequence)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_description").toJava(java.lang.CharSequence.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
 			return super.onCreateDescription();
@@ -353,7 +353,7 @@ public class RubotoActivity extends Activity
             	return (android.app.Dialog)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_dialog", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(android.app.Dialog.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
 			return super.onCreateDialog(arg0, arg1);
@@ -367,7 +367,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_options_menu", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onCreateOptionsMenu(arg0);
@@ -381,7 +381,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_panel_menu", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onCreatePanelMenu(arg0, arg1);
@@ -395,7 +395,7 @@ public class RubotoActivity extends Activity
             	return (android.view.View)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_panel_view", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(android.view.View.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
 			return super.onCreatePanelView(arg0);
@@ -409,7 +409,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_thumbnail", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onCreateThumbnail(arg0, arg1);
@@ -423,7 +423,7 @@ public class RubotoActivity extends Activity
             	return (android.view.View)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create_view", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(android.view.View.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
 			return super.onCreateView(arg0, arg1, arg2);
@@ -437,7 +437,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_destroy");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onDestroy();
@@ -451,7 +451,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_detached_from_window");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onDetachedFromWindow();
@@ -465,7 +465,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_key_down", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onKeyDown(arg0, arg1);
@@ -479,7 +479,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_key_long_press", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onKeyLongPress(arg0, arg1);
@@ -493,7 +493,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_key_multiple", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onKeyMultiple(arg0, arg1, arg2);
@@ -507,7 +507,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_key_up", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onKeyUp(arg0, arg1);
@@ -521,7 +521,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_low_memory");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onLowMemory();
@@ -535,7 +535,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_menu_item_selected", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onMenuItemSelected(arg0, arg1);
@@ -549,7 +549,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_menu_opened", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onMenuOpened(arg0, arg1);
@@ -563,7 +563,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_new_intent", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onNewIntent(arg0);
@@ -577,7 +577,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_options_item_selected", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onOptionsItemSelected(arg0);
@@ -591,7 +591,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_options_menu_closed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onOptionsMenuClosed(arg0);
@@ -605,7 +605,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_panel_closed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onPanelClosed(arg0, arg1);
@@ -619,7 +619,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_pause");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onPause();
@@ -633,7 +633,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_post_create", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onPostCreate(arg0);
@@ -647,7 +647,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_post_resume");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onPostResume();
@@ -661,7 +661,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_prepare_dialog", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onPrepareDialog(arg0, arg1, arg2);
@@ -675,7 +675,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_prepare_options_menu", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onPrepareOptionsMenu(arg0);
@@ -689,7 +689,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_prepare_panel", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onPreparePanel(arg0, arg1, arg2);
@@ -703,7 +703,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_restart");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onRestart();
@@ -717,7 +717,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_restore_instance_state", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onRestoreInstanceState(arg0);
@@ -731,7 +731,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_resume");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onResume();
@@ -745,7 +745,7 @@ public class RubotoActivity extends Activity
             	return (java.lang.Object)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_retain_non_configuration_instance").toJava(java.lang.Object.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
 			return super.onRetainNonConfigurationInstance();
@@ -759,7 +759,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_save_instance_state", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onSaveInstanceState(arg0);
@@ -773,7 +773,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_search_requested").toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onSearchRequested();
@@ -787,7 +787,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_start");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onStart();
@@ -801,7 +801,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_stop");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onStop();
@@ -815,7 +815,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_title_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onTitleChanged(arg0, arg1);
@@ -829,7 +829,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_touch_event", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onTouchEvent(arg0);
@@ -843,7 +843,7 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_trackball_event", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
 			return super.onTrackballEvent(arg0);
@@ -857,7 +857,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_user_interaction");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onUserInteraction();
@@ -871,7 +871,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_user_leave_hint");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onUserLeaveHint();
@@ -885,7 +885,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_window_attributes_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onWindowAttributesChanged(arg0);
@@ -899,7 +899,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_window_focus_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		} else {
 			super.onWindowFocusChanged(arg0);
@@ -917,7 +917,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_accuracy_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -929,7 +929,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_sensor_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -945,7 +945,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "run");
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -965,7 +965,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_click", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -981,7 +981,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_focus_change", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -997,10 +997,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_long_click", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1015,10 +1015,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_touch", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1033,10 +1033,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_key", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1052,7 +1052,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_item_selected", args);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1064,7 +1064,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_nothing_selected", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1081,10 +1081,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_item_long_click", args).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1100,7 +1100,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_item_click", args);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1116,7 +1116,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_child_view_added", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1128,7 +1128,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_child_view_removed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1144,10 +1144,10 @@ public class RubotoActivity extends Activity
             	return (android.view.View)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "create_tab_content", JavaUtil.convertJavaToRuby(__ruby__, arg0)).toJava(android.view.View.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return null;
+                return null;
             }
 		} else {
-	        return null;
+                return null;
 		}
 	}
 	
@@ -1162,7 +1162,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_tab_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1178,10 +1178,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_editor_action", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1197,7 +1197,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_date_changed", args);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1213,7 +1213,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_time_changed", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1230,7 +1230,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_date_set", args);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1246,7 +1246,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_time_set", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1262,10 +1262,10 @@ public class RubotoActivity extends Activity
             	return (Boolean)RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_dialog_key", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2)).toJava(boolean.class);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        return false;
+                return false;
             }
 		} else {
-	        return false;
+                return false;
 		}
 	}
 	
@@ -1280,7 +1280,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_dialog_multi_choice_click", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1), JavaUtil.convertJavaToRuby(__ruby__, arg2));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1296,7 +1296,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_dialog_click", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1312,7 +1312,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_show", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1328,7 +1328,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_dismiss", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1344,7 +1344,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_cancel", JavaUtil.convertJavaToRuby(__ruby__, arg0));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1360,7 +1360,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_draw", JavaUtil.convertJavaToRuby(__ruby__, arg0), JavaUtil.convertJavaToRuby(__ruby__, arg1));
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
@@ -1373,7 +1373,7 @@ public class RubotoActivity extends Activity
             	RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_size_changed", args);
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
-		        
+                
             }
 		}
 	}
