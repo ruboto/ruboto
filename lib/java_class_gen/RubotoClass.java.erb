@@ -73,7 +73,10 @@ public class Ruboto<%= @class %> extends <%= @class %>
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
 
+%               if @class == "Activity"
+%               # we'll assume the first thing that happens is an activity gets spawned. no need to do this in other classes
                 Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
+%               end
 
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
