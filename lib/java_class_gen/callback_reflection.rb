@@ -30,7 +30,8 @@ class ReflectionBuilder
       if !callbacks_only or method.getName[0..1] == "on"
         hash[method.getName] = {}
         hash[method.getName]["return_type"] = method.getReturnType.getName unless method.getReturnType.getName == "void" 
-        hash[method.getName]["args"] = method.getParameterTypes.map{|i| i.getName} unless method.getParameterTypes.empty?
+        # the gsub below converts [Ljava nonsense to ClassName[]
+        hash[method.getName]["args"] = method.getParameterTypes.map {|i| i.getName.gsub(/\[Ljava\.[\w\.]+;/) {|m| "#{m[2..-2]}[]"}} unless method.getParameterTypes.empty?
         hash[method.getName]["abstract"] = java.lang.reflect.Modifier.isAbstract(method.getModifiers)
         @@count += 1
       end
