@@ -157,8 +157,9 @@ public class RubotoActivity extends Activity
 	 */
 	
 	@Override
-	public void onCreate(Bundle savedState) {
-		super.onCreate(savedState);
+	public void onCreate(android.os.Bundle arg0) {
+
+		super.onCreate(arg0);
 
                 Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
 
@@ -175,7 +176,7 @@ public class RubotoActivity extends Activity
                     Script.defineGlobalVariable("$hello", this);
                     setRemoteVariable("$hello");
                     Script.execute("start.rb");
-                    Script.defineGlobalVariable("$bundle", savedState);
+                    Script.defineGlobalVariable("$bundle", arg0);
                     Script.execute(remoteVariable + "on_create($bundle)");
 //            RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create", JavaUtil.convertJavaToRuby(__ruby__, savedState));
 		}

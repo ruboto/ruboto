@@ -10,12 +10,18 @@ def unprefixed_class(class_name)
   /\.([^\.]+)\z/.match(class_name)[1]
 end
 
+
 task :generate_java_classes do
   all_callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))
+
+  @starting_methods = {"BroadcastReceiver" => "onReceive"}
+  @starting_methods.default = "onCreate"
+
   all_callbacks.each do |full_class, method_hash|
     @class = unprefixed_class full_class
     @callbacks = method_hash
     @full_class = full_class
+    @first_method = @starting_methods[@class]
 
 
     ##############################################################################################
@@ -24,7 +30,6 @@ task :generate_java_classes do
     #   
     #   1) Remove callbacks that are hard coded in RubotoActivity.erb:
     #
-    @callbacks[full_class].delete("onCreate")
 
     if @class == "Activity"
       @callbacks["android.view.View$OnCreateContextMenuListener"].delete("onCreateContextMenu")
@@ -94,7 +99,7 @@ task :generate_java_classes do
           constant = constant[3..-1] if constant[0..2] == "ON_"
           v["constant"] = "CB_#{constant}"
         end
-        @constants << v["constant"] unless @constants.include?(v["constant"])
+        @constants << v["constant"] unless @constants.include?(v["constant"]) || v["method"] == @first_method
 
         v["args"] = (v["args"] || [])
         v["args_with_types"], v["args_alone"] = [], []
