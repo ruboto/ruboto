@@ -166,6 +166,8 @@ public class RubotoActivity extends Activity
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
                     Script.defineGlobalVariable("$activity", this);
+                    __ruby__ = Script.getRuby();
+		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
                     try {
                         new Script("start.rb").execute();
                     }
