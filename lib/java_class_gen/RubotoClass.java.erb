@@ -84,7 +84,7 @@ public class Ruboto<%= @class %> extends <%= @class %>
                     Script.setUpJRuby(null);
                     Script.defineGlobalVariable("$activity", this);
                     __ruby__ = Script.getRuby();
-		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, Ruboto<%= @class %>.this);
                     try {
                         new Script("start.rb").execute();
                     }
