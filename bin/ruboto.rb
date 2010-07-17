@@ -52,6 +52,7 @@ Main {
       copier = AssetCopier.new assets, root
       copier.copy "Rakefile"
       copier.copy "libs"
+      copier.copy ".gitignore"
       copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
     end
   end
