@@ -53,6 +53,8 @@ Main {
       copier.copy "Rakefile"
       copier.copy "libs"
       copier.copy ".gitignore"
+      copier.copy "lib"
+      copier.copy "assets"
       copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
     end
   end
