@@ -9,9 +9,8 @@ Gem::Specification.new do |s|
   s.summary = %q{The core components of Ruby on Android}
   s.homepage = %q{http://ruboto.org/}
   s.description = %q{The core components of Ruby on Android}
-  s.files = 
   s.files = FileList['[A-Z]*', "assets/**/*", "bin/*", 'lib/*'].to_a
-  s.executables = ['ruboto.rb']
-  s.default_executable = 'ruboto.rb'
+  s.executables = ['ruboto']
+  s.default_executable = 'ruboto'
   s.add_dependency('main', '>= 4.2.0')
 end
