@@ -66,5 +66,12 @@ Main {
       end
     end
   end
+
+  def run
+    puts %Q{
+      Ruboto -- Ruby for Android
+      Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
+   }
+  end
 }
 
