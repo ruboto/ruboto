@@ -37,9 +37,16 @@ java_import "java.util.Arrays"
 java_import "java.util.ArrayList"
 java_import "android.R"
 
+java_import "android.util.Log"
+
 module Ruboto
   java_import "org.ruboto.R"
-  Id = JavaUtilities.get_proxy_class("org.ruboto.R$id")
+  begin
+    Id = JavaUtilities.get_proxy_class("org.ruboto.R$id")
+  rescue NameError
+    Log.d "RUBOTO", "no R$id"
+  end
+
 end
 AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
