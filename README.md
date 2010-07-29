@@ -16,10 +16,9 @@ Contributing
 
 Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the project and start coding!
 
-
-
+<a name="application_generator">
 ### Application generator
-
+</a>
 
     ruby -rubygems /path/to/ruboto-core/bin/ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name Name --target android-8
 
