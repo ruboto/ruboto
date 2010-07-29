@@ -18,7 +18,7 @@ end
 
 
 Main {
-  mode "app" do
+  mode "gen app" do
     option("name"){
       required
       argument :required
