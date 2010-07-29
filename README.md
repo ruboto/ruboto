@@ -6,7 +6,7 @@ Ruby on Android.
 Installation
 -------
 
-    gem install ruboto-core
+    gem install ruboto-core    <===  Not released, yet :)
 
 Features
 -------
@@ -20,7 +20,9 @@ Features
 ### Application generator
 </a>
 
-    ruby -rubygems /path/to/ruboto-core/bin/ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name Name --target android-8
+Make sure the "android" command is in your path:
+
+    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name Name --target android-8
 
 
 <a name="packaging_task">
