@@ -74,8 +74,8 @@ class Activity
       b.putString("Initialize Script", "#{remote_variable}.initialize_activity")
 
       i = Intent.new
-      i.setClassName "org.ruboto.irb",
-                     "org.ruboto.embedded.Ruboto#{dialog ? 'Dialog' : 'Activity'}"
+      i.setClassName "org.ruboto",
+                     "org.ruboto.Ruboto#{dialog ? 'Dialog' : 'Activity'}"
       i.putExtra("RubotoActivity Config", b)
 
       self.startActivity i
