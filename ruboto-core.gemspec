@@ -8,4 +8,6 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://ruboto.org/}
   s.description = %q{The core components of Ruby on Android}
   s.files = [ "assets", "bin", "Rakefile", "README.md"]
+  s.executables = ['ruboto.rb']
+  s.default_executable = 'ruboto.rb'
 end
