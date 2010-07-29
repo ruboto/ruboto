@@ -27,7 +27,9 @@ Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the proj
 ### Packaging task
 </a>
 
-Not implemented, yet.
+This will generate an apk file.
+
+    rake
 
 <a name="deployment_task">
 ### Deployment task
