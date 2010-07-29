@@ -10,4 +10,5 @@ Gem::Specification.new do |s|
   s.files = [ "assets", "bin", "Rakefile", "README.md"]
   s.executables = ['ruboto.rb']
   s.default_executable = 'ruboto.rb'
+  s.add_dependency('main', '>= 4.2.0')
 end
