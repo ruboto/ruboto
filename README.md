@@ -22,11 +22,16 @@ Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the proj
 
     ruby -rubygems /path/to/ruboto-core/bin/ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name Name --target android-8
 
+
+<a name="packaging_task">
 ### Packaging task
+</a>
 
 Not implemented, yet.
 
+<a name="deployment_task">
 ### Deployment task
+</a>
 
 Not implemented, yet.
 
