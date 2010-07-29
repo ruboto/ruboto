@@ -4,6 +4,6 @@ task :gem do
   `gem build ruboto-core.gemspec`
 end
 
-task :deploy do
+task :release do
   `gem push ruboto-core-0.0.1.gem`
 end
