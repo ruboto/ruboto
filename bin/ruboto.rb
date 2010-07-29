@@ -57,7 +57,7 @@ Main {
       copier.copy "assets"
       copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
 
-      java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")]
+      java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")] << File.join(root, "assets/scripts/ruboto.rb")
       java_files.each do |file|
         text = File.read(file)
         File.open(file, 'w') do |f|
