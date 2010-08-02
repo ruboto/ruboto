@@ -18,55 +18,77 @@ end
 
 
 Main {
-  mode "gen app" do
-    option("name"){
-      required
-      argument :required
-      description "Name of your app"
-    }
-    option("target") {
-      required
-      argument :required
-      description "android version to target. must begin with 'android-'. Ex: android-8 to target Froyo"
-    }
-    option("path"){
-      required
-      argument :required
-      description "path to where you want your app."
-    }
-    option("package"){
-      required
-      argument :required
-      description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
-    }
+  mode "gen" do
+    mode "app" do
+      option("name"){
+        required
+        argument :required
+        description "Name of your app"
+      }
+      option("target") {
+        required
+        argument :required
+        description "android version to target. must begin with 'android-'. Ex: android-8 to target Froyo"
+      }
+      option("path"){
+        required
+        argument :required
+        description "path to where you want your app."
+      }
+      option("package"){
+        required
+        argument :required
+        description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
+      }
 
-    def run
-      path = params['path'].value
-      name = params['name'].value
-      target = params['target'].value
-      package = params['package'].value
-      `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a RubotoActivity`
-      root = File.expand_path(path)
-      assets = File.expand_path(__FILE__ + "/../../assets")
+      def run
+        path = params['path'].value
+        name = params['name'].value
+        target = params['target'].value
+        package = params['package'].value
+        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a RubotoActivity`
+        root = File.expand_path(path)
+        assets = File.expand_path(__FILE__ + "/../../assets")
 
-      copier = AssetCopier.new assets, root
-      copier.copy "Rakefile"
-      copier.copy "libs"
-      copier.copy ".gitignore"
-      copier.copy "lib"
-      copier.copy "assets"
-      copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
+        copier = AssetCopier.new assets, root
+        copier.copy "Rakefile"
+        copier.copy "libs"
+        copier.copy ".gitignore"
+        copier.copy "lib"
+        copier.copy "assets"
+        copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
 
-      java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")] << File.join(root, "assets/scripts/ruboto.rb")
-      java_files.each do |file|
-        text = File.read(file)
-        File.open(file, 'w') do |f|
-          f << text.gsub("org.ruboto", package)
+        java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")] << File.join(root, "assets/scripts/ruboto.rb")
+        java_files.each do |file|
+          text = File.read(file)
+          File.open(file, 'w') do |f|
+            f << text.gsub("org.ruboto", package)
+          end
         end
+      end
+    end
+
+    mode "key" do
+      option("keystore"){
+        default "~/.android/production.keystore"
+        description "path to where the keystore will be saved. defaults to ~/.android/production.keystore"
+      }
+
+      option("alias"){
+        required
+        description "The 'alias' for the key. Identifies the key within the keystore. Required"
+      }
+
+      def run
+        keystore = params['keystore'].value
+        key_alias = params['alias'].value
+
+        `keytool -genkey -keyalg rsa -keysize 4096 -validity 1000000 -keystore #{keystore} -alias #{key_alias}`
       end
     end
   end
 
+  # just running `ruboto`
   def run
     puts %Q{
       Ruboto -- Ruby for Android
