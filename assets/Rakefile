@@ -174,6 +174,18 @@ end
 
 task :gen => :generate_java_classes
 
+task :sign => :release do
+  sh "jarsigner -keystore #{ENV['RUBOTO_KEYSTORE']} -signedjar bin/#{build_project_name}.apk bin/#{build_project_name}-unsigned.apk #{ENV['RUBOTO_KEY_ALIAS']}"
+end
+
+task :align => :sign do
+  sh "zipalign 4 bin/#{build_project_name}.apk #{build_project_name}.apk"
+end
+
+task :publish => :align do
+  puts "#{build_project_name}.apk is ready for the market!"
+end
+
 def manifest
   @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
 end
@@ -187,3 +199,4 @@ end
 def package() manifest.root.attribute('package') end
 def version() strings :version_name end
 def app_name()  strings :app_name end
+def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
