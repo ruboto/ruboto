@@ -8,6 +8,15 @@ Installation
 
     gem install ruboto-core    <===  Not released, yet :)
 
+Getting Started
+---------------
+
+Before you use Ruboto, you should do the following things:
+
+* Install the JDK if it's not on your system already
+* Install [the Android SDK](http://developer.android.com/sdk/index.html)
+* Add the sdk's `tools/` directory to your `$PATH`
+
 Features
 -------
 
@@ -22,7 +31,7 @@ Features
 
 Make sure the "android" command is in your path:
 
-    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name Name --target android-8
+    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-8
 
 
 <a name="packaging_task">
@@ -38,8 +47,6 @@ This will generate an apk file.
 </a>
 
 Not implemented, yet.
-
-We will have options to deploy either the full apk or just push your application files.
 
 ### Updating Ruboto
 
@@ -59,3 +66,14 @@ Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the proj
 
     rake release
 
+Tips & Tricks
+-------------
+
+### Emulators
+
+If you're doing a lot of Android development, you'll probably find yourself typing `emulator -avd name_of_emulator` a lot to open emulators. It can be convenient to alias these to shorter commands.
+
+For example, in your `~/.bashrc`, `~/.zshrc`, or similar file, you might put
+    alias eclair="emulator -avd eclair"
+    alias froyo="emulator -avd froyo"
+If you have an "eclair" emulator that runs Android 2.1 and a "froyo" one that runs Android 2.2.
