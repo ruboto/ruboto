@@ -46,7 +46,19 @@ This will generate an apk file.
 ### Deployment task
 </a>
 
-Not implemented, yet.
+When you're ready to post your app to the Market, you need to do a few things.
+
+First, you'll need to generate a key to sign the app with using `keytool` if you do not already have one. If you're ok with accepting some sane defaults, you can use
+    ruboto gen key --alias alias_for_your_key
+with an optional flag `--keystore /path/to/keystore.keystore`, which defaults to `~/.android/production.keystore`. It will ask for a password for the keystore and one for the key itself. Make sure that you remember those two passwords, as well as the alias for the key. 
+
+Also make sure to keep your key backed up (if you lose it, you won't be able to release updates to your app that can install right over the old versions), but secure.
+
+Once you have your key, use the `rake publish` task to generate a market-ready `.apk` file. You will need the `RUBOTO_KEYSTORE` and `RUBOTO_KEY_ALIAS` environment variables set to the path to the keystore and the alias for the key, respectively. So either run
+    RUBOTO_KEYSTORE=~/.android/production.keystore RUBOTO_KEY_ALIAS=foo rake publish
+or set those environment variables in your `~/.bashrc` or similar file and just run
+    rake publish
+Now get that `.apk` to the market!
 
 ### Updating Ruboto
 
