@@ -166,21 +166,33 @@ public class RubotoActivity extends Activity
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
                     Script.defineGlobalVariable("$activity", this);
-                    __ruby__ = Script.getRuby();
-		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+		}
+
+                __ruby__ = Script.getRuby();
+                __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+                Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
+
+                Script.defineGlobalVariable("$bundle", arg0);
+
+                if (configBundle != null) {
+                    setRemoteVariable(configBundle.getString("Remote Variable"));
+                    if (configBundle.getBoolean("Define Remote Variable")) {
+                        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
+                        setRemoteVariable(configBundle.getString("Remote Variable"));
+                    }
+                    if (configBundle.getString("Initialize Script") != null) {
+                        Script.execute(configBundle.getString("Initialize Script"));
+                    }
+                    Script.execute(remoteVariable + "on_create($bundle)");
+                } else {
+                    Script.defineGlobalVariable("$activity", this);
+
                     try {
-                        new Script("start.rb").execute();
+                        new Script("startrr.rb").execute();
                     }
                     catch(IOException e){
                         ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
                     }
-		} else {
-                    Script.defineGlobalVariable("$hello", this);
-                    setRemoteVariable("$hello");
-                    Script.execute("start.rb");
-                    Script.defineGlobalVariable("$bundle", arg0);
-                    Script.execute(remoteVariable + "on_create($bundle)");
-//            RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create", JavaUtil.convertJavaToRuby(__ruby__, savedState));
 		}
 	}
 	

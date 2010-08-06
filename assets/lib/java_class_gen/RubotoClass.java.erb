@@ -83,8 +83,29 @@ public class Ruboto<%= @class %> extends <%= @class %>
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
                     Script.defineGlobalVariable("$activity", this);
-                    __ruby__ = Script.getRuby();
-		    __this__ = JavaUtil.convertJavaToRuby(__ruby__, Ruboto<%= @class %>.this);
+		}
+
+                __ruby__ = Script.getRuby();
+                __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+                Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
+
+%               if @class == "Activity"
+                Script.defineGlobalVariable("$bundle", arg0);
+%               end
+
+                if (configBundle != null) {
+                    setRemoteVariable(configBundle.getString("Remote Variable"));
+                    if (configBundle.getBoolean("Define Remote Variable")) {
+                        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
+                        setRemoteVariable(configBundle.getString("Remote Variable"));
+                    }
+                    if (configBundle.getString("Initialize Script") != null) {
+                        Script.execute(configBundle.getString("Initialize Script"));
+                    }
+                    Script.execute(remoteVariable + "on_create($bundle)");
+                } else {
+                    Script.defineGlobalVariable("$activity", this);
+
                     try {
                         new Script("start.rb").execute();
                     }
@@ -93,15 +114,6 @@ public class Ruboto<%= @class %> extends <%= @class %>
                         ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
 %                     end
                     }
-		} else {
-                    Script.defineGlobalVariable("$hello", this);
-                    setRemoteVariable("$hello");
-                    Script.execute("start.rb");
-%                   if @class == "Activity"
-                    Script.defineGlobalVariable("$bundle", arg0);
-%                   end
-                    Script.execute(remoteVariable + "on_create($bundle)");
-//            RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "on_create", JavaUtil.convertJavaToRuby(__ruby__, savedState));
 		}
 	}
 	
