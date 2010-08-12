@@ -74,7 +74,9 @@ public class Ruboto<%= @class %> extends <%= @class %>
 %       v = @callbacks[@full_class].delete(@first_method)
 	public <%= "#{v["return_type"]} #{v["interface_method"]}(#{v["args_with_types"] })" %> {
 
+%              unless v["abstract"]
 		super.<%= @first_method %>(<%= v["args_alone"].join(',') %>);
+%              end
 
 %               if @class == "Activity"
 %               # we'll assume the first thing that happens is an activity gets spawned. no need to do this in other classes
