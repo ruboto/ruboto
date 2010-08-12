@@ -114,6 +114,10 @@ task :generate_java_classes do
     ##############################################################################################
 
 
+    File.open("assets/src/Inheriting#{@class}.java", "w") do |file|
+      file.write ERB.new(IO.read("assets/lib/java_class_gen/InheritingClass.java.erb"), 0, "%").result
+    end
+
     File.open("assets/src/Ruboto#{@class}.java", "w") do |file|
       file.write ERB.new(IO.read("assets/lib/java_class_gen/RubotoClass.java.erb"), 0, "%").result
     end

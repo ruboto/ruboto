@@ -46,6 +46,7 @@ public class Ruboto<%= @class %> extends <%= @class %>
     private final Handler loadingHandler = new Handler();
     private IRubyObject __this__;
     private Ruby __ruby__;
+    private String scriptName;
 
 	public Ruboto<%= @class %> setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
@@ -107,7 +108,7 @@ public class Ruboto<%= @class %> extends <%= @class %>
                     Script.defineGlobalVariable("$activity", this);
 
                     try {
-                        new Script("start.rb").execute();
+                        new Script(scriptName).execute();
                     }
                     catch(IOException e){
 %                     if @class == "Activity"
@@ -116,6 +117,10 @@ public class Ruboto<%= @class %> extends <%= @class %>
                     }
 		}
 	}
+
+        public void setScriptName(String name){
+               scriptName = name;
+        }
 	
 
 
