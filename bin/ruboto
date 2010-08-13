@@ -56,6 +56,7 @@ Main {
         copier.copy ".gitignore"
         copier.copy "lib"
         copier.copy "assets"
+        copier.copy "src/org/ruboto/*.java"
         copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
 
         java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")] << File.join(root, "assets/scripts/ruboto.rb")
