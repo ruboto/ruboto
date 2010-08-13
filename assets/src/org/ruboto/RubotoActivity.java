@@ -133,6 +133,7 @@ public class RubotoActivity extends Activity
     private final Handler loadingHandler = new Handler();
     private IRubyObject __this__;
     private Ruby __ruby__;
+    private String scriptName;
 
 	public RubotoActivity setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
@@ -188,13 +189,17 @@ public class RubotoActivity extends Activity
                     Script.defineGlobalVariable("$activity", this);
 
                     try {
-                        new Script("startrr.rb").execute();
+                        new Script(scriptName).execute();
                     }
                     catch(IOException e){
                         ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
                     }
 		}
 	}
+
+        public void setScriptName(String name){
+               scriptName = name;
+        }
 	
 
 
