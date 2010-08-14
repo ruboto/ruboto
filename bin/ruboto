@@ -2,6 +2,7 @@
 
 require 'main'
 require 'fileutils'
+require 'rexml/document'
 
 class AssetCopier
   def initialize(from, to)
@@ -10,10 +11,23 @@ class AssetCopier
   end
 
   def copy(from, to='')
+    FileUtils.mkdir_p(File.join(@to, to))
     FileUtils.cp_r(Dir[File.join(@from, from)], File.join(@to, to))
   end
 end
 
+def generate_inheriting_file(klass, name, package, script_name, dest=nil)
+  to = dest ?  File.join(dest, "src/#{package.gsub('.', '/')}") : "src/#{package.gsub('.', '/')}"
+
+  FileUtils.cp(File.expand_path(__FILE__ + "/../../assets/src/Inheriting#{klass}.java"), to)
+  FileUtils.move(File.join(to, "Inheriting#{klass}.java"), File.join(to, "#{name}.java"))
+
+  file = File.join(to, "#{name}.java")
+  text = File.read(file)
+  File.open(file, 'w') do |f|
+    f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
+  end
+end
 
 
 
@@ -40,13 +54,20 @@ Main {
         argument :required
         description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
       }
+      option("activity"){
+        required
+        argument :required
+        description "name of your primary Activity"
+      }
 
       def run
         path = params['path'].value
         name = params['name'].value
         target = params['target'].value
         package = params['package'].value
-        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a RubotoActivity`
+        activity = params['activity'].value
+
+        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
         root = File.expand_path(path)
         assets = File.expand_path(__FILE__ + "/../../assets")
 
@@ -56,8 +77,7 @@ Main {
         copier.copy ".gitignore"
         copier.copy "lib"
         copier.copy "assets"
-        copier.copy "src/org/ruboto/*.java"
-        copier.copy "src/*.java", "src/#{package.gsub('.', '/')}"
+        copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
 
         java_files = Dir[File.join(root, "src/#{package.gsub('.', '/')}/*.java")] << File.join(root, "assets/scripts/ruboto.rb")
         java_files.each do |file|
@@ -66,6 +86,33 @@ Main {
             f << text.gsub("org.ruboto", package)
           end
         end
+
+        generate_inheriting_file "Activity", activity, package, "main_activity.rb", path
+      end
+    end
+
+    mode "class" do
+      argument("class"){
+        required
+        description "the Android Class that you want."
+      }
+
+      option("script_name"){
+        required
+        argument :required
+        description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb"
+      }
+
+      option("name"){
+        required
+        argument :required
+        description "name of the class (and file). Should be CamelCase"
+      }
+
+
+      def run
+        package = REXML::Document.new(File.read('AndroidManifest.xml')).root.attribute('package').value
+        generate_inheriting_file params['class'].value, params['name'].value, package, params['script_name'].value
       end
     end
 
@@ -94,7 +141,7 @@ Main {
     puts %Q{
       Ruboto -- Ruby for Android
       Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
-   }
+    }
   end
 }
 
