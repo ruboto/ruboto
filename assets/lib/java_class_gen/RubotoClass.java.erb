@@ -89,7 +89,7 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
 		}
 
                 __ruby__ = Script.getRuby();
-                __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+                __this__ = JavaUtil.convertJavaToRuby(__ruby__, Ruboto<%= @class %>.this);
                 Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
 %               if @class == "Activity"
