@@ -171,6 +171,7 @@ public abstract class RubotoActivity extends Activity
 
                 __ruby__ = Script.getRuby();
                 __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoActivity.this);
+
                 Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
                 Script.defineGlobalVariable("$bundle", arg0);

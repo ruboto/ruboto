@@ -90,11 +90,11 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
 
                 __ruby__ = Script.getRuby();
                 __this__ = JavaUtil.convertJavaToRuby(__ruby__, Ruboto<%= @class %>.this);
+
+%             if @class == "Activity"
                 Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
-%               if @class == "Activity"
                 Script.defineGlobalVariable("$bundle", arg0);
-%               end
 
                 if (configBundle != null) {
                     setRemoteVariable(configBundle.getString("Remote Variable"));
@@ -113,11 +113,17 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
                         new Script(scriptName).execute();
                     }
                     catch(IOException e){
-%                     if @class == "Activity"
                         ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
-%                     end
                     }
 		}
+%             else
+                try {
+                    new Script(scriptName).execute();
+                }
+                catch(IOException e){
+
+                }
+%             end
 	}
 
         public void setScriptName(String name){
