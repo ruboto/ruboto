@@ -16,8 +16,8 @@ class AssetCopier
   end
 end
 
-def generate_inheriting_file(klass, name, package, script_name, dest=nil)
-  to = dest ?  File.join(dest, "src/#{package.gsub('.', '/')}") : "src/#{package.gsub('.', '/')}"
+def generate_inheriting_file(klass, name, package, script_name, dest='.')
+  to = File.join(dest, "src/#{package.gsub('.', '/')}")
 
   FileUtils.cp(File.expand_path(__FILE__ + "/../../assets/src/Inheriting#{klass}.java"), to)
   FileUtils.move(File.join(to, "Inheriting#{klass}.java"), File.join(to, "#{name}.java"))
