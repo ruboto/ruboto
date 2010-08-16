@@ -14,6 +14,15 @@ def unprefixed_class(class_name)
   /\.([^\.]+)\z/.match(class_name)[1]
 end
 
+# active_support/inflector.rb
+def underscore(camel_cased_word)
+  camel_cased_word.to_s.gsub(/::/, '/').
+    gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+    gsub(/([a-z\d])([A-Z])/,'\1_\2').
+    tr("-", "_").
+    downcase
+end
+
 
 task :generate_java_classes do
   all_callbacks = eval(IO.read("assets/lib/java_class_gen/interfaces.txt"))
