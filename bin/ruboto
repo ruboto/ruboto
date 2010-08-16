@@ -27,6 +27,8 @@ def generate_inheriting_file(klass, name, package, script_name, dest='.')
   File.open(file, 'w') do |f|
     f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
   end
+
+  `touch #{File.join(dest, "assets/scripts/#{script_name}")}`
 end
 
 
