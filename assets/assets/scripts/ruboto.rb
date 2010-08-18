@@ -15,8 +15,10 @@ end
 
 require 'java'
 
-%w(Activity).each do |klass|
-  java_import "org.ruboto.Ruboto#{klass}"
+RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
+
+RUBOTO_CLASSES.each do |klass|
+  java_import "org.ruboto.#{klass}"
 end
 
 
@@ -166,7 +168,7 @@ class RubotoActivity
   end
 end
 
-[RubotoActivity, RubotoBroadcastReceiver, RubotoService].each do |klass|
+RUBOTO_CLASSES.each do |klass|
   klass.instance_eval do
     def handle_create &block
       @create_block = block
