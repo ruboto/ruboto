@@ -40,9 +40,9 @@ java_import "android.R"
 java_import "android.util.Log"
 
 module Ruboto
-  java_import "org.ruboto.R"
+  java_import "THE_PACKAGE.R"
   begin
-    Id = JavaUtilities.get_proxy_class("org.ruboto.R$id")
+    Id = JavaUtilities.get_proxy_class("THE_PACKAGE.R$id")
   rescue NameError
     Log.d "RUBOTO", "no R$id"
   end
