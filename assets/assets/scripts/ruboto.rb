@@ -170,7 +170,7 @@ class RubotoActivity
 end
 
 RUBOTO_CLASSES.each do |klass|
-  klass.instance_eval do
+  klass.class_eval do
     def handle_create &block
       @create_block = block
     end
