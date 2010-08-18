@@ -114,41 +114,6 @@ class RubotoActivity
     self
   end
 
-  def handle_create &block
-    @create_block = block
-  end
-
-  def on_create(bundle)
-    setContentView(instance_eval &@content_view_block) if @content_view_block
-    instance_eval {@create_block.call} if @create_block
-  end
-
-  # plugin or something
-  def setup_content &block
-    @view_parent = nil
-    @content_view_block = block
-  end
-
-  #
-  # Setup Callbacks
-  #
-
-  def method_missing(name, *args, &block)
-    # make #handle_name_of_callback request that callback
-    if name.to_s =~ /^handle_(.*)/ and (const = RubotoActivity.const_get("CB_#{$1.upcase}"))
-        requestCallback const
-        @eigenclass ||= class << self; self; end
-        @eigenclass.send(:define_method, "on_#{$1}", &block)
-    else
-      super
-    end
-  end
-
-  def respond_to?(name)
-    return true if name.to_s =~ /^handle_(.*)/ and RubotoActivity.const_get("CB_#{$1.upcase}")
-    super
-  end
-
   #
   # Option Menus
   #
@@ -200,6 +165,46 @@ class RubotoActivity
     false
   end
 end
+
+[RubotoActivity, RubotoBroadcastReceiver, RubotoService].each do |klass|
+  klass.instance_eval do
+    def handle_create &block
+      @create_block = block
+    end
+
+    def on_create(bundle)
+      setContentView(instance_eval &@content_view_block) if @content_view_block
+      instance_eval {@create_block.call} if @create_block
+    end
+
+    # plugin or something
+    def setup_content &block
+      @view_parent = nil
+      @content_view_block = block
+    end
+
+    #
+    # Setup Callbacks
+    #
+
+    def method_missing(name, *args, &block)
+      # make #handle_name_of_callback request that callback
+      if name.to_s =~ /^handle_(.*)/ and (const = RubotoActivity.const_get("CB_#{$1.upcase}"))
+        requestCallback const
+        @eigenclass ||= class << self; self; end
+        @eigenclass.send(:define_method, "on_#{$1}", &block)
+      else
+        super
+      end
+    end
+
+    def respond_to?(name)
+      return true if name.to_s =~ /^handle_(.*)/ and RubotoActivity.const_get("CB_#{$1.upcase}")
+      super
+    end
+  end
+end
+
 
 #############################################################################
 #
