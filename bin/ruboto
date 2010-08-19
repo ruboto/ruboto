@@ -94,7 +94,7 @@ Main {
         java_files.each do |file|
           text = File.read(file)
           File.open(file, 'w') do |f|
-            f << text.gsub("THE_PACKAGE", package)
+            f << text.gsub("THE_PACKAGE", package).gsub("ACTIVITY_NAME", activity)
           end
         end
 
