@@ -109,9 +109,8 @@ Main {
       }
 
       option("script_name"){
-        required
         argument :required
-        description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb"
+        description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb. optional"
       }
 
       option("name"){
@@ -123,7 +122,11 @@ Main {
 
       def run
         package = REXML::Document.new(File.read('AndroidManifest.xml')).root.attribute('package').value
-        generate_inheriting_file params['class'].value, params['name'].value, package, params['script_name'].value
+        name = params['name'].value
+        script_name = params['script_name'].value || "#{underscore(name)}.rb"
+        klass = params['class'].value
+
+        generate_inheriting_file klass, name, package, script_name
       end
     end
 
