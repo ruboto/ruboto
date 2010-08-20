@@ -23,6 +23,15 @@ def underscore(camel_cased_word)
     downcase
 end
 
+def transform_return_type(type)
+  if type.include?(".")
+    return type
+  elsif type == "int"
+    return "Integer"
+  else
+    return type.capitalize
+  end
+end
 
 task :generate_java_classes do
   all_callbacks = eval(IO.read("assets/lib/java_class_gen/interfaces.txt"))

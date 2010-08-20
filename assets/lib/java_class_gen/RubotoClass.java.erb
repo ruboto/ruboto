@@ -153,11 +153,11 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
             try {
 %             if v["args_alone"].size > 3
             	IRubyObject[] args = {<%= v["args_alone"].map{|i| "JavaUtil.convertJavaToRuby(__ruby__, #{i})"}.join(", ") %>};
-            	<%= "return (#{v["return_type"].include?(".") ? v["return_type"] : v["return_type"].capitalize})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>", args)<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void" %>;
+            	<%= "return (#{transform_return_type v["return_type"]})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>", args)<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void" %>;
 %             elsif v["args_alone"].size > 0 
-            	<%= "return (#{v["return_type"].include?(".") ? v["return_type"] : v["return_type"].capitalize})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>", <%= v["args_alone"].map{|i| "JavaUtil.convertJavaToRuby(__ruby__, #{i})"}.join(", ") %>)<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void"%>;
+            	<%= "return (#{transform_return_type v["return_type"]})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>", <%= v["args_alone"].map{|i| "JavaUtil.convertJavaToRuby(__ruby__, #{i})"}.join(", ") %>)<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void"%>;
 %             else 
-            	<%= "return (#{v["return_type"].include?(".") ? v["return_type"] : v["return_type"].capitalize})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>")<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void"%>;
+            	<%= "return (#{transform_return_type v["return_type"]})" if v["return_type"] != "void" %>RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __this__, "<%=v["ruby_method"]%>")<%= ".toJava(#{v["return_type"]}.class)" if v["return_type"] != "void"%>;
 %             end
             } catch (RaiseException re) {
                 re.printStackTrace(__ruby__.getErrorStream());
