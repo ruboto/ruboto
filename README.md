@@ -14,6 +14,7 @@ Getting Started
 Before you use Ruboto, you should do the following things:
 
 * Install the JDK if it's not on your system already
+* Install [jruby](http://jruby.org/) if you don't already have it. [rvm](http://rvm.beginrescueend.com/) is nice for handling multiple Rubies, but jruby also has a [very easy install process](http://jruby.org/#2)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
 * Add the sdk's `tools/` directory to your `$PATH`
 
