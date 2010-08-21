@@ -11,8 +11,9 @@ require 'rake/clean'
 require 'rexml/document'
 
 generated_libs     = 'generated_libs'
-stdlib             = 'libs/jruby-stdlib.jar'
-jruby_jar          = 'libs/jruby.jar'
+jars = Dir['libs/*.jar']
+stdlib             = jars.grep(/stdlib/).first #libs/jruby-stdlib-VERSION.jar
+jruby_jar          = jars.grep(/core/).first   #libs/jruby-core-VERSION.jar
 stdlib_precompiled = File.join(generated_libs, 'jruby-stdlib-precompiled.jar')
 jruby_ruboto_jar   = File.join(generated_libs, 'jruby-ruboto.jar')
 ant.property :name=>'external.libs.dir', :value => generated_libs

@@ -3,6 +3,7 @@
 require 'main'
 require 'fileutils'
 require 'rexml/document'
+require 'jruby-jars'
 
 class AssetCopier
   def initialize(from, to)
@@ -13,6 +14,11 @@ class AssetCopier
   def copy(from, to='')
     FileUtils.mkdir_p(File.join(@to, to))
     FileUtils.cp_r(Dir[File.join(@from, from)], File.join(@to, to))
+  end
+
+  def copy_from_absolute_path(from, to='')
+    FileUtils.mkdir_p(File.join(@to, to))
+    FileUtils.cp_r(Dir[from], File.join(@to, to))
   end
 end
 
@@ -84,7 +90,8 @@ Main {
 
         copier = AssetCopier.new assets, root
         copier.copy "Rakefile"
-        copier.copy "libs"
+        copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
+        copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"
         copier.copy ".gitignore"
         copier.copy "lib"
         copier.copy "assets"
