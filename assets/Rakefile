@@ -72,6 +72,12 @@ task :publish => :align do
   puts "#{build_project_name}.apk is ready for the market!"
 end
 
+task :update_scripts do
+  Dir['assets/scripts/*.rb'].each do |script|
+    `adb push #{script} /data/data/#{package}/files/scripts`
+  end
+end
+
 def manifest
   @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
 end
