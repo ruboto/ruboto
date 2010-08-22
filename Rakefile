@@ -34,7 +34,7 @@ def transform_return_type(type)
 end
 
 task :generate_java_classes do
-  all_callbacks = eval(IO.read("assets/lib/java_class_gen/interfaces.txt"))
+  all_callbacks = eval(IO.read("lib/java_class_gen/interfaces.txt"))
 
   @starting_methods = {"BroadcastReceiver" => "onReceive"}
   @starting_methods.default = "onCreate"
@@ -133,11 +133,11 @@ task :generate_java_classes do
 
 
     File.open("assets/src/Inheriting#{@class}.java", "w") do |file|
-      file.write ERB.new(IO.read("assets/lib/java_class_gen/InheritingClass.java.erb"), 0, "%").result
+      file.write ERB.new(IO.read("lib/java_class_gen/InheritingClass.java.erb"), 0, "%").result
     end
 
     File.open("assets/src/org/ruboto/Ruboto#{@class}.java", "w") do |file|
-      file.write ERB.new(IO.read("assets/lib/java_class_gen/RubotoClass.java.erb"), 0, "%").result
+      file.write ERB.new(IO.read("lib/java_class_gen/RubotoClass.java.erb"), 0, "%").result
     end
   end
 end
