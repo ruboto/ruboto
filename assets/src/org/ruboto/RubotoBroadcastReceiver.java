@@ -33,7 +33,6 @@ public abstract class RubotoBroadcastReceiver extends BroadcastReceiver
     private IRubyObject __this__;
     private Ruby __ruby__;
     private String scriptName;
-    protected Object[] args;
 
 	public RubotoBroadcastReceiver setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));

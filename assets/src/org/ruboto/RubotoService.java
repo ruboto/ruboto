@@ -41,7 +41,6 @@ public abstract class RubotoService extends Service
     private IRubyObject __this__;
     private Ruby __ruby__;
     private String scriptName;
-    protected Object[] args;
 
 	public RubotoService setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
