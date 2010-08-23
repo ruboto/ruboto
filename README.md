@@ -6,7 +6,7 @@ Ruby on Android.
 Installation
 -------
 
-    gem install ruboto-core    <===  Not released, yet :)
+    gem install ruboto-core
 
 Getting Started
 ---------------
@@ -18,27 +18,38 @@ Before you use Ruboto, you should do the following things:
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
 * Add the sdk's `tools/` directory to your `$PATH`
 
-Features
--------
-
-* [Application generator](#application_generator) (like the rails application generator)
-* [Packaging task](#packaging_task) to generate an apk file
-* [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
-* Update path when ruboto is updated, either by "gem update" or "rake ruboto:update" (not decided, yet)
-
 General Information
 ------------------
 
 The Rakefile assumes that you are in the root directory of your app, as do all commands of the `ruboto` command line utility, other than `ruboto gen app`.
 
+The Rakefile requires you to run it through JRuby's rake. 
+
+The `ruboto` command line tool uses a gem that uses _id2ref, which JRuby disables by default (because kittens die every time someone writes code using it). 
+
+Features
+-------
+
+* [Application generator](#application_generator) (like the rails application generator)
+* [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
+* [Packaging task](#packaging_task) to generate an apk file
+* [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
+* Update path when ruboto is updated, either by "gem update" or "rake ruboto:update" (not decided, yet)
+
 <a name="application_generator">
 ### Application generator
 </a>
 
-Make sure the "android" command is in your path:
+    ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --activity MainActivityName
+Target should be something like `android-8` (8 is Froyo)
 
-    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-8 --activity MainActivityName
+<a name="class_generator">
+### Class generator
+</a>
 
+    ruboto gen class ClassName --name YourObjectName
+Ex:
+    ruboto gen class BroadcastReceiver --name AwesomenessReceiver
 
 <a name="packaging_task">
 ### Packaging task
@@ -80,9 +91,14 @@ Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the proj
 
     rake gem
 
-### Publishing the gem
 
-    rake release
+Getting Help
+------------
+
+* You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful. 
+* There is further documentation at the [wiki](http://github.com/ruboto/ruboto-core/wiki)
+* You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
+
 
 Tips & Tricks
 -------------
