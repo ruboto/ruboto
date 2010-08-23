@@ -72,8 +72,9 @@ public abstract class RubotoService extends Service
 
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
-                    Script.defineGlobalVariable("$service", this);
 		}
+                Script.defineGlobalVariable("$service", this);
+
 
                 __ruby__ = Script.getRuby();
                 __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoService.this);

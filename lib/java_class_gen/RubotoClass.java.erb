@@ -85,8 +85,9 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
 
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
-                    Script.defineGlobalVariable("$<%= underscore(@class) %>", this);
 		}
+                Script.defineGlobalVariable("$<%= underscore(@class) %>", this);
+
 
                 __ruby__ = Script.getRuby();
                 __this__ = JavaUtil.convertJavaToRuby(__ruby__, Ruboto<%= @class %>.this);

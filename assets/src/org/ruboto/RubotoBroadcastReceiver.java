@@ -63,8 +63,9 @@ public abstract class RubotoBroadcastReceiver extends BroadcastReceiver
 
 		if (Script.getRuby() == null){
                     Script.setUpJRuby(null);
-                    Script.defineGlobalVariable("$broadcast_receiver", this);
 		}
+                Script.defineGlobalVariable("$broadcast_receiver", this);
+
 
                 __ruby__ = Script.getRuby();
                 __this__ = JavaUtil.convertJavaToRuby(__ruby__, RubotoBroadcastReceiver.this);
