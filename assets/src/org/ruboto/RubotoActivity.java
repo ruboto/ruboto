@@ -134,6 +134,7 @@ public abstract class RubotoActivity extends Activity
     private IRubyObject __this__;
     private Ruby __ruby__;
     private String scriptName;
+    public Object[] args;
 
 	public RubotoActivity setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
@@ -160,6 +161,8 @@ public abstract class RubotoActivity extends Activity
 	@Override
 	public void onCreate(android.os.Bundle arg0) {
 
+               args = new Object[1];
+               args[0] = arg0;
 		super.onCreate(arg0);
 
                 Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());

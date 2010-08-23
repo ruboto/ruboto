@@ -171,6 +171,11 @@ end
 
 RUBOTO_CLASSES.each do |klass|
   klass.class_eval do
+    def when_launched(&block)
+      instance_exec *args, &block
+      on_create nil
+    end
+
     def handle_create &block
       @create_block = block
     end

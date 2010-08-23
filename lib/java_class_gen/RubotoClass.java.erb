@@ -47,6 +47,7 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
     private IRubyObject __this__;
     private Ruby __ruby__;
     private String scriptName;
+    public Object[] args;
 
 	public Ruboto<%= @class %> setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
@@ -74,6 +75,10 @@ public abstract class Ruboto<%= @class %> extends <%= @class %>
 %       v = @callbacks[@full_class].delete(@first_method)
 	public <%= "#{v["return_type"]} #{v["interface_method"]}(#{v["args_with_types"] })" %> {
 
+               args = new Object[<%= v["args_alone"].length %>];
+%              v["args_alone"].each_with_index do |arg, index|
+               args[<%= index %>] = <%= arg %>;
+%              end
 %              unless v["abstract"]
 		super.<%= @first_method %>(<%= v["args_alone"].join(',') %>);
 %              end

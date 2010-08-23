@@ -33,6 +33,7 @@ public abstract class RubotoBroadcastReceiver extends BroadcastReceiver
     private IRubyObject __this__;
     private Ruby __ruby__;
     private String scriptName;
+    public Object[] args;
 
 	public RubotoBroadcastReceiver setRemoteVariable(String var) {
 		remoteVariable = ((var == null) ? "" : (var + "."));
@@ -59,6 +60,9 @@ public abstract class RubotoBroadcastReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(android.content.Context arg0, android.content.Intent arg1) {
 
+               args = new Object[2];
+               args[0] = arg0;
+               args[1] = arg1;
 
 
 		if (Script.getRuby() == null){
