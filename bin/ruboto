@@ -93,7 +93,6 @@ Main {
         copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
         copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"
         copier.copy ".gitignore"
-        copier.copy "lib"
         copier.copy "assets"
         copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
 
