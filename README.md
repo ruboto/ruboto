@@ -26,13 +26,18 @@ Features
 * [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
 * Update path when ruboto is updated, either by "gem update" or "rake ruboto:update" (not decided, yet)
 
+General Information
+------------------
+
+The Rakefile assumes that you are in the root directory of your app, as do all commands of the `ruboto` command line utility, other than `ruboto gen app`.
+
 <a name="application_generator">
 ### Application generator
 </a>
 
 Make sure the "android" command is in your path:
 
-    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-8
+    ruboto.rb gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-8 --activity MainActivityName
 
 
 <a name="packaging_task">
