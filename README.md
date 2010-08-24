@@ -97,6 +97,7 @@ Getting Help
 * There is further documentation at the [wiki](http://github.com/ruboto/ruboto-core/wiki)
 * If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto-core/issues)
 * You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
+* There are some sample scripts (just Activities) [here](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/)
 
 Tips & Tricks
 -------------
