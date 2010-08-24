@@ -34,32 +34,32 @@ Features
 * [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
 * Update path when ruboto is updated, either by "gem update" or "rake ruboto:update" (not decided, yet)
 
-<span name="application_generator">
+<a name="application_generator">
 ### Application generator
-</span>
+</a>
 
     ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --activity MainActivityName
 Target should be something like `android-8` (8 is Froyo)
 
-<span name="class_generator">
+<a name="class_generator">
 ### Class generator
-</span>
+</a>
 
     ruboto gen class ClassName --name YourObjectName
 Ex:
     ruboto gen class BroadcastReceiver --name AwesomenessReceiver
 
-<span name="packaging_task">
+<a name="packaging_task">
 ### Packaging task
-</span>
+</a>
 
 This will generate an apk file.
 
     rake
 
-<span name="deployment_task">
+<a name="deployment_task">
 ### Deployment task
-</span>
+</a>
 
 When you're ready to post your app to the Market, you need to do a few things.
 
