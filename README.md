@@ -14,7 +14,7 @@ Getting Started
 Before you use Ruboto, you should do the following things:
 
 * Install the JDK if it's not on your system already
-* Install [jruby](http://jruby.org/) if you don't already have it. [rvm](http://rvm.beginrescueend.com/) is nice for handling multiple Rubies, but jruby also has a [very easy install process](http://jruby.org/#2)
+* Install [jruby](http://jruby.org/) if you don't already have it.JRuby also has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
 * Add the sdk's `tools/` directory to your `$PATH`
 
@@ -24,8 +24,6 @@ General Information
 The Rakefile assumes that you are in the root directory of your app, as do all commands of the `ruboto` command line utility, other than `ruboto gen app`.
 
 The Rakefile requires you to run it through JRuby's rake. 
-
-The `ruboto` command line tool uses a gem that uses _id2ref, which JRuby disables by default (because kittens die every time someone writes code using it). 
 
 Features
 -------
@@ -97,8 +95,8 @@ Getting Help
 
 * You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful. 
 * There is further documentation at the [wiki](http://github.com/ruboto/ruboto-core/wiki)
+* If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto-core/issues)
 * You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
-
 
 Tips & Tricks
 -------------
