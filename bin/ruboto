@@ -54,7 +54,11 @@ def generate_inheriting_file(klass, name, package, script_name, dest='.')
     f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
   end
 
-  `touch #{File.join(dest, "assets/scripts/#{script_name}")}`
+  sample_source = File.read(File.join($assets, "samples/sample_#{underscore klass}.rb"))
+  File.open File.join(dest, "assets/scripts/#{script_name}"), "a" do |f|
+    f << sample_source
+  end
+end
 end
 
 # active_support/inflector.rb
