@@ -1,9 +1,29 @@
 #!/usr/bin/env ruby
 
+begin
+  require 'jruby'
+  JRuby.objectspace = true
+rescue LoadError
+end
+
 require 'main'
 require 'fileutils'
 require 'rexml/document'
 require 'jruby-jars'
+
+# fix main (to an extent)
+module Main
+  class Program
+    module InstanceMethods
+      def setup_finalizers
+        @finalizers ||= []
+        ObjectSpace.define_finalizer(self) do
+          while((f = @finalizers.pop)); f.call; end
+        end
+      end
+    end
+  end
+end
 
 class AssetCopier
   def initialize(from, to)
