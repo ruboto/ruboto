@@ -17,6 +17,7 @@ Before you use Ruboto, you should do the following things:
 * Install [jruby](http://jruby.org/) if you don't already have it. JRuby has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
 * Add the sdk's `tools/` directory to your `$PATH`
+* Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html) image unless you want to develop using your phone.
 
 General Information
 ------------------
@@ -32,7 +33,7 @@ Command-line Tools
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
 * [Packaging task](#packaging_task) to generate an apk file
 * [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
-* [Develop without having to compile to pick every change](#update_scripts)
+* [Develop without having to compile to try every change](#update_scripts)
 
 
 <a name="application_generator"></a>
@@ -54,6 +55,10 @@ Ex:
 This will generate an apk file.
 
     $ rake
+
+To generate an apk and install it to a connected device (or emulator) all in one go, run
+
+    $ rake install
 
 <a name="deployment_task"></a>
 ### Deployment task
@@ -164,3 +169,24 @@ For example, in your `~/.bashrc`, `~/.zshrc`, or similar file, you might put
     alias eclair="emulator -avd eclair"
     alias froyo="emulator -avd froyo"
 If you have an "eclair" emulator that runs Android 2.1 and a "froyo" one that runs Android 2.2.
+
+
+Alternatives
+------------
+
+If Ruboto's performance is a problem for you, or you want something that gives you total access to the android API (as Ruboto does not yet do), check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett). 
+
+Mirah, formerly known as Duby, is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration. 
+
+Garrett is a "playground for Mirah exploration on Android."
+
+
+Thanks
+-----
+
+Thanks go to:
+
+* Charles Nutter, a member of the JRuby core team, for being mentoring this RSoC project and starting the Ruboto project in the first place with an [irb](http://github.com/ruboto/ruboto-irb)
+* All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors)
+* [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and heavily sponsoring JRuby, which is obviously critical to the project.
+* All [contributors](http://github.com/ruboto/ruboto-core/contributors) and [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors), as much of this code was taken from ruboto-irb.
