@@ -25,6 +25,8 @@ module Main
   end
 end
 
+$assets = File.expand_path(__FILE__ + "/../../assets")
+
 class AssetCopier
   def initialize(from, to)
     @from = from
@@ -58,7 +60,6 @@ def generate_inheriting_file(klass, name, package, script_name, dest='.')
   File.open File.join(dest, "assets/scripts/#{script_name}"), "a" do |f|
     f << sample_source
   end
-end
 end
 
 # active_support/inflector.rb
@@ -110,9 +111,8 @@ Main {
 
         `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
         root = File.expand_path(path)
-        assets = File.expand_path(__FILE__ + "/../../assets")
 
-        copier = AssetCopier.new assets, root
+        copier = AssetCopier.new $assets, root
         copier.copy "Rakefile"
         copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
         copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"
