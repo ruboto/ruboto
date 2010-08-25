@@ -14,7 +14,7 @@ Getting Started
 Before you use Ruboto, you should do the following things:
 
 * Install the JDK if it's not on your system already
-* Install [jruby](http://jruby.org/) if you don't already have it.JRuby also has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
+* Install [jruby](http://jruby.org/) if you don't already have it. JRuby has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
 * Add the sdk's `tools/` directory to your `$PATH`
 
@@ -79,6 +79,39 @@ Now get that `.apk` to the market!
 
 Not implemented, yet.
 
+
+Scripts
+-------
+
+The main thing Ruboto offers you is the ability to write Ruby scripts to define the behavior of Activites, BroadcastReceievers, and Services. (Eventually it'll be every class. It's setup such that adding in more classes should be trivial.)
+
+Here's how it works:
+
+First of all, your scripts are found in `assets/scripts/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method handle_foo_bar on the Android object. In your scripts, they are defined as `$class_name`. That was really abstract, so here's an example. 
+
+You generate an app with the option `--activity FooActivity`, which means that ruboto will generate a FooActivity for you. So you open `assets/scripts/foo_activity.rb` in your favorite text editor. If you want an activity that does nothing but Log when it gets launched and when it gets destroyed (in the onCreate and onPause methods). You want your script to look like this:
+
+    require 'ruboto.rb' #scripts will not work without doing this
+    $activity.handle_create do |bundle|
+      Log.v 'MYAPPNAME', 'onCreate got called!'
+      handle_pause do
+        Log.v 'MYAPPNAME', 'onPause got called!'
+      end
+    end
+
+If you prefer, you can also do this. It's equivalent:
+
+    require 'ruboto.rb' #scripts will not work without doing this
+    $activity.handle_create do |bundle|
+      Log.v 'MYAPPNAME', 'onCreate got called!'
+    end
+    $activity.handle_pause do
+      Log.v 'MYAPPNAME', 'onPause got called!'
+    end
+
+Each class has only one method that you can nest other calls inside of (ie. what is happening in that first example that removes the need for the second `$activity.`. For Activities and Services, it is `handle_create`, and for BroadcastReceivers, it is `handle_receive`. The general rule is that it corresponds to the first method in the class's lifecycle. But you should never really have to think about it because generating a class generates a sample script that calls that method.
+
+The arguments passed to the block you give `handle_create` are the arguments that `onCreate` gets called with. (Same with `handle_receive` and `onReceive` for receivers.)
 
 Contributing
 ------------
