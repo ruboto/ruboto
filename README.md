@@ -181,7 +181,7 @@ Mirah, formerly known as Duby, is a language with Ruby-like syntax that compiles
 Garrett is a "playground for Mirah exploration on Android."
 
 
-Thanks
+Domo Arigato
 -----
 
 Thanks go to:
