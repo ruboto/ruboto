@@ -12,6 +12,6 @@ Gem::Specification.new do |s|
   s.files = FileList['[A-Z]*', "assets/**/*", "bin/*", 'lib/*'].to_a
   s.executables = ['ruboto']
   s.default_executable = 'ruboto'
-  s.add_dependency('main', '>= 4.2.0')
+  s.add_dependency('main', '= 4.2.0')
   s.add_dependency('jruby-jars', '>= 1.5.0')
 end
