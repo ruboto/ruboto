@@ -40,7 +40,7 @@ Command-line Tools
 ### Application generator
 
     $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --activity MainActivityName
-Target should be something like `android-8` (8 is Froyo)
+Currently any value but `android-8` will not work.
 
 <a name="class_generator"></a>
 ### Class generator

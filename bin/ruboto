@@ -84,7 +84,7 @@ Main {
       option("target") {
         required
         argument :required
-        description "android version to target. must begin with 'android-'. Ex: android-8 to target Froyo"
+        description "android version to target. must begin with 'android-'. Currently must be 'android-8'"
       }
       option("path"){
         required
