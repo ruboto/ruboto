@@ -22,6 +22,8 @@ require 'java'
 end
 
 RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
+$init_methods = Hash.new 'create'
+$init_methods[RubotoBroadcastReceiver] = 'receive'
 
 # Automate this?
 #java_import "org.ruboto.embedded.RubotoView"
@@ -210,6 +212,12 @@ RUBOTO_CLASSES.each do |klass|
       return true if name.to_s =~ /^handle_(.*)/ and RubotoActivity.const_get("CB_#{$1.upcase}")
       super
     end
+
+    eval %Q{
+      def handle_#{$init_methods[klass]}(&block)
+        when_launched &block
+      end
+    }
   end
 end
 

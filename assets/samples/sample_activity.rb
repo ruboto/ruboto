@@ -2,7 +2,7 @@ require 'ruboto.rb'
 
 ruboto_import_widgets :TextView, :LinearLayout, :Button
 
-$activity.when_launched do |bundle|
+$activity.handle_create do |bundle|
   setTitle 'This is the Title'
 
   setup_content do

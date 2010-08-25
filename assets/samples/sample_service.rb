@@ -1,2 +1,4 @@
 require 'ruboto.rb'
-$service
+$service.handle_create do
+  # define what your service does
+end
