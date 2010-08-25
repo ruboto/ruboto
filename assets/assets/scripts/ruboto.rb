@@ -25,8 +25,7 @@ RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
 $init_methods = Hash.new 'create'
 $init_methods[RubotoBroadcastReceiver] = 'receive'
 
-# Automate this?
-#java_import "org.ruboto.embedded.RubotoView"
+java_import "org.ruboto.RubotoView"
 
 java_import "android.app.Activity"
 java_import "android.content.Intent"
