@@ -35,32 +35,28 @@ Command-line Tools
 * [Develop without having to compile to pick every change](#update_scripts)
 
 
-<a name="application_generator">
+<a name="application_generator"></a>
 ### Application generator
-</a>
 
     $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --activity MainActivityName
 Target should be something like `android-8` (8 is Froyo)
 
-<a name="class_generator">
+<a name="class_generator"></a>
 ### Class generator
-</a>
 
     $ ruboto gen class ClassName --name YourObjectName
 Ex:
     $ ruboto gen class BroadcastReceiver --name AwesomenessReceiver
 
-<a name="packaging_task">
+<a name="packaging_task"></a>
 ### Packaging task
-</a>
 
 This will generate an apk file.
 
     $ rake
 
-<a name="deployment_task">
+<a name="deployment_task"></a>
 ### Deployment task
-</a>
 
 When you're ready to post your app to the Market, you need to do a few things.
 
@@ -76,9 +72,8 @@ or set those environment variables in your `~/.bashrc` or similar file and just 
     $ rake publish
 Now get that `.apk` to the market!
 
-<span id="update_scripts">
+<a name="update_scripts"></a>
 ### Updating Your Scripts on a Device
-</span>
 
 With traditional Android development, you have to recompile your app and reinstall it on your test device/emulator every time you make a change. That's slow and annoying.
 
