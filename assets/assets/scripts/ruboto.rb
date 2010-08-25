@@ -17,11 +17,11 @@ require 'java'
 
 
 
-%w(Activity BroadcastReceiver).map do |klass|
+%w(Activity BroadcastReceiver Service).map do |klass|
   java_import "org.ruboto.Ruboto#{klass}"
 end
 
-RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver]
+RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
 
 # Automate this?
 #java_import "org.ruboto.embedded.RubotoView"
