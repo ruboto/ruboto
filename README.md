@@ -25,7 +25,7 @@ The Rakefile assumes that you are in the root directory of your app, as do all c
 
 The Rakefile requires you to run it through JRuby's rake. 
 
-Features
+Command-line Tools
 -------
 
 * [Application generator](#application_generator) (like the rails application generator)
@@ -139,12 +139,12 @@ The arguments passed to the block you give `handle_create` are the arguments tha
 Contributing
 ------------
 
-Want to contribute? Great! Meet us on #ruboto on irc.freenode.net, fork the project and start coding!
+Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the project and start coding!
 
-### Building the gem
+Other ways to help:
 
-    rake gem
-
+* Use Ruboto and tell us when you run into issues
+* As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto-core/wiki/)
 
 Getting Help
 ------------
