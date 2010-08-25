@@ -32,7 +32,8 @@ Features
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
 * [Packaging task](#packaging_task) to generate an apk file
 * [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
-* Update path when ruboto is updated, either by "gem update" or "rake ruboto:update" (not decided, yet)
+* [Develop without having to compile to pick every change](#update_scripts)
+
 
 <a name="application_generator">
 ### Application generator
@@ -75,7 +76,29 @@ or set those environment variables in your `~/.bashrc` or similar file and just 
     rake publish
 Now get that `.apk` to the market!
 
-### Updating Ruboto
+<span id="update_scripts">
+### Updating Your Scripts on a Device
+</span>
+
+With traditional Android development, you have to recompile your app and reinstall it on your test device/emulator every time you make a change. That's slow and annoying.
+
+Luckily, with Ruboto, most of your changes are in the scripts, not in the compiles Java files. So if your changes are Ruby-only, you can just run
+
+    $ rake update_scripts
+
+to have it copy the current version of your scripts to your device.
+
+Sorry if this takes away your excuse to have sword fights:
+
+![XKCD Code's Compiling](http://imgs.xkcd.com/comics/compiling.png)
+
+Caveats:
+
+This only works if your changes are all Ruby. If you have Java changes (which would generally just mean generating new classes) or changes to the xml, you will need to recompile your script.
+
+Also, you need root access to your device for this to work, as it needs to write to directories that are read-only otherwise. The easiest solution is to test on an emulator, but you can also root your phone.
+
+### Updating Ruboto's Files
 
 Not implemented, yet.
 
