@@ -186,7 +186,7 @@ Domo Arigato
 
 Thanks go to:
 
-* Charles Nutter, a member of the JRuby core team, for being mentoring this RSoC project and starting the Ruboto project in the first place with an [irb](http://github.com/ruboto/ruboto-irb)
+* Charles Nutter, a member of the JRuby core team, for mentoring this RSoC project and starting the Ruboto project in the first place with an [irb](http://github.com/ruboto/ruboto-irb)
 * All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors)
 * [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and heavily sponsoring JRuby, which is obviously critical to the project.
 * All [contributors](http://github.com/ruboto/ruboto-core/contributors) and [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors), as much of this code was taken from ruboto-irb.
