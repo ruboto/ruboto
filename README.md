@@ -127,19 +127,22 @@ If you prefer, you can also do this. It's equivalent:
       Log.v 'MYAPPNAME', 'onPause got called!'
     end
 
-Each class has only one method that you can nest other calls inside of (ie. what is happening in that first example that removes the need for the second `$activity.`. For Activities and Services, it is `handle_create`, and for BroadcastReceivers, it is `handle_receive`. The general rule is that it corresponds to the first method in the class's lifecycle. But you should never really have to think about it because generating a class generates a sample script that calls that method.
+Each class has only one method that you can nest other calls inside of (ie. what is happening in that first example that removes the need for the second `$activity.`). For Activities and Services, it is `handle_create`, and for BroadcastReceivers, it is `handle_receive`. The general rule is that it corresponds to the first method in the class's lifecycle. But you should never really have to think about it because generating a class generates a sample script that calls that method.
 
-The arguments passed to the block you give `handle_create` are the arguments that `onCreate` gets called with. (Same with `handle_receive` and `onReceive` for receivers.)
+The arguments passed to the block you give `handle_` methods are the same as the arguments that the java methods take. Consult the Android documentation.
+
+Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-core/blob/master/assets/assets/scripts/ruboto.rb) where everything is defined.
 
 Contributing
 ------------
 
 Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the project and start coding!
 
-Other ways to help:
+"But I don't understand it well enough to contribute by forking the project!" That's fine. Equally helpful:
 
-* Use Ruboto and tell us when you run into issues
+* Use Ruboto and tell us how it could be better.
 * As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto-core/wiki/)
+* When you gain enough wisdom, reconsider whether you could fork the project.
 
 Getting Help
 ------------
