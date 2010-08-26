@@ -109,6 +109,12 @@ Main {
         package = params['package'].value
         activity = params['activity'].value
 
+        abort "path must be to a directory that does not yet exist. it will be created" if
+          File.exists?(path)
+
+        abort "Currently you must set target to 'android-8' (Froyo) for ruboto to work" unless
+          target == 'android-8'
+
         `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
         root = File.expand_path(path)
 
@@ -151,6 +157,9 @@ Main {
 
 
       def run
+        abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
+          File.exists? 'AndroidManifest.xml'
+
         package = REXML::Document.new(File.read('AndroidManifest.xml')).root.attribute('package').value
         name = params['name'].value
         script_name = params['script_name'].value || "#{underscore(name)}.rb"
