@@ -6,6 +6,7 @@ begin
 rescue LoadError
 end
 
+require 'rubygems'
 require 'main'
 require 'fileutils'
 require 'rexml/document'
@@ -115,17 +116,45 @@ Main {
         abort "Currently you must set target to 'android-8' (Froyo) for ruboto to work" unless
           target == 'android-8'
 
-        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
         root = File.expand_path(path)
+        print "\nGenerating Android app #{name} in #{root}..."
+        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
+        puts "Done"
 
+        puts "\nCopying files:"
         copier = AssetCopier.new $assets, root
-        copier.copy "Rakefile"
+
+        %w{Rakefile .gitignore assets}.each do |f|
+          print "#{f}..."
+          copier.copy f
+          puts "Done"
+        end
+
+        print "JRuby jars..."
         copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
         copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"
-        copier.copy ".gitignore"
-        copier.copy "assets"
-        copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
+        puts "Done"
 
+        print "Ruboto java classes..."
+        copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
+        puts "Done"
+
+        print "\nAdding RubotoActivity and RubotoDialog to the manifest..."
+        file = File.join(root, "AndroidManifest.xml")
+        text = File.read(file)
+        File.open(file, 'w') do |f|
+          f << text.gsub("</application>", 
+                 %Q{
+        <activity android:name="org.ruboto.RubotoActivity">
+        </activity>
+        <activity android:name="org.ruboto.RubotoDialog" android:theme="@android:style/Theme.Dialog">
+        </activity>
+    </application>
+                  })
+        end
+        puts "Done"
+
+        print "Setting the package name in ruboto.rb..."
         java_files = [File.join(root, "assets/scripts/ruboto.rb")]
         java_files.each do |file|
           text = File.read(file)
@@ -133,8 +162,13 @@ Main {
             f << text.gsub("THE_PACKAGE", package).gsub("ACTIVITY_NAME", activity)
           end
         end
+        puts "Done"
 
+        print "Generating the default Activity and script..."
         generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
+        puts "Done"
+
+        puts "\nHello, #{name}\n"
       end
     end
 
