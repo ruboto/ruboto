@@ -17,15 +17,13 @@ require 'java'
 
 
 
-%w(Activity BroadcastReceiver Service).map do |klass|
+%w(Activity Dialog BroadcastReceiver Service View).map do |klass|
   java_import "org.ruboto.Ruboto#{klass}"
 end
 
 RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
 $init_methods = Hash.new 'create'
 $init_methods[RubotoBroadcastReceiver] = 'receive'
-
-java_import "org.ruboto.RubotoView"
 
 java_import "android.app.Activity"
 java_import "android.content.Intent"
@@ -63,10 +61,10 @@ class Activity
   attr_accessor :init_block
 
   def start_ruboto_dialog(remote_variable, &block)
-    start_ruboto_activity(remote_variable, true, &block)
+    start_ruboto_activity(remote_variable, RubotoDialog, &block)
   end
 
-  def start_ruboto_activity(remote_variable, dialog=false, &block)
+  def start_ruboto_activity(remote_variable, klass=RubotoActivity, &block)
     @@init_block = block
 
     if @initialized or not self.is_a?(RubotoActivity)
@@ -76,8 +74,7 @@ class Activity
       b.putString("Initialize Script", "#{remote_variable}.initialize_activity")
 
       i = Intent.new
-      i.setClassName "THE_PACKAGE",
-                     "THE_PACKAGE.ACTIVITY_NAME"
+      i.setClass self, klass.java_class
       i.putExtra("RubotoActivity Config", b)
 
       self.startActivity i
