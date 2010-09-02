@@ -19,7 +19,7 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.exceptions.RaiseException;
 
-public abstract class RubotoActivity extends Activity
+public class RubotoActivity extends Activity
     implements
         android.content.DialogInterface.OnCancelListener,
         android.widget.TabHost.TabContentFactory,
