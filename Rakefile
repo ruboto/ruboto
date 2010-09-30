@@ -5,7 +5,7 @@ task :gem do
 end
 
 task :release do
-  `gem push ruboto-core-0.0.1.gem`
+  `gem push #{Dir['ruboto-core-*.gem'][-1]}`
 end
 
 require 'erb'
