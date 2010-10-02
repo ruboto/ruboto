@@ -29,6 +29,8 @@ file jruby_ruboto_jar => generated_libs do
   ant.zip(:destfile=>jruby_ruboto_jar) do
     zipfileset(:src=>jruby_jar) do
       exclude(:name=>'jni/**')
+      # dx chokes on some of the netdb classes, for some reason
+      exclude(:name=>'jnr/netdb/**')
     end
   end
 end
