@@ -1,2 +1,5 @@
 tmp
 .DS_Store
+.rvmrc
+.bundle
+*.gem
