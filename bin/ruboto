@@ -85,6 +85,7 @@ Main {
       option("target") {
         required
         argument :required
+        defaults 'android-8'
         description "android version to target. must begin with 'android-'. Currently must be 'android-8'"
       }
       option("path"){
@@ -95,11 +96,13 @@ Main {
       option("package"){
         required
         argument :required
+        defaults 'org.ruboto.example'
         description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
       }
       option("activity"){
         required
         argument :required
+        defaults 'Main'
         description "name of your primary Activity"
       }
 
