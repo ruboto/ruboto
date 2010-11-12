@@ -45,6 +45,57 @@ class AssetCopier
   end
 end
 
+###########################################################################
+#
+# log_action: put text to stdout around the execution of a block
+#
+
+def log_action(initial_text, final_text="Done.", &block)
+  $stdout.sync = true
+  print initial_text, "..."
+  yield
+  puts final_text
+end
+
+###########################################################################
+#
+# reconfigure_jruby_libs:
+#   - removes unneeded code from jruby-core
+#   - moves ruby stdlib to the root of the ruby-stdlib jar
+#
+
+def reconfigure_jruby_libs
+  jruby_core = JRubyJars::core_jar_path.split('/')[-1]
+  log_action("Removing unneeded classes from #{jruby_core}") do
+    Dir.mkdir "libs/tmp"
+    Dir.chdir "libs/tmp"
+    FileUtils.move "../#{jruby_core}", "."
+    `jar -xf #{jruby_core}`
+    File.delete jruby_core
+    ['jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf', 
+     'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
+    ].each {|i| FileUtils.remove_dir i, true}
+    `jar -cf ../#{jruby_core} .`
+    Dir.chdir "../.."
+    FileUtils.remove_dir "libs/tmp", true
+  end
+
+  jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
+  log_action("Reformatting #{jruby_stdlib}") do
+    Dir.mkdir "libs/tmp"
+    Dir.chdir "libs/tmp"
+    FileUtils.move "../#{jruby_stdlib}", "."
+    `jar -xf #{jruby_stdlib}`
+    File.delete jruby_stdlib
+    FileUtils.move "META-INF/jruby.home/lib/ruby/1.8", ".."
+    Dir.chdir "../1.8"
+    FileUtils.remove_dir "../tmp", true
+    `jar -cf ../#{jruby_stdlib} .`
+    Dir.chdir "../.."
+    FileUtils.remove_dir "libs/1.8", true
+  end
+end
+
 def generate_inheriting_file(klass, name, package, script_name, dest='.')
   to = File.join(dest, "src/#{package.gsub('.', '/')}")
 
@@ -140,7 +191,12 @@ Main {
 
         print "Ruboto java classes..."
         copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
-        puts "Done"
+        puts "Done\n\n"
+
+        current_dir = Dir.pwd
+        Dir.chdir params['path'].value
+        reconfigure_jruby_libs
+        Dir.chdir current_dir
 
         print "\nAdding RubotoActivity and RubotoDialog to the manifest..."
         file = File.join(root, "AndroidManifest.xml")
@@ -226,11 +282,42 @@ Main {
     end
   end
 
+  mode "update-jruby" do
+    option("force"){
+      description "force and update even if the version hasn't changed"
+    }
+
+    def run
+      jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
+      jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
+      abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app" if 
+		(not jruby_core or not jruby_stdlib) and not params['force'].value
+
+      current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
+      new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
+      abort "both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version" if
+		current_jruby_version == new_jruby_version and not params['force'].value
+      puts "Current jruby version: #{current_jruby_version}"
+      puts "New jruby version: #{new_jruby_version}"
+
+      copier = AssetCopier.new $assets, File.expand_path(".")
+      log_action("Removing #{jruby_core}") {`rm #{jruby_core}`} if jruby_core
+      log_action("Removing #{jruby_stdlib}") {`rm #{jruby_stdlib}`} if jruby_stdlib
+      log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
+      log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
+
+      reconfigure_jruby_libs
+
+      puts "JRuby version is now: #{new_jruby_version}"
+    end
+  end
+
   # just running `ruboto`
   def run
     puts %Q{
       Ruboto -- Ruby for Android
       Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
+      Execute `ruboto --help` for other options
     }
   end
 }
