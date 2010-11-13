@@ -96,6 +96,252 @@ def reconfigure_jruby_libs
   end
 end
 
+###########################################################################
+#
+# REXML Additions:
+#   Extends REXML::Element to provide information in the necessary format
+#   to generate the appropriate code.
+#
+
+class REXML::Element
+  def all_methods(method_base="all", methods_include="", methods_exclude="", remove_final=true)
+    all_methods = get_elements("method")
+
+    working_methods = case method_base
+      when "all"
+        all_methods
+      when "none"
+        []
+      when "on"
+        all_methods.select{|i| i.attribute("name").value.match(/^on[A-Z]/)}
+    end
+
+    methods_include = methods_include.split(",") if methods_include.is_a?(String)
+    all_methods.each{|i| working_methods << i if methods_include.include?(i.attribute("name").value)}
+    methods_exclude = methods_exclude.split(",")  if methods_exclude.is_a?(String)
+    working_methods = working_methods.select{|i| not methods_exclude.include?(i.attribute("name").value)}
+
+    #remove methods marked final
+    working_methods = working_methods.select{|i| (not i.attribute("final")) or i.attribute("final").value == "false"} if remove_final
+
+    working_methods
+  end
+
+  def parameters
+    get_elements("parameter").map {|p| [p.attribute("name"), p.attribute("type")]}
+  end
+
+  def method_signature 
+    "#{attribute("name")}(#{parameters.map{|i| i[1]}.join(',')})"
+  end
+
+  def constant_string
+    "CB_" + attribute("name").value.gsub(/[A-Z]/) {|i| "_#{i}"}.upcase.gsub(/^ON_/, "")
+  end
+
+  def super_string
+    if attribute("abstract") and attribute("abstract").value == "true"
+      nil
+    else
+      "super.#{attribute("name")}(#{parameters.map{|i| i[0]}.join(", ")});"
+    end
+  end
+
+  def default_return
+    return nil unless attribute("return")
+    case attribute("return").value
+      when "boolean": "return false;"
+      when "int":     "return 0;"
+      when "void":    nil
+      else            "return null;"
+    end
+  end
+
+  def ruby_call
+    rv = []
+
+    params = parameters
+    args = ""
+    if params.size > 3
+      args = ", args"
+      rv << "IRubyObject[] args = {" + params.map{|i| "JavaUtil.convertJavaToRuby(getRuby(), #{i[0]})"}.join(", ") + "};"
+    elsif params.size > 0
+      args = ", " + params.map{|i| "JavaUtil.convertJavaToRuby(getRuby(), #{i[0]})"}.join(", ")
+    end
+
+    return_cast = ""
+    if attribute("return") and attribute("return").value.include?(".")
+      return_cast = "return (#{attribute("return").value})"
+    elsif attribute("return") and attribute("return").value == "int"
+      return_cast = "return (Integer)"
+    elsif attribute("return") and attribute("return").value != "void"
+      return_cast = "return (#{attribute("return").value.capitalize})" 
+    end
+
+    convert_return = ""
+    if attribute("return") and attribute("return").value != "void"
+      convert_return = ".toJava(#{attribute("return").value}.class)" 
+    end
+
+    rv << "#{return_cast}RuntimeHelpers.invoke(getRuby().getCurrentContext(), callbackProcs[#{constant_string}], \"call\" #{args})#{convert_return};"
+    rv
+  end
+
+  def method_definition
+    method_call((attribute("return") ? attribute("return").value : "void"), nil, 
+      if_else("callbackProcs[#{constant_string}] != null", 
+        [super_string] + try_catch(ruby_call, ["re.printStackTrace();", default_return]), 
+        [super_string, default_return])).indent.join("\n")
+  end
+end
+
+###########################################################################
+#
+# Methods for formatting code
+#
+
+def method_call(return_type=nil, method_name=nil, body_clause=[]) 
+  ["public #{return_type || ""} #{method_name || attribute("name").value}(" + parameters.map{|i| "#{i[1]} #{i[0]}"}.join(", ") + ") {",
+    body_clause.indent, "}"]
+end
+
+def if_else(condition, if_clause, else_clause) 
+  ["if (#{condition}) {", if_clause.indent, else_clause.compact.empty? ? nil : "} else {", else_clause.indent, "}"]
+end
+
+def try_catch(try_clause, catch_clause)
+  ["try {", try_clause.indent, "} catch (RaiseException re) {", catch_clause.indent, "}"]
+end
+
+class Array
+  def indent
+    flatten.compact.map{|i| "  " + i}
+  end
+end
+
+###########################################################################
+#
+# Build Subclass or Interface:
+#
+
+#
+# build_file: Copies src to the appropriate location and uses 
+#   the substitutions hash to modify the contents
+#
+def build_file(src, package, name, substitutions, dest='.')
+  to = File.join(dest, "src/#{package.gsub('.', '/')}")
+
+  FileUtils.cp(File.expand_path(__FILE__ + "/../../assets/src/#{src}.java"), to)
+  FileUtils.move(File.join(to, "#{src}.java"), File.join(to, "#{name}.java"))
+
+  file = File.join(to, "#{name}.java")
+  text = File.read(file)
+  substitutions.each {|k,v| text.gsub!(k, v)}
+
+  File.open(file, 'w') {|f| f << text}
+end
+
+#
+# get_class_or_interface: Opens the xml file and locates the specified class.
+#   Aborts if the class is not found or if it is not available for  
+#   all api levels
+#
+def get_class_or_interface(klass, a_type, min_api, target_api, force=false)
+  $stdout.sync = true
+
+  abort "ERROR: Can't parse package.#{a_type.capitalize} #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
+
+  print "Loading Android API..."
+  api = REXML::Document.new(File.read(File.expand_path(__FILE__ + "/../../lib/java_class_gen/android_api.xml"))).root
+  puts "Done."
+
+  element = api.elements["package[@name='#{$1}']/#{a_type}[@name='#{$2}']"]
+  abort "ERROR: #{a_type.capitalize} #{klass} not found" unless element
+
+  abort "#{a_type.capitalize} not available in minSdkVersion (#{min_api}), added in #{element.attribute('api_added').value}" if 
+          element.attribute('api_added') and element.attribute('api_added').value.to_i > min_api.to_i
+  abort "#{a_type.capitalize} deprecated for targetSdkVersion (#{target_api}); use --force to create it" if 
+          element.attribute('deprecated') and element.attribute('deprecated').value.to_i <= target_api.to_i
+  abort "#{a_type.capitalize} removed for targetSdkVersion (#{target_api})" if 
+          element.attribute('api_removed') and element.attribute('api_removed').value.to_i <= target_api.to_i
+
+  element
+end
+
+#
+# check_methods: Checks the methods to see if they are available for all api levels
+#
+def check_methods(methods, min_api, target_api, force=false)
+  added = methods.select{|i| i.attribute('api_added') and i.attribute('api_added').value.to_i > min_api.to_i}
+  unless added.empty?
+    puts "The following methods were added after the minSdkVersion (#{min_api}) and will not be created:" + 
+           added.map{|i| "#{i.method_signature} -- added in #{i.attribute('api_added')}"}.indent.join("\n")
+  end
+
+  deprecated = methods.select{|i| i.attribute('deprecated') and i.attribute('deprecated').value.to_i <= target_api.to_i}
+  unless deprecated.empty?
+    puts "The following methods were deprecated by targetSdkVersion (#{target_api}); modify or use --force:\n" +
+           deprecated.map{|i| "#{i.method_signature} -- deprecated in #{i.attribute('deprecated')}"}.indent.join("\n")
+  end
+
+  removed = methods.select{|i| i.attribute('api_removed') and i.attribute('api_removed').value.to_i <= target_api.to_i}
+  unless removed.empty?
+    puts "The following methods were removed by targetSdkVersion (#{target_api}) and will not be created:\n"
+           removed.map{|i| "#{i.method_signature} -- removed in #{i.attribute('api_removed')}"}.indent.join("\n")
+  end
+
+  abort "Aborting...modify or use --force for deprecated methods" if not force and not deprecated.empty?
+
+  methods - added - removed
+end
+
+#
+# generate_subclass_or_interface: Creates a subclass or interface based on the specifications.
+#
+def generate_subclass_or_interface(klass, a_type, name, package, method_base, methods_include, methods_exclude, target_api, min_api, dest='.')
+  class_desc = get_class_or_interface klass, a_type, min_api, target_api
+
+  print "Generating methods..."
+  methods = class_desc.all_methods(method_base, methods_include, methods_exclude)
+  puts methods.count
+
+  check_methods(methods, min_api, target_api)
+
+  build_file "InheritingClass", package, name, {
+               "THE_PACKAGE" => package,
+               "THE_ACTION" => a_type == "class" ? "extends" : "implements",
+               "THE_ANDROID_CLASS" => klass,
+               "THE_RUBOTO_CLASS" => name,
+               "THE_CONSTANTS" =>  methods.map {|i| "public static final int #{i.constant_string} = #{methods.index(i)};"}.indent.join("\n"),
+               "CONSTANTS_COUNT" => methods.count.to_s,
+               "THE_METHODS" => methods.map{|i| i.method_definition}.join("\n\n")
+             }
+end
+
+#
+# open_manifest_and_check_for_sdk_versions:
+#   Aborts if no manifest or if sdk versions are not set in hte manifest
+#
+def open_manifest_and_check_for_sdk_versions
+  abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
+    File.exists? 'AndroidManifest.xml'
+
+  manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
+
+  sample = ' (e.g., <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" />)'
+  abort "you must specify your sdk level in the manifest#{sample}"      unless manifest.elements["uses-sdk"]
+  abort "you must specify a minimum sdk level in the manifest#{sample}" unless manifest.elements["uses-sdk"].attribute('android:minSdkVersion')
+  abort "you must specify a target sdk level in the manifest#{sample}"  unless manifest.elements["uses-sdk"].attribute('android:targetSdkVersion')
+
+  manifest
+end
+
+###########################################################################
+#
+# generate_inheriting_file:
+#   Builds a script based subclass of Activity, Service, or BroadcastReceiver
+#
+
 def generate_inheriting_file(klass, name, package, script_name, dest='.')
   to = File.join(dest, "src/#{package.gsub('.', '/')}")
 
@@ -259,6 +505,76 @@ Main {
         klass = params['class'].value
 
         generate_inheriting_file klass, name, package, script_name
+      end
+    end
+
+    mode "subclass" do
+      argument("class"){
+        required
+        description "the Android Class that you want to subclass (e.g., package.Class)."
+      }
+
+      option("name"){
+        required
+        argument :required
+        description "name of the class (and file). Should be CamelCase"
+      }
+
+      option("method_base"){
+        required
+        argument :required
+        description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
+      }
+
+      option("method_include"){
+        argument :required
+        description "additional methods to add to the base list"
+      }
+
+      option("method_exclude"){
+        argument :required
+        description "methods to remove from the base list"
+      }
+
+      def run
+        manifest = open_manifest_and_check_for_sdk_versions
+
+        generate_subclass_or_interface params['class'].value,
+                                    "class",
+                                    params['name'].value, 
+                                    manifest.attribute('package').value, 
+                                    params['method_base'].value,
+                                    params['method_include'].value || "",
+                                    params['method_exclude'].value || "",
+                                    manifest.elements["uses-sdk"].attribute('android:targetSdkVersion').value, 
+                                    manifest.elements["uses-sdk"].attribute('android:minSdkVersion').value 
+      end
+    end
+
+    mode "interface" do
+      argument("interface"){
+        required
+        description "the Android Interface that you want to implement (e.g., package.Interface)."
+      }
+
+      option("name"){
+        required
+        argument :required
+        description "name of the class (and file) that will implement the interface. Should be CamelCase"
+      }
+
+      def run
+        manifest = open_manifest_and_check_for_sdk_versions
+
+        generate_subclass_or_interface params['interface'].value,
+                                    "interface",
+                                    params['name'].value, 
+                                    manifest.attribute('package').value, 
+                                    "all",
+                                    "",
+                                    "",
+                                    manifest.elements["uses-sdk"].attribute('android:targetSdkVersion').value, 
+                                    manifest.elements["uses-sdk"].attribute('android:minSdkVersion').value 
       end
     end
 
