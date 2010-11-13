@@ -6,7 +6,7 @@
 #
 #######################################################
 
-$RUBOTO_VERSION = 4
+$RUBOTO_VERSION = 5
 
 def confirm_ruboto_version(required_version, exact=true)
   raise "requires $RUBOTO_VERSION=#{required_version} or greater, current version #{$RUBOTO_VERSION}" if $RUBOTO_VERSION < required_version and not exact
@@ -308,3 +308,35 @@ class Button
     super(context, params)
   end
 end
+
+#############################################################################
+#
+# ruboto_import
+#
+
+def ruboto_import(package_class)
+  klass = java_import package_class
+  return unless klass
+
+  klass.class_eval do
+    def method_missing(name, *args, &block)
+      if name.to_s =~ /^handle_(.*)/ and (const = self.class.const_get("CB_#{$1.upcase}"))
+        setCallbackProc(const, block)
+        self
+      else
+        super
+      end
+    end
+
+    def respond_to?(name)
+      return true if name.to_s =~ /^handle_(.*)/ and self.class.const_get("CB_#{$1.upcase}")
+      super
+    end
+
+    def initialize_handlers(&block)
+      instance_eval &block
+      self
+    end
+  end
+end
+
