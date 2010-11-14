@@ -385,6 +385,12 @@ Main {
         defaults 'android-8'
         description "android version to target. must begin with 'android-'. Currently must be 'android-8'"
       }
+      option("min_sdk") {
+        required
+        argument :required
+        defaults 'android-3'
+        description "minimum android version supported. must begin with 'android-'. (default 'android-3')"
+      }
       option("path"){
         required
         argument :required
@@ -407,6 +413,7 @@ Main {
         path = params['path'].value
         name = params['name'].value
         target = params['target'].value
+        min_sdk = params['min_sdk'].value
         package = params['package'].value
         activity = params['activity'].value
 
@@ -444,7 +451,7 @@ Main {
         reconfigure_jruby_libs
         Dir.chdir current_dir
 
-        print "\nAdding RubotoActivity and RubotoDialog to the manifest..."
+        print "\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest..."
         file = File.join(root, "AndroidManifest.xml")
         text = File.read(file)
         File.open(file, 'w') do |f|
@@ -455,6 +462,7 @@ Main {
         <activity android:name="org.ruboto.RubotoDialog" android:theme="@android:style/Theme.Dialog">
         </activity>
     </application>
+    <uses-sdk android:minSdkVersion="#{min_sdk[/\d+/]}" android:targetSdkVersion="#{target[/\d+/]}" />
                   })
         end
         puts "Done"
