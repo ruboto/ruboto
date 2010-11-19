@@ -13,6 +13,8 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
+THE_CONSTRUCTORS
+
   private Ruby getRuby() {
     if (__ruby__ == null) __ruby__ = Script.getRuby();
     return __ruby__;
