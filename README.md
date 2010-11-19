@@ -31,6 +31,7 @@ Command-line Tools
 
 * [Application generator](#application_generator) (like the rails application generator)
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
+* [Callback generator](#class_generator) to generate specific subclasses to open up access (callbacks) for various portions of the Android API.
 * [Packaging task](#packaging_task) to generate an apk file
 * [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
 * [Develop without having to compile to try every change](#update_scripts)
@@ -39,15 +40,50 @@ Command-line Tools
 <a name="application_generator"></a>
 ### Application generator
 
-    $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --activity MainActivityName
-Currently any value but `android-8` will not work.
+    $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min_sdk another-android-version --activity MainActivityName
+Version values must be specified using'android-' and the sdk level number (e.g., android-8 is froyo).
 
 <a name="class_generator"></a>
 ### Class generator
 
+Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.
+
     $ ruboto gen class ClassName --name YourObjectName
 Ex:
     $ ruboto gen class BroadcastReceiver --name AwesomenessReceiver
+
+<a name="callback_generator"></a>
+### Callback generator
+
+Can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
+
+* For classes that need subclassing (e.g., PhoneStateListener, SQLiteOpenHelper, View)
+
+    $ ruboto gen subclass AndroidPackageAndClassName --name YourClassName --method_base all-on-or-none --method_include methods --method_exclude methods
+Ex:
+    $ ruboto gen class android.telephony.PhoneStateListener --name MyPhoneStateListener
+
+* For interfaces that need implementing (e.g., OnClickListener or SensorListener)
+
+    $ ruboto gen interface AndroidPackageAndInterfaceName --name YourClassName
+Ex:
+    $ ruboto gen interface android.hardware.SensorListener --name MySensorListener
+
+Inside your script use: 
+
+    ruboto_import "your.package.MySensorListener"
+
+Later:
+
+    # Create the callback object
+    @sensor_listener = MySensorListener.new
+
+    # Specify the block to call 
+    @sensor_listener.handle_sensor_changed do |sensor, values|
+      # Do stuff
+    end
+
+    # Register the listener
 
 <a name="packaging_task"></a>
 ### Packaging task
@@ -100,8 +136,33 @@ Also, you need root access to your device for this to work, as it needs to write
 
 ### Updating Ruboto's Files
 
-Not implemented, yet.
+You can update various portions of your generated Ruboto app through the ruboto command:
 
+* JRuby:
+ 
+1) If a new version of JRuby is released, you should update your gem (e.g., sudo gem update jruby-jars).
+
+2) From the root directory of your app: 
+
+    $ ruboto update jruby
+
+* The ruboto.rb script:
+
+1) From the root directory of your app: 
+
+    $ ruboto update ruboto
+
+* The core classes (e.g., RubotoActivity):
+
+1) These classes are generated on your machine based on the SDKs (min and target) specified when you 'gen app' (stored in the AndroidManifest.xml)
+
+2) You many want to regenerate them if a new version of the SDK is released, if you change your targets, or if you want more control over the callbacks you receive.
+
+3) From the root directory of your app:
+
+    $ ruboto gen core Activity --method_base all-on-or-none --method_include specific-methods-to-include --method_include specific-methods-to-exclude
+
+4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either exclude those methods or add --force to create them anyway (added methods are created without calling super to avoid crashin on legacy hardware).
 
 Scripts
 -------
