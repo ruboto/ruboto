@@ -26,6 +26,7 @@ module Main
   end
 end
 
+$gem_root =  File.expand_path(__FILE__+ "/../..")
 $assets = File.expand_path(__FILE__ + "/../../assets")
 
 class AssetCopier
@@ -113,7 +114,7 @@ class REXML::Element
       when "none"
         []
       when "on"
-        all_methods.select{|i| i.attribute("name").value.match(/^on[A-Z]/)}
+        all_methods.select{|i| i.attribute("name").value.match(/^on[A-Z]/)} 
     end
 
     methods_include = methods_include.split(",") if methods_include.is_a?(String)
@@ -128,7 +129,7 @@ class REXML::Element
   end
 
   def parameters
-    get_elements("parameter").map {|p| [p.attribute("name"), p.attribute("type")]}
+    get_elements("parameter").map {|p| [p.attribute("name").value, p.attribute("type").value.gsub("&lt;", "<").gsub("&gt;", ">")]}
   end
 
   def method_signature 
@@ -140,10 +141,16 @@ class REXML::Element
   end
 
   def super_string
-    if attribute("abstract") and attribute("abstract").value == "true"
+    if attribute("api_added") and 
+        attribute("api_added").value.to_i > verify_min_sdk.to_i and 
+        attribute("api_added").value.to_i <= verify_target_sdk.to_i
       nil
-    else
+    elsif attribute("abstract") and attribute("abstract").value == "true"
+      nil
+    elsif name == "method"
       "super.#{attribute("name")}(#{parameters.map{|i| i[0]}.join(", ")});"
+    elsif name == "constructor"
+      "super(#{parameters.map{|i| i[0]}.join(", ")});"
     end
   end
 
@@ -155,6 +162,12 @@ class REXML::Element
       when "void":    nil
       else            "return null;"
     end
+  end
+
+  def super_return
+    rv = super_string
+    return rv unless attribute("return")
+    rv ? "return #{rv}" : default_return
   end
 
   def ruby_call
@@ -170,13 +183,14 @@ class REXML::Element
     end
 
     return_cast = ""
-    if attribute("return") and attribute("return").value.include?(".")
+    if attribute("return") and (attribute("return").value.include?(".") or attribute("return").value == "int[]")
       return_cast = "return (#{attribute("return").value})"
     elsif attribute("return") and attribute("return").value == "int"
       return_cast = "return (Integer)"
     elsif attribute("return") and attribute("return").value != "void"
       return_cast = "return (#{attribute("return").value.capitalize})" 
     end
+    return_cast = return_cast.gsub("&lt;", "<").gsub("&gt;", ">")
 
     convert_return = ""
     if attribute("return") and attribute("return").value != "void"
@@ -188,10 +202,14 @@ class REXML::Element
   end
 
   def method_definition
-    method_call((attribute("return") ? attribute("return").value : "void"), nil, 
+    method_call((attribute("return") ? attribute("return").value : "void"), attribute("name").value, parameters,
       if_else("callbackProcs[#{constant_string}] != null", 
         [super_string] + try_catch(ruby_call, ["re.printStackTrace();", default_return]), 
-        [super_string, default_return])).indent.join("\n")
+        [super_return])).indent.join("\n")
+  end
+
+  def constructor_definition(class_name)
+    method_call("", class_name, parameters, [super_string]).indent.join("\n")
   end
 end
 
@@ -200,8 +218,8 @@ end
 # Methods for formatting code
 #
 
-def method_call(return_type=nil, method_name=nil, body_clause=[]) 
-  ["public #{return_type || ""} #{method_name || attribute("name").value}(" + parameters.map{|i| "#{i[1]} #{i[0]}"}.join(", ") + ") {",
+def method_call(return_type=nil, method_name="", parameters=[], body_clause=[]) 
+  ["public #{return_type || ""} #{method_name}(" + parameters.map{|i| "#{i[1]} #{i[0]}"}.join(", ") + ") {",
     body_clause.indent, "}"]
 end
 
@@ -231,8 +249,8 @@ end
 def build_file(src, package, name, substitutions, dest='.')
   to = File.join(dest, "src/#{package.gsub('.', '/')}")
 
-  FileUtils.cp(File.expand_path(__FILE__ + "/../../assets/src/#{src}.java"), to)
-  FileUtils.move(File.join(to, "#{src}.java"), File.join(to, "#{name}.java"))
+  FileUtils.cp(File.expand_path($gem_root + "/assets/src/#{src}.java"), to)
+  FileUtils.move(File.join(to, "#{src}.java"), File.join(to, "#{name}.java")) if src != name
 
   file = File.join(to, "#{name}.java")
   text = File.read(file)
@@ -246,16 +264,20 @@ end
 #   Aborts if the class is not found or if it is not available for  
 #   all api levels
 #
-def get_class_or_interface(klass, a_type, min_api, target_api, force=false)
+def get_class_or_interface(klass, force=false)
   $stdout.sync = true
+  min_api = verify_min_sdk
+  target_api = verify_target_sdk
 
   abort "ERROR: Can't parse package.#{a_type.capitalize} #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
 
-  print "Loading Android API..."
-  api = REXML::Document.new(File.read(File.expand_path(__FILE__ + "/../../lib/java_class_gen/android_api.xml"))).root
-  puts "Done."
+  unless @api
+    print "Loading Android API..."
+    @api = REXML::Document.new(File.read(File.expand_path($gem_root + "/lib/java_class_gen/android_api.xml"))).root
+    puts "Done."
+  end
 
-  element = api.elements["package[@name='#{$1}']/#{a_type}[@name='#{$2}']"]
+  element = @api.elements["package[@name='#{$1}']/[@name='#{$2}']"]
   abort "ERROR: #{a_type.capitalize} #{klass} not found" unless element
 
   abort "#{a_type.capitalize} not available in minSdkVersion (#{min_api}), added in #{element.attribute('api_added').value}" if 
@@ -271,69 +293,184 @@ end
 #
 # check_methods: Checks the methods to see if they are available for all api levels
 #
-def check_methods(methods, min_api, target_api, force=false)
-  added = methods.select{|i| i.attribute('api_added') and i.attribute('api_added').value.to_i > min_api.to_i}
-  unless added.empty?
-    puts "The following methods were added after the minSdkVersion (#{min_api}) and will not be created:" + 
-           added.map{|i| "#{i.method_signature} -- added in #{i.attribute('api_added')}"}.indent.join("\n")
-  end
+def check_methods(methods, force=false)
+  min_api = verify_min_sdk.to_i
+  target_api = verify_target_sdk.to_i
 
-  deprecated = methods.select{|i| i.attribute('deprecated') and i.attribute('deprecated').value.to_i <= target_api.to_i}
-  unless deprecated.empty?
-    puts "The following methods were deprecated by targetSdkVersion (#{target_api}); modify or use --force:\n" +
-           deprecated.map{|i| "#{i.method_signature} -- deprecated in #{i.attribute('deprecated')}"}.indent.join("\n")
-  end
+  # Remove methods changed outside of the scope of the sdk versions
+  methods = methods.select{|i| not i.attribute('api_added') or i.attribute('api_added').value.to_i <= target_api}
+  methods = methods.select{|i| not i.attribute('deprecated') or i.attribute('deprecated').value.to_i > min_api}
+  methods = methods.select{|i| not i.attribute('api_removed') or i.attribute('api_removed').value.to_i > min_api}
 
-  removed = methods.select{|i| i.attribute('api_removed') and i.attribute('api_removed').value.to_i <= target_api.to_i}
-  unless removed.empty?
-    puts "The following methods were removed by targetSdkVersion (#{target_api}) and will not be created:\n"
-           removed.map{|i| "#{i.method_signature} -- removed in #{i.attribute('api_removed')}"}.indent.join("\n")
-  end
-
-  abort "Aborting...modify or use --force for deprecated methods" if not force and not deprecated.empty?
-
-  methods - added - removed
+  # Inform and remove methods changed inside the scope of the sdk versions
+  methods.select do |i|
+    if i.attribute('api_added') and i.attribute('api_added').value.to_i > min_api and not force
+      puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- exclude or force" 
+      false
+    elsif i.attribute('deprecated') and i.attribute('deprecated').value.to_i <= target_api and not force
+      puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- exclude or force" 
+      false
+    elsif i.attribute('api_removed') and i.attribute('api_removed').value.to_i <= target_api
+      puts "Can't create #{i.method_signature} -- removed in #{i.attribute('api_removed')}"
+      false
+    else
+      true
+    end
+  end  
 end
 
 #
 # generate_subclass_or_interface: Creates a subclass or interface based on the specifications.
 #
-def generate_subclass_or_interface(klass, a_type, name, package, method_base, methods_include, methods_exclude, target_api, min_api, dest='.')
-  class_desc = get_class_or_interface klass, a_type, min_api, target_api
+def generate_subclass_or_interface(params)
+  defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => false}
+  params = defaults.merge(params)
+  params[:package] = verify_package unless params[:package]
 
-  print "Generating methods..."
-  methods = class_desc.all_methods(method_base, methods_include, methods_exclude)
-  puts methods.count
+  class_desc = get_class_or_interface(params[:class] || params[:interface])
 
-  check_methods(methods, min_api, target_api)
+  puts "Generating methods for #{params[:name]}..."
+  methods = class_desc.all_methods(params[:method_base], params[:method_include], params[:method_exclude])
+  methods = check_methods(methods, params[:force])
+  puts "Done. Methods created: #{methods.count}"
 
-  build_file "InheritingClass", package, name, {
-               "THE_PACKAGE" => package,
-               "THE_ACTION" => a_type == "class" ? "extends" : "implements",
-               "THE_ANDROID_CLASS" => klass,
-               "THE_RUBOTO_CLASS" => name,
-               "THE_CONSTANTS" =>  methods.map {|i| "public static final int #{i.constant_string} = #{methods.index(i)};"}.indent.join("\n"),
+  # Remove any duplicate constants (use *args handle multiple parameter lists)
+  constants = methods.map(&:constant_string).uniq
+
+  build_file params[:template], params[:package], params[:name], {
+               "THE_PACKAGE" => params[:package],
+               "THE_ACTION" => class_desc.name == "class" ? "extends" : "implements",
+               "THE_ANDROID_CLASS" => (params[:class] || params[:interface]),
+               "THE_RUBOTO_CLASS" => params[:name],
+               "THE_CONSTANTS" =>  constants.map {|i| "public static final int #{i} = #{constants.index(i)};"}.indent.join("\n"),
                "CONSTANTS_COUNT" => methods.count.to_s,
+               "THE_CONSTRUCTORS" => class_desc.name == "class" ? 
+                  class_desc.get_elements("constructor").map{|i| i.constructor_definition(params[:name])}.join("\n\n") : "",
                "THE_METHODS" => methods.map{|i| i.method_definition}.join("\n\n")
              }
 end
 
 #
-# open_manifest_and_check_for_sdk_versions:
-#   Aborts if no manifest or if sdk versions are not set in hte manifest
+# generate_core_classe: generates RubotoActivity, RubotoService, etc. based 
+#   on the API specifications.
 #
-def open_manifest_and_check_for_sdk_versions
+def generate_core_classes(params)
+  hash = {:package => "org.ruboto"}
+
+  %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener).each do |i|
+    name = i.split(".")[-1]
+    if(params[:class] == name or params[:class] == "all")
+      generate_subclass_or_interface(hash.merge({:class => i, :name => "Ruboto#{name}"}))
+    end
+  end
+
+  %w(method_base method_include force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
+  hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").push("onReceive").join(",")
+
+  %w(android.app.Activity android.app.Service android.content.BroadcastReceiver android.view.View).each do |i|
+    name = i.split(".")[-1]
+    if(params[:class] == name or params[:class] == "all")
+      generate_subclass_or_interface(
+        hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
+    end
+  end
+end
+
+###########################################################################
+#
+# Updating components
+#
+
+def update_jruby(force=nil)
+  jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
+  jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
+  new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
+
+  unless force
+    abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app" if 
+     (not jruby_core or not jruby_stdlib)
+
+    current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
+    abort "both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version" if
+      current_jruby_version == new_jruby_version
+
+    puts "Current jruby version: #{current_jruby_version}"
+    puts "New jruby version: #{new_jruby_version}"
+  end
+
+  copier = AssetCopier.new $assets, File.expand_path(".")
+  log_action("Removing #{jruby_core}") {File.delete jruby_core} if jruby_core
+  log_action("Removing #{jruby_stdlib}") {File.delete jruby_stdlib} if jruby_stdlib
+  log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
+  log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
+
+  reconfigure_jruby_libs
+
+  puts "JRuby version is now: #{new_jruby_version}"
+end
+
+def update_ruboto(force=nil)
+  verify_manifest
+
+  from = File.expand_path($gem_root + "/assets/assets/scripts/ruboto.rb")
+  to = File.expand_path("./assets/scripts/ruboto.rb")
+
+  from_text = File.read(from)
+  to_text = File.read(from) if File.exists?(to)
+
+  unless force
+    puts "New version: #{from_text[/\$RUBOTO_VERSION = (\d+)/, 1]}"
+    puts "Old version: #{to_text ? to_text[/\$RUBOTO_VERSION = (\d+)/, 1] : 'none'}"
+
+    abort "The ruboto.rb verion has not changed. Use --force to force update." if 
+      from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
+  end
+
+  log_action("Copying ruboto.rb and setting the package name...") do
+    File.open(to, 'w') {|f| f << from_text.gsub("THE_PACKAGE", verify_package).gsub("ACTIVITY_NAME", verify_activity)}
+  end
+end
+
+###########################################################################
+#
+# Verify the presence of important components
+#
+
+def verify_manifest
   abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
     File.exists? 'AndroidManifest.xml'
+  @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml')).root
+end
 
-  manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
+def verify_package
+  verify_manifest
+  @package ||= @manifest.attribute('package').value
+end
 
-  sample = ' (e.g., <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" />)'
-  abort "you must specify your sdk level in the manifest#{sample}"      unless manifest.elements["uses-sdk"]
-  abort "you must specify a minimum sdk level in the manifest#{sample}" unless manifest.elements["uses-sdk"].attribute('android:minSdkVersion')
-  abort "you must specify a target sdk level in the manifest#{sample}"  unless manifest.elements["uses-sdk"].attribute('android:targetSdkVersion')
+def verify_activity
+  verify_manifest
+  @activity ||= @manifest.elements['application/activity'].attribute('android:name').value
+end
 
-  manifest
+def verify_sdk_versions
+  verify_manifest
+  @uses_sdk ||= @manifest.elements["uses-sdk"]
+  abort "you must specify your sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @uses_sdk
+  @uses_sdk
+end
+
+def verify_min_sdk
+  verify_sdk_versions
+  @min_sdk ||= @uses_sdk.attribute('android:minSdkVersion').value
+  abort "you must specify a minimum sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @min_sdk
+  @min_sdk
+end
+
+def verify_target_sdk
+  verify_sdk_versions
+  @target_sdk ||= @uses_sdk.attribute('android:targetSdkVersion').value
+  abort "you must specify a target sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @target_sdk
+  @target_sdk
 end
 
 ###########################################################################
@@ -383,7 +520,7 @@ Main {
         required
         argument :required
         defaults 'android-8'
-        description "android version to target. must begin with 'android-'. Currently must be 'android-8'"
+        description "android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
       }
       option("min_sdk") {
         required
@@ -420,9 +557,6 @@ Main {
         abort "path must be to a directory that does not yet exist. it will be created" if
           File.exists?(path)
 
-        abort "Currently you must set target to 'android-8' (Froyo) for ruboto to work" unless
-          target == 'android-8'
-
         root = File.expand_path(path)
         print "\nGenerating Android app #{name} in #{root}..."
         `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
@@ -432,54 +566,35 @@ Main {
         copier = AssetCopier.new $assets, root
 
         %w{Rakefile .gitignore assets}.each do |f|
-          print "#{f}..."
-          copier.copy f
-          puts "Done"
+          log_action(f) {copier.copy f}
         end
 
-        print "JRuby jars..."
-        copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
-        copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"
-        puts "Done"
+        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java", "src/org/ruboto"}
 
-        print "Ruboto java classes..."
-        copier.copy "src/org/ruboto/*.java", "src/org/ruboto"
-        puts "Done\n\n"
-
+        # Remember the current directory and chdir to the new app directory
         current_dir = Dir.pwd
-        Dir.chdir params['path'].value
-        reconfigure_jruby_libs
+        Dir.chdir root
+
+        update_jruby true
+ 
+        log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
+          verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
+          verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 
+                                                                            "android:theme" => "@android:style/Theme.Dialog"}
+          verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk[/\d+/], "android:targetSdkVersion" => target[/\d+/]}
+          File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
+        end
+
+        update_ruboto true
+
+        generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true)
+
+        # Go back to whence we came
         Dir.chdir current_dir
 
-        print "\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest..."
-        file = File.join(root, "AndroidManifest.xml")
-        text = File.read(file)
-        File.open(file, 'w') do |f|
-          f << text.gsub("</application>", 
-                 %Q{
-        <activity android:name="org.ruboto.RubotoActivity">
-        </activity>
-        <activity android:name="org.ruboto.RubotoDialog" android:theme="@android:style/Theme.Dialog">
-        </activity>
-    </application>
-    <uses-sdk android:minSdkVersion="#{min_sdk[/\d+/]}" android:targetSdkVersion="#{target[/\d+/]}" />
-                  })
+        log_action("Generating the default Activity and script") do
+          generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
         end
-        puts "Done"
-
-        print "Setting the package name in ruboto.rb..."
-        java_files = [File.join(root, "assets/scripts/ruboto.rb")]
-        java_files.each do |file|
-          text = File.read(file)
-          File.open(file, 'w') do |f|
-            f << text.gsub("THE_PACKAGE", package).gsub("ACTIVITY_NAME", activity)
-          end
-        end
-        puts "Done"
-
-        print "Generating the default Activity and script..."
-        generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
-        puts "Done"
 
         puts "\nHello, #{name}\n"
       end
@@ -504,15 +619,11 @@ Main {
 
 
       def run
-        abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
-          File.exists? 'AndroidManifest.xml'
-
-        package = REXML::Document.new(File.read('AndroidManifest.xml')).root.attribute('package').value
         name = params['name'].value
         script_name = params['script_name'].value || "#{underscore(name)}.rb"
         klass = params['class'].value
 
-        generate_inheriting_file klass, name, package, script_name
+        generate_inheriting_file klass, name, verify_package, script_name
       end
     end
 
@@ -530,32 +641,30 @@ Main {
 
       option("method_base"){
         required
+        validate {|i| %w(all on none).include?(i)}
         argument :required
         description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
       }
 
       option("method_include"){
         argument :required
+        defaults ""
         description "additional methods to add to the base list"
       }
 
       option("method_exclude"){
         argument :required
+        defaults ""
         description "methods to remove from the base list"
       }
 
-      def run
-        manifest = open_manifest_and_check_for_sdk_versions
+      option("force"){
+        cast :boolean
+        description "force added and deprecated methods not excluded to be create"
+      }
 
-        generate_subclass_or_interface params['class'].value,
-                                    "class",
-                                    params['name'].value, 
-                                    manifest.attribute('package').value, 
-                                    params['method_base'].value,
-                                    params['method_include'].value || "",
-                                    params['method_exclude'].value || "",
-                                    manifest.elements["uses-sdk"].attribute('android:targetSdkVersion').value, 
-                                    manifest.elements["uses-sdk"].attribute('android:minSdkVersion').value 
+      def run
+        generate_subclass_or_interface %w(class name method_base method_include method_exclude force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
       end
     end
 
@@ -572,17 +681,46 @@ Main {
       }
 
       def run
-        manifest = open_manifest_and_check_for_sdk_versions
+        generate_subclass_or_interface %w(interface name).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+      end
+    end
 
-        generate_subclass_or_interface params['interface'].value,
-                                    "interface",
-                                    params['name'].value, 
-                                    manifest.attribute('package').value, 
-                                    "all",
-                                    "",
-                                    "",
-                                    manifest.elements["uses-sdk"].attribute('android:targetSdkVersion').value, 
-                                    manifest.elements["uses-sdk"].attribute('android:minSdkVersion').value 
+    mode "core" do
+      argument("class"){
+        required
+        validate {|i| %w(Activity Service BroadcastReceiver View OnClickListener OnItemClickListener all).include?(i)}
+        description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, or all (default = all)"
+      }
+
+      option("method_base"){
+        required
+        argument :required
+        validate {|i| %w(all on none).include?(i)}
+        defaults "on"
+        description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
+      }
+
+      option("method_include"){
+        required
+        argument :required
+        defaults ""
+        description "additional methods to add to the base list"
+      }
+
+      option("method_exclude"){
+        required
+        argument :required
+        defaults ""
+        description "methods to remove from the base list"
+      }
+
+      option("force"){
+        cast :boolean
+        description "force added and deprecated methods not excluded to be create"
+      }
+
+      def run
+        generate_core_classes [:class, :method_base, :method_include, :method_exclude, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
       end
     end
 
@@ -607,32 +745,21 @@ Main {
   end
 
   mode "update-jruby" do
+    argument("what"){
+      required
+      validate {|i| %w(jruby ruboto).include?(i)}
+      description "What do you want to update: 'jruby' or 'ruboto'"
+    }
+
     option("force"){
       description "force and update even if the version hasn't changed"
     }
 
     def run
-      jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
-      jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
-      abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app" if 
-		(not jruby_core or not jruby_stdlib) and not params['force'].value
-
-      current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
-      new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
-      abort "both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version" if
-		current_jruby_version == new_jruby_version and not params['force'].value
-      puts "Current jruby version: #{current_jruby_version}"
-      puts "New jruby version: #{new_jruby_version}"
-
-      copier = AssetCopier.new $assets, File.expand_path(".")
-      log_action("Removing #{jruby_core}") {`rm #{jruby_core}`} if jruby_core
-      log_action("Removing #{jruby_stdlib}") {`rm #{jruby_stdlib}`} if jruby_stdlib
-      log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
-      log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
-
-      reconfigure_jruby_libs
-
-      puts "JRuby version is now: #{new_jruby_version}"
+      case params['what'].value
+        when "jruby": update_jruby(params['force'].value);
+        when "ruboto": update_ruboto(params['force'].value);
+      end
     end
   end
 
