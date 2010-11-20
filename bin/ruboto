@@ -327,10 +327,21 @@ def generate_subclass_or_interface(params)
   params = defaults.merge(params)
   params[:package] = verify_package unless params[:package]
 
-  class_desc = get_class_or_interface(params[:class] || params[:interface])
+  # check the class and its parents
+  hierarchy = [class_desc = get_class_or_interface(params[:class] || params[:interface])]
+  while hierarchy[-1].name == "class" and hierarchy[-1].attribute("extends")
+    hierarchy << get_class_or_interface(hierarchy[-1].attribute("extends").value)
+  end
 
   puts "Generating methods for #{params[:name]}..."
-  methods = class_desc.all_methods(params[:method_base], params[:method_include], params[:method_exclude])
+  methods, methods_hash = [], {}
+  # get methods from the hierachy (removing duplicates)
+  hierarchy.each do |i|
+    m = i.all_methods(params[:method_base], params[:method_include], params[:method_exclude])
+    m = m.select{|j| methods_hash[j.method_signature].nil?}
+    m.each{|j| methods_hash[j.method_signature] = j}
+    methods += m
+  end
   methods = check_methods(methods, params[:force])
   puts "Done. Methods created: #{methods.count}"
 
