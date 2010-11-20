@@ -416,7 +416,7 @@ def update_ruboto(force=nil)
   to = File.expand_path("./assets/scripts/ruboto.rb")
 
   from_text = File.read(from)
-  to_text = File.read(from) if File.exists?(to)
+  to_text = File.read(to) if File.exists?(to)
 
   unless force
     puts "New version: #{from_text[/\$RUBOTO_VERSION = (\d+)/, 1]}"
