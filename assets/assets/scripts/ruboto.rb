@@ -127,6 +127,10 @@ class RubotoActivity
     mi.setIcon(icon) if icon
     mi.class.class_eval {attr_accessor :on_click}
     mi.on_click = block
+
+    # Seems to be needed or the block might get cleaned up
+    @all_menu_items = [] unless @all_menu_items
+    @all_menu_items << mi
   end
 
   def handle_create_options_menu &block
@@ -151,6 +155,10 @@ class RubotoActivity
     mi = @context_menu.add(title)
     mi.class.class_eval {attr_accessor :on_click}
     mi.on_click = block
+
+    # Seems to be needed or the block might get cleaned up
+    @all_menu_items = [] unless @all_menu_items
+    @all_menu_items << mi
   end
 
   def handle_create_context_menu &block
@@ -160,7 +168,7 @@ class RubotoActivity
     end
     setCallbackProc(RubotoActivity::CB_CREATE_CONTEXT_MENU, p)
 
-    p = Proc.new do |num,menu_item|
+    p = Proc.new do |menu_item|
       (instance_eval {menu_item.on_click.call(menu_item.getMenuInfo.position)}; return true) if menu_item.on_click
       false
     end
@@ -261,8 +269,8 @@ def ruboto_import_widgets(*widgets)
   widgets.each{|i| ruboto_import_widget i}
 end
 
-def ruboto_import_widget(class_name)
-  view_class = java_import "android.widget.#{class_name}"
+def ruboto_import_widget(class_name, package_name="android.widget")
+  view_class = java_import "#{package_name}.#{class_name}"
   return unless view_class
 
   RubotoActivity.class_eval "
