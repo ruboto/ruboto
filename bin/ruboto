@@ -105,9 +105,11 @@ end
 #
 
 class REXML::Element
-  def all_methods(method_base="all", methods_include="", methods_exclude="", remove_final=true)
+  def all_methods(method_base="all", method_include="", method_exclude="", implements="")
+    # get all the methogs
     all_methods = get_elements("method")
 
+    # establish the base set of methods
     working_methods = case method_base
       when "all"
         all_methods
@@ -117,13 +119,36 @@ class REXML::Element
         all_methods.select{|i| i.attribute("name").value.match(/^on[A-Z]/)} 
     end
 
-    methods_include = methods_include.split(",") if methods_include.is_a?(String)
-    all_methods.each{|i| working_methods << i if methods_include.include?(i.attribute("name").value)}
-    methods_exclude = methods_exclude.split(",")  if methods_exclude.is_a?(String)
-    working_methods = working_methods.select{|i| not methods_exclude.include?(i.attribute("name").value)}
+    # make sure to include requested methods
+    include_methods = method_include.split(",") if method_include.is_a?(String)
+    all_methods.each{|i| working_methods << i if include_methods.include?(i.attribute("name").value)}
 
-    #remove methods marked final
-    working_methods = working_methods.select{|i| (not i.attribute("final")) or i.attribute("final").value == "false"} if remove_final
+    # make sure to exclude rejected methods
+    exclude_methods = method_exclude.split(",") if method_exclude.is_a?(String)
+    working_methods = working_methods.select{|i| not exclude_methods.include?(i.attribute("name").value)}
+
+    # remove methods marked final
+    working_methods = working_methods.select{|i| (not i.attribute("final")) or i.attribute("final").value == "false"}
+
+    # get additional methods from parent
+    if name =="class" and attribute("extends")
+      attribute("extends").value.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
+      parent = root.elements["package[@name='#{$1}']/class[@name='#{$2}']"]
+      parent_methods = parent.all_methods(method_base, method_include, method_exclude)
+      working_signatures = working_methods.map(&:method_signature)
+      working_methods += parent_methods.select{|i| not working_signatures.include?(i.method_signature)}
+    end
+
+    # get additional methods from interfaces
+    if name =="class" and implements != ""
+      implements.split(",").each do |i|
+        i.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
+        interface = root.elements["package[@name='#{$1}']/interface[@name='#{$2}']"]
+        abort("Unkown interface: #{i}") unless interface
+        working_signatures = working_methods.map(&:method_signature)
+        working_methods += interface.all_methods.select{|j| not working_signatures.include?(j.method_signature)}
+      end
+    end
 
     working_methods
   end
@@ -265,27 +290,21 @@ end
 #   all api levels
 #
 def get_class_or_interface(klass, force=false)
-  $stdout.sync = true
-  min_api = verify_min_sdk
-  target_api = verify_target_sdk
+  abort "ERROR: Can't parse package from #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
 
-  abort "ERROR: Can't parse package.#{a_type.capitalize} #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
+  element = verify_api.elements["package[@name='#{$1}']/[@name='#{$2}']"]
 
-  unless @api
-    print "Loading Android API..."
-    @api = REXML::Document.new(File.read(File.expand_path($gem_root + "/lib/java_class_gen/android_api.xml"))).root
-    puts "Done."
+  abort "ERROR: #{klass} not found" unless element
+
+  unless force
+    abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added').value}; use --force to create it" if 
+            element.attribute('api_added') and element.attribute('api_added').value.to_i > verify_min_api.to_i
+    abort "#{klass} deprecated for targetSdkVersion, deprecatrd in #{element.attribute('deprecated').value}; use --force to create it" if 
+            element.attribute('deprecated') and element.attribute('deprecated').value.to_i <= verify_target_api.to_i
   end
 
-  element = @api.elements["package[@name='#{$1}']/[@name='#{$2}']"]
-  abort "ERROR: #{a_type.capitalize} #{klass} not found" unless element
-
-  abort "#{a_type.capitalize} not available in minSdkVersion (#{min_api}), added in #{element.attribute('api_added').value}" if 
-          element.attribute('api_added') and element.attribute('api_added').value.to_i > min_api.to_i
-  abort "#{a_type.capitalize} deprecated for targetSdkVersion (#{target_api}); use --force to create it" if 
-          element.attribute('deprecated') and element.attribute('deprecated').value.to_i <= target_api.to_i
-  abort "#{a_type.capitalize} removed for targetSdkVersion (#{target_api})" if 
-          element.attribute('api_removed') and element.attribute('api_removed').value.to_i <= target_api.to_i
+  abort "#{klass} removed for targetSdkVersion, removed in #{element.attribute('api_removed').value}" if 
+          element.attribute('api_removed') and element.attribute('api_removed').value.to_i <= verify_target_api.to_i
 
   element
 end
@@ -323,25 +342,14 @@ end
 # generate_subclass_or_interface: Creates a subclass or interface based on the specifications.
 #
 def generate_subclass_or_interface(params)
-  defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => false}
+  defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => false, :implements => ""}
   params = defaults.merge(params)
   params[:package] = verify_package unless params[:package]
 
-  # check the class and its parents
-  hierarchy = [class_desc = get_class_or_interface(params[:class] || params[:interface])]
-  while hierarchy[-1].name == "class" and hierarchy[-1].attribute("extends")
-    hierarchy << get_class_or_interface(hierarchy[-1].attribute("extends").value)
-  end
+  class_desc = get_class_or_interface(params[:class] || params[:interface])
 
   puts "Generating methods for #{params[:name]}..."
-  methods, methods_hash = [], {}
-  # get methods from the hierachy (removing duplicates)
-  hierarchy.each do |i|
-    m = i.all_methods(params[:method_base], params[:method_include], params[:method_exclude])
-    m = m.select{|j| methods_hash[j.method_signature].nil?}
-    m.each{|j| methods_hash[j.method_signature] = j}
-    methods += m
-  end
+  methods = class_desc.all_methods(params[:method_base], params[:method_include], params[:method_exclude], params[:implements]) 
   methods = check_methods(methods, params[:force])
   puts "Done. Methods created: #{methods.count}"
 
@@ -351,7 +359,8 @@ def generate_subclass_or_interface(params)
   build_file params[:template], params[:package], params[:name], {
                "THE_PACKAGE" => params[:package],
                "THE_ACTION" => class_desc.name == "class" ? "extends" : "implements",
-               "THE_ANDROID_CLASS" => (params[:class] || params[:interface]),
+               "THE_ANDROID_CLASS" => (params[:class] || params[:interface]) + 
+                  (params[:implements] == "" ? "" : (" implements " + params[:implements].split(",").join(", "))),
                "THE_RUBOTO_CLASS" => params[:name],
                "THE_CONSTANTS" =>  constants.map {|i| "public static final int #{i} = #{constants.index(i)};"}.indent.join("\n"),
                "CONSTANTS_COUNT" => methods.count.to_s,
@@ -375,7 +384,7 @@ def generate_core_classes(params)
     end
   end
 
-  %w(method_base method_include force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
+  %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
   hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").push("onReceive").join(",")
 
   %w(android.app.Activity android.app.Service android.content.BroadcastReceiver android.view.View).each do |i|
@@ -483,6 +492,17 @@ def verify_target_sdk
   abort "you must specify a target sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @target_sdk
   @target_sdk
 end
+
+def verify_api
+  unless @api
+    api = File.expand_path($gem_root + "/lib/java_class_gen/android_api.xml")
+    abort "cannot find android_api.xml to extract info from it." unless  File.exists? api
+    log_action("Loading Android API") {@api = REXML::Document.new(File.read(api)).root}
+  end
+  @api
+end
+
+
 
 ###########################################################################
 #
@@ -669,13 +689,21 @@ Main {
         description "methods to remove from the base list"
       }
 
+      option("implements"){
+        required
+        argument :required
+        defaults ""
+        description "comma separated list interfaces to implement"
+      }
+
       option("force"){
         cast :boolean
         description "force added and deprecated methods not excluded to be create"
       }
 
       def run
-        generate_subclass_or_interface %w(class name method_base method_include method_exclude force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+        generate_subclass_or_interface(
+          %w(class name method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
       end
     end
 
@@ -725,13 +753,22 @@ Main {
         description "methods to remove from the base list"
       }
 
+      option("implements"){
+        required
+        argument :required
+        defaults ""
+        description "for classes only, interfaces to implement (cannot be used with 'gen core all')"
+      }
+
       option("force"){
         cast :boolean
         description "force added and deprecated methods not excluded to be create"
       }
 
       def run
-        generate_core_classes [:class, :method_base, :method_include, :method_exclude, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
+        abort("specify 'implements' only for Activity, Service, or BroadcastReceiver") unless 
+          %w(Activity Service BroadcastReceiver).include?(params["class"].value) or params["implements"].value == ""
+        generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
       end
     end
 
