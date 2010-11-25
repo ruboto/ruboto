@@ -104,6 +104,35 @@ end
 
 #############################################################################
 #
+# Configure a class to work with handlers
+#
+
+def ruboto_allow_handlers(klass)
+  klass.class_eval do
+    def method_missing(name, *args, &block)
+      if name.to_s =~ /^handle_(.*)/ and (const = self.class.const_get("CB_#{$1.upcase}"))
+        setCallbackProc(const, block)
+        self
+      else
+        super
+      end
+    end
+
+    def respond_to?(name)
+      return true if name.to_s =~ /^handle_(.*)/ and self.class.const_get("CB_#{$1.upcase}")
+      super
+    end
+
+    def initialize_handlers(&block)
+      instance_eval &block
+      self
+    end
+  end
+  klass
+end
+
+#############################################################################
+#
 # RubotoActivity
 #
 
@@ -116,6 +145,20 @@ class RubotoActivity
     instance_eval &@@init_block
     @initialized = true
     self
+  end
+
+  def handle_finish_create &block
+    @finish_create_block = block
+  end
+
+  def setup_content &block
+    @view_parent = nil
+    @content_view_block = block
+  end
+
+  def on_create(bundle)
+    setContentView(instance_eval &@content_view_block) if @content_view_block
+    instance_eval {@finish_create_block.call} if @finish_create_block
   end
 
   #
@@ -177,48 +220,13 @@ class RubotoActivity
 end
 
 RUBOTO_CLASSES.each do |klass|
+  # Setup ability to handle callbacks
+  ruboto_allow_handlers(klass)
+
   klass.class_eval do
     def when_launched(&block)
       instance_exec *args, &block
       on_create nil
-    end
-
-    def handle_create &block
-      @create_block = block
-    end
-
-    def on_create(bundle)
-      setContentView(instance_eval &@content_view_block) if @content_view_block
-      instance_eval {@create_block.call} if @create_block
-    end
-
-    # plugin or something
-    def setup_content &block
-      @view_parent = nil
-      @content_view_block = block
-    end
-
-    #
-    # Setup Callbacks
-    #
-
-    def method_missing(name, *args, &block)
-      if name.to_s =~ /^handle_(.*)/ and (const = self.class.const_get("CB_#{$1.upcase}"))
-        setCallbackProc(const, block)
-        self
-      else
-        super
-      end
-    end
-
-    def respond_to?(name)
-      return true if name.to_s =~ /^handle_(.*)/ and self.class.const_get("CB_#{$1.upcase}")
-      super
-    end
-
-    def initialize_handlers(&block)
-      instance_eval &block
-      self
     end
 
     eval %Q{
@@ -226,37 +234,6 @@ RUBOTO_CLASSES.each do |klass|
         when_launched &block
       end
     }
-  end
-end
-
-#############################################################################
-#
-# ruboto_import
-#
-
-def ruboto_import(package_class)
-  klass = java_import package_class
-  return unless klass
-
-  klass.class_eval do
-    def method_missing(name, *args, &block)
-      if name.to_s =~ /^handle_(.*)/ and (const = self.class.const_get("CB_#{$1.upcase}"))
-        setCallbackProc(const, block)
-        self
-      else
-        super
-      end
-    end
-
-    def respond_to?(name)
-      return true if name.to_s =~ /^handle_(.*)/ and self.class.const_get("CB_#{$1.upcase}")
-      super
-    end
-
-    def initialize_handlers(&block)
-      instance_eval &block
-      self
-    end
   end
 end
 
@@ -332,7 +309,7 @@ class ListView
       setAdapter @adapter
       params.delete :list
     end
-    setOnItemClickListener(context.item_click_handler)
+    setOnItemClickListener(context)
     super(context, params)
   end
 
@@ -344,40 +321,56 @@ class ListView
   end
 end
 
-ruboto_import "org.ruboto.RubotoOnItemClickListener"
-
-class RubotoActivity
-  attr_accessor :item_click_handler
-
-  def item_click_handler
-    @item_click_handler ||= RubotoOnItemClickListener.new
-  end
-
-  def handle_item_click(&block)
-    item_click_handler.send(:handle_item_click, &block)
-    self
-  end
-end
-
 class Button
   def configure(context, params = {})
-    setOnClickListener(context.click_handler)
+    setOnClickListener(context)
     super(context, params)
   end
 end
 
-ruboto_import "org.ruboto.RubotoOnClickListener"
+#############################################################################
+#
+# Import a class and set it up for handlers
+#
 
-class RubotoActivity
-  attr_accessor :click_handler
-
-  def click_handler
-    @click_handler ||= RubotoOnClickListener.new
-  end
-
-  def handle_click(&block)
-    click_handler.send(:handle_click, &block)
-    self
-  end
+def ruboto_import(package_class)
+  klass = java_import package_class
+  return unless klass
+  ruboto_allow_handlers(klass)
 end
+
+#############################################################################
+#
+# Allows RubotoActivity to handle callbacks covering Class based handlers
+#
+
+def ruboto_register_handler(handler_class, unique_name, for_class, method_name)
+  klass_name = handler_class[/.+\.([A-Z].+)/,1]
+  klass = ruboto_import handler_class
+  return unless klass
+
+  RubotoActivity.class_eval "
+    attr_accessor :#{unique_name}_handler
+
+    def #{unique_name}_handler
+      @#{unique_name}_handler ||= #{klass_name}.new
+    end
+
+    def handle_#{unique_name}(&block)
+      #{unique_name}_handler.handle_#{unique_name} &block
+      self
+    end
+  "
+
+  for_class.class_eval "
+    alias_method :orig_#{method_name}, :#{method_name}
+    def #{method_name}(handler)
+      orig_#{method_name} handler.#{unique_name}_handler
+    end
+  "
+end
+
+ruboto_register_handler("org.ruboto.RubotoOnClickListener", "click", Button, "setOnClickListener")
+ruboto_register_handler("org.ruboto.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
+
 
