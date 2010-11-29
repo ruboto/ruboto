@@ -104,7 +104,8 @@ end
 #   to generate the appropriate code.
 #
 
-class REXML::Element
+#class REXML::Element
+class Hash
   def all_methods(method_base="all", method_include="", method_exclude="", implements="")
     # get all the methogs
     all_methods = get_elements("method")
@@ -240,6 +241,64 @@ end
 
 ###########################################################################
 #
+#  Hash & String to mimic REXML::Element API
+#
+
+class String
+  def value
+    self
+  end
+end
+
+class ElementsHandler
+  def initialize hash
+    @hash = hash
+  end
+
+  def [] name
+    name.match(/package\[@name='([^']*)'\]\/(\w*)\[@name='([^']*)'\]/)
+    package = @hash["package"].find{|i| i.attribute("name") == $1}
+    if $2 != ""
+      package[$2].find{|i| i.attribute("name") == $3}
+    else
+      klass = package["class"].find{|i| i.attribute("name") == $3}
+      klass = package["interface"].find{|i| i.attribute("name") == $3} unless klass
+      klass
+    end
+  end
+end
+
+class Hash
+  def root
+    $api
+  end
+
+  def name
+    self["name"]
+  end
+
+  def attribute(name)
+    self["values"][name]
+  end
+
+  def add_element(name, atributes)
+    self[name] = [] unless self[name]
+    new_element = {"name" => name, "values" => atributes}
+    self[name] << new_element
+    new_element
+  end
+
+  def get_elements(name)
+    self[name] or []
+  end
+
+  def elements
+    ElementsHandler.new(self)
+  end
+end
+
+###########################################################################
+#
 # Methods for formatting code
 #
 
@@ -321,21 +380,35 @@ def check_methods(methods, force=false)
   methods = methods.select{|i| not i.attribute('deprecated') or i.attribute('deprecated').value.to_i > min_api}
   methods = methods.select{|i| not i.attribute('api_removed') or i.attribute('api_removed').value.to_i > min_api}
 
-  # Inform and remove methods changed inside the scope of the sdk versions
-  methods.select do |i|
-    if i.attribute('api_added') and i.attribute('api_added').value.to_i > min_api and not force
-      puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- exclude or force" 
-      false
-    elsif i.attribute('deprecated') and i.attribute('deprecated').value.to_i <= target_api and not force
-      puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- exclude or force" 
-      false
-    elsif i.attribute('api_removed') and i.attribute('api_removed').value.to_i <= target_api
+  # Inform and remove methods that do not exist in one of the sdk versions
+  methods = methods.select do |i|
+    if i.attribute('api_removed') and i.attribute('api_removed').value.to_i <= target_api
       puts "Can't create #{i.method_signature} -- removed in #{i.attribute('api_removed')}"
       false
     else
       true
     end
-  end  
+  end
+
+  new_methods = methods
+  unless force
+    # Inform and remove methods changed inside the scope of the sdk versions
+    new_methods = methods.select do |i|
+      if i.attribute('api_added') and i.attribute('api_added').value.to_i > min_api
+        puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- exclude or force" 
+        false
+      elsif i.attribute('deprecated') and i.attribute('deprecated').value.to_i <= target_api
+        puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- exclude or force" 
+        false
+      else
+        true
+      end
+    end
+
+    abort("Aborting!") if methods.count != new_methods.count
+  end
+
+  new_methods
 end
 
 #
@@ -494,15 +567,49 @@ def verify_target_sdk
 end
 
 def verify_api
-  unless @api
+  unless $api
     api = File.expand_path($gem_root + "/lib/java_class_gen/android_api.xml")
     abort "cannot find android_api.xml to extract info from it." unless  File.exists? api
-    log_action("Loading Android API") {@api = REXML::Document.new(File.read(api)).root}
+#    log_action("Loading Android API") {$api = REXML::Document.new(File.read(api)).root}
+    log_action("Loading Android API") {$api = scan_in_api(File.read(api))["api"][0]}
   end
-  @api
+  $api
 end
 
+###########################################################################
+#
+# Scan the XML file. Much faster than using REXML.
+#
 
+def scan_in_api(file)
+  require 'strscan'
+  doc = StringScanner.new(file)
+#  $api = REXML::Document.new
+  $api = {}
+  parents = [$api]
+
+  while not doc.eos?
+    doc.scan(/</)
+    if doc.scan(/\/\w+>/)
+      parents.pop
+    else
+      name = doc.scan(/\w+/)
+      doc.scan(/\s+/)
+      values = {}
+      while not (term = doc.scan(/[\/>]/))
+        key = doc.scan(/\w+/)
+        doc.scan(/='/)
+        value = doc.scan(/[^']*/)
+        doc.scan(/'\s*/)
+        values[key] = value
+      end
+      element = parents[-1].add_element(name, values)
+      parents.push(element) if term == ">"
+      doc.scan(/>/) if term == "/"
+    end
+  end
+  $api
+end
 
 ###########################################################################
 #
