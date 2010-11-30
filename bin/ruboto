@@ -300,13 +300,13 @@ def get_class_or_interface(klass, force=false)
 
   unless force
     abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use --force to create it" if 
-            element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_api.to_i
+            element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
     abort "#{klass} deprecated for targetSdkVersion, deprecatrd in #{element.attribute('deprecated')}; use --force to create it" if 
-            element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_api.to_i
+            element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
   end
 
   abort "#{klass} removed for targetSdkVersion, removed in #{element.attribute('api_removed')}" if 
-          element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_api.to_i
+          element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_sdk.to_i
 
   element
 end
