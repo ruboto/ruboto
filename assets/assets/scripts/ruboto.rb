@@ -365,7 +365,7 @@ def ruboto_register_handler(handler_class, unique_name, for_class, method_name)
   for_class.class_eval "
     alias_method :orig_#{method_name}, :#{method_name}
     def #{method_name}(handler)
-      orig_#{method_name} handler.#{unique_name}_handler
+      orig_#{method_name}(handler.kind_of?(RubotoActivity) ? handler.#{unique_name}_handler : handler)
     end
   "
 end
