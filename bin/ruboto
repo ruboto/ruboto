@@ -362,7 +362,7 @@ def generate_subclass_or_interface(params)
   params = defaults.merge(params)
   params[:package] = verify_package unless params[:package]
 
-  class_desc = get_class_or_interface(params[:class] || params[:interface])
+  class_desc = get_class_or_interface(params[:class] || params[:interface], params[:force])
 
   puts "Generating methods for #{params[:name]}..."
   methods = class_desc.all_methods(params[:method_base], params[:method_include], params[:method_exclude], params[:implements]) 
@@ -806,7 +806,7 @@ Main {
       }
 
       def run
-        generate_subclass_or_interface %w(interface name).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+        generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
       end
     end
 
