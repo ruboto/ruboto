@@ -277,6 +277,7 @@ end
 #
 def build_file(src, package, name, substitutions, dest='.')
   to = File.join(dest, "src/#{package.gsub('.', '/')}")
+  Dir.mkdir(to) unless File.directory?(to)
 
   FileUtils.cp(File.expand_path($gem_root + "/assets/src/#{src}.java"), to)
   FileUtils.move(File.join(to, "#{src}.java"), File.join(to, "#{name}.java")) if src != name
