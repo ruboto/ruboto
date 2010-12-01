@@ -806,7 +806,7 @@ Main {
       }
 
       def run
-        generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+        generate_subclass_or_interface %w(interface name).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
       end
     end
 
