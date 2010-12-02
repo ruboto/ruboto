@@ -121,6 +121,8 @@ class XMLElement < Hash
         all_methods
       when "none"
         []
+      when "abstract"
+        all_methods.select{|i| i.attribute("abstract") == "true"} 
       when "on"
         all_methods.select{|i| i.attribute("name").match(/^on[A-Z]/)} 
     end
@@ -759,9 +761,9 @@ Main {
 
       option("method_base"){
         required
-        validate {|i| %w(all on none).include?(i)}
+        validate {|i| %w(all on none abstract).include?(i)}
         argument :required
-        description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
+        description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)"
       }
 
       option("method_include"){
