@@ -394,15 +394,14 @@ end
 #   on the API specifications.
 #
 def generate_core_classes(params)
-  hash = {:package => "org.ruboto"}
-
   %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener).each do |i|
     name = i.split(".")[-1]
     if(params[:class] == name or params[:class] == "all")
-      generate_subclass_or_interface(hash.merge({:class => i, :name => "Ruboto#{name}"}))
+      generate_subclass_or_interface({:package => "org.ruboto.callbacks", :class => i, :name => "Ruboto#{name}"})
     end
   end
 
+  hash = {:package => "org.ruboto"}
   %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
   hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").push("onReceive").join(",")
 
@@ -808,8 +807,13 @@ Main {
         description "name of the class (and file) that will implement the interface. Should be CamelCase"
       }
 
+      option("force"){
+        cast :boolean
+        description "force added and deprecated interfaces to be create"
+      }
+
       def run
-        generate_subclass_or_interface %w(interface name).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+        generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
       end
     end
 
