@@ -370,7 +370,7 @@ def ruboto_register_handler(handler_class, unique_name, for_class, method_name)
   "
 end
 
-ruboto_register_handler("org.ruboto.RubotoOnClickListener", "click", Button, "setOnClickListener")
-ruboto_register_handler("org.ruboto.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
+ruboto_register_handler("org.ruboto.callbacks.RubotoOnClickListener", "click", Button, "setOnClickListener")
+ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
 
 
