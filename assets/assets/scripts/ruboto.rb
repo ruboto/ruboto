@@ -18,7 +18,7 @@ end
 
 require 'java'
 
-
+$package_name = "THE_PACKAGE"
 
 %w(Activity Dialog BroadcastReceiver Service).map do |klass|
   java_import "org.ruboto.Ruboto#{klass}"
@@ -45,9 +45,9 @@ java_import "android.R"
 java_import "android.util.Log"
 
 module Ruboto
-  java_import "THE_PACKAGE.R"
+  java_import "#{$package_name}.R"
   begin
-    Id = JavaUtilities.get_proxy_class("THE_PACKAGE.R$id")
+    Id = JavaUtilities.get_proxy_class("#{$package_name}.R$id")
   rescue NameError
     Log.d "RUBOTO", "no R$id"
   end
@@ -61,14 +61,12 @@ AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 #
 
 class Activity
-  attr_accessor :init_block
-
   def start_ruboto_dialog(remote_variable, &block)
     start_ruboto_activity(remote_variable, RubotoDialog, &block)
   end
 
   def start_ruboto_activity(remote_variable, klass=RubotoActivity, &block)
-    @@init_block = block
+    $activity_init_block = block
 
     if @initialized or not self.is_a?(RubotoActivity)
       b = Bundle.new
@@ -133,91 +131,96 @@ end
 
 #############################################################################
 #
-# RubotoActivity
+# Activity Subclass Setup
 #
 
-class RubotoActivity
-  #
-  # Initialize
-  #
+def ruboto_configure_activity(klass)
+  klass.class_eval do
+    #
+    # Initialize
+    #
 
-  def initialize_activity()
-    instance_eval &@@init_block
-    @initialized = true
-    self
-  end
-
-  def handle_finish_create &block
-    @finish_create_block = block
-  end
-
-  def setup_content &block
-    @view_parent = nil
-    @content_view_block = block
-  end
-
-  def on_create(bundle)
-    setContentView(instance_eval &@content_view_block) if @content_view_block
-    instance_eval {@finish_create_block.call} if @finish_create_block
-  end
-
-  #
-  # Option Menus
-  #
-
-  def add_menu title, icon=nil, &block
-    mi = @menu.add(title)
-    mi.setIcon(icon) if icon
-    mi.class.class_eval {attr_accessor :on_click}
-    mi.on_click = block
-
-    # Seems to be needed or the block might get cleaned up
-    @all_menu_items = [] unless @all_menu_items
-    @all_menu_items << mi
-  end
-
-  def handle_create_options_menu &block
-    p = Proc.new do |*args|
-      @menu, @context_menu = args[0], nil
-      instance_eval {block.call(*args)} if block
+    def initialize_activity()
+      instance_eval &$activity_init_block
+      @initialized = true
+      self
     end
-    setCallbackProc(RubotoActivity::CB_CREATE_OPTIONS_MENU, p)
 
-    p = Proc.new do |num,menu_item|
-      (instance_eval &(menu_item.on_click); return true) if @menu
-      false
+    def handle_finish_create &block
+      @finish_create_block = block
     end
-    setCallbackProc(RubotoActivity::CB_MENU_ITEM_SELECTED, p)
+
+    def setup_content &block
+      @content_view_block = block
+    end
+
+    def on_create(bundle)
+      @view_parent = nil
+      setContentView(instance_eval &@content_view_block) if @content_view_block
+      instance_eval {@finish_create_block.call} if @finish_create_block
+    end
+
+    #
+    # Option Menus
+    #
+
+    def add_menu title, icon=nil, &block
+      mi = @menu.add(title)
+      mi.setIcon(icon) if icon
+      mi.class.class_eval {attr_accessor :on_click}
+      mi.on_click = block
+
+      # Seems to be needed or the block might get cleaned up
+      @all_menu_items = [] unless @all_menu_items
+      @all_menu_items << mi
+    end
+
+    def handle_create_options_menu &block
+      p = Proc.new do |*args|
+        @menu, @context_menu = args[0], nil
+        instance_eval {block.call(*args)} if block
+      end
+      setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
+
+      p = Proc.new do |num,menu_item|
+        (instance_eval &(menu_item.on_click); return true) if @menu
+        false
+      end
+      setCallbackProc(self.class.const_get("CB_MENU_ITEM_SELECTED"), p)
+    end
+
+    #
+    # Context Menus
+    #
+
+    def add_context_menu title, &block
+      mi = @context_menu.add(title)
+      mi.class.class_eval {attr_accessor :on_click}
+      mi.on_click = block
+
+      # Seems to be needed or the block might get cleaned up
+      @all_menu_items = [] unless @all_menu_items
+      @all_menu_items << mi
+    end
+
+    def handle_create_context_menu &block
+      p = Proc.new do |*args|
+        @menu, @context_menu = nil, args[0]
+        instance_eval {block.call(*args)} if block
+      end
+      setCallbackProc(self.class.const_get("CB_CREATE_CONTEXT_MENU"), p)
+
+      p = Proc.new do |menu_item|
+        (instance_eval {menu_item.on_click.call(menu_item.getMenuInfo.position)}; return true) if menu_item.on_click
+        false
+      end
+      setCallbackProc(self.class.const_get("CB_CONTEXT_ITEM_SELECTED"), p)
+    end
   end
 
-  #
-  # Context Menus
-  #
-
-  def add_context_menu title, &block
-    mi = @context_menu.add(title)
-    mi.class.class_eval {attr_accessor :on_click}
-    mi.on_click = block
-
-    # Seems to be needed or the block might get cleaned up
-    @all_menu_items = [] unless @all_menu_items
-    @all_menu_items << mi
-  end
-
-  def handle_create_context_menu &block
-    p = Proc.new do |*args|
-      @menu, @context_menu = nil, args[0]
-      instance_eval {block.call(*args)} if block
-    end
-    setCallbackProc(RubotoActivity::CB_CREATE_CONTEXT_MENU, p)
-
-    p = Proc.new do |menu_item|
-      (instance_eval {menu_item.on_click.call(menu_item.getMenuInfo.position)}; return true) if menu_item.on_click
-      false
-    end
-    setCallbackProc(RubotoActivity::CB_CONTEXT_ITEM_SELECTED, p)
-  end
+  ruboto_allow_handlers(klass)
 end
+ruboto_configure_activity(RubotoActivity)
 
 RUBOTO_CLASSES.each do |klass|
   # Setup ability to handle callbacks
@@ -373,4 +376,81 @@ end
 ruboto_register_handler("org.ruboto.callbacks.RubotoOnClickListener", "click", Button, "setOnClickListener")
 ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
 
+#############################################################################
+#
+# RubotoPreferenceActivity Preference Generation
+#
+
+def ruboto_import_preferences(*preferences)
+  preferences.each{|i| ruboto_import_preference i}
+end
+
+def ruboto_import_preference(class_name, package_name="android.preference")
+  klass = java_import "#{package_name}.#{class_name}"
+  return unless klass
+
+  setup_preferences
+
+  RubotoPreferenceActivity.class_eval "
+     def #{(class_name.to_s.gsub(/([A-Z])/) {'_' + $1.downcase})[1..-1]}(params={})
+        rv = #{class_name}.new self
+        rv.configure self, params
+        @parent.addPreference(rv) if @parent
+        if block_given?
+          old_parent, @parent = @parent, rv
+          yield
+          @parent = old_parent
+        end
+        rv
+     end
+   "
+end
+
+def setup_preferences
+  return if @preferences_setup_complete
+
+  java_import "android.preference.PreferenceScreen"
+  java_import "android.preference.Preference"
+  java_import "org.ruboto.RubotoPreferenceActivity"
+  ruboto_configure_activity(RubotoPreferenceActivity)
+
+
+  RubotoPreferenceActivity.class_eval do
+    def preference_screen(params={})
+      rv = self.getPreferenceManager.createPreferenceScreen(self)
+      rv.configure self, params
+      @parent.addPreference(rv) if @parent
+      if block_given?
+        old_parent, @parent = @parent, rv
+        yield
+        @parent = old_parent
+      end
+      rv
+    end
+
+    def setup_preference_screen &block
+      @preference_screen_block = block
+    end
+
+    def on_create(bundle)
+      @parent = nil
+      setPreferenceScreen(instance_eval &@preference_screen_block) if @preference_screen_block
+      instance_eval {@finish_create_block.call} if @finish_create_block
+    end
+  end
+
+  Preference.class_eval do
+    def configure(context, params = {})
+      params.each do |k, v|
+        if v.is_a?(Array)
+          self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) {$2.upcase}}", *v)
+        else
+          self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) {$2.upcase}}", v)
+        end
+      end
+    end
+  end
+
+  @preferences_setup_complete = true
+end
 
