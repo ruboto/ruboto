@@ -96,6 +96,7 @@ class XMLElement < Hash
   def find_class_or_interface(klass, a_type)
     abort "ERROR: Can't parse package from #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
     package = self["package"].find{|i| i.attribute("name") == $1}
+    abort "ERROR: Can't find package #{$1}" unless package
     if a_type == "either"
       package["class"].find{|i| i.attribute("name") == $2} or package["interface"].find{|i| i.attribute("name") == $2}
     else
@@ -274,21 +275,18 @@ end
 #
 
 #
-# build_file: Copies src to the appropriate location and uses 
-#   the substitutions hash to modify the contents
+# build_file: Reads the src from the appropriate location,  
+#   uses the substitutions hash to modify the contents, 
+#   and writes to the new location
 #
 def build_file(src, package, name, substitutions, dest='.')
   to = File.join(dest, "src/#{package.gsub('.', '/')}")
   Dir.mkdir(to) unless File.directory?(to)
 
-  FileUtils.cp(File.expand_path($gem_root + "/assets/src/#{src}.java"), to)
-  FileUtils.move(File.join(to, "#{src}.java"), File.join(to, "#{name}.java")) if src != name
-
-  file = File.join(to, "#{name}.java")
-  text = File.read(file)
+  text = File.read(File.expand_path($gem_root + "/assets/src/#{src}.java"))
   substitutions.each {|k,v| text.gsub!(k, v)}
 
-  File.open(file, 'w') {|f| f << text}
+  File.open(File.join(to, "#{name}.java"), 'w') {|f| f << text}
 end
 
 #
@@ -410,6 +408,13 @@ def generate_core_classes(params)
     if(params[:class] == name or params[:class] == "all")
       generate_subclass_or_interface(
         hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
+    end
+  end
+
+  %w(android.preference.PreferenceActivity).each do |i|
+    name = i.split(".")[-1]
+    if params[:class] == name
+      generate_subclass_or_interface(hash.merge({:template => "RubotoActivity", :class => i, :name => "Ruboto#{name}"}))
     end
   end
 end
@@ -820,7 +825,7 @@ Main {
     mode "core" do
       argument("class"){
         required
-        validate {|i| %w(Activity Service BroadcastReceiver View OnClickListener OnItemClickListener all).include?(i)}
+        validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity OnClickListener OnItemClickListener all).include?(i)}
         description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, or all (default = all)"
       }
 
