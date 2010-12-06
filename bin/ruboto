@@ -410,8 +410,9 @@ def generate_core_classes(params)
         hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
     end
   end
-
-  %w(android.preference.PreferenceActivity).each do |i|
+ 
+  # Activities that can be created, but only directly  (i.e., not included in all)
+  %w(android.preference.PreferenceActivity android.app.TabActivity).each do |i|
     name = i.split(".")[-1]
     if params[:class] == name
       generate_subclass_or_interface(hash.merge({:template => "RubotoActivity", :class => i, :name => "Ruboto#{name}"}))
@@ -825,8 +826,8 @@ Main {
     mode "core" do
       argument("class"){
         required
-        validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity OnClickListener OnItemClickListener all).include?(i)}
-        description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, or all (default = all)"
+        validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener all).include?(i)}
+        description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
       }
 
       option("method_base"){
@@ -864,8 +865,8 @@ Main {
       }
 
       def run
-        abort("specify 'implements' only for Activity, Service, or BroadcastReceiver") unless 
-          %w(Activity Service BroadcastReceiver).include?(params["class"].value) or params["implements"].value == ""
+        abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless 
+          %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params["class"].value) or params["implements"].value == ""
         generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
       end
     end
