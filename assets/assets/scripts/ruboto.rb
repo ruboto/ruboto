@@ -68,7 +68,7 @@ class Activity
   def start_ruboto_activity(remote_variable, klass=RubotoActivity, &block)
     $activity_init_block = block
 
-    if @initialized or not self.is_a?(RubotoActivity)
+    if @initialized or not self.kind_of?(RubotoActivity)
       b = Bundle.new
       b.putString("Remote Variable", remote_variable)
       b.putBoolean("Define Remote Variable", true)
