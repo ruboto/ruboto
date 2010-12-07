@@ -712,7 +712,7 @@ Main {
 
         update_ruboto true
 
-        generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true)
+        generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true, :implements => "")
 
         # Go back to whence we came
         Dir.chdir current_dir
