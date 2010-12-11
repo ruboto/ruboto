@@ -8,12 +8,14 @@ import org.jruby.exceptions.RaiseException;
 import org.ruboto.Script;
 import java.io.IOException;
 import android.app.ProgressDialog;
+import android.os.Handler;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private Ruby __ruby__;
   private String scriptName;
   private String remoteVariable = "";
   public Object[] args;
+  private ProgressDialog loadingDialog; 
 
 THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
@@ -53,13 +55,38 @@ THE_CONSTANTS
     args[0] = arg0;
 
     super.onCreate(arg0);
+    
+    if (Script.getRuby() != null) {
+    	finishCreate();
+    } else {
+      loadingThread.start();
+	  loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
+    }
+  }
 
+  private final Handler loadingHandler = new Handler();
+  
+  private final Thread loadingThread = new Thread() {
+      public void run(){
+        Script.setUpJRuby(null);
+        loadingHandler.post(loadingComplete);
+      }
+  };
+  
+  private final Runnable loadingComplete = new Runnable(){
+    public void run(){
+      loadingDialog.dismiss();
+      finishCreate();
+    }
+  };
+
+  private void finishCreate() {
     Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
 
     getRuby();
 
     Script.defineGlobalVariable("$activity", this);
-    Script.defineGlobalVariable("$bundle", arg0);
+    Script.defineGlobalVariable("$bundle", args[0]);
 
     android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
@@ -78,7 +105,7 @@ THE_CONSTANTS
         new Script(scriptName).execute();
       } catch(IOException e){
         e.printStackTrace();
-        ProgressDialog.show(this, "Script failed", "Something bad happened", true, false);
+        ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
       }
     }
   }
