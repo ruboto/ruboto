@@ -78,10 +78,10 @@ class XMLElement < Hash
     self["values"][name]
   end
 
-  def add_element(name, atributes)
+  def add_element(name, attributes)
     new_element = XMLElement.new 
     new_element["name"] = name
-    new_element["values"] = atributes
+    new_element["values"] = attributes
 
     self[name] = [] unless self[name]
     self[name] << new_element
