@@ -77,6 +77,8 @@ THE_CONSTANTS
     public void run(){
       loadingDialog.dismiss();
       finishCreate();
+      onStart();
+      onResume();
     }
   };
 
