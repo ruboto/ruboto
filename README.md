@@ -71,6 +71,7 @@ Ex:
 
 Inside your script use: 
 
+    # note that this is different than java_import
     ruboto_import "your.package.MySensorListener"
 
 Later:
