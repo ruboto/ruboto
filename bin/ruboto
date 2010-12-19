@@ -644,13 +644,13 @@ Main {
       option("target") {
         required
         argument :required
-        defaults 'android-8'
+        defaults 'android-9'
         description "android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
       }
       option("min_sdk") {
         required
         argument :required
-        defaults 'android-3'
+        defaults 'android-7'
         description "minimum android version supported. must begin with 'android-'. (default 'android-3')"
       }
       option("path"){
