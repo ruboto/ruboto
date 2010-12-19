@@ -2,8 +2,8 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto-core}
-  s.version = "0.0.2"
-  s.date = %q{2010-07-29}
+  s.version = "0.0.3"
+  s.date = %q{2010-12-19}
   s.authors = ["Daniel Jackoway", "Charles Nutter", "Scott Moyer"]
   s.email = %q{ruboto@googlegroups.com}
   s.summary = %q{Platform for writing Android apps in Ruby}
