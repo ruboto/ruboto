@@ -61,7 +61,7 @@ For classes that need subclassing (e.g., PhoneStateListener, SQLiteOpenHelper, V
 
     $ ruboto gen subclass AndroidPackageAndClassName --name YourClassName --method_base all-on-or-none --method_include methods --method_exclude methods
 Ex:
-    $ ruboto gen class android.telephony.PhoneStateListener --name MyPhoneStateListener
+    $ ruboto gen subclass android.telephony.PhoneStateListener --name MyPhoneStateListener --method_base on
 
 For interfaces that need implementing (e.g., OnClickListener or SensorListener)
 
