@@ -1,0 +1,53 @@
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="500px" height="500px" version="1.1" id="svg2490" sodipodi:version="0.32" inkscape:version="0.46" sodipodi:docname="Ruboto-logo.svg" inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <metadata id="metadata2553">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs id="defs2551">
+    <inkscape:perspective sodipodi:type="inkscape:persp3d" inkscape:vp_x="0 : 250 : 1" inkscape:vp_y="0 : 1000 : 0" inkscape:vp_z="500 : 250 : 1" inkscape:persp3d-origin="250 : 166.66667 : 1" id="perspective2555"/>
+  </defs>
+  <sodipodi:namedview inkscape:window-height="856" inkscape:window-width="1436" inkscape:pageshadow="2" inkscape:pageopacity="0.0" guidetolerance="10.0" gridtolerance="10.0" objecttolerance="10.0" borderopacity="1.0" bordercolor="#666666" pagecolor="#ffffff" id="base" showgrid="false" inkscape:zoom="1.8469629" inkscape:cx="193.44384" inkscape:cy="359.23036" inkscape:window-x="4" inkscape:window-y="22" inkscape:current-layer="svg2490"/>
+  <rect width="500" height="500" id="rect2492" stroke="none" fill="#30587C"/>
+  <g stroke-linecap="round" id="g2494">
+    <g stroke="#FFFFFF" id="g2496">
+      <path stroke-width="30" d="M 303,49 l -12,18" id="path2498"/>
+      <path stroke-width="30" d="M 197,49 l 12,18" id="path2500"/>
+      <path stroke-width="60" d="M 216,300 v 38" id="path2502"/>
+      <path stroke-width="60" d="M 284,300 v 38" id="path2504"/>
+      <path stroke-width="60" d="M 136,162 v 77" id="path2506"/>
+      <path stroke-width="60" d="M 364,162 v 77" id="path2508"/>
+      <ellipse stroke-width="12" fill="#97C03D" rx="90" ry="75" cx="250" cy="132" id="ellipse2510" style="fill:#ff0000"/>
+      <path stroke-width="12" fill="#97C03D" d="M 340,138 h -180 v 138 a 25,25 0,0,0 25,25 h 130 a 25,25 0,0,0 25,-25 z" id="path2512" style="fill:#ff0000"/>
+    </g>
+    <g id="g2514" stroke="none" fill="#FFFFFF">
+      <circle cx="214" cy="99" r="9" id="circle2516"/>
+      <circle cx="286" cy="99" r="9" id="circle2518"/>
+    </g>
+    <g stroke="#97C03D" id="g2520" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000">
+      <path stroke-width="6" d="M 303,49 l -24,36" id="path2522" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000"/>
+      <path stroke-width="6" d="M 197,49 l 24,36" id="path2524" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000"/>
+      <path stroke-width="36" d="M 216,300 v 38" id="path2526" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000"/>
+      <path stroke-width="36" d="M 284,300 v 38" id="path2528" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000"/>
+      <path d="M 136,162 v 77" id="path2530" stroke-width="36" style="fill:#ff0000;stroke:#ff0000;stroke-opacity:1"/>
+      <path stroke-width="36" d="M 364,162 v 77" id="path2532" style="stroke:#ff0000;stroke-opacity:1;fill:#ff0000"/>
+    </g>
+  </g>
+  <g transform="translate(54.53004,413.83428)" id="g2534" style="fill:none;stroke:#ffffff;stroke-width:12;stroke-linecap:square">
+    <path d="M 126,6 L 126,30 C 126,43.25483 115.25483,54 102,54 C 88.745166,54 78,43.25483 78,30 L 78,6" id="path2538"/>
+    <circle r="24" cx="318" cy="30" id="circle2544" sodipodi:cx="318" sodipodi:cy="30" sodipodi:rx="24" sodipodi:ry="24" transform="translate(-76.070829,-1.3535735)"/>
+    <g id="g3399" transform="translate(-73.634397,-0.5414294)">
+      <path style="stroke-width:10.92265701" sodipodi:nodetypes="ccscc" id="path2542" d="M 221.46133,29.770804 L 255.202,29.770804 C 263.67221,29.770804 270.53867,24.328942 270.53867,17.616066 C 270.53867,10.90319 263.67221,5.4613287 255.202,5.4613287 L 221.46133,5.4613287"/>
+      <path style="stroke-width:10.92265701" sodipodi:nodetypes="ccscc" id="path3397" d="M 221.42892,54.056353 L 255.16959,54.056353 C 263.6398,54.056353 270.50626,48.614491 270.50626,41.901615 C 270.50626,35.188739 263.6398,29.746878 255.16959,29.746878 L 221.42892,29.746878"/>
+    </g>
+    <path d="M 54.3996,53.863757 C 54.3996,43.922632 46.34073,35.863757 36.3996,35.863757 M 6.3996002,35.863757 L 39.3996,35.863757 C 47.68387,35.863757 54.3996,29.148028 54.3996,20.863757 C 54.3996,12.579486 47.68387,5.863757 39.3996,5.863757 L 6.3996002,5.863757" id="path3403"/>
+    <circle r="24" cx="318" cy="30" id="circle3405" sodipodi:cx="318" sodipodi:cy="30" sodipodi:rx="24" sodipodi:ry="24" transform="translate(49.926683,-0.6776725)"/>
+    <g id="g3415" transform="translate(-5.4142939,0)">
+      <path id="path2546" d="M 311.04491,53.729285 L 311.04491,5.729285"/>
+      <path id="path3407" d="M 287.20551,5.4927383 L 335.20551,5.4927383"/>
+    </g>
+  </g>
+</svg>
