@@ -604,14 +604,9 @@ end
 #   Builds a script based subclass of Activity, Service, or BroadcastReceiver
 #
 
-def generate_inheriting_file(klass, name, package, script_name, dest='.')
-  to = File.join(dest, "src/#{package.gsub('.', '/')}")
-
-  FileUtils.cp(File.expand_path(__FILE__ + "/../../assets/src/Inheriting#{klass}.java"), to)
-  FileUtils.move(File.join(to, "Inheriting#{klass}.java"), File.join(to, "#{name}.java"))
-
-  file = File.join(to, "#{name}.java")
-  text = File.read(file)
+def generate_inheriting_file(klass, name, package, script_name, dest='.', filename = name)
+  file = File.join(dest, "src/#{package.gsub('.', '/')}", "#{filename}.java")
+  text = File.read(File.expand_path(__FILE__ + "/../../assets/src/Inheriting#{klass}.java"))
   File.open(file, 'w') do |f|
     f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
   end
@@ -684,41 +679,41 @@ Main {
 
         root = File.expand_path(path)
         print "\nGenerating Android app #{name} in #{root}..."
-        `android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}`
+        system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
+        puts "Done"
+
+        print "\nGenerating Android test project #{name} in #{root}..."
+        system "android create test-project -m .. -n #{name}Test -p #{path}/test"
         puts "Done"
 
         puts "\nCopying files:"
         copier = AssetCopier.new $assets, root
 
-        %w{Rakefile .gitignore assets}.each do |f|
+        %w{Rakefile .gitignore assets test}.each do |f|
           log_action(f) {copier.copy f}
         end
 
         log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java", "src/org/ruboto"}
 
-        # Remember the current directory and chdir to the new app directory
-        current_dir = Dir.pwd
-        Dir.chdir root
+        Dir.chdir root do
+          update_jruby true
 
-        update_jruby true
- 
-        log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
-          verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
-          verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 
+          log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
+            verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
+            verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog",
                                                                             "android:theme" => "@android:style/Theme.Dialog"}
-          verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk[/\d+/], "android:targetSdkVersion" => target[/\d+/]}
-          File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
+            verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk[/\d+/], "android:targetSdkVersion" => target[/\d+/]}
+            File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
+          end
+
+          update_ruboto true
+
+          generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true, :implements => "")
         end
-
-        update_ruboto true
-
-        generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true, :implements => "")
-
-        # Go back to whence we came
-        Dir.chdir current_dir
 
         log_action("Generating the default Activity and script") do
           generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
+          generate_inheriting_file "Test", activity, package, "#{underscore(activity)}_test.rb", "#{path}/test", "#{activity}Test"
         end
 
         puts "\nHello, #{name}\n"

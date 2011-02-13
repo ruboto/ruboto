@@ -80,6 +80,13 @@ task :update_scripts do
   end
 end
 
+task :test do
+  Dir.chdir('test') do
+    puts 'Running tests'
+    system "ant run-tests"
+  end
+end
+
 def manifest
   @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
 end

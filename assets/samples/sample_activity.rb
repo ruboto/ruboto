@@ -7,8 +7,8 @@ $activity.handle_create do |bundle|
 
   setup_content do
     linear_layout :orientation => LinearLayout::VERTICAL do
-      @text_view = text_view :text => "What hath Matz wrought?"
-      button :text => "M-x butterfly", :width => :wrap_content
+      @text_view = text_view :text => "What hath Matz wrought?", :id => 42
+      button :text => "M-x butterfly", :width => :wrap_content, :id => 43
     end
   end
 

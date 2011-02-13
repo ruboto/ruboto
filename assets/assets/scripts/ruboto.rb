@@ -20,6 +20,16 @@ require 'java'
 
 $package_name = "THE_PACKAGE"
 
+class Object
+  def self.android
+    Java::android
+  end
+
+  def android
+    self.class.android
+  end
+end
+
 %w(Activity Dialog BroadcastReceiver Service).map do |klass|
   java_import "org.ruboto.Ruboto#{klass}"
 end
