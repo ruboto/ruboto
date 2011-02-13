@@ -612,6 +612,7 @@ def generate_inheriting_file(klass, name, package, script_name, dest='.', filena
   end
 
   sample_source = File.read(File.join($assets, "samples/sample_#{underscore klass}.rb"))
+  FileUtils.mkdir_p File.join(dest, 'assets/scripts')
   File.open File.join(dest, "assets/scripts/#{script_name}"), "a" do |f|
     f << sample_source
   end
