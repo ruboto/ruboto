@@ -3,7 +3,7 @@ GEM
   specs:
     arrayfields (4.7.4)
     fattr (2.1.0)
-    jruby-jars (1.5.3)
+    jruby-jars (1.5.6)
     main (4.2.0)
       arrayfields (>= 4.7.4)
       fattr (>= 2.1.0)

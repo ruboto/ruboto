@@ -1,7 +1,12 @@
 package THE_PACKAGE;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.widget.TextView;
+import android.app.ProgressDialog;
+import org.ruboto.Script;
+import java.io.IOException;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import android.util.Log;
 
 /**
  * This is a simple framework for a test of an Application.  See
@@ -14,35 +19,30 @@ import android.widget.TextView;
  * org.ruboto.test.tests/android.test.InstrumentationTestRunner
  */
 public class InheritingTestTest extends ActivityInstrumentationTestCase2<InheritingTest> {
-
-    private InheritingTest mActivity;  // the activity under test
-    private TextView mView;          // the activity's TextView (the only view)
-    private String resourceString;
-
     public InheritingTestTest() {
         super("THE_PACKAGE", InheritingTest.class);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mActivity = this.getActivity();
-        resourceString = "What hath Matz wrought?";
-        long start = System.currentTimeMillis();
-        while (mView == null) {
-            if (System.currentTimeMillis() - start > 60000) break;
-            Thread.sleep(1000);
-            mView = (TextView) mActivity.findViewById(42);
+//    public static Test suite() {
+//        for (String f : getActivity().getAssets().list("scripts")) {
+//            java.lang.System.out.println(f);
+//        }
+//        Script.copyScriptsIfNeeded(getActivity().getFilesDir().getAbsolutePath() + "/scripts", getActivity().getAssets());
+//        for (String f : getActivity().getAssets().list("scripts")) {
+//            suite.addTest(new InheritingTest(f));
+//        }
+//        return suite;
+//    }
+
+    public void runTest() {
+        try {
+            Script.setUpJRuby(null);
+            Script.defineGlobalVariable("$test", this);
+            new Script("start.rb").execute();
+        } catch(IOException e){
+            e.printStackTrace();
+            ProgressDialog.show(this.getActivity(), "Test failed", e.getMessage(), true, true);
         }
-        assertNotNull(mView);
-    }
-
-    public void testPreconditions() throws Exception {
-      assertNotNull(mView);
-    }
-
-    public void testText() throws Exception {
-        assertEquals(resourceString, (String) mView.getText());
     }
 
 }
