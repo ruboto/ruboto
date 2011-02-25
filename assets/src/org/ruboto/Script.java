@@ -89,11 +89,15 @@ public class Script {
     public static String execute(String code) {
         if (!initialized) return null;
         try {
-            return ruby.evalScriptlet(code, scope).inspect().asJavaString();
+            return exec(code);
         } catch (RaiseException re) {
             re.printStackTrace(ruby.getErrorStream());
             return null;
         }
+    }
+
+    public static String exec(String code) throws RaiseException {
+        return ruby.evalScriptlet(code, scope).inspect().asJavaString();
     }
 
     public static void defineGlobalConstant(String name, Object object) {
