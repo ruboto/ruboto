@@ -14,12 +14,5 @@ $test.test('test_generated_code') do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
   button = activity.findViewById(43)
   button.performClick
-  # assert_equal "What hath Matz wrought!", @text_view.text
+  assert_equal "What hath Matz wrought!", @text_view.text
 end
-
-#$suite.addTest {
-#  # Test succeeded
-#}
-#$suite.addTest {
-#  raise 'test failed'
-#}

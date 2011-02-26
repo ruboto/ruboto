@@ -207,25 +207,23 @@ For each generated class, a ruby test script is created in the test/assets/scrip
 For example if you generate a RubotoSampleAppActivity a file test/assets/scripts/ruboto_sample_app_activity_test.rb
 file is created containing a sample test class:
 
-    require 'java'
-
     $test.activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
 
-    $test.test('test_generated_code') do |activity|
-      # TODO(uwe):  Move this to $test.setup do
-      # TODO(uwe):  end
+    $test.setup do |activity|
       start = Time.now
       loop do
-        @view = activity.findViewById(42);
-        break if @view || (Time.now - start > 60)
+        @text_view = activity.findViewById(42)
+        break if @text_view || (Time.now - start > 60)
         sleep 1
       end
+      assert @text_view
+    end
 
-      # assert_not_nil @view
-      raise "@view expected to be not nil" unless @view
-
-      # assert_equal resourceString, @view.text
-      raise "resourceString and @view.getText() do not match" unless "What hath Matz wrought?" == @view.getText()
+    $test.test('test_generated_code') do |activity|
+      assert_equal "What hath Matz wrought?", @text_view.text
+      button = activity.findViewById(43)
+      button.performClick
+      assert_equal "What hath Matz wrought!", @text_view.text
     end
 
 You run the tests for your app using ant or rake
