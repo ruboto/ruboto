@@ -205,7 +205,7 @@ Testing
 
 For each generated class, a ruby test script is created in the test/assets/scripts directory.
 For example if you generate a RubotoSampleAppActivity a file test/assets/scripts/ruboto_sample_app_activity_test.rb
-file is created containing a sample test class:
+file is created containing a sample test script:
 
     activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
 
