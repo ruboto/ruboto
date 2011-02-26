@@ -20,11 +20,13 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.ruboto.Script;
 
 public class ActivityTest extends ActivityInstrumentationTestCase2 {
+    private final IRubyObject setup;
     private final IRubyObject block;
 
-    public ActivityTest(Class activityClass, String name, IRubyObject block) {
+    public ActivityTest(Class activityClass, IRubyObject setup, String name, IRubyObject block) {
         super(activityClass);
         setName(name);
+        this.setup = setup;
         this.block = block;
         Log.d(getClass().getName(), "Instance: " + name);
     }
@@ -35,10 +37,17 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
         Script.setUpJRuby(null);
         Log.d(getClass().getName(), "ruby ok");
         try {
-            Activity activity = getActivity();
+            final Activity activity = getActivity();
             Log.d(getClass().getName(), "activity ok");
-            RuntimeHelpers.invoke(block.getRuntime().getCurrentContext(), block, "call",
-                    JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
+            runTestOnUiThread(new Runnable() {
+                public void run() {
+                    RuntimeHelpers.invoke(setup.getRuntime().getCurrentContext(), setup, "call",
+                            JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
+                    Log.d(getClass().getName(), "setup ok");
+                    RuntimeHelpers.invoke(block.getRuntime().getCurrentContext(), block, "call",
+                            JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
+                }
+            });
         } catch (Throwable t) {
             throw new AssertionFailedError(t.getMessage());
         }

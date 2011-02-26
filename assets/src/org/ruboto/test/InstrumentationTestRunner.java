@@ -29,6 +29,7 @@ import org.ruboto.Script;
 
 public class InstrumentationTestRunner extends android.test.InstrumentationTestRunner {
     private Class activityClass;
+    private IRubyObject setup;
     private TestSuite suite;
     
     public TestSuite getAllTests() {
@@ -37,26 +38,14 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         
         try {
             Script.setUpJRuby(null);
+            loadScript("test_helper.rb");
             Script.defineGlobalVariable("$runner", this);
             Script.defineGlobalVariable("$test", this);
             Script.defineGlobalVariable("$suite", suite);
             String[] scripts = getContext().getResources().getAssets().list("scripts");
             for (String f : scripts) {
                 Log.i(getClass().getName(), "Found script: " + f);
-
-                InputStream is = getContext().getResources().getAssets().open("scripts/" + f);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(is));
-                StringBuilder source = new StringBuilder();
-                while (true) {
-                    String line = buffer.readLine();
-                    if (line == null) break;
-                    source.append(line).append("\n");
-                }
-                buffer.close();
-
-                Log.d(getClass().getName(), "Loading test script: " + f);
-                Script.exec(source.toString());
-                Log.d(getClass().getName(), "Test script loaded");
+                loadScript(f);
             }
         } catch (IOException e) {
           addError(suite, e);
@@ -70,20 +59,39 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         this.activityClass = activityClass;
     }
 
+    public void setup(IRubyObject block) {
+        this.setup = block;
+    }
+
     public void test(String name, IRubyObject block) {
-            Test test = new ActivityTest(activityClass, name, block);
-            suite.addTest(test);
-            Log.d(getClass().getName(), "Made test instance: " + test);
+        Test test = new ActivityTest(activityClass, setup, name, block);
+        suite.addTest(test);
+        Log.d(getClass().getName(), "Made test instance: " + test);
     }
 
     private void addError(TestSuite suite, final Throwable t) {
-        Log.e(getClass().getName(), "Exception loading tests");
         Log.e(getClass().getName(), "Exception loading tests: " + t);
         suite.addTest(new TestCase(t.getMessage()) {
             public void runTest() throws java.lang.Throwable {
                 throw t;
             }
         });
+    }
+
+    private void loadScript(String f) throws IOException {
+        InputStream is = getContext().getResources().getAssets().open("scripts/" + f);
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(is));
+        StringBuilder source = new StringBuilder();
+        while (true) {
+            String line = buffer.readLine();
+            if (line == null) break;
+            source.append(line).append("\n");
+        }
+        buffer.close();
+
+        Log.d(getClass().getName(), "Loading test script: " + f);
+        Script.exec(source.toString());
+        Log.d(getClass().getName(), "Test script loaded");
     }
 
 }
