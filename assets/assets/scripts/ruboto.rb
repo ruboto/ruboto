@@ -261,7 +261,6 @@ end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
   view_class = java_import "#{package_name}.#{class_name}"
-  return unless view_class
 
   RubotoActivity.class_eval "
      def #{(class_name.to_s.gsub(/([A-Z])/) {'_' + $1.downcase})[1..-1]}(params={})

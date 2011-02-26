@@ -46,7 +46,7 @@ Version values must be specified using'android-' and the sdk level number (e.g.,
 <a name="class_generator"></a>
 ### Class generator
 
-Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.
+Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.  The generator also generates a corrsponding test script.
 
     $ ruboto gen class ClassName --name YourObjectName
 Ex:
@@ -200,6 +200,40 @@ The arguments passed to the block you give `handle_` methods are the same as the
 
 Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-core/blob/master/assets/assets/scripts/ruboto.rb) where everything is defined.
 
+Testing
+-------
+
+For each generated class, a ruby test script is created in the test/assets/scripts directory.
+For example if you generate a RubotoSampleAppActivity a file test/assets/scripts/ruboto_sample_app_activity_test.rb
+file is created containing a sample test class:
+
+    require 'java'
+
+    $test.activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
+
+    $test.test('test_generated_code') do |activity|
+      # TODO(uwe):  Move this to $test.setup do
+      # TODO(uwe):  end
+      start = Time.now
+      loop do
+        @view = activity.findViewById(42);
+        break if @view || (Time.now - start > 60)
+        sleep 1
+      end
+
+      # assert_not_nil @view
+      raise "@view expected to be not nil" unless @view
+
+      # assert_equal resourceString, @view.text
+      raise "resourceString and @view.getText() do not match" unless "What hath Matz wrought?" == @view.getText()
+    end
+
+You run the tests for your app using ant or rake
+
+    $ jruby -S rake test
+
+    $ cd test ; ant run-tests
+
 Contributing
 ------------
 
@@ -210,6 +244,10 @@ Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the proj
 * Use Ruboto and tell us how it could be better.
 * As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto-core/wiki/)
 * When you gain enough wisdom, reconsider whether you could fork the project.
+
+If contributing code to the project, please run the exising tests and add tests for your changes.  You run the tests using rake
+
+    $ jruby -S rake test
 
 Getting Help
 ------------
@@ -244,7 +282,7 @@ Garrett is a "playground for Mirah exploration on Android."
 
 
 Domo Arigato
------
+------------
 
 Thanks go to:
 

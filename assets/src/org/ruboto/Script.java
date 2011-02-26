@@ -21,6 +21,7 @@ import org.jruby.RubyInstanceConfig;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.parser.EvalStaticScope;
+import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.scope.ManyVarsDynamicScope;
@@ -89,15 +90,15 @@ public class Script {
     public static String execute(String code) {
         if (!initialized) return null;
         try {
-            return exec(code);
+            return exec(code).inspect().asJavaString();
         } catch (RaiseException re) {
             re.printStackTrace(ruby.getErrorStream());
             return null;
         }
     }
 
-    public static String exec(String code) throws RaiseException {
-        return ruby.evalScriptlet(code, scope).inspect().asJavaString();
+    public static IRubyObject exec(String code) throws RaiseException {
+        return ruby.evalScriptlet(code, scope);
     }
 
     public static void defineGlobalConstant(String name, Object object) {

@@ -1,7 +1,11 @@
 package org.ruboto.test;
 
+import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
@@ -17,108 +21,69 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.jruby.exceptions.RaiseException;
+import org.jruby.javasupport.JavaEmbedUtils;
+import org.jruby.RubyClass;
+import org.jruby.runtime.builtin.IRubyObject;
+import org.ruboto.Script;
 
 public class InstrumentationTestRunner extends android.test.InstrumentationTestRunner {
+    private Class activityClass;
+    private TestSuite suite;
+    
     public TestSuite getAllTests() {
-        TestSuite suite = new TestSuite("Sweet");
+        Log.i(getClass().getName(), "Finding test scripts");
+        suite = new TestSuite("Sweet");
+        
         try {
-            java.util.List<java.lang.Class> testClasses = getClassesForPackage("org");
-            testClasses = Arrays.asList(new Class[]{org.ruboto.sample_app.RubotoSampleAppActivityTest.class});
-            for (Class c : testClasses) {
-                Log.d("RUBOTO TEST", "Found class: " + c.getName());
-                String[] scripts;
-                try {
-                  scripts = getContext().getResources().getAssets().list("scripts");
-                } catch (IOException e) {
-                    Log.e("RUBOTO TEST", "Exception listing scripts: " + e);
-                    scripts = new String[]{"ruboto_sample_app_activity_test.rb"};
+            Script.setUpJRuby(null);
+            Script.defineGlobalVariable("$runner", this);
+            Script.defineGlobalVariable("$test", this);
+            Script.defineGlobalVariable("$suite", suite);
+            String[] scripts = getContext().getResources().getAssets().list("scripts");
+            for (String f : scripts) {
+                Log.i(getClass().getName(), "Found script: " + f);
+
+                InputStream is = getContext().getResources().getAssets().open("scripts/" + f);
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(is));
+                StringBuilder source = new StringBuilder();
+                while (true) {
+                    String line = buffer.readLine();
+                    if (line == null) break;
+                    source.append(line).append("\n");
                 }
-                for (String f : scripts) {
-                    Log.d("RUBOTO TEST", "Found script: " + f);
-                    suite.addTest((Test)c.getConstructor(String.class).newInstance(f));
-                }
+                buffer.close();
+
+                Log.d(getClass().getName(), "Loading test script: " + f);
+                Script.exec(source.toString());
+                Log.d(getClass().getName(), "Test script loaded");
             }
-        } catch (NoSuchMethodException e) {
-            Log.e("RUBOTO TEST", "NoSuchMethodException: " + e.getMessage());
-        } catch (InstantiationException e2) {
-            Log.e("RUBOTO TEST", "InstantiationException: " + e2.getMessage());
-        } catch (IllegalAccessException e3) {
-            Log.e("RUBOTO TEST", "IllegalAccessException: " + e3.getMessage());
-        } catch (java.lang.reflect.InvocationTargetException e4) {
-            Log.e("RUBOTO TEST", "InvocationTargetException: " + e4.getMessage());
-        } catch (java.lang.ClassNotFoundException e) {
-            // Huh?
+        } catch (IOException e) {
+          addError(suite, e);
+        } catch (RaiseException e) {
+          addError(suite, e);
         }
-        suite.addTest(new TestCase("Success 2!") {
-            public void runTest() {
-                // Success!
-            }
-        });
         return suite;
     }
 
-    public static List<Class> getClassesForPackage(String pckgname) throws ClassNotFoundException {
-        Log.d("RUBOTO TEST", "Searching for classes in package: " + pckgname);
-        // This will hold a list of directories matching the pckgname.
-        //There may be more than one if a package is split over multiple jars/paths
-        List<Class> classes = new ArrayList<Class>();
-        ArrayList<File> directories = new ArrayList<File>();
-        try {
-            ClassLoader cld = Thread.currentThread().getContextClassLoader();
-            if (cld == null) {
-                throw new ClassNotFoundException("Can't get class loader.");
-            }
-            // Ask for all resources for the path
-            Enumeration<URL> resources = cld.getResources(pckgname.replace('.', '/'));
-        Log.d("RUBOTO TEST", "Searched");
-            while (resources.hasMoreElements()) {
-            Log.d("RUBOTO TEST", "Found resource");
-                URL res = resources.nextElement();
-            Log.d("RUBOTO TEST", "Found resource: " + res);
-                if (res.getProtocol().equalsIgnoreCase("jar")){
-                    JarURLConnection conn = (JarURLConnection) res.openConnection();
-                    JarFile jar = conn.getJarFile();
-                    for (JarEntry e:Collections.list(jar.entries())){
-                        if (e.getName().startsWith(pckgname.replace('.', '/'))
-                            && e.getName().endsWith(".class") && ! e.getName().contains("$")){
-                            String className = e.getName().replace("/",".").substring(0,e.getName().length() - 6);
-                            Log.d("RUBOTO TEST", className);
-                            classes.add(Class.forName(className));
-                        }
-                    }
-                }else
-                    directories.add(new File(URLDecoder.decode(res.getPath(), "UTF-8")));
-            }
-        } catch (NullPointerException x) {
-            throw new ClassNotFoundException(pckgname + " does not appear to be " +
-                    "a valid package (Null pointer exception)");
-        } catch (UnsupportedEncodingException encex) {
-            throw new ClassNotFoundException(pckgname + " does not appear to be " +
-                    "a valid package (Unsupported encoding)");
-        } catch (IOException ioex) {
-            throw new ClassNotFoundException("IOException was thrown when trying " +
-                    "to get all resources for " + pckgname);
-        }
+    public void activity(Class activityClass) {
+        this.activityClass = activityClass;
+    }
 
-        // For every directory identified capture all the .class files
-        for (File directory : directories) {
-            if (directory.exists()) {
-                // Get the list of the files contained in the package
-                String[] files = directory.list();
-                for (String file : files) {
-                    // we are only interested in .class files
-                    if (file.endsWith(".class")) {
-                        // removes the .class extension
-                        classes.add(Class.forName(pckgname + '.'
-                                + file.substring(0, file.length() - 6)));
-                    }
-                }
-            } else {
-                throw new ClassNotFoundException(pckgname + " (" + directory.getPath() +
-                                    ") does not appear to be a valid package");
+    public void test(String name, IRubyObject block) {
+            Test test = new ActivityTest(activityClass, name, block);
+            suite.addTest(test);
+            Log.d(getClass().getName(), "Made test instance: " + test);
+    }
+
+    private void addError(TestSuite suite, final Throwable t) {
+        Log.e(getClass().getName(), "Exception loading tests");
+        Log.e(getClass().getName(), "Exception loading tests: " + t);
+        suite.addTest(new TestCase(t.getMessage()) {
+            public void runTest() throws java.lang.Throwable {
+                throw t;
             }
-        }
-        return classes;
+        });
     }
 
 }
