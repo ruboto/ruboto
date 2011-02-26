@@ -219,8 +219,11 @@ file is created containing a sample test class:
       assert @text_view
     end
 
-    test('test_generated_code') do |activity|
+    test('initial setup') do |activity|
       assert_equal "What hath Matz wrought?", @text_view.text
+    end
+
+    test('button changes text') do |activity|
       button = activity.findViewById(43)
       button.performClick
       assert_equal "What hath Matz wrought!", @text_view.text
