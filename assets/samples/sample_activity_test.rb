@@ -1,6 +1,6 @@
-$test.activity Java::THE_PACKAGE.SampleActivity
+activity Java::THE_PACKAGE.SampleActivity
 
-$test.setup do |activity|
+setup do |activity|
   start = Time.now
   loop do
     @text_view = activity.findViewById(42)
@@ -10,8 +10,11 @@ $test.setup do |activity|
   assert @text_view
 end
 
-$test.test('test_generated_code') do |activity|
+test('initial setup') do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
+end
+
+test('button changes text') do |activity|
   button = activity.findViewById(43)
   button.performClick
   assert_equal "What hath Matz wrought!", @text_view.text

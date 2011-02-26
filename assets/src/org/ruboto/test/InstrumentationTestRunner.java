@@ -38,10 +38,10 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         
         try {
             Script.setUpJRuby(null);
-            loadScript("test_helper.rb");
             Script.defineGlobalVariable("$runner", this);
             Script.defineGlobalVariable("$test", this);
             Script.defineGlobalVariable("$suite", suite);
+            loadScript("test_helper.rb");
             String[] scripts = getContext().getResources().getAssets().list("scripts");
             for (String f : scripts) {
                 Log.i(getClass().getName(), "Found script: " + f);
@@ -90,7 +90,8 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         buffer.close();
 
         Log.d(getClass().getName(), "Loading test script: " + f);
-        Script.exec(source.toString());
+        Script.defineGlobalVariable("$script_code", source.toString());
+        Script.exec("$test.instance_eval($script_code)");
         Log.d(getClass().getName(), "Test script loaded");
     }
 

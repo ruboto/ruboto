@@ -207,9 +207,9 @@ For each generated class, a ruby test script is created in the test/assets/scrip
 For example if you generate a RubotoSampleAppActivity a file test/assets/scripts/ruboto_sample_app_activity_test.rb
 file is created containing a sample test class:
 
-    $test.activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
+    activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
 
-    $test.setup do |activity|
+    setup do |activity|
       start = Time.now
       loop do
         @text_view = activity.findViewById(42)
@@ -219,7 +219,7 @@ file is created containing a sample test class:
       assert @text_view
     end
 
-    $test.test('test_generated_code') do |activity|
+    test('test_generated_code') do |activity|
       assert_equal "What hath Matz wrought?", @text_view.text
       button = activity.findViewById(43)
       button.performClick
