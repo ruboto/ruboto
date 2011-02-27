@@ -13,7 +13,7 @@ class RubotoRbTest < Test::Unit::TestCase
   end
 
   def teardown
-    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
   end
 
   def test_that_tests_work_on_new_project
