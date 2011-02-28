@@ -118,13 +118,13 @@ class XMLElement < Hash
 
     # establish the base set of methods
     working_methods = case method_base
-      when "all"
+      when "all" then 
         all_methods
-      when "none"
+      when "none" then
         []
-      when "abstract"
+      when "abstract" then
         all_methods.select{|i| i.attribute("abstract") == "true"}
-      when "on"
+      when "on" then
         all_methods.select{|i| i.attribute("name").match(/^on[A-Z]/)}
     end
 
@@ -189,10 +189,10 @@ class XMLElement < Hash
   def default_return
     return nil unless attribute("return")
     case attribute("return")
-      when "boolean": "return false;"
-      when "int":     "return 0;"
-      when "void":    nil
-      else            "return null;"
+      when "boolean" then "return false;"
+      when "int"     then "return 0;"
+      when "void"    then nil
+      else                "return null;"
     end
   end
 
@@ -901,7 +901,7 @@ Main {
     end
   end
 
-  mode "update-jruby" do
+  mode "update" do
     argument("what"){
       required
       validate {|i| %w(jruby ruboto).include?(i)}
@@ -914,12 +914,12 @@ Main {
 
     def run
       case params['what'].value
-        when "jruby"
+        when "jruby" then
           update_jruby(params['force'].value)
           Dir.chdir 'test' do
             update_jruby params['force'].value
           end
-        when "ruboto"
+        when "ruboto" then
           update_ruboto(params['force'].value)
           Dir.chdir 'test' do
             update_ruboto params['force'].value
