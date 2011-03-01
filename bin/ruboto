@@ -729,6 +729,38 @@ Main {
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
           File.open("AndroidManifest.xml", 'w') {|f| test_manifest.document.write(f, 4)}
           File.open('build.properties', 'a'){|f| f.puts 'test.runner=org.ruboto.test.InstrumentationTestRunner'}
+          ant_setup_line = "  <setup/>\n"
+          run_tests_override = <<EOF
+          
+  <macrodef name="run-tests-helper">
+    <attribute name="emma.enabled" default="false"/>
+    <element name="extra-instrument-args" optional="yes"/>
+    <sequential>
+      <echo>Running tests ...</echo>
+      <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
+        <arg line="${adb.device.arg}"/>
+        <arg value="shell"/>
+        <arg value="am"/>
+        <arg value="instrument"/>
+        <arg value="-w"/>
+        <arg value="-e"/>
+        <arg value="coverage"/>
+        <arg value="@{emma.enabled}"/>
+        <extra-instrument-args/>
+        <arg value="${manifest.package}/${test.runner}"/>
+      </exec>
+      <echo message="${tests.output}"/>
+      <fail message="Tests failed!!!">
+        <condition>
+          <contains string="${tests.output}" substring="FAILURES"/>
+        </condition>
+      </fail>
+    </sequential>
+  </macrodef>
+
+EOF
+          ant_script = File.read('build.xml').gsub(ant_setup_line, ant_setup_line + run_tests_override)
+          File.open('build.xml', 'w'){|f| f << ant_script}
         end
 
         puts "\nHello, #{name}\n"

@@ -44,6 +44,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             loadScript("test_helper.rb");
             String[] scripts = getContext().getResources().getAssets().list("scripts");
             for (String f : scripts) {
+                if (f.equals("test_helper.rb")) continue;
                 Log.i(getClass().getName(), "Found script: " + f);
                 loadScript(f);
             }
@@ -64,6 +65,9 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     public void test(String name, IRubyObject block) {
+        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.FROYO) {
+          name ="runTest";
+        }
         Test test = new ActivityTest(activityClass, setup, name, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);

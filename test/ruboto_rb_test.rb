@@ -8,6 +8,7 @@ class RubotoRbTest < Test::Unit::TestCase
 
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     system "jruby #{PROJECT_DIR}/bin/ruboto gen app --package org.ruboto.sample_app --path #{APP_DIR} --name #{APP_NAME} --target android-8 --min_sdk android-8 --activity #{APP_NAME}Activity"
     raise "gen app failed with return code #$?" unless $? == 0
   end
