@@ -14,16 +14,6 @@ require 'ruboto/util/scan_in_api'
 require 'ruboto/core_ext/array'
 require 'ruboto/core_ext/object'
 
-# Decorate Main with all our modules
-module Main
-  include Ruboto::Util::LogAction
-  include Ruboto::Util::CodeFormatting
-  include Ruboto::Util::Build
-  include Ruboto::Util::Update
-  include Ruboto::Util::Verify
-  include Ruboto::Util::ScanInAPI
-end
-
 module Ruboto
   module Commands
     module Base
