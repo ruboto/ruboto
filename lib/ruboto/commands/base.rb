@@ -195,6 +195,8 @@ module Ruboto
               end
 
               mode "subclass" do
+                include Ruboto::Util::Build
+                
                 argument("class"){
                   required
                   description "the Android Class that you want to subclass (e.g., package.Class)."
@@ -244,6 +246,8 @@ module Ruboto
               end
 
               mode "interface" do
+                include Ruboto::Util::Build
+                
                 argument("interface"){
                   required
                   description "the Android Interface that you want to implement (e.g., package.Interface)."

@@ -1,6 +1,7 @@
 module Ruboto
   module Util
     module Build
+      include Verify
       ###########################################################################
       #
       # Build Subclass or Interface:
