@@ -76,14 +76,32 @@ end
 
 task :update_scripts do
   Dir['assets/scripts/*.rb'].each do |script|
-    `adb push #{script} /data/data/#{package}/files/scripts`
+    `adb push #{script} /data/data/#{package}/files/assets/scripts`
   end
+  `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
+end
+
+task :update_test_scripts do
+  Dir['test/assets/scripts/*.rb'].each do |script|
+    `adb push #{script} /data/data/#{package}.tests/files/assets/scripts`
+  end
+  `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
 end
 
 task :test do
   Dir.chdir('test') do
     puts 'Running tests'
+    system 'system "adb uninstall #{package}"'
     system "ant run-tests"
+  end
+end
+
+namespace :test do
+  task :quick => [:update_scripts, :update_test_scripts] do
+    Dir.chdir('test') do
+      puts 'Running quick tests'
+      system "ant run-tests-quick"
+    end
   end
 end
 

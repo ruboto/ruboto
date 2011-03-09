@@ -63,6 +63,7 @@ public class Script {
 
     public static synchronized Ruby setUpJRuby(PrintStream out) {
         if (ruby == null) {
+        	System.setProperty("jruby.interfaces.useProxy", "true");
             RubyInstanceConfig config = new RubyInstanceConfig();
             config.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
 
@@ -154,17 +155,22 @@ public class Script {
                 if (dest.exists())
                     continue;
 
-                Log.d(TAG, "copying file " + f);
+                try {
+                    Log.d(TAG, "copying file " + from + "/" + f);
 
-                InputStream is = assets.open(from+ "/" +f);
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
+                    InputStream is = assets.open(from + "/" + f);
+                    OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
 
-                int n;
-                while ((n = is.read(buffer, 0, buffer.length)) != -1)
-                    fos.write(buffer, 0, n);
-
-                is.close();
-                fos.close();
+                    int n;
+                    while ((n = is.read(buffer, 0, buffer.length)) != -1) {
+                        fos.write(buffer, 0, n);
+                    }
+                    is.close();
+                    fos.close();
+                } catch (java.io.FileNotFoundException e) {
+                    dest.mkdir();
+                    copyScripts(from + "/" + f, dest, assets);
+                }
             }
         } catch (IOException iox) {
             Log.e(TAG, "error copying demo scripts", iox);

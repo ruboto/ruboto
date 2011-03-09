@@ -117,7 +117,7 @@ module Ruboto
                     test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
                     File.open("AndroidManifest.xml", 'w') {|f| test_manifest.document.write(f, 4)}
                     File.open('build.properties', 'a'){|f| f.puts 'test.runner=org.ruboto.test.InstrumentationTestRunner'}
-                    ant_setup_line = "  <setup/>\n"
+                    ant_setup_line = /^(\s*<setup\s*\/>\n)/
                     run_tests_override = <<-EOF
                     <macrodef name="run-tests-helper">
                     <attribute name="emma.enabled" default="false"/>
@@ -139,14 +139,22 @@ module Ruboto
                     <echo message="${tests.output}"/>
                     <fail message="Tests failed!!!">
                     <condition>
-                    <contains string="${tests.output}" substring="FAILURES"/>
+                      <or>
+                        <contains string="${tests.output}" substring="INSTRUMENTATION_FAILED"/>
+                        <contains string="${tests.output}" substring="FAILURES"/>
+                      </or>
                     </condition>
                     </fail>
                     </sequential>
                     </macrodef>
 
+  <target name="run-tests-quick"
+          description="Runs tests with previously installed packages">
+    <run-tests-helper />
+  </target>
+
                     EOF
-                    ant_script = File.read('build.xml').gsub(ant_setup_line, ant_setup_line + run_tests_override)
+                    ant_script = File.read('build.xml').gsub(ant_setup_line, "\\1#{run_tests_override}")
                     File.open('build.xml', 'w'){|f| f << ant_script}
                   end
 

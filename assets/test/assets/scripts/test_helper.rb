@@ -1,6 +1,6 @@
 require 'java'
 
-def assert(value, message = "'#{value}' expected to be true")
+def assert(value, message = "#{value.inspect} expected to be true")
   raise message unless value
 end
 

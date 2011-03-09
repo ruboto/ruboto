@@ -70,7 +70,7 @@ module Ruboto
           FileUtils.move "../#{jruby_core}", "."
           `jar -xf #{jruby_core}`
           File.delete jruby_core
-          ['jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
+          ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
             'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
             ].each {|i| FileUtils.remove_dir i, true}
             `jar -cf ../#{jruby_core} .`
@@ -86,6 +86,10 @@ module Ruboto
             `jar -xf #{jruby_stdlib}`
             File.delete jruby_stdlib
             FileUtils.move "META-INF/jruby.home/lib/ruby/1.8", ".."
+            Dir["META-INF/jruby.home/lib/ruby/site_ruby/1.8/*"].each do |f|
+              next if File.basename(f) =~ /^..?$/
+              FileUtils.move f, "../1.8/" + File.basename(f)
+            end
             Dir.chdir "../1.8"
             FileUtils.remove_dir "../tmp", true
             `jar -cf ../#{jruby_stdlib} .`
