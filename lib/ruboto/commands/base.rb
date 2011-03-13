@@ -336,6 +336,8 @@ module Ruboto
             end
 
             mode "update" do
+              include Ruboto::Util::LogAction
+              include Ruboto::Util::Update
               argument("what"){
                 required
                 validate {|i| %w(jruby ruboto).include?(i)}
@@ -350,14 +352,8 @@ module Ruboto
                 case params['what'].value
                 when "jruby" then
                   update_jruby(params['force'].value)
-                  Dir.chdir 'test' do
-                    update_jruby params['force'].value
-                  end
                 when "ruboto" then
                   update_ruboto(params['force'].value)
-                  Dir.chdir 'test' do
-                    update_ruboto params['force'].value
-                  end
                 end
               end
             end

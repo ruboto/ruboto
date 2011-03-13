@@ -152,12 +152,13 @@ public class Script {
             for (String f : assets.list(from)) {
                 File dest = new File(to, f);
 
-                if (dest.exists())
+                if (dest.exists()) {
                     continue;
+                }
 
-                try {
-                    Log.d(TAG, "copying file " + from + "/" + f);
+                Log.d(TAG, "copying file from " + from + "/" + f + " to " + dest);
 
+                if (assets.list(from + "/" + f).length == 0) {
                     InputStream is = assets.open(from + "/" + f);
                     OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
 
@@ -167,13 +168,13 @@ public class Script {
                     }
                     is.close();
                     fos.close();
-                } catch (java.io.FileNotFoundException e) {
+                } else {
                     dest.mkdir();
                     copyScripts(from + "/" + f, dest, assets);
                 }
             }
         } catch (IOException iox) {
-            Log.e(TAG, "error copying demo scripts", iox);
+            Log.e(TAG, "error copying scripts", iox);
         }
     }
 

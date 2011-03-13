@@ -76,14 +76,14 @@ end
 
 task :update_scripts do
   Dir['assets/scripts/*.rb'].each do |script|
-    `adb push #{script} /data/data/#{package}/files/assets/scripts`
+    `adb push #{script} /data/data/#{package}/files/scripts/`
   end
   `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
 end
 
 task :update_test_scripts do
   Dir['test/assets/scripts/*.rb'].each do |script|
-    `adb push #{script} /data/data/#{package}.tests/files/assets/scripts`
+    `adb push #{script} /data/data/#{package}.tests/files/scripts/`
   end
   `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
 end
