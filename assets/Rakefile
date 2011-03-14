@@ -5,8 +5,12 @@
 #
 
 
-raise "Needs JRuby 1.5" unless RUBY_PLATFORM =~ /java/
-require 'ant'
+if RUBY_PLATFORM =~ /java/
+  puts "Detected JRuby.  Loading ANT."
+  require 'ant'
+  ant_loaded = true
+end
+
 require 'rake/clean'
 require 'rexml/document'
 
@@ -16,13 +20,13 @@ stdlib             = jars.grep(/stdlib/).first #libs/jruby-stdlib-VERSION.jar
 jruby_jar          = jars.grep(/core/).first   #libs/jruby-core-VERSION.jar
 stdlib_precompiled = File.join(generated_libs, 'jruby-stdlib-precompiled.jar')
 jruby_ruboto_jar   = File.join(generated_libs, 'jruby-ruboto.jar')
-ant.property :name=>'external.libs.dir', :value => generated_libs
+ant.property :name=>'external.libs.dir', :value => generated_libs if ant_loaded
 dirs = ['tmp/ruby', 'tmp/precompiled', generated_libs]
 dirs.each { |d| directory d }
 
 CLEAN.include('tmp', 'bin', generated_libs)
 
-ant_import
+ant_import if ant_loaded
 
 file stdlib_precompiled => :compile_stdlib
 file jruby_ruboto_jar => generated_libs do
@@ -74,11 +78,43 @@ task :publish => :align do
   puts "#{build_project_name}.apk is ready for the market!"
 end
 
-task :update_scripts do
-  Dir['assets/scripts/*.rb'].each do |script|
-    `adb push #{script} /data/data/#{package}/files/scripts/`
-  end
+task :start_app do
+  `adb shell am start -a android.intent.action.MAIN -n no.datek.nettbuss.operator/.StartupActivity`
+end
+
+task :stop_app do
   `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
+end
+
+task :uninstall do
+  system "adb uninstall #{package}"
+end
+
+namespace :install do
+  desc 'Build, install, and restart the application'
+  task :restart => [:install, :start_app]
+  namespace :restart do
+    desc 'Uninstall, build, install, and restart the application'
+    task :clean => [:uninstall, :install, :start_app]
+  end
+end
+
+task :update_scripts do
+  manifest
+  Dir.chdir('assets') do
+    # Add more directories here if you want them copied to the emulator
+    ['scripts'].each do |script_dir|
+      Dir["#{script_dir}/*"].each do |script|
+        next if File.directory? script
+        `adb push #{script} /data/data/#{package}/files/#{script_dir}`
+      end
+    end
+  end
+end
+
+namespace :update_scripts do
+  desc 'Copy scripts to emulator and restart the app'
+  task :restart => [:stop_app, :update_scripts, :start_app]
 end
 
 task :update_test_scripts do
@@ -88,10 +124,10 @@ task :update_test_scripts do
   `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
 end
 
-task :test do
+task :test => :uninstall do
   Dir.chdir('test') do
     puts 'Running tests'
-    system 'system "adb uninstall #{package}"'
+    system "adb uninstall #{package}.tests"
     system "ant run-tests"
   end
 end
