@@ -86,6 +86,8 @@ task :stop_app do
   `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
 end
 
+task :restart => [:stop_app, :start_app]
+
 task :uninstall do
   system "adb uninstall #{package}"
 end
