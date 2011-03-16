@@ -25,7 +25,7 @@ module Ruboto
               doc.scan(/='/)
               value = doc.scan(/[^']*/)
               doc.scan(/'\s*/)
-              values[key] = value
+              values[key] = value.include?("&") ? value.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&quot;', "\"") : value
             end
             element = parents[-1].add_element(name, values)
             parents.push(element) if term == ">"
