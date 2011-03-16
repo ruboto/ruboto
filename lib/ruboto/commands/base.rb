@@ -26,48 +26,40 @@ module Ruboto
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
 
-              option("name"){
-                required
-                argument :required
-                description "Name of your app"
-              }
-              option("target") {
-                required
-                argument :required
-                defaults 'android-9'
-                description "android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
-              }
-              option("min_sdk") {
-                required
-                argument :required
-                defaults 'android-7'
-                description "minimum android version supported. must begin with 'android-'. (default 'android-3')"
-              }
-              option("path"){
-                required
-                argument :required
-                description "path to where you want your app."
-              }
               option("package"){
                 required
                 argument :required
-                defaults 'org.ruboto.example'
                 description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
               }
-              option("activity"){
-                required
+              option("name"){
                 argument :required
-                defaults 'Main'
-                description "name of your primary Activity"
+                description "Name of your app.  Defaults to the last part of the package name capitalized."
+              }
+              option("activity"){
+                argument :required
+                description "Name of your primary Activity.  Defaults to the name of the application with Activity appended."
+              }
+              option("path"){
+                argument :required
+                description "Path to where you want your app.  Defaults to the last part og the package name."
+              }
+              option("min_sdk") {
+                argument :required
+                defaults 'android-7'
+                description "Minimum android version supported. must begin with 'android-'."
+              }
+              option("target") {
+                argument :required
+                description "Android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
               }
 
               def run
-                path = params['path'].value
-                name = params['name'].value
-                target = params['target'].value
-                min_sdk = params['min_sdk'].value
                 package = params['package'].value
-                activity = params['activity'].value
+                name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
+                activity = params['activity'].value || "#{name}Activity"
+                path = params['path'].value || package.split('.').last
+                min_sdk = params['min_sdk'].value
+                target = params['target'].value || min_sdk
 
                 abort "path must be to a directory that does not yet exist. it will be created" if
                 File.exists?(path)
