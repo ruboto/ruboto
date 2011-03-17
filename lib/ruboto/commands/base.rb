@@ -268,6 +268,8 @@ module Ruboto
               end
 
               mode "core" do
+                include Ruboto::Util::Build
+
                 argument("class"){
                   required
                   validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener all).include?(i)}
