@@ -13,6 +13,7 @@ import android.os.Handler;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private Ruby __ruby__;
   private String scriptName;
+  private int splash = 0;
   private String remoteVariable = "";
   public Object[] args;
   private ProgressDialog loadingDialog; 
@@ -40,6 +41,10 @@ THE_CONSTANTS
     return this;
   }
 
+  public void setSplash(int a_res){
+    splash = a_res;
+  }
+
   public void setScriptName(String name){
     scriptName = name;
   }
@@ -60,8 +65,13 @@ THE_CONSTANTS
       backgroundCreate();
     	finishCreate();
     } else {
+      if (splash == 0) {
+        loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
+      } else {
+        requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        setContentView(splash);
+      }
       loadingThread.start();
-      loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
     }
   }
 
@@ -77,7 +87,7 @@ THE_CONSTANTS
   
   private final Runnable loadingComplete = new Runnable(){
     public void run(){
-      loadingDialog.dismiss();
+      if (loadingDialog != null) loadingDialog.dismiss();
       finishCreate();
       onStart();
       onResume();
