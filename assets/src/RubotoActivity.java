@@ -57,10 +57,11 @@ THE_CONSTANTS
     super.onCreate(arg0);
     
     if (Script.getRuby() != null) {
+      backgroundCreate();
     	finishCreate();
     } else {
       loadingThread.start();
-	  loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
+      loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
     }
   }
 
@@ -69,6 +70,7 @@ THE_CONSTANTS
   private final Thread loadingThread = new Thread() {
       public void run(){
         Script.setUpJRuby(null);
+        backgroundCreate();
         loadingHandler.post(loadingComplete);
       }
   };
@@ -82,14 +84,14 @@ THE_CONSTANTS
     }
   };
 
-  private void finishCreate() {
+  private void backgroundCreate() {
     Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
-
     getRuby();
-
     Script.defineGlobalVariable("$activity", this);
     Script.defineGlobalVariable("$bundle", args[0]);
+  }
 
+  private void finishCreate() {
     android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
     if (configBundle != null) {
