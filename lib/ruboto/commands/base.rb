@@ -332,6 +332,8 @@ module Ruboto
             mode "update" do
               include Ruboto::Util::LogAction
               include Ruboto::Util::Update
+              include Ruboto::Util::Verify
+
               argument("what"){
                 required
                 validate {|i| %w(jruby ruboto).include?(i)}
