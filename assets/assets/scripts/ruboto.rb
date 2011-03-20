@@ -9,7 +9,7 @@
 #
 #######################################################
 
-$RUBOTO_VERSION = 6
+$RUBOTO_VERSION = 7
 
 def confirm_ruboto_version(required_version, exact=true)
   raise "requires $RUBOTO_VERSION=#{required_version} or greater, current version #{$RUBOTO_VERSION}" if $RUBOTO_VERSION < required_version and not exact
@@ -30,38 +30,15 @@ class Object
   end
 end
 
-%w(Activity Dialog BroadcastReceiver Service).map do |klass|
-  java_import "org.ruboto.Ruboto#{klass}"
-end
-
-RUBOTO_CLASSES = [RubotoActivity, RubotoBroadcastReceiver, RubotoService]
-$init_methods = Hash.new 'create'
-$init_methods[RubotoBroadcastReceiver] = 'receive'
-
-java_import "android.app.Activity"
-java_import "android.content.Intent"
-java_import "android.os.Bundle"
-
-java_import "android.view.View"
-java_import "android.view.ViewGroup"
-
-java_import "android.widget.Toast"
-
-java_import "android.widget.ArrayAdapter"
-java_import "java.util.Arrays"
-java_import "java.util.ArrayList"
 java_import "android.R"
-
-java_import "android.util.Log"
 
 module Ruboto
   java_import "#{$package_name}.R"
   begin
     Id = JavaUtilities.get_proxy_class("#{$package_name}.R$id")
   rescue NameError
-    Log.d "RUBOTO", "no R$id"
+    Java::android.util.Log.d "RUBOTO", "no R$id"
   end
-
 end
 AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
@@ -70,7 +47,10 @@ AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 # Activity
 #
 
-class Activity
+def setup_activity
+ java_import "android.app.Activity"
+
+ Activity.class_eval do
   def start_ruboto_dialog(remote_variable, &block)
     start_ruboto_activity(remote_variable, RubotoDialog, &block)
   end
@@ -78,13 +58,13 @@ class Activity
   def start_ruboto_activity(remote_variable, klass=RubotoActivity, &block)
     $activity_init_block = block
 
-    if @initialized or not self.kind_of?(RubotoActivity)
-      b = Bundle.new
+    if @initialized or self == $activity
+      b = Java::android.os.Bundle.new
       b.putString("Remote Variable", remote_variable)
       b.putBoolean("Define Remote Variable", true)
       b.putString("Initialize Script", "#{remote_variable}.initialize_activity")
 
-      i = Intent.new
+      i = Java::android.content.Intent.new
       i.setClass self, klass.java_class
       i.putExtra("RubotoActivity Config", b)
 
@@ -101,13 +81,14 @@ class Activity
 
   #plugin
   def toast(text, duration=5000)
-    Toast.makeText(self, text, duration).show
+    Java::android.widget.Toast.makeText(self, text, duration).show
   end
 
   #plugin
   def toast_result(result, success, failure, duration=5000)
     toast(result ? success : failure, duration)
   end
+ end
 end
 
 #############################################################################
@@ -230,9 +211,13 @@ def ruboto_configure_activity(klass)
 
   ruboto_allow_handlers(klass)
 end
-ruboto_configure_activity(RubotoActivity)
 
-RUBOTO_CLASSES.each do |klass|
+#############################################################################
+#
+# Ruboto Set up for all app types (Activity, Service, BroadcastReceiver)
+#
+
+def ruboto_setup(klass, init_method="create")
   # Setup ability to handle callbacks
   ruboto_allow_handlers(klass)
 
@@ -243,7 +228,7 @@ RUBOTO_CLASSES.each do |klass|
     end
 
     eval %Q{
-      def handle_#{$init_methods[klass]}(&block)
+      def handle_#{init_method}(&block)
         when_launched &block
       end
     }
@@ -261,6 +246,7 @@ end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
   view_class = java_import "#{package_name}.#{class_name}"
+  return unless view_class
 
   RubotoActivity.class_eval "
      def #{(class_name.to_s.gsub(/([A-Z])/) {'_' + $1.downcase})[1..-1]}(params={})
@@ -275,6 +261,11 @@ def ruboto_import_widget(class_name, package_name="android.widget")
         rv
      end
    "
+
+  setup_list_view       if class_name == :ListView
+  setup_button          if class_name == :Button
+  setup_linear_layout   if class_name == :LinearLayout
+  setup_relative_layout if class_name == :RelativeLayout
 end
 
 #############################################################################
@@ -282,62 +273,104 @@ end
 # Extend Common View Classes
 #
 
-# Need to load these two to extend classes
-ruboto_import_widgets :ListView, :Button
+def setup_view
+ java_import "android.view.View"
+ java_import "android.view.ViewGroup"
 
-class View
-  @@convert_params = {
-     :wrap_content => ViewGroup::LayoutParams::WRAP_CONTENT,
-     :fill_parent  => ViewGroup::LayoutParams::FILL_PARENT,
-  }
+ View.class_eval do
+  @@convert_constants ||= {}
+
+  def self.add_constant_conversion(from, to)
+    @@convert_constants[from] = to
+  end
+
+  def self.convert_constant(from)
+    @@convert_constants[from] or from
+  end
+
+  def self.setup_constant_conversion
+    (self.constants - self.superclass.constants).each do |i|
+      View.add_constant_conversion i.downcase.to_sym, self.const_get(i)
+    end
+  end
 
   def configure(context, params = {})
     if width = params.delete(:width)
-      getLayoutParams.width = @@convert_params[width] or width
+      getLayoutParams.width = View.convert_constant(width)
     end
 
     if height = params.delete(:height)
-      getLayoutParams.height = @@convert_params[height] or height
+      getLayoutParams.height = View.convert_constant(height)
+    end
+
+    if layout = params.delete(:layout)
+      lp = getLayoutParams
+      layout.each do |k, v|
+        values = (v.is_a?(Array) ? v : [v]).map{|i| @@convert_constants[i] or i}
+        lp.send("#{k.to_s.gsub(/_([a-z])/) {$1.upcase}}", *values)
+      end
     end
 
     params.each do |k, v|
-      if v.is_a?(Array)
-        self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) {$2.upcase}}", *v)
-      else
-        self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) {$2.upcase}}", v)
+      values = (v.is_a?(Array) ? v : [v]).map{|i| @@convert_constants[i] or i}
+      self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) {$2.upcase}}", *values)
+    end
+  end
+ end
+
+ View.add_constant_conversion :wrap_content, ViewGroup::LayoutParams::WRAP_CONTENT
+ View.add_constant_conversion :fill_parent,  ViewGroup::LayoutParams::FILL_PARENT
+end
+
+#############################################################################
+#
+# Special widget setup
+#
+
+def setup_linear_layout
+  LinearLayout.setup_constant_conversion
+end
+
+def setup_relative_layout
+  RelativeLayout.setup_constant_conversion
+end
+
+def setup_button
+  Button.class_eval do
+    def configure(context, params = {})
+      setOnClickListener(context)
+      super(context, params)
+    end
+  end
+
+  ruboto_register_handler("org.ruboto.callbacks.RubotoOnClickListener", "click", Button, "setOnClickListener")
+end
+
+def setup_list_view
+  ListView.class_eval do
+    attr_reader :adapter, :adapter_list
+
+    def configure(context, params = {})
+      if params.has_key? :list
+        @adapter_list = Java::java.util.ArrayList.new
+        @adapter_list.addAll(params[:list])
+        @adapter = Java::android.widget.ArrayAdapter.new(context, R::layout::simple_list_item_1, @adapter_list)
+        setAdapter @adapter
+        params.delete :list
       end
+      setOnItemClickListener(context)
+      super(context, params)
+    end
+
+    def reload_list(list)
+      @adapter_list.clear();
+      @adapter_list.addAll(list)
+      @adapter.notifyDataSetChanged
+      invalidate
     end
   end
-end
 
-class ListView
-  attr_reader :adapter, :adapter_list
-
-  def configure(context, params = {})
-    if params.has_key? :list
-      @adapter_list = ArrayList.new
-      @adapter_list.addAll(params[:list])
-      @adapter = ArrayAdapter.new(context, R::layout::simple_list_item_1, @adapter_list)
-      setAdapter @adapter
-      params.delete :list
-    end
-    setOnItemClickListener(context)
-    super(context, params)
-  end
-
-  def reload_list(list)
-    @adapter_list.clear();
-    @adapter_list.addAll(list)
-    @adapter.notifyDataSetChanged
-    invalidate
-  end
-end
-
-class Button
-  def configure(context, params = {})
-    setOnClickListener(context)
-    super(context, params)
-  end
+  ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
 end
 
 #############################################################################
@@ -381,9 +414,6 @@ def ruboto_register_handler(handler_class, unique_name, for_class, method_name)
     end
   "
 end
-
-ruboto_register_handler("org.ruboto.callbacks.RubotoOnClickListener", "click", Button, "setOnClickListener")
-ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
 
 #############################################################################
 #
@@ -461,5 +491,29 @@ def setup_preferences
   end
 
   @preferences_setup_complete = true
+end
+
+#############################################################################
+#############################################################################
+#
+# Final set up depending on globals
+#
+
+if $activity
+  java_import "org.ruboto.RubotoActivity"
+  setup_activity
+  ruboto_configure_activity(RubotoActivity)
+  ruboto_setup(RubotoActivity)
+  setup_view
+end
+
+if $service
+  java_import "org.ruboto.RubotoService"
+  ruboto_setup(RubotoService)
+end
+
+if $broadcast_receiver
+  java_import "org.ruboto.RubotoBroadcastReceiver"
+  ruboto_setup(RubotoBroadcastReceiver, "receive")
 end
 
