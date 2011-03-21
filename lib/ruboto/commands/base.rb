@@ -77,7 +77,7 @@ module Ruboto
                 puts "\nCopying files:"
                 copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, root
 
-                %w{Rakefile .gitignore assets test}.each do |f|
+                %w{Rakefile .gitignore assets res test}.each do |f|
                   log_action(f) {copier.copy f}
                 end
 
