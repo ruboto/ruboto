@@ -101,6 +101,7 @@ namespace :install do
   end
 end
 
+desc 'Copy scripts to emulator'
 task :update_scripts do
   manifest
   Dir.chdir('assets') do
