@@ -67,6 +67,10 @@ module Ruboto
                 root = File.expand_path(path)
                 print "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
+                Dir.chdir path do
+                  verify_strings.root.elements['string'].text = name
+                  File.open("res/values/strings.xml", 'w') {|f| verify_strings.document.write(f, 4)}
+                end
                 puts "Done"
 
                 print "\nGenerating Android test project #{name} in #{root}..."
