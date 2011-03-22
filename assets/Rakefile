@@ -79,7 +79,7 @@ task :publish => :align do
 end
 
 task :start_app do
-  `adb shell am start -a android.intent.action.MAIN -n no.datek.nettbuss.operator/.StartupActivity`
+  `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
 end
 
 task :stop_app do
@@ -155,5 +155,6 @@ end
 
 def package() manifest.root.attribute('package') end
 def version() strings :version_name end
-def app_name()  strings :app_name end
+def app_name() strings :app_name end
+def main_activity() manifest.root.elements['application'].elements['activity'].attributes['android:name'] end
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
