@@ -17,6 +17,5 @@ $activity.handle_create do |bundle|
       @text_view.setText "What hath Matz wrought!"
       toast 'Flipped a bit via butterfly'
     end
-    true
   end
 end
