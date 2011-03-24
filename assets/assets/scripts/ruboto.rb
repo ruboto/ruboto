@@ -20,16 +20,6 @@ require 'java'
 
 $package_name = "THE_PACKAGE"
 
-class Object
-  def self.android
-    Java::android
-  end
-
-  def android
-    self.class.android
-  end
-end
-
 java_import "android.R"
 
 module Ruboto
