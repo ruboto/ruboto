@@ -45,6 +45,12 @@ module Ruboto
         @target_sdk
       end
 
+      def verify_strings
+        abort "cannot find your strings.xml to extract info from it. Make sure you're in the root directory of your app" unless
+        File.exists? 'res/values/strings.xml'
+        @strings ||= REXML::Document.new(File.read('res/values/strings.xml'))
+      end
+
       def verify_api
         Ruboto::API.api
       end
