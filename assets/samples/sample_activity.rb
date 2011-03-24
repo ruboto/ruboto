@@ -1,4 +1,4 @@
-require 'ruboto.rb'
+require 'ruboto'
 
 ruboto_import_widgets :TextView, :LinearLayout, :Button
 

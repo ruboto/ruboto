@@ -1,4 +1,5 @@
-require 'ruboto.rb'
+require 'ruboto'
+
 $service.handle_create do
   # define what your service does. Directly put any code that you want
   # executed when onCreate gets called. Define the rest of the

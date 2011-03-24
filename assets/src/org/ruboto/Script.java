@@ -160,7 +160,7 @@ public class Script {
 
                 if (assets.list(from + "/" + f).length == 0) {
                     InputStream is = assets.open(from + "/" + f);
-                    OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest));
+                    OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest), 8192);
 
                     int n;
                     while ((n = is.read(buffer, 0, buffer.length)) != -1) {
@@ -180,8 +180,9 @@ public class Script {
 
     public static void copyScriptsIfNeeded(String to, AssetManager assets) {
         /* the if makes sure we only do this the first time */
-        if (configDir(to))
+        if (configDir(to)) {
             copyScripts("scripts", scriptsDirFile, assets);
+        }
     }
 
 
@@ -220,7 +221,7 @@ public class Script {
     }
 
     public String getContents() throws IOException {
-        BufferedReader buffer = new BufferedReader(new FileReader(getFile()));
+        BufferedReader buffer = new BufferedReader(new FileReader(getFile()), 8192);
         StringBuilder source = new StringBuilder();
         while (true) {
             String line = buffer.readLine();
