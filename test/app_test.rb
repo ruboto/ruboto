@@ -26,7 +26,7 @@ class AppTest < Test::Unit::TestCase
     filename = "#{APP_DIR}/assets/scripts/ruboto_sample_app_activity.rb"
     s = File.read(filename)
     s.gsub!(/(require 'ruboto.rb')/, "\\1\nrequire 'yaml'")
-    File.open(filename, 'w'){|f| s}
+    File.open(filename, 'w'){|f| f << s}
     run_app_tests
   end
 
@@ -34,6 +34,7 @@ class AppTest < Test::Unit::TestCase
 
   def run_app_tests
     Dir.chdir "#{APP_DIR}/test" do
+      system "adb uninstall #{PACKAGE}"
       system 'ant run-tests'
       raise "tests failed with return code #$?" unless $? == 0
       system "adb uninstall #{PACKAGE}"

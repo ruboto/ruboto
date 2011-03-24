@@ -41,6 +41,7 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
             Log.d(getClass().getName(), "activity ok");
             runTestOnUiThread(new Runnable() {
                 public void run() {
+                    Log.d(getClass().getName(), "calling setup");
                     RuntimeHelpers.invoke(setup.getRuntime().getCurrentContext(), setup, "call",
                             JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
                     Log.d(getClass().getName(), "setup ok");
