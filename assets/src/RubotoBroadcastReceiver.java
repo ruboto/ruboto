@@ -19,11 +19,8 @@ THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
   private Ruby getRuby() {
-    if (__ruby__ == null) __ruby__ = Script.getRuby();
-
     if (__ruby__ == null) {
-      Script.setUpJRuby(null);
-      __ruby__ = Script.getRuby();
+        __ruby__ = Script.getRuby();
     }
 
     return __ruby__;

@@ -41,7 +41,7 @@ module Ruboto
               }
               option("path"){
                 argument :required
-                description "Path to where you want your app.  Defaults to the last part og the package name."
+                description "Path to where you want your app.  Defaults to the last part of the package name."
               }
               option("min_sdk") {
                 argument :required
@@ -61,12 +61,12 @@ module Ruboto
                 min_sdk = params['min_sdk'].value
                 target = params['target'].value || min_sdk
 
-                abort "path must be to a directory that does not yet exist. it will be created" if
-                File.exists?(path)
+                abort "path must be to a directory that does not yet exist. It will be created." if File.exists?(path)
 
                 root = File.expand_path(path)
                 print "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
+                exit $? unless $? == 0
                 Dir.chdir path do
                   verify_strings.root.elements['string'].text = name
                   File.open("res/values/strings.xml", 'w') {|f| verify_strings.document.write(f, 4)}

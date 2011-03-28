@@ -28,6 +28,7 @@ import org.jruby.runtime.scope.ManyVarsDynamicScope;
 
 import android.os.Environment;
 import android.util.Log;
+import android.content.Context;
 import android.content.res.AssetManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -61,7 +62,11 @@ public class Script {
         return initialized;
     }
 
-    public static synchronized Ruby setUpJRuby(PrintStream out) {
+    public static synchronized Ruby setUpJRuby(Context appContext) {
+        return setUpJRuby(appContext, System.out);
+    }
+
+    public static synchronized Ruby setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
         	System.setProperty("jruby.interfaces.useProxy", "true");
             RubyInstanceConfig config = new RubyInstanceConfig();
@@ -82,6 +87,7 @@ public class Script {
             DynamicScope currentScope = context.getCurrentScope();
             scope = new ManyVarsDynamicScope(new EvalStaticScope(currentScope.getStaticScope()), currentScope);
             
+            copyScriptsIfNeeded(appContext);
             initialized = true;
         }
 
@@ -178,7 +184,9 @@ public class Script {
         }
     }
 
-    public static void copyScriptsIfNeeded(String to, AssetManager assets) {
+    private static void copyScriptsIfNeeded(Context context) {
+        String to = context.getFilesDir().getAbsolutePath() + "/scripts";
+        AssetManager assets = context.getAssets();
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
             copyScripts("scripts", scriptsDirFile, assets);
