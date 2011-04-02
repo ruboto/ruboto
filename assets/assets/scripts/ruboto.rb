@@ -164,8 +164,12 @@ def ruboto_configure_activity(klass)
       setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
 
       p = Proc.new do |num,menu_item|
-        (instance_eval &(menu_item.on_click); return true) if @menu
-        false
+        if @menu
+          instance_eval &(menu_item.on_click)
+          true
+        else
+          false
+        end
       end
       setCallbackProc(self.class.const_get("CB_MENU_ITEM_SELECTED"), p)
     end
@@ -192,8 +196,17 @@ def ruboto_configure_activity(klass)
       setCallbackProc(self.class.const_get("CB_CREATE_CONTEXT_MENU"), p)
 
       p = Proc.new do |menu_item|
-        (instance_eval {menu_item.on_click.call(menu_item.getMenuInfo.position)}; return true) if menu_item.on_click
-        false
+        if menu_item.on_click
+          arg = menu_item
+          begin
+            arg = menu_item.getMenuInfo.position
+          rescue
+          end
+          instance_eval {menu_item.on_click.call(arg)}
+          true
+        else
+          false
+        end
       end
       setCallbackProc(self.class.const_get("CB_CONTEXT_ITEM_SELECTED"), p)
     end
