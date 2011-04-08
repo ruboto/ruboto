@@ -268,8 +268,8 @@ module Ruboto
 
                 argument("class"){
                   required
-                  validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener all).include?(i)}
-                  description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
+                  validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i)}
+                  description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, OnItemSelectedListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
                 }
 
                 option("method_base"){
