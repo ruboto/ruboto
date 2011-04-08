@@ -158,14 +158,16 @@ def ruboto_configure_activity(klass)
 
     def handle_create_options_menu &block
       p = Proc.new do |*args|
-        @menu, @context_menu = args[0], nil
+        @menu = args[0]
         instance_eval {block.call(*args)} if block
       end
       setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
 
       p = Proc.new do |num,menu_item|
-        if @menu
+        # handles a problem where this is called for context items
+        unless @just_processed_context_item == menu_item
           instance_eval &(menu_item.on_click)
+          @just_processed_context_item = nil
           true
         else
           false
@@ -190,7 +192,7 @@ def ruboto_configure_activity(klass)
 
     def handle_create_context_menu &block
       p = Proc.new do |*args|
-        @menu, @context_menu = nil, args[0]
+        @context_menu = args[0]
         instance_eval {block.call(*args)} if block
       end
       setCallbackProc(self.class.const_get("CB_CREATE_CONTEXT_MENU"), p)
@@ -203,6 +205,7 @@ def ruboto_configure_activity(klass)
           rescue
           end
           instance_eval {menu_item.on_click.call(arg)}
+          @just_processed_context_item = menu_item
           true
         else
           false
