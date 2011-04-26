@@ -21,16 +21,12 @@ require 'java'
 $package_name = ($activity || $service || $broadcast_receiver).package_name
 $package = eval("Java::#{$package_name}")
 
-class Object
-  def self.android
-    Java::android
-  end
-
+# Create convenience method for top-level android package so we do not need to prefix with 'Java::'.
+module Kernel
   def android
-    Java::android
+    JavaUtilities.get_package_module_dot_format('android')    
   end
 end
-module Java ; undef android ; end
 
 java_import "android.R"
 
