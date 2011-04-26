@@ -92,6 +92,7 @@ module Ruboto
                   update_jruby true
 
                   log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
+                    verify_manifest.elements['application'].attributes['android:hardwareAccelerated'] = 'true'
                     verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
                     verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog",
                       "android:theme" => "@android:style/Theme.Dialog"}
