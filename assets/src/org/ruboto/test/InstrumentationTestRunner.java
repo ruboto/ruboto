@@ -37,7 +37,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         suite = new TestSuite("Sweet");
         
         try {
-            Script.setUpJRuby(null);
+            Script.setUpJRuby(getTargetContext());
             Script.defineGlobalVariable("$runner", this);
             Script.defineGlobalVariable("$test", this);
             Script.defineGlobalVariable("$suite", suite);
@@ -65,7 +65,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     public void test(String name, IRubyObject block) {
-        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.FROYO) {
+        if (android.os.Build.VERSION.SDK_INT <= 8) {
           name ="runTest";
         }
         Test test = new ActivityTest(activityClass, setup, name, block);

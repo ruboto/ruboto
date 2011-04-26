@@ -24,7 +24,7 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
     private final IRubyObject block;
 
     public ActivityTest(Class activityClass, IRubyObject setup, String name, IRubyObject block) {
-        super(activityClass);
+        super(activityClass.getPackage().getName(), activityClass);
         setName(name);
         this.setup = setup;
         this.block = block;
@@ -34,7 +34,7 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
     public void runTest() throws Exception {
         Log.d(getClass().getName(), "runTest");
         Log.d(getClass().getName(), "runTest: " + getName());
-        Script.setUpJRuby(null);
+        Script.setUpJRuby(getActivity());
         Log.d(getClass().getName(), "ruby ok");
         try {
             final Activity activity = getActivity();
