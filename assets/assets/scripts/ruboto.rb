@@ -18,7 +18,19 @@ end
 
 require 'java'
 
-$package_name = "THE_PACKAGE"
+$package_name = ($activity || $service).package_name
+$package = eval("Java::#$package_name")
+
+class Object
+  def self.android
+    Java::android
+  end
+
+  def android
+    Java::android
+  end
+end
+module Java ; undef android ; end
 
 java_import "android.R"
 
@@ -269,6 +281,7 @@ def ruboto_import_widget(class_name, package_name="android.widget")
    "
 
   setup_list_view       if class_name == :ListView
+  setup_spinner         if class_name == :Spinner
   setup_button          if class_name == :Button
   setup_linear_layout   if class_name == :LinearLayout
   setup_relative_layout if class_name == :RelativeLayout
@@ -360,7 +373,8 @@ def setup_list_view
       if params.has_key? :list
         @adapter_list = Java::java.util.ArrayList.new
         @adapter_list.addAll(params[:list])
-        @adapter = Java::android.widget.ArrayAdapter.new(context, R::layout::simple_list_item_1, @adapter_list)
+        item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
+        @adapter = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
         setAdapter @adapter
         params.delete :list
       end
@@ -369,7 +383,7 @@ def setup_list_view
     end
 
     def reload_list(list)
-      @adapter_list.clear();
+      @adapter_list.clear
       @adapter_list.addAll(list)
       @adapter.notifyDataSetChanged
       invalidate
@@ -377,6 +391,34 @@ def setup_list_view
   end
 
   ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemClickListener", "item_click", ListView, "setOnItemClickListener")
+end
+
+def setup_spinner
+  Spinner.class_eval do
+    attr_reader :adapter, :adapter_list
+
+    def configure(context, params = {})
+      if params.has_key? :list
+        @adapter_list = Java::java.util.ArrayList.new
+        @adapter_list.addAll(params[:list])
+        item_layout = params.delete(:item_layout) || R::layout::simple_spinner_item
+        @adapter = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
+        setAdapter @adapter
+        params.delete :list
+      end
+      setOnItemSelectedListener(context)
+      super(context, params)
+    end
+
+    def reload_list(list)
+      @adapter.clear
+      @adapter.addAll(list)
+      @adapter.notifyDataSetChanged
+      invalidate
+    end
+  end
+
+  ruboto_register_handler("org.ruboto.callbacks.RubotoOnItemSelectedListener", "item_selected", Spinner, "setOnItemSelectedListener")
 end
 
 #############################################################################

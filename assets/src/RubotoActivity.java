@@ -22,11 +22,13 @@ THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
   private Ruby getRuby() {
-    if (__ruby__ == null) __ruby__ = Script.getRuby();
-
     if (__ruby__ == null) {
-      Script.setUpJRuby(null);
-      __ruby__ = Script.getRuby();
+        __ruby__ = Script.getRuby();
+
+        if (__ruby__ == null) {
+          Script.setUpJRuby(this);
+          __ruby__ = Script.getRuby();
+        }
     }
 
     return __ruby__;
@@ -79,7 +81,6 @@ THE_CONSTANTS
   
   private final Thread loadingThread = new Thread() {
       public void run(){
-        Script.setUpJRuby(null);
         backgroundCreate();
         loadingHandler.post(loadingComplete);
       }
@@ -95,7 +96,6 @@ THE_CONSTANTS
   };
 
   private void backgroundCreate() {
-    Script.copyScriptsIfNeeded(getFilesDir().getAbsolutePath() + "/scripts", getAssets());
     getRuby();
     Script.defineGlobalVariable("$activity", this);
     Script.defineGlobalVariable("$bundle", args[0]);

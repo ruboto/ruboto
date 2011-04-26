@@ -125,7 +125,7 @@ module Ruboto
       #   on the API specifications.
       #
       def generate_core_classes(params)
-        %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener).each do |i|
+        %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener android.widget.AdapterView.OnItemSelectedListener).each do |i|
           name = i.split(".")[-1]
           if(params[:class] == name or params[:class] == "all")
             generate_subclass_or_interface({:package => "org.ruboto.callbacks", :class => i, :name => "Ruboto#{name}"})
