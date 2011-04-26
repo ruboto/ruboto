@@ -53,15 +53,16 @@ def setup_activity
  java_import "android.app.Activity"
 
  Activity.class_eval do
-  def start_ruboto_dialog(remote_variable, &block)
-    start_ruboto_activity(remote_variable, RubotoDialog, &block)
+  def start_ruboto_dialog(remote_variable, theme=R.style::Theme_Dialog, &block)
+    start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
   end
 
-  def start_ruboto_activity(remote_variable, klass=RubotoActivity, &block)
+  def start_ruboto_activity(remote_variable, klass=RubotoActivity, theme=nil, &block)
     $activity_init_block = block
 
     if @initialized or self == $activity
       b = Java::android.os.Bundle.new
+      b.putInt("Theme", theme) if theme
       b.putString("Remote Variable", remote_variable)
       b.putBoolean("Define Remote Variable", true)
       b.putString("Initialize Script", "#{remote_variable}.initialize_activity")
@@ -264,13 +265,21 @@ end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
   view_class = java_import "#{package_name}.#{class_name}"
-  return unless view_class
 
   RubotoActivity.class_eval "
      def #{(class_name.to_s.gsub(/([A-Z])/) {'_' + $1.downcase})[1..-1]}(params={})
-        rv = #{class_name}.new self
-        @view_parent.addView(rv) if @view_parent
+        force_style = params.delete(:default_style)
+        rv = force_style ? #{class_name}.new(self, nil, force_style) : #{class_name}.new(self)
+
+        force_parent = params.delete(:parent)
+        if force_index = params.delete(:parent_index)
+          (force_parent || @view_parent).addView(rv, force_index) if (force_parent || @view_parent)
+        else
+          (force_parent || @view_parent).addView(rv) if (force_parent || @view_parent)
+        end
+
         rv.configure self, params
+
         if block_given?
           old_view_parent, @view_parent = @view_parent, rv
           yield
