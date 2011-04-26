@@ -18,8 +18,8 @@ end
 
 require 'java'
 
-$package_name = ($activity || $service).package_name
-$package = eval("Java::#$package_name")
+$package_name = ($activity || $service || $broadcast_receiver).package_name
+$package = eval("Java::#{$package_name}")
 
 class Object
   def self.android
