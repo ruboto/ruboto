@@ -61,6 +61,12 @@ THE_CONSTANTS
     args = new Object[1];
     args[0] = arg0;
 
+    android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
+
+    if (configBundle != null && configBundle.containsKey("Theme")) {
+      setTheme(configBundle.getInt("Theme"));
+    }
+
     super.onCreate(arg0);
     
     if (Script.getRuby() != null) {
