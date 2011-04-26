@@ -1,38 +1,29 @@
 package org.ruboto;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.PrintStream;
 
 import org.jruby.Ruby;
 import org.jruby.RubyInstanceConfig;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.parser.EvalStaticScope;
-import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.ThreadContext;
+import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.scope.ManyVarsDynamicScope;
 
-import android.os.Environment;
-import android.util.Log;
 import android.content.Context;
 import android.content.res.AssetManager;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import android.util.Log;
 
 public class Script {
     private static String scriptsDir = "scripts";
@@ -206,7 +197,6 @@ public class Script {
     public Script(String name, String contents) {
         this.name = name;
         this.contents = contents;
-        File file = getFile();
     }
 
     /*************************************************************************************************
