@@ -47,7 +47,7 @@ module Ruboto
           puts "New version: #{from_text[/\$RUBOTO_VERSION = (\d+)/, 1]}"
           puts "Old version: #{to_text ? to_text[/\$RUBOTO_VERSION = (\d+)/, 1] : 'none'}"
 
-          abort "The ruboto.rb verion has not changed. Use --force to force update." if
+          abort "The ruboto.rb version has not changed. Use --force to force update." if
           from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
         end
 
