@@ -4,3 +4,4 @@ tmp
 .bundle
 *.gem
 .idea
+*~
