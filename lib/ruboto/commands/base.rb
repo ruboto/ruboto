@@ -361,13 +361,22 @@ module Ruboto
               end
             end
 
+            option "version" do
+               description "display ruboto version"
+            end
+
             # just running `ruboto`
             def run
+              version = Gem.searcher.find('ruboto').version.version
+              if params['version'].value
+                puts version
+              else
               puts %Q{
-                Ruboto -- Ruby for Android
+                Ruboto -- Ruby for Android #{version}
                 Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
                 Execute `ruboto --help` for other options
               }
+              end
             end
           }
         end

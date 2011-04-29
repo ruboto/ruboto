@@ -175,12 +175,17 @@ public class Script {
         }
     }
 
+    public static void copyAssets(Context context, String directory) {
+    	File dest = new File(scriptsDirFile.getParentFile(), directory);
+        dest.mkdir();
+        copyScripts(directory, dest, context.getAssets());
+    }
+    
     private static void copyScriptsIfNeeded(Context context) {
         String to = context.getFilesDir().getAbsolutePath() + "/scripts";
-        AssetManager assets = context.getAssets();
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
-            copyScripts("scripts", scriptsDirFile, assets);
+        	copyAssets(context, "scripts");
         }
     }
 
