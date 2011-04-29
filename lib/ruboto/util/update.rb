@@ -48,11 +48,11 @@ module Ruboto
           puts "Old version: #{to_text ? to_text[/\$RUBOTO_VERSION = (\d+)/, 1] : 'none'}"
 
           abort "The ruboto.rb version has not changed. Use --force to force update." if
-          from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
+              from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
         end
 
         log_action("Copying ruboto.rb and setting the package name") do
-          File.open(to, 'w') {|f| f << from_text.gsub("THE_PACKAGE", verify_package).gsub("ACTIVITY_NAME", verify_activity)}
+          File.open(to, 'w') {|f| f << from_text}
         end
       end
 
