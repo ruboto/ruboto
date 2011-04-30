@@ -1,6 +1,6 @@
 #######################################################
 #
-# ruboto.rb (by Scott Moyer)
+# ruboto.rb
 #
 # - Wrapper for using RubotoActivity, RubotoService, and
 #     RubotoBroadcastReceiver. 
@@ -9,7 +9,7 @@
 #
 #######################################################
 
-$RUBOTO_VERSION = 7
+$RUBOTO_VERSION = 8
 
 def confirm_ruboto_version(required_version, exact=true)
   raise "requires $RUBOTO_VERSION=#{required_version} or greater, current version #{$RUBOTO_VERSION}" if $RUBOTO_VERSION < required_version and not exact
@@ -408,6 +408,7 @@ def setup_spinner
         @adapter_list.addAll(params[:list])
         item_layout = params.delete(:item_layout) || R::layout::simple_spinner_item
         @adapter = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
+        @adapter.setDropDownViewResource(params.delete(:dropdown_layout) || R::layout::simple_spinner_dropdown_item)
         setAdapter @adapter
         params.delete :list
       end
