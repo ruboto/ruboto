@@ -14,6 +14,10 @@ module Ruboto
         @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml')).root
       end
 
+      def save_manifest
+        File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
+      end
+      
       def verify_package
         verify_manifest
         @package ||= @manifest.attribute('package').value

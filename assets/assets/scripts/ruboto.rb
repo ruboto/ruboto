@@ -265,10 +265,27 @@ def ruboto_import_widget(class_name, package_name="android.widget")
   RubotoActivity.class_eval "
      def #{(class_name.to_s.gsub(/([A-Z])/) {'_' + $1.downcase})[1..-1]}(params={})
         force_style = params.delete(:default_style)
-        rv = force_style ? #{class_name}.new(self, nil, force_style) : #{class_name}.new(self)
-
         force_parent = params.delete(:parent)
-        if force_index = params.delete(:parent_index)
+        force_index = params.delete(:parent_index)
+        if force_style
+          if params.any?
+            attributes = android.util.AttributeSet.impl do |method, *args|
+              puts 'Not implemented, yet.'
+              puts %Q{Unhandled AttributeSet method: \#{method}(\#{args.map{|a| a.inspect}.join(', ')})}
+            end
+          else
+            attributes = nil
+          end
+          rv = #{class_name}.new(self, attributes, force_style)
+        else
+          if api_key = params.delete(:apiKey)
+            rv = #{class_name}.new(self, api_key)
+          else
+            rv = #{class_name}.new(self)
+          end
+        end
+
+        if force_index
           (force_parent || @view_parent).addView(rv, force_index) if (force_parent || @view_parent)
         else
           (force_parent || @view_parent).addView(rv) if (force_parent || @view_parent)

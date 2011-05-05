@@ -2,8 +2,8 @@ require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
 class AppTest < Test::Unit::TestCase
-  PACKAGE ='org.ruboto.sample_app'
-  APP_NAME = 'RubotoSampleApp'
+  PACKAGE ='org.ruboto.test_app'
+  APP_NAME = 'RubotoTestApp'
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join PROJECT_DIR, 'tmp', APP_NAME
 
@@ -23,7 +23,7 @@ class AppTest < Test::Unit::TestCase
   end
 
   def test_that_yaml_loads
-    filename = "#{APP_DIR}/assets/scripts/ruboto_sample_app_activity.rb"
+    filename = "#{APP_DIR}/assets/scripts/ruboto_test_app_activity.rb"
     s = File.read(filename)
     s.gsub!(/(require 'ruboto.rb')/, "\\1\nrequire 'yaml'")
     File.open(filename, 'w'){|f| f << s}

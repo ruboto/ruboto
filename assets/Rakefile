@@ -26,7 +26,14 @@ dirs.each { |d| directory d }
 
 CLEAN.include('tmp', 'bin', generated_libs)
 
-ant_import if ant_loaded
+if ant_loaded
+  ant_import
+else
+  desc "build package and install it on the emulator or device"
+  task :install do
+    system 'ant install'
+  end
+end
 
 file stdlib_precompiled => :compile_stdlib
 file jruby_ruboto_jar => generated_libs do

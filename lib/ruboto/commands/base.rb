@@ -10,7 +10,6 @@ require 'ruboto/util/build'
 require 'ruboto/util/update'
 require 'ruboto/util/verify'
 require 'ruboto/util/scan_in_api'
-
 require 'ruboto/core_ext/array'
 require 'ruboto/core_ext/object'
 
@@ -64,7 +63,7 @@ module Ruboto
                 abort "path must be to a directory that does not yet exist. It will be created." if File.exists?(path)
 
                 root = File.expand_path(path)
-                print "\nGenerating Android app #{name} in #{root}..."
+                puts "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
                 exit $? unless $? == 0
                 Dir.chdir path do
@@ -73,313 +72,251 @@ module Ruboto
                 end
                 puts "Done"
 
-                print "\nGenerating Android test project #{name} in #{root}..."
-                system "android create test-project -m .. -n #{name}Test -p #{path}/test"
-                FileUtils.rm_rf File.join(root, 'test', 'src', package.split('.'))
-                puts "Done"
-
-                puts "\nCopying files:"
-                copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, root
-
-                %w{Rakefile .gitignore assets res test}.each do |f|
-                  log_action(f) {copier.copy f}
-                end
-
-                log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java", "src/org/ruboto"}
-                log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test/src/org/ruboto/test"}
-
                 Dir.chdir root do
+                  update_test true
+                  update_assets true
+                  update_classes true
                   update_jruby true
-
-                  log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
-                    if min_sdk.to_i >= 11
-                      verify_manifest.elements['application'].attributes['android:hardwareAccelerated'] = 'true'
-                    end
-                    verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
-                    verify_manifest.elements['application'].add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog",
-                      "android:theme" => "@android:style/Theme.Dialog"}
-                      verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk[/\d+/], "android:targetSdkVersion" => target[/\d+/]}
-                      File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
-                    end
-
-                    update_ruboto true
-
-                    generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => true, :implements => "")
-                  end
+                  update_ruboto true
+                  update_manifest min_sdk[/\d+/], target[/\d+/], true
+                  update_core_classes true
 
                   log_action("Generating the default Activity and script") do
                     generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
                   end
-
-                  Dir.chdir File.join(root, 'test') do
-                    test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
-                    test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
-                    File.open("AndroidManifest.xml", 'w') {|f| test_manifest.document.write(f, 4)}
-                    File.open('build.properties', 'a'){|f| f.puts 'test.runner=org.ruboto.test.InstrumentationTestRunner'}
-                    ant_setup_line = /^(\s*<setup\s*\/>\n)/
-                    run_tests_override = <<-EOF
-                    <macrodef name="run-tests-helper">
-                    <attribute name="emma.enabled" default="false"/>
-                    <element name="extra-instrument-args" optional="yes"/>
-                    <sequential>
-                    <echo>Running tests ...</echo>
-                    <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
-                    <arg line="${adb.device.arg}"/>
-                    <arg value="shell"/>
-                    <arg value="am"/>
-                    <arg value="instrument"/>
-                    <arg value="-w"/>
-                    <arg value="-e"/>
-                    <arg value="coverage"/>
-                    <arg value="@{emma.enabled}"/>
-                    <extra-instrument-args/>
-                    <arg value="${manifest.package}/${test.runner}"/>
-                    </exec>
-                    <echo message="${tests.output}"/>
-                    <fail message="Tests failed!!!">
-                    <condition>
-                      <or>
-                        <contains string="${tests.output}" substring="INSTRUMENTATION_FAILED"/>
-                        <contains string="${tests.output}" substring="FAILURES"/>
-                      </or>
-                    </condition>
-                    </fail>
-                    </sequential>
-                    </macrodef>
-
-  <target name="run-tests-quick"
-          description="Runs tests with previously installed packages">
-    <run-tests-helper />
-  </target>
-
-                    EOF
-                    ant_script = File.read('build.xml').gsub(ant_setup_line, "\\1#{run_tests_override}")
-                    File.open('build.xml', 'w'){|f| f << ant_script}
-                  end
-
-                  puts "\nHello, #{name}\n"
                 end
-              end
 
-              mode "class" do
-                include Ruboto::Util::Build
-                include Ruboto::Util::Verify
-
-                argument("class"){
-                  required
-                  description "the Android Class that you want."
-                }
-
-                option("script_name"){
-                  argument :required
-                  description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb. optional"
-                }
-
-                option("name"){
-                  required
-                  argument :required
-                  description "name of the class (and file). Should be CamelCase"
-                }
-
-
-                def run
-                  name = params['name'].value
-                  script_name = params['script_name'].value || "#{underscore(name)}.rb"
-                  klass = params['class'].value
-
-                  generate_inheriting_file klass, name, verify_package, script_name
-                end
-              end
-
-              mode "subclass" do
-                include Ruboto::Util::Build
-                
-                argument("class"){
-                  required
-                  description "the Android Class that you want to subclass (e.g., package.Class)."
-                }
-
-                option("name"){
-                  required
-                  argument :required
-                  description "name of the class (and file). Should be CamelCase"
-                }
-
-                option("method_base"){
-                  required
-                  validate {|i| %w(all on none abstract).include?(i)}
-                  argument :required
-                  description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)"
-                }
-
-                option("method_include"){
-                  argument :required
-                  defaults ""
-                  description "additional methods to add to the base list"
-                }
-
-                option("method_exclude"){
-                  argument :required
-                  defaults ""
-                  description "methods to remove from the base list"
-                }
-
-                option("implements"){
-                  required
-                  argument :required
-                  defaults ""
-                  description "comma separated list interfaces to implement"
-                }
-
-                option("force"){
-                  cast :boolean
-                  description "force added and deprecated methods not excluded to be create"
-                }
-
-                def run
-                  generate_subclass_or_interface(
-                  %w(class name method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
-                end
-              end
-
-              mode "interface" do
-                include Ruboto::Util::Build
-                
-                argument("interface"){
-                  required
-                  description "the Android Interface that you want to implement (e.g., package.Interface)."
-                }
-
-                option("name"){
-                  required
-                  argument :required
-                  description "name of the class (and file) that will implement the interface. Should be CamelCase"
-                }
-
-                option("force"){
-                  cast :boolean
-                  description "force added and deprecated interfaces to be create"
-                }
-
-                def run
-                  generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
-                end
-              end
-
-              mode "core" do
-                include Ruboto::Util::Build
-
-                argument("class"){
-                  required
-                  validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i)}
-                  description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, OnItemSelectedListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
-                }
-
-                option("method_base"){
-                  required
-                  argument :required
-                  validate {|i| %w(all on none).include?(i)}
-                  defaults "on"
-                  description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
-                }
-
-                option("method_include"){
-                  required
-                  argument :required
-                  defaults ""
-                  description "additional methods to add to the base list"
-                }
-
-                option("method_exclude"){
-                  required
-                  argument :required
-                  defaults ""
-                  description "methods to remove from the base list"
-                }
-
-                option("implements"){
-                  required
-                  argument :required
-                  defaults ""
-                  description "for classes only, interfaces to implement (cannot be used with 'gen core all')"
-                }
-
-                option("force"){
-                  cast :boolean
-                  description "force added and deprecated methods not excluded to be create"
-                }
-
-                def run
-                  abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless
-                  %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params["class"].value) or params["implements"].value == ""
-                  generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
-                end
-              end
-
-              mode "key" do
-                option("keystore"){
-                  default "~/.android/production.keystore"
-                  description "path to where the keystore will be saved. defaults to ~/.android/production.keystore"
-                }
-
-                option("alias"){
-                  required
-                  description "The 'alias' for the key. Identifies the key within the keystore. Required"
-                }
-
-                def run
-                  keystore = params['keystore'].value
-                  key_alias = params['alias'].value
-
-                  `keytool -genkey -keyalg rsa -keysize 4096 -validity 1000000 -keystore #{keystore} -alias #{key_alias}`
-                end
+                puts "\nHello, #{name}\n"
               end
             end
 
-            mode "update" do
-              include Ruboto::Util::LogAction
-              include Ruboto::Util::Update
+            mode "class" do
+              include Ruboto::Util::Build
               include Ruboto::Util::Verify
 
-              argument("what"){
+              argument("class"){
                 required
-                validate {|i| %w(jruby ruboto).include?(i)}
-                description "What do you want to update: 'jruby' or 'ruboto'"
+                description "the Android Class that you want."
               }
 
-              option("force"){
-                description "force and update even if the version hasn't changed"
+              option("script_name"){
+                argument :required
+                description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb. optional"
+              }
+
+              option("name"){
+                required
+                argument :required
+                description "name of the class (and file). Should be CamelCase"
               }
 
               def run
-                case params['what'].value
-                when "jruby" then
-                  update_jruby(params['force'].value)
-                when "ruboto" then
-                  update_ruboto(params['force'].value)
-                end
+                name = params['name'].value
+                script_name = params['script_name'].value || "#{underscore(name)}.rb"
+                klass = params['class'].value
+
+                generate_inheriting_file klass, name, verify_package, script_name
               end
             end
 
-            option "version" do
-               description "display ruboto version"
+            mode "subclass" do
+              include Ruboto::Util::Build
+
+              argument("class"){
+                required
+                description "the Android Class that you want to subclass (e.g., package.Class)."
+              }
+
+              option("name"){
+                required
+                argument :required
+                description "name of the class (and file). Should be CamelCase"
+              }
+
+              option("method_base"){
+                required
+                validate {|i| %w(all on none abstract).include?(i)}
+                argument :required
+                description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)"
+              }
+
+              option("method_include"){
+                argument :required
+                defaults ""
+                description "additional methods to add to the base list"
+              }
+
+              option("method_exclude"){
+                argument :required
+                defaults ""
+                description "methods to remove from the base list"
+              }
+
+              option("implements"){
+                required
+                argument :required
+                defaults ""
+                description "comma separated list interfaces to implement"
+              }
+
+              option("force"){
+                cast :boolean
+                description "force added and deprecated methods not excluded to be create"
+              }
+
+              def run
+                generate_subclass_or_interface(
+                %w(class name method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
+              end
             end
 
-            # just running `ruboto`
+            mode "interface" do
+              include Ruboto::Util::Build
+
+              argument("interface"){
+                required
+                description "the Android Interface that you want to implement (e.g., package.Interface)."
+              }
+
+              option("name"){
+                required
+                argument :required
+                description "name of the class (and file) that will implement the interface. Should be CamelCase"
+              }
+
+              option("force"){
+                cast :boolean
+                description "force added and deprecated interfaces to be create"
+              }
+
+              def run
+                generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+              end
+            end
+
+            mode "core" do
+              include Ruboto::Util::Build
+
+              argument("class"){
+                required
+                validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i)}
+                description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, OnItemSelectedListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
+              }
+
+              option("method_base"){
+                required
+                argument :required
+                validate {|i| %w(all on none).include?(i)}
+                defaults "on"
+                description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
+              }
+
+              option("method_include"){
+                required
+                argument :required
+                defaults ""
+                description "additional methods to add to the base list"
+              }
+
+              option("method_exclude"){
+                required
+                argument :required
+                defaults ""
+                description "methods to remove from the base list"
+              }
+
+              option("implements"){
+                required
+                argument :required
+                defaults ""
+                description "for classes only, interfaces to implement (cannot be used with 'gen core all')"
+              }
+
+              option("force"){
+                cast :boolean
+                description "force added and deprecated methods not excluded to be create"
+              }
+
+              def run
+                abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless
+                %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params["class"].value) or params["implements"].value == ""
+                generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
+              end
+            end
+
+            mode "key" do
+              option("keystore"){
+                default "~/.android/production.keystore"
+                description "path to where the keystore will be saved. defaults to ~/.android/production.keystore"
+              }
+
+              option("alias"){
+                required
+                description "The 'alias' for the key. Identifies the key within the keystore. Required"
+              }
+
+              def run
+                keystore = params['keystore'].value
+                key_alias = params['alias'].value
+
+                `keytool -genkey -keyalg rsa -keysize 4096 -validity 1000000 -keystore #{keystore} -alias #{key_alias}`
+              end
+            end
+          end
+
+          mode "update" do
+            include Ruboto::Util::LogAction
+            include Ruboto::Util::Update
+            include Ruboto::Util::Verify
+
+            argument("what") {
+              required
+              validate {|i| %w(jruby app ruboto).include?(i)}
+              description "What do you want to update: 'jruby', 'app', or 'ruboto'"
+            }
+
+            option("force") {
+              description "force and update even if the version hasn't changed"
+            }
+
             def run
-              version = Gem.searcher.find('ruboto').version.version
-              if params['version'].value
-                puts version
-              else
+              case params['what'].value
+              when "jruby" then
+                update_jruby(params['force'].value)
+              when "app" then
+                force = params['force'].value
+                update_test force
+                update_assets force
+                update_classes force
+                update_jruby force
+                update_ruboto force
+                update_manifest nil, nil, force
+                update_core_classes force
+              when "ruboto" then
+                update_ruboto(params['force'].value)
+              end
+            end
+          end
+
+          option "version" do
+            description "display ruboto version"
+          end
+
+          # just running `ruboto`
+          def run
+            version = Gem.searcher.find('ruboto').version.version
+            if params['version'].value
+              puts version
+            else
               puts %Q{
                 Ruboto -- Ruby for Android #{version}
                 Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
                 Execute `ruboto --help` for other options
               }
-              end
             end
-          }
-        end
+          end
+        }
       end
     end
   end
+end
