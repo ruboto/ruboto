@@ -117,9 +117,9 @@ desc 'Copy scripts to emulator'
 task :update_scripts do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
-  if `adb shell ls -d #{sdcard_path}` =~ /^#{sdcard_path}$/
+  if `adb shell ls -d #{sdcard_path}`.chomp =~ /^#{sdcard_path}$/
     data_dir = sdcard_path
-  elsif `adb shell ls -d #{app_files_path}` =~ /^#{app_files_path}$/
+  elsif `adb shell ls -d #{app_files_path}`.chomp =~ /^#{app_files_path}$/
     data_dir = app_files_path
   else
     raise "Cannot find the scripts directory on the device.  If you have a non-rooted device, you need to add permission WRITE_EXTERNAL_STORAGE to the AndroidManifest.xml file to enable the update_scripts rake task."
