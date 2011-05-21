@@ -87,7 +87,7 @@ module Ruboto
                   update_core_classes true
 
                   log_action("Generating the default Activity and script") do
-                    generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb", path
+                    generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb"
                   end
                 end
 

@@ -180,22 +180,22 @@ EOF
         jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         log_action("Removing unneeded classes from #{jruby_core}") do
           Dir.mkdir "libs/tmp"
-          Dir.chdir "libs/tmp"
-          FileUtils.move "../#{jruby_core}", "."
-          `jar -xf #{jruby_core}`
-          File.delete jruby_core
-          ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
-            'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
-          ].each {|i| FileUtils.remove_dir i, true}
-          `jar -cf ../#{jruby_core} .`
-          Dir.chdir "../.."
+          Dir.chdir "libs/tmp" do
+            FileUtils.move "../#{jruby_core}", "."
+            `jar -xf #{jruby_core}`
+            File.delete jruby_core
+            ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
+              'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
+            ].each {|i| FileUtils.remove_dir i, true}
+            `jar -cf ../#{jruby_core} .`
+          end
           FileUtils.remove_dir "libs/tmp", true
         end
 
         jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
         log_action("Reformatting #{jruby_stdlib}") do
           Dir.mkdir "libs/tmp"
-          Dir.chdir "libs/tmp"
+          Dir.chdir "libs/tmp" do
           FileUtils.move "../#{jruby_stdlib}", "."
           `jar -xf #{jruby_stdlib}`
           File.delete jruby_stdlib
@@ -205,37 +205,35 @@ EOF
             next if File.basename(f) =~ /^..?$/
             FileUtils.move f, "../1.8/" + File.basename(f)
           end
-
-          Dir.chdir "../1.8"
-          `jar -cf ../#{jruby_stdlib} .`
-          Dir.chdir ".."
-          FileUtils.remove_dir "1.8", true
+          end
+          Dir.chdir "libs/1.8" do
+            `jar -cf ../#{jruby_stdlib} .`
+          end
         end
 
-        psych_jar = "../psych.jar"
+        psych_jar = "libs/psych.jar"
         psych_already_present = File.exists? psych_jar
         FileUtils.rm_f psych_jar
           
         if with_psych || with_psych.nil? && psych_already_present
           log_action("Adding psych #{File.basename psych_jar}") do
-            FileUtils.move "tmp/META-INF/jruby.home/lib/ruby/1.9", "."
-            Dir.chdir "1.9"
-          
-            Dir["**/*"].each do |f|
-              next if File.basename(f) =~ /^..?$/
-              if File.exists? "../1.8/#{f}"
-                puts "Removing duplicate #{f}"
-                FileUtils.rm_f f
+            FileUtils.move "libs/tmp/META-INF/jruby.home/lib/ruby/1.9", "libs/1.9"
+            Dir.chdir "libs/1.9" do
+              Dir["**/*"].each do |f|
+                next if File.basename(f) =~ /^..?$/
+                if File.exists? "../1.8/#{f}"
+                  puts "Removing duplicate #{f}"
+                  FileUtils.rm_f f
+                end
               end
+              `jar -cf #{psych_jar} .`
             end
-            `jar -cf #{psych_jar} .`
-            Dir.chdir ".."
-            FileUtils.remove_dir "1.9", true
+            FileUtils.remove_dir "libs/1.9", true
           end
         end
           
-        FileUtils.remove_dir "tmp", true
-        Dir.chdir ".."
+        FileUtils.remove_dir "libs/tmp", true
+        FileUtils.remove_dir "libs/1.8", true
       end
     end
   end
