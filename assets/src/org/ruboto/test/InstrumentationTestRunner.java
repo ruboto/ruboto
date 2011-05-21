@@ -68,7 +68,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         if (android.os.Build.VERSION.SDK_INT <= 8) {
           name ="runTest";
         }
-        Test test = new ActivityTest(activityClass, setup, name, block);
+        Test test = new ActivityTest(activityClass, Script.getRuby().getScriptFilename(), setup, name, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
@@ -94,9 +94,13 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         buffer.close();
 
         Log.d(getClass().getName(), "Loading test script: " + f);
-        Script.defineGlobalVariable("$script_code", source.toString());
-        Script.exec("$test.instance_eval($script_code)");
-        Log.d(getClass().getName(), "Test script loaded");
+        String oldFilename = Script.getRuby().getScriptFilename();
+        Script.getRuby().setScriptFilename(f);
+        Script.getRuby().put("$script_code", source.toString());
+        Script.getRuby().setScriptFilename(f);
+        Script.getRuby().runScriptlet("$test.instance_eval($script_code)");
+        Script.getRuby().setScriptFilename(oldFilename);
+        Log.d(getClass().getName(), "Test script " + f + " loaded");
     }
 
 }

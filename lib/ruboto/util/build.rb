@@ -139,8 +139,7 @@ module Ruboto
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver android.view.View).each do |i|
           name = i.split(".")[-1]
           if(params[:class] == name or params[:class] == "all")
-            generate_subclass_or_interface(
-            hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
+            generate_subclass_or_interface(hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
           end
         end
 

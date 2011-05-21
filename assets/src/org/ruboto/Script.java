@@ -11,35 +11,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import org.jruby.Ruby;
 import org.jruby.RubyInstanceConfig;
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.ScriptingContainer;
 import org.jruby.exceptions.RaiseException;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.parser.EvalStaticScope;
-import org.jruby.runtime.DynamicScope;
-import org.jruby.runtime.ThreadContext;
-import org.jruby.runtime.builtin.IRubyObject;
-import org.jruby.runtime.scope.ManyVarsDynamicScope;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.util.Log;
 
 public class Script {
     private static String scriptsDir = "scripts";
     private static File scriptsDirFile = null;
-  
+
     private String name = null;
-    private static Ruby ruby;
-    private static DynamicScope scope;
+    private static ScriptingContainer ruby;
     private static boolean initialized = false;
 
     private String contents = null;
 
-    public static final String TAG = "RUBOTO"; //for logging
+    public static final String TAG = "RUBOTO"; // for logging
 
     /*************************************************************************************************
-     *
+     * 
      * Static Methods: JRuby Execution
      */
 
@@ -53,30 +51,25 @@ public class Script {
         return initialized;
     }
 
-    public static synchronized Ruby setUpJRuby(Context appContext) {
+    public static synchronized ScriptingContainer setUpJRuby(Context appContext) {
         return setUpJRuby(appContext, System.out);
     }
 
-    public static synchronized Ruby setUpJRuby(Context appContext, PrintStream out) {
+    public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
         	System.setProperty("jruby.interfaces.useProxy", "true");
-            RubyInstanceConfig config = new RubyInstanceConfig();
+			ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
+			RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
             config.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
 
             config.setLoader(Script.class.getClassLoader());
-            if (scriptsDir != null) config.setCurrentDirectory(scriptsDir);
-
+			if (scriptsDir != null) {
+				config.setCurrentDirectory(scriptsDir);
+			}
             if (out != null) {
             	config.setOutput(out);
             	config.setError(out);
             }
-            
-            /* Set up Ruby environment */
-            ruby = Ruby.newInstance(config);
-
-            ThreadContext context = ruby.getCurrentContext();
-            DynamicScope currentScope = context.getCurrentScope();
-            scope = new ManyVarsDynamicScope(new EvalStaticScope(currentScope.getStaticScope()), currentScope);
             
             copyScriptsIfNeeded(appContext);
             initialized = true;
@@ -86,28 +79,30 @@ public class Script {
     }
 
     public static String execute(String code) {
-        if (!initialized) return null;
+        if (!initialized) {
+            return null;
+        }
         try {
-            return exec(code).inspect().asJavaString();
+			return ruby.callMethod(exec(code), "inspect", String.class);
         } catch (RaiseException re) {
-            re.printStackTrace(ruby.getErrorStream());
+			re.printStackTrace(ruby.getError());
             return null;
         }
     }
 
-    public static IRubyObject exec(String code) throws RaiseException {
-        return ruby.evalScriptlet(code, scope);
-    }
+	public static Object exec(String code) throws RaiseException {
+		return ruby.runScriptlet(code);
+	}
 
     public static void defineGlobalConstant(String name, Object object) {
-        ruby.defineGlobalConstant(name, JavaUtil.convertJavaToRuby(ruby, object));
+		ruby.put(name, object);
     }
     
     public static void defineGlobalVariable(String name, Object object) {
-        ruby.getGlobalVariables().set(name, JavaUtil.convertJavaToRuby(ruby, object));
+		ruby.put(name, object);
     }
     
-    public static Ruby getRuby() {
+	public static ScriptingContainer getRuby() {
     	return ruby;
     }
 
@@ -119,8 +114,10 @@ public class Script {
     public static void setDir(String dir) {
     	scriptsDir = dir;
     	scriptsDirFile = new File(dir);
-        if (ruby != null) ruby.setCurrentDirectory(scriptsDir);
+		if (ruby != null) {
+			ruby.setCurrentDirectory(scriptsDir);
     }
+	}
     
     public static String getDir() {
     	return scriptsDir;
@@ -177,14 +174,46 @@ public class Script {
 
     public static void copyAssets(Context context, String directory) {
     	File dest = new File(scriptsDirFile.getParentFile(), directory);
-        dest.mkdir();
-        copyScripts(directory, dest, context.getAssets());
+		if (dest.exists() || dest.mkdir()) {
+            copyScripts(directory, dest, context.getAssets());
+		} else {
+            throw new RuntimeException("Unable to create scripts directory: " + dest);
+		}
     }
     
+    private static boolean isDebugBuild(Context context) {
+        PackageManager pm = context.getPackageManager();
+        PackageInfo pi;
+        try {
+            pi = pm.getPackageInfo(context.getPackageName(), 0);
+            return ((pi.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+
+    }
+
     private static void copyScriptsIfNeeded(Context context) {
-        String to = context.getFilesDir().getAbsolutePath() + "/scripts";
+		File toFile;
+        if (isDebugBuild(context)) {
+			toFile = context.getExternalFilesDir(null);
+            if (toFile != null) {
+			if (!toFile.exists()) {
+				toFile.mkdir();
+			}
+		} else {
+                Log.e(TAG,
+                        "Environment 'scripts_on_sdcard' is set to 'true', but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
+                toFile = context.getFilesDir();
+            }
+        } else {
+			toFile = context.getFilesDir();
+		}
+		String to = toFile.getAbsolutePath() + "/scripts";
+		Log.i(TAG, "Checking scripts in " + to);
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
+			Log.i(TAG, "Copying scripts to " + to);
         	copyAssets(context, "scripts");
         }
     }
@@ -228,7 +257,9 @@ public class Script {
         StringBuilder source = new StringBuilder();
         while (true) {
             String line = buffer.readLine();
-            if (line == null) break;
+			if (line == null) {
+				break;
+			}
             source.append(line).append("\n");
         }
         buffer.close();

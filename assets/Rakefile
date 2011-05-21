@@ -1,9 +1,8 @@
-# callback_reflection.rb creates the interfaces.txt (JRuby can't do YAML with ruby 1.8, so it's just
-# and inspect on the hash) on a device. Bring it off the device and put it in the callback_gen dir.
-#
-# Move this into a rake task later.
-#
+require 'time'
 
+UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
+BUNDLE_JAR = 'libs/bundle.jar'
+BUNDLE_PATH = 'tmp/bundle'
 
 if RUBY_PLATFORM =~ /java/
   puts "Detected JRuby.  Loading ANT."
@@ -85,6 +84,11 @@ task :publish => :align do
   puts "#{build_project_name}.apk is ready for the market!"
 end
 
+desc 'Start the emulator with larger disk'
+task :emulator do
+  system 'emulator -partition-size 1024 -avd Android_3.0'
+end
+
 task :start_app do
   `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
 end
@@ -93,6 +97,7 @@ task :stop_app do
   `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
 end
 
+desc 'Restart the application'
 task :restart => [:stop_app, :start_app]
 
 task :uninstall do
@@ -111,15 +116,26 @@ end
 desc 'Copy scripts to emulator'
 task :update_scripts do
   manifest
+  development = true
+  if development
+    # data_dir = '/mnt/sdcard/Download'
+    data_dir = "/mnt/sdcard/Android/data/#{package}/files"
+  else
+    data_dir = "/data/data/#{package}/files"
+  end
+  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
   Dir.chdir('assets') do
-    # Add more directories here if you want them copied to the emulator
-    ['scripts'].each do |script_dir|
-      Dir["#{script_dir}/*"].each do |script|
-        next if File.directory? script
-        `adb push #{script} /data/data/#{package}/files/#{script_dir}`
+    ['scripts'].each do |asset_dir|
+      Dir["#{asset_dir}/*"].each do |asset_file|
+        next if File.directory? asset_file
+        next if File.ctime(asset_file) < last_update
+        print "#{asset_file}: "
+        $stdout.flush
+        `adb push #{asset_file} #{data_dir}/#{asset_file}`
       end
     end
   end
+  mark_update
 end
 
 namespace :update_scripts do
@@ -128,6 +144,7 @@ namespace :update_scripts do
 end
 
 task :update_test_scripts do
+  manifest
   Dir['test/assets/scripts/*.rb'].each do |script|
     `adb push #{script} /data/data/#{package}.tests/files/scripts/`
   end
@@ -151,6 +168,106 @@ namespace :test do
   end
 end
 
+file 'Gemfile'
+
+desc 'Generate bundle jar from Gemfile'
+file BUNDLE_JAR => 'Gemfile' do
+  puts "Generating #{BUNDLE_JAR}"
+
+  FileUtils.mkdir_p BUNDLE_PATH
+  system "bundle install --path=#{BUNDLE_PATH}"
+
+  # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
+  
+  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems"
+  scanned_files = []
+  Dir["*/lib/**/*"].each do |f|
+    raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
+    gem_name, lib_file = $1, $2
+    if existing_file = scanned_files.find{|sf| sf =~ %r{(.*?)/lib/#{lib_file}}}
+      puts "Removing duplicate of file #{lib_file} in gem #{gem_name}"
+      puts "Already present in gem #{$1}"
+    end
+  end
+
+  # FIXME(uwe):  Remove when directory listing in apk subdirectories work.
+  # FIXME(uwe):  http://jira.codehaus.org/browse/JRUBY-5775
+  CORE_EXT_RB = "#{BUNDLE_PATH}/ruby/1.8/gems/activesupport-2.3.11/lib/active_support/core_ext.rb"
+  if File.exists?(CORE_EXT_RB) && File.read(CORE_EXT_RB) !~ %r{require 'active_support/core_ext/array'}
+    File.open(CORTE_EXT_RB, 'a') do |f|
+      f << <<EOF
+  require 'active_support/core_ext/array'
+  require 'active_support/core_ext/base64'
+  require 'active_support/core_ext/benchmark'
+  require 'active_support/core_ext/bigdecimal'
+  # require 'active_support/core_ext/blank'
+  require 'active_support/core_ext/cgi'
+  require 'active_support/core_ext/class'
+  require 'active_support/core_ext/date_time'
+  require 'active_support/core_ext/date'
+  require 'active_support/core_ext/duplicable'
+  require 'active_support/core_ext/enumerable'
+  require 'active_support/core_ext/exception'
+  require 'active_support/core_ext/file'
+  require 'active_support/core_ext/float'
+  require 'active_support/core_ext/hash'
+  require 'active_support/core_ext/integer'
+  require 'active_support/core_ext/kernel'
+  require 'active_support/core_ext/load_error'
+  require 'active_support/core_ext/logger'
+  require 'active_support/core_ext/module'
+  require 'active_support/core_ext/name_error'
+  require 'active_support/core_ext/numeric'
+  require 'active_support/core_ext/object'
+  require 'active_support/core_ext/pathname'
+  require 'active_support/core_ext/proc'
+  require 'active_support/core_ext/process'
+  require 'active_support/core_ext/range'
+  require 'active_support/core_ext/rexml'
+  require 'active_support/core_ext/string'
+  require 'active_support/core_ext/symbol'
+  require 'active_support/core_ext/time'
+  require 'active_support/core_ext/try'
+  require 'active_support/core_ext/uri'
+EOF
+    end
+  end
+
+  #FIXME(uwe): Do not try to patch unused adapters
+#  Change
+#  
+#  #{BUNDLE_PATH}/ruby/1.8/gems/after_commit-1.0.8/lib/after_commit/active_record.rb
+#  
+#  like this:
+#  
+#  # Object.subclasses_of(base).each do |klass|
+#  #   include_after_commit_extension klass
+#  # end
+#  include_after_commit_extension ::ActiveRecord::ConnectionAdapters::Sqlite3Adapter
+
+  
+  FileUtils.rm_f BUNDLE_JAR
+  ant.zip :destfile => BUNDLE_JAR do
+    Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each do |gem_dir|
+      zipfileset :dir => "#{gem_dir}/lib"
+    end
+  end
+end
+
+task :mark_update do
+  mark_update
+end
+
+task :install => BUNDLE_JAR
+task :install => :mark_update
+
+# Methods
+
+def mark_update
+  FileUtils.mkdir_p File_dirname(UPDATE_MARKER_FILE)
+  File.open(UPDATE_MARKER_FILE, 'w'){|f| f << Time.now.iso8601}
+end
+
 def manifest
   @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
 end
@@ -162,7 +279,9 @@ def strings(name)
 end
 
 def package() manifest.root.attribute('package') end
+
 def version() strings :version_name end
-def app_name() strings :app_name end
-def main_activity() manifest.root.elements['application'].elements['activity'].attributes['android:name'] end
+
+def app_name()  strings :app_name end
+
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end

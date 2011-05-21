@@ -7,7 +7,7 @@ module Ruboto
       #
       def update_test(force = nil)
         root = Dir.getwd
-        if force || !Dir.exists?("#{root}/test")
+        if force || !File.exists?("#{root}/test")
           name = verify_strings.root.elements['string'].text
           puts "\nGenerating Android test project #{name} in #{root}..."
           system "android create test-project -m #{root} -n #{name}Test -p #{root}/test"
@@ -24,12 +24,12 @@ module Ruboto
           File.open('build.properties', 'a'){|f| f.puts 'test.runner=org.ruboto.test.InstrumentationTestRunner'}
           ant_setup_line = /^(\s*<setup\s*\/>\n)/
           run_tests_override = <<-EOF
-          <macrodef name="run-tests-helper">
-          <attribute name="emma.enabled" default="false"/>
-          <element name="extra-instrument-args" optional="yes"/>
-          <sequential>
-          <echo>Running tests ...</echo>
-          <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
+    <macrodef name="run-tests-helper">
+      <attribute name="emma.enabled" default="false"/>
+      <element name="extra-instrument-args" optional="yes"/>
+      <sequential>
+        <echo>Running tests ...</echo>
+        <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
           <arg line="${adb.device.arg}"/>
           <arg value="shell"/>
           <arg value="am"/>
@@ -40,31 +40,31 @@ module Ruboto
           <arg value="@{emma.enabled}"/>
           <extra-instrument-args/>
           <arg value="${manifest.package}/${test.runner}"/>
-          </exec>
-          <echo message="${tests.output}"/>
-          <fail message="Tests failed!!!">
+        </exec>
+        <echo message="${tests.output}"/>
+        <fail message="Tests failed!!!">
           <condition>
             <or>
+              <contains string="${tests.output}" substring="INSTRUMENTATION_RESULT"/>
               <contains string="${tests.output}" substring="INSTRUMENTATION_FAILED"/>
               <contains string="${tests.output}" substring="FAILURES"/>
             </or>
           </condition>
-          </fail>
-          </sequential>
-          </macrodef>
+        </fail>
+      </sequential>
+    </macrodef>
 
-<target name="run-tests-quick"
-description="Runs tests with previously installed packages">
-<run-tests-helper />
-</target>
+    <target name="run-tests-quick" description="Runs tests with previously installed packages">
+      <run-tests-helper />
+    </target>
           
-          EOF
+EOF
           ant_script = File.read('build.xml').gsub(ant_setup_line, "\\1#{run_tests_override}")
           File.open('build.xml', 'w'){|f| f << ant_script}
         end
       end
 
-      def update_jruby(force=nil)
+      def update_jruby(force=nil, with_psych=nil)
         jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
         jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
         new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
@@ -87,7 +87,7 @@ description="Runs tests with previously installed packages">
         log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
 
-        reconfigure_jruby_libs
+        reconfigure_jruby_libs(with_psych)
 
         puts "JRuby version is now: #{new_jruby_version}"
       end
@@ -122,7 +122,6 @@ description="Runs tests with previously installed packages">
           else
             app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
           end
-          app_element = verify_manifest.elements['application']
           if app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
             puts 'found dialog tag'
           else
@@ -133,6 +132,10 @@ description="Runs tests with previously installed packages">
             sdk_element.attributes["android:targetSdkVersion"] = target
           else
             verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk, "android:targetSdkVersion" => target}
+          end
+          #   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+          unless sdcard_permission_element = verify_manifest.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
+            verify_manifest.add_element 'uses-permission', {"android:name" => 'android.permission.WRITE_EXTERNAL_STORAGE'}
           end
           save_manifest
         end
@@ -170,7 +173,7 @@ description="Runs tests with previously installed packages">
       #   - moves ruby stdlib to the root of the ruby-stdlib jar
       #
 
-      def reconfigure_jruby_libs
+      def reconfigure_jruby_libs(with_psych=nil)
         jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         log_action("Removing unneeded classes from #{jruby_core}") do
           Dir.mkdir "libs/tmp"
@@ -193,17 +196,43 @@ description="Runs tests with previously installed packages">
           FileUtils.move "../#{jruby_stdlib}", "."
           `jar -xf #{jruby_stdlib}`
           File.delete jruby_stdlib
+
           FileUtils.move "META-INF/jruby.home/lib/ruby/1.8", ".."
           Dir["META-INF/jruby.home/lib/ruby/site_ruby/1.8/*"].each do |f|
             next if File.basename(f) =~ /^..?$/
             FileUtils.move f, "../1.8/" + File.basename(f)
           end
+
           Dir.chdir "../1.8"
-          FileUtils.remove_dir "../tmp", true
           `jar -cf ../#{jruby_stdlib} .`
-          Dir.chdir "../.."
-          FileUtils.remove_dir "libs/1.8", true
+          Dir.chdir ".."
+          FileUtils.remove_dir "1.8", true
         end
+
+        psych_jar = "../psych.jar"
+        psych_already_present = File.exists? psych_jar
+        FileUtils.rm_f psych_jar
+          
+        if with_psych || with_psych.nil? && psych_already_present
+          log_action("Adding psych #{File.basename psych_jar}") do
+            FileUtils.move "tmp/META-INF/jruby.home/lib/ruby/1.9", "."
+            Dir.chdir "1.9"
+          
+            Dir["**/*"].each do |f|
+              next if File.basename(f) =~ /^..?$/
+              if File.exists? "../1.8/#{f}"
+                puts "Removing duplicate #{f}"
+                FileUtils.rm_f f
+              end
+            end
+            `jar -cf #{psych_jar} .`
+            Dir.chdir ".."
+            FileUtils.remove_dir "1.9", true
+          end
+        end
+          
+        FileUtils.remove_dir "tmp", true
+        Dir.chdir ".."
       end
     end
   end

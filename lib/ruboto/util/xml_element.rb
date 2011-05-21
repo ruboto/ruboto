@@ -158,35 +158,39 @@ module Ruboto
         args = ""
         if params.size > 3
           args = ", args"
-          rv << "IRubyObject[] args = {" + params.map{|i| "JavaUtil.convertJavaToRuby(getRuby(), #{i[0]})"}.join(", ") + "};"
+          rv << "Object[] args = {" + params.map{|i| i[0]}.join(", ") + "};"
         elsif params.size > 0
-          args = ", " + params.map{|i| "JavaUtil.convertJavaToRuby(getRuby(), #{i[0]})"}.join(", ")
+          args = ", " + params.map{|i| i[0]}.join(", ")
         end
 
         return_cast = ""
-        if attribute("return") and (attribute("return").include?(".") or attribute("return") == "int[]")
-          return_cast = "return (#{attribute("return")})"
-        elsif attribute("return") and attribute("return") == "int"
-          return_cast = "return (Integer)"
-        elsif attribute("return") and attribute("return") != "void"
-          return_cast = "return (#{attribute("return").capitalize})"
-        end
-        return_cast = return_cast.gsub("&lt;", "<").gsub("&gt;", ">")
-
         convert_return = ""
-        if attribute("return") and attribute("return") != "void"
-          convert_return = ".toJava(#{attribute("return")}.class)"
+        if attribute("return") && attribute("return") != "void"
+          if (attribute("return").include?(".") or attribute("return") == "int[]")
+            return_class = attribute("return")
+          elsif attribute("return") == 'int'
+            return_class = 'Integer'
+          else
+            return_class = attribute("return").capitalize
+          end
+          return_cast = "return (#{return_class.gsub("&lt;", "<").gsub("&gt;", ">")}) " if return_class
+          convert_return = ", #{return_class}.class"
         end
 
-        rv << "#{return_cast}RuntimeHelpers.invoke(getRuby().getCurrentContext(), callbackProcs[#{constant_string}], \"call\" #{args})#{convert_return};"
+        rv << "#{return_cast}getRuby().callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"
         rv
       end
 
       def method_definition
-        method_call((attribute("return") ? attribute("return") : "void"), attribute("name"), parameters,
-        if_else("callbackProcs[#{constant_string}] != null",
-        [super_string] + try_catch(ruby_call, ["re.printStackTrace();", default_return]),
-        [super_return])).indent.join("\n")
+        method_call(
+          (attribute("return") ? attribute("return") : "void"),
+          attribute("name"), parameters,
+          if_else(
+              "callbackProcs[#{constant_string}] != null",
+              [super_string] + try_catch(ruby_call, ["re.printStackTrace();", default_return]),
+              [super_return]
+          )
+        ).indent.join("\n")
       end
 
       def constructor_definition(class_name)

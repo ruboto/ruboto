@@ -1,18 +1,23 @@
 package THE_PACKAGE;
 
+import java.io.IOException;
+
 import org.jruby.Ruby;
+import org.jruby.embed.ScriptingContainer;
+import org.jruby.exceptions.RaiseException;
+import org.jruby.javasupport.JavaUtil;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.runtime.builtin.IRubyObject;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.exceptions.RaiseException;
 import org.ruboto.Script;
-import java.io.IOException;
+
 import android.app.ProgressDialog;
 import android.os.Handler;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private Ruby __ruby__;
+  private ScriptingContainer __ruby__;
   private String scriptName;
+  private String rubyClassName;
+  private Object rubyInstance;
   private int splash = 0;
   private String remoteVariable = "";
   public Object[] args;
@@ -21,7 +26,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
-  private Ruby getRuby() {
+  private ScriptingContainer getRuby() {
     if (__ruby__ == null) {
         __ruby__ = Script.getRuby();
 
@@ -122,7 +127,12 @@ THE_CONSTANTS
       Script.execute(remoteVariable + "on_create($bundle)");
     } else {
       try {
-        new Script(scriptName).execute();
+          new Script(scriptName).execute();
+          rubyClassName = this.getClass().getSimpleName();
+          if (getRuby().get(rubyClassName) != null) {
+  		    rubyInstance = Script.exec(rubyClassName + ".new");
+  		    getRuby().callMethod(rubyInstance, "on_create", configBundle);
+          }
       } catch(IOException e){
         e.printStackTrace();
         ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);

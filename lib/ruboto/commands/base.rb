@@ -52,6 +52,11 @@ module Ruboto
                 description "Android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
               }
 
+              option("with-psych") {
+                description "Generate the Psych YAML parser jar"
+                cast :boolean
+              }
+
               def run
                 package = params['package'].value
                 name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
@@ -76,7 +81,7 @@ module Ruboto
                   update_test true
                   update_assets true
                   update_classes true
-                  update_jruby true
+                  update_jruby true, params['with-psych'].value
                   update_ruboto true
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes true
@@ -279,6 +284,11 @@ module Ruboto
               description "force and update even if the version hasn't changed"
             }
 
+            option("with-psych") {
+              description "Generate the Psych YAML parser jar"
+              cast :boolean
+            }
+
             def run
               case params['what'].value
               when "jruby" then
@@ -288,7 +298,7 @@ module Ruboto
                 update_test force
                 update_assets force
                 update_classes force
-                update_jruby force
+                update_jruby force, params['with-psych'].value
                 update_ruboto force
                 update_manifest nil, nil, force
                 update_core_classes force

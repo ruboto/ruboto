@@ -20,15 +20,17 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.ruboto.Script;
 
 public class ActivityTest extends ActivityInstrumentationTestCase2 {
-    private final IRubyObject setup;
+    private final Object setup;
     private final IRubyObject block;
+    private final String filename;
 
-    public ActivityTest(Class activityClass, IRubyObject setup, String name, IRubyObject block) {
+    public ActivityTest(Class activityClass, String filename, IRubyObject setup, String name, IRubyObject block) {
         super(activityClass.getPackage().getName(), activityClass);
-        setName(name);
+        this.filename = filename;
         this.setup = setup;
+        setName(filename + "#" + name);
         this.block = block;
-        Log.d(getClass().getName(), "Instance: " + name);
+        Log.d(getClass().getName(), "Instance: " + getName());
     }
 
     public void runTest() throws Exception {
@@ -41,12 +43,16 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
             Log.d(getClass().getName(), "activity ok");
             runTestOnUiThread(new Runnable() {
                 public void run() {
+                    String oldFile = Script.getRuby().getScriptFilename();
+
                     Log.d(getClass().getName(), "calling setup");
-                    RuntimeHelpers.invoke(setup.getRuntime().getCurrentContext(), setup, "call",
-                            JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
+                    Script.getRuby().setScriptFilename(filename);
+                    Script.getRuby().callMethod(setup, "call", activity);
                     Log.d(getClass().getName(), "setup ok");
-                    RuntimeHelpers.invoke(block.getRuntime().getCurrentContext(), block, "call",
-                            JavaUtil.convertJavaToRuby(Script.getRuby(), activity));
+                    
+                    Script.getRuby().setScriptFilename(filename);
+                    Script.getRuby().callMethod(block, "call", activity);
+                    Script.getRuby().setScriptFilename(oldFile);
                 }
             });
         } catch (Throwable t) {

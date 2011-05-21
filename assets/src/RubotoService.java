@@ -4,13 +4,14 @@ import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.javasupport.JavaUtil;
+import org.jruby.embed.ScriptingContainer;
 import org.jruby.exceptions.RaiseException;
 import org.ruboto.Script;
 import java.io.IOException;
 import android.app.ProgressDialog;
 
 public abstract class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private Ruby __ruby__;
+  private ScriptingContainer __ruby__;
   private String scriptName;
   private String remoteVariable = "";
   public Object[] args;
@@ -18,7 +19,7 @@ public abstract class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 THE_CONSTANTS
   private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
-  private Ruby getRuby() {
+  private ScriptingContainer getRuby() {
     if (__ruby__ == null) __ruby__ = Script.getRuby();
 
     if (__ruby__ == null) {
