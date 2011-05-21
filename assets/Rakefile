@@ -115,13 +115,14 @@ end
 
 desc 'Copy scripts to emulator'
 task :update_scripts do
-  manifest
-  development = true
-  if development
-    # data_dir = '/mnt/sdcard/Download'
-    data_dir = "/mnt/sdcard/Android/data/#{package}/files"
+  sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
+  app_files_path = "/data/data/#{package}/files"
+  if `adb shell ls -d #{sdcard_path}` =~ /^#{sdcard_path}$/
+    data_dir = sdcard_path
+  elsif `adb shell ls -d #{app_files_path}` =~ /^#{app_files_path}$/
+    data_dir = app_files_path
   else
-    data_dir = "/data/data/#{package}/files"
+    raise "Cannot find the scripts directory on the device.  If you have a non-rooted device, you need to add permission WRITE_EXTERNAL_STORAGE to the AndroidManifest.xml file to enable the update_scripts rake task."
   end
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
   Dir.chdir('assets') do
@@ -172,6 +173,7 @@ file 'Gemfile'
 
 desc 'Generate bundle jar from Gemfile'
 file BUNDLE_JAR => 'Gemfile' do
+  next unless File.exists? 'Gemfile'
   puts "Generating #{BUNDLE_JAR}"
 
   FileUtils.mkdir_p BUNDLE_PATH
@@ -264,7 +266,7 @@ task :install => :mark_update
 # Methods
 
 def mark_update
-  FileUtils.mkdir_p File_dirname(UPDATE_MARKER_FILE)
+  FileUtils.mkdir_p File.dirname(UPDATE_MARKER_FILE)
   File.open(UPDATE_MARKER_FILE, 'w'){|f| f << Time.now.iso8601}
 end
 
@@ -282,6 +284,8 @@ def package() manifest.root.attribute('package') end
 
 def version() strings :version_name end
 
-def app_name()  strings :app_name end
+def app_name() strings :app_name end
+
+def main_activity() manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name') end
 
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end

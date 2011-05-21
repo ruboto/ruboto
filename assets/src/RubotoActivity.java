@@ -107,9 +107,8 @@ THE_CONSTANTS
   };
 
   private void backgroundCreate() {
-    getRuby();
-    Script.defineGlobalVariable("$activity", this);
-    Script.defineGlobalVariable("$bundle", args[0]);
+      getRuby().put("$activity", this);
+      getRuby().put("$bundle", args[0]);
   }
 
   private void finishCreate() {

@@ -58,7 +58,8 @@ public class Script {
     public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
         	System.setProperty("jruby.interfaces.useProxy", "true");
-			ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
+			// ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
+			ruby = new ScriptingContainer();
 			RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
             config.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
 
@@ -198,12 +199,12 @@ public class Script {
         if (isDebugBuild(context)) {
 			toFile = context.getExternalFilesDir(null);
             if (toFile != null) {
-			if (!toFile.exists()) {
-				toFile.mkdir();
-			}
-		} else {
+			    if (!toFile.exists()) {
+				    toFile.mkdir();
+			    }
+		    } else {
                 Log.e(TAG,
-                        "Environment 'scripts_on_sdcard' is set to 'true', but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
+                        "Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
                 toFile = context.getFilesDir();
             }
         } else {
@@ -273,6 +274,7 @@ public class Script {
      */
 
     public String execute() throws IOException {
+    	Script.getRuby().setScriptFilename(name);
         return Script.execute(getContents());
     }
 }

@@ -48,6 +48,9 @@ module Ruboto
               <contains string="${tests.output}" substring="INSTRUMENTATION_RESULT"/>
               <contains string="${tests.output}" substring="INSTRUMENTATION_FAILED"/>
               <contains string="${tests.output}" substring="FAILURES"/>
+              <not>
+                <matches string="${tests.output}" pattern="OK \\(\\d+ tests\\)" multiline="true"/>
+              </not>
             </or>
           </condition>
         </fail>
@@ -133,10 +136,10 @@ EOF
           else
             verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk, "android:targetSdkVersion" => target}
           end
-          #   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-          unless sdcard_permission_element = verify_manifest.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
-            verify_manifest.add_element 'uses-permission', {"android:name" => 'android.permission.WRITE_EXTERNAL_STORAGE'}
-          end
+          # # <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+          # unless sdcard_permission_element = verify_manifest.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
+          #   verify_manifest.add_element 'uses-permission', {"android:name" => 'android.permission.WRITE_EXTERNAL_STORAGE'}
+          # end
           save_manifest
         end
       end

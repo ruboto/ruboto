@@ -10,6 +10,7 @@ GEM
 
 PLATFORMS
   java
+  ruby
 
 DEPENDENCIES
   jruby-jars

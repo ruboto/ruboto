@@ -36,7 +36,7 @@ class AppTest < Test::Unit::TestCase
     Dir.chdir "#{APP_DIR}/test" do
       system "adb uninstall #{PACKAGE}"
       system 'ant run-tests'
-      raise "tests failed with return code #$?" unless $? == 0
+      assert_equal 0, $?, "tests failed with return code #$?"
       system "adb uninstall #{PACKAGE}"
     end
   end

@@ -30,25 +30,25 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
         this.setup = setup;
         setName(filename + "#" + name);
         this.block = block;
-        Log.d(getClass().getName(), "Instance: " + getName());
+        Log.i(getClass().getName(), "Instance: " + getName());
     }
 
     public void runTest() throws Exception {
-        Log.d(getClass().getName(), "runTest");
-        Log.d(getClass().getName(), "runTest: " + getName());
+        Log.i(getClass().getName(), "runTest");
+        Log.i(getClass().getName(), "runTest: " + getName());
         Script.setUpJRuby(getActivity());
-        Log.d(getClass().getName(), "ruby ok");
+        Log.i(getClass().getName(), "ruby ok");
         try {
             final Activity activity = getActivity();
-            Log.d(getClass().getName(), "activity ok");
+            Log.i(getClass().getName(), "activity ok");
             runTestOnUiThread(new Runnable() {
                 public void run() {
                     String oldFile = Script.getRuby().getScriptFilename();
 
-                    Log.d(getClass().getName(), "calling setup");
+                    Log.i(getClass().getName(), "calling setup");
                     Script.getRuby().setScriptFilename(filename);
                     Script.getRuby().callMethod(setup, "call", activity);
-                    Log.d(getClass().getName(), "setup ok");
+                    Log.i(getClass().getName(), "setup ok");
                     
                     Script.getRuby().setScriptFilename(filename);
                     Script.getRuby().callMethod(block, "call", activity);
@@ -58,7 +58,7 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
         } catch (Throwable t) {
             throw new AssertionFailedError(t.getMessage());
         }
-        Log.d(getClass().getName(), "runTest ok");
+        Log.i(getClass().getName(), "runTest ok");
     }
 
 }
