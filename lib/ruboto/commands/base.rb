@@ -44,7 +44,7 @@ module Ruboto
               }
               option("min_sdk") {
                 argument :required
-                defaults 'android-7'
+                defaults 'android-8'
                 description "Minimum android version supported. must begin with 'android-'."
               }
               option("target") {
