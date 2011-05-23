@@ -261,11 +261,10 @@ EOF
 
   
   FileUtils.rm_f BUNDLE_JAR
-  ant.zip :destfile => BUNDLE_JAR do
-    Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each do |gem_dir|
-      zipfileset :dir => "#{gem_dir}/lib"
-    end
+  Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each_with_index do |gem_dir, i|
+    `jar #{i == 0 ? 'c' : 'u'}f #{BUNDLE_JAR} -C #{gem_dir}/lib .`
   end
+
 end
 
 task :mark_update do
