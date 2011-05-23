@@ -181,14 +181,15 @@ file BUNDLE_JAR => 'Gemfile' do
 
   # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
   
-  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems"
-  scanned_files = []
-  Dir["*/lib/**/*"].each do |f|
-    raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
-    gem_name, lib_file = $1, $2
-    if existing_file = scanned_files.find{|sf| sf =~ %r{(.*?)/lib/#{lib_file}}}
-      puts "Removing duplicate of file #{lib_file} in gem #{gem_name}"
-      puts "Already present in gem #{$1}"
+  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+    scanned_files = []
+    Dir["*/lib/**/*"].each do |f|
+      raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
+      gem_name, lib_file = $1, $2
+      if existing_file = scanned_files.find{|sf| sf =~ %r{(.*?)/lib/#{lib_file}}}
+        puts "Removing duplicate of file #{lib_file} in gem #{gem_name}"
+        puts "Already present in gem #{$1}"
+      end
     end
   end
 

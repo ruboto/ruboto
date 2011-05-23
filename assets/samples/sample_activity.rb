@@ -1,6 +1,6 @@
 require 'ruboto'
 
-ruboto_import_widgets :TextView, :LinearLayout, :Button
+ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 $activity.handle_create do |bundle|
   setTitle 'This is the Title'
