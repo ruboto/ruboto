@@ -105,8 +105,12 @@ task :uninstall do
 end
 
 namespace :install do
+  desc 'Uninstall, build, and install the application'
+  task :clean => [:uninstall, :install]
+
   desc 'Build, install, and restart the application'
   task :restart => [:install, :start_app]
+  
   namespace :restart do
     desc 'Uninstall, build, install, and restart the application'
     task :clean => [:uninstall, :install, :start_app]
@@ -117,12 +121,19 @@ desc 'Copy scripts to emulator'
 task :update_scripts do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
-  if `adb shell ls -d #{sdcard_path}`.chomp =~ /^#{sdcard_path}$/
+  if `adb shell ls #{sdcard_path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+    puts 'Pushing files to apk public file area.'
     data_dir = sdcard_path
-  elsif `adb shell ls -d #{app_files_path}`.chomp =~ /^#{app_files_path}$/
+  elsif `adb shell ls #{app_files_path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+    puts 'Pushing files to apk private file area.'
     data_dir = app_files_path
   else
-    raise "Cannot find the scripts directory on the device.\nIf you have a non-rooted device, you need to add permission WRITE_EXTERNAL_STORAGE to the AndroidManifest.xml file to enable the update_scripts rake task."
+    puts 'Cannot find the scripts directory on the device.'
+    puts 'If you have a non-rooted device, you need to add'
+    puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
+    puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
+    puts "Reverting to uninstalling and re-installing the apk."
+    Rake::Task['install:clean'].invoke
   end
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
   Dir.chdir('assets') do
