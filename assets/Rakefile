@@ -122,7 +122,7 @@ task :update_scripts do
   elsif `adb shell ls -d #{app_files_path}`.chomp =~ /^#{app_files_path}$/
     data_dir = app_files_path
   else
-    raise "Cannot find the scripts directory on the device.  If you have a non-rooted device, you need to add permission WRITE_EXTERNAL_STORAGE to the AndroidManifest.xml file to enable the update_scripts rake task."
+    raise "Cannot find the scripts directory on the device.\nIf you have a non-rooted device, you need to add permission WRITE_EXTERNAL_STORAGE to the AndroidManifest.xml file to enable the update_scripts rake task."
   end
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
   Dir.chdir('assets') do

@@ -23,15 +23,19 @@ class AppTest < Test::Unit::TestCase
   end
 
   def test_that_yaml_loads
+    assert_require 'yaml'
+  end
+  
+  private
+
+  def assert_require(file)
     filename = "#{APP_DIR}/assets/scripts/ruboto_test_app_activity.rb"
     s = File.read(filename)
-    s.gsub!(/(require 'ruboto.rb')/, "\\1\nrequire 'yaml'")
+    s.gsub!(/(require 'ruboto')/, "\\1require '#{file}'")
     File.open(filename, 'w'){|f| f << s}
     run_app_tests
   end
-
-  private
-
+  
   def run_app_tests
     Dir.chdir "#{APP_DIR}/test" do
       system "adb uninstall #{PACKAGE}"
