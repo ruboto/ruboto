@@ -400,6 +400,9 @@ def setup_list_view
         setAdapter @adapter
         params.delete :list
       end
+      if params.has_key? :adapter
+        @adapter = params[:adapter]
+      end
       setOnItemClickListener(context)
       super(context, params)
     end

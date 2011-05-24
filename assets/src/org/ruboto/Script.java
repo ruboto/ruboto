@@ -12,7 +12,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import org.jruby.RubyInstanceConfig;
-import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.exceptions.RaiseException;
 
