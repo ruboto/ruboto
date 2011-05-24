@@ -208,7 +208,7 @@ file BUNDLE_JAR => 'Gemfile' do
   # FIXME(uwe):  http://jira.codehaus.org/browse/JRUBY-5775
   CORE_EXT_RB = "#{BUNDLE_PATH}/ruby/1.8/gems/activesupport-2.3.11/lib/active_support/core_ext.rb"
   if File.exists?(CORE_EXT_RB) && File.read(CORE_EXT_RB) !~ %r{require 'active_support/core_ext/array'}
-    File.open(CORTE_EXT_RB, 'a') do |f|
+    File.open(CORE_EXT_RB, 'a') do |f|
       f << <<EOF
   require 'active_support/core_ext/array'
   require 'active_support/core_ext/base64'
