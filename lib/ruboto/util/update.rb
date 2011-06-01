@@ -73,8 +73,9 @@ EOF
         new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
 
         unless force
-          abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app" if
-          (not jruby_core or not jruby_stdlib)
+          if !jruby_core || !jruby_stdlib
+            abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app"
+          end
 
           current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
           abort "both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version" if
@@ -90,7 +91,7 @@ EOF
         log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
 
-        reconfigure_jruby_libs(with_psych)
+        reconfigure_jruby_libs(new_jruby_version, with_psych)
 
         puts "JRuby version is now: #{new_jruby_version}"
       end
@@ -175,8 +176,7 @@ EOF
       #   - removes unneeded code from jruby-core
       #   - moves ruby stdlib to the root of the ruby-stdlib jar
       #
-
-      def reconfigure_jruby_libs(with_psych=nil)
+      def reconfigure_jruby_libs(jruby_core_version, with_psych=nil)
         jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         Dir.chdir 'libs' do
           log_action("Removing unneeded classes from #{jruby_core}") do
@@ -185,9 +185,14 @@ EOF
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
               File.delete jruby_core
-              ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
+              invalid_libs = ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
-              ].each {|i| FileUtils.remove_dir i, true}
+              ]
+              if jruby_core_version == '1.6.2'
+                puts 'Retaining FFI for JRuby 1.6.2'
+                invalid_libs.delete('org/jruby/ext/ffi')
+              end
+              invalid_libs.each {|i| FileUtils.remove_dir i, true}
               `jar -cf ../#{jruby_core} .`
             end
             FileUtils.remove_dir "tmp", true

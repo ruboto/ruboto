@@ -23,15 +23,19 @@ class AppTest < Test::Unit::TestCase
   end
 
   def test_that_yaml_loads
-    assert_require 'yaml'
+    assert_code "require 'yaml'"
+  end
+  
+  def test_file_read_source_file
+    assert_code "File.read(__FILE__)"
   end
   
   private
 
-  def assert_require(file)
+  def assert_code(code)
     filename = "#{APP_DIR}/assets/scripts/ruboto_test_app_activity.rb"
     s = File.read(filename)
-    s.gsub!(/(require 'ruboto')/, "\\1require '#{file}'")
+    s.gsub!(/(require 'ruboto')/, "\\1\n#{code}")
     File.open(filename, 'w'){|f| f << s}
     run_app_tests
   end
