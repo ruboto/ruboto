@@ -6,7 +6,6 @@ class AppTest < Test::Unit::TestCase
   APP_NAME = 'RubotoTestApp'
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join PROJECT_DIR, 'tmp', APP_NAME
-
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
@@ -22,14 +21,16 @@ class AppTest < Test::Unit::TestCase
     run_app_tests
   end
 
-  def test_that_yaml_loads
-    assert_code "require 'yaml'"
+  if !File.exists? 'libs/jruby-core-1.5.6.jar'
+    def test_that_yaml_loads
+      assert_code "require 'yaml'"
+    end
   end
-  
+
   def test_file_read_source_file
     assert_code "File.read(__FILE__)"
   end
-  
+
   private
 
   def assert_code(code)
@@ -39,7 +40,7 @@ class AppTest < Test::Unit::TestCase
     File.open(filename, 'w'){|f| f << s}
     run_app_tests
   end
-  
+
   def run_app_tests
     Dir.chdir "#{APP_DIR}/test" do
       system "adb uninstall #{PACKAGE}"
