@@ -23,9 +23,9 @@ class AppTest < Test::Unit::TestCase
 
   puts 'jruby-jars-1.5.6 present?'
   p File.join(APP_DIR, 'libs', 'jruby-core-1.5.6')
-  p File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6'))
+  p File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6.jar'))
     
-  if not File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6'))
+  if not File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6.jar'))
     def test_that_yaml_loads
       assert_code "require 'yaml'"
     end
