@@ -21,7 +21,13 @@ class AppTest < Test::Unit::TestCase
     run_app_tests
   end
 
-  if !File.exists? 'libs/jruby-core-1.5.6.jar'
+  puts "ENV['JRUBY_JARS_VERSION']"
+  p ENV['JRUBY_JARS_VERSION']
+  puts
+  puts "ENV"
+  p ENV
+    
+  if ENV['JRUBY_JARS_VERSION'] != '1.5.6'
     def test_that_yaml_loads
       assert_code "require 'yaml'"
     end
