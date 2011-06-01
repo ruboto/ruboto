@@ -21,16 +21,16 @@ class AppTest < Test::Unit::TestCase
     run_app_tests
   end
 
-  puts "ENV['JRUBY_JARS_VERSION']"
-  p ENV['JRUBY_JARS_VERSION']
-  puts
-  puts "ENV"
-  p ENV
+  puts 'jruby-jars-1.5.6 present?'
+  p File.join(APP_DIR, 'libs', 'jruby-core-1.5.6')
+  p File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6'))
     
-  if ENV['JRUBY_JARS_VERSION'] != '1.5.6'
+  if not File.exists?(File.join(APP_DIR, 'libs', 'jruby-core-1.5.6'))
     def test_that_yaml_loads
       assert_code "require 'yaml'"
     end
+  else
+    puts "Skipping YAML tests on jruby-jars-1.5.6"
   end
 
   def test_file_read_source_file
