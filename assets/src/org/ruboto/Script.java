@@ -56,6 +56,7 @@ public class Script {
 
     public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
+            Log.d(TAG, "Setting up JRuby runtime");
             System.setProperty("jruby.interfaces.useProxy", "true");
 		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
 		    ruby = new ScriptingContainer();
@@ -201,12 +202,10 @@ public class Script {
     		
         	// FIXME(uwe):  Simplify this as soon as we drop support for android-7
             if (android.os.Build.VERSION.SDK_INT >= 8) {
-            	System.out.println(new java.io.File(".").getAbsolutePath());
             	ruby.put("script_context", context);
-            	System.out.println(new java.io.File(".").getAbsolutePath());
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
-                toFile = (File) exec("java.io.File.new(android.os.Environment.external_storage_directory, %Q{Android/data/#$package_name/files}");
+                toFile = (File) exec("Java::java.io.File.new(Java::android.os.Environment.external_storage_directory, %Q{Android/data/#$package_name/files})");
             }
             // FIXME end
             
