@@ -200,10 +200,10 @@ public class Script {
         if (isDebugBuild(context)) {
     		
         	// FIXME(uwe):  Simplify this as soon as we drop support for android-7
-        	System.out.println(new java.io.File(".").getAbsolutePath());
-        	ruby.put("script_context", context);
-        	System.out.println(new java.io.File(".").getAbsolutePath());
             if (android.os.Build.VERSION.SDK_INT >= 8) {
+            	System.out.println(new java.io.File(".").getAbsolutePath());
+            	ruby.put("script_context", context);
+            	System.out.println(new java.io.File(".").getAbsolutePath());
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
                 toFile = (File) exec("java.io.File.new(android.os.Environment.external_storage_directory, %Q{Android/data/#$package_name/files}");
