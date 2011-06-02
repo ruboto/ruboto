@@ -1,5 +1,14 @@
 package org.ruboto;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.AssetManager;
+import android.os.Environment;
+import android.util.Log;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,14 +23,6 @@ import java.io.PrintStream;
 import org.jruby.RubyInstanceConfig;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.exceptions.RaiseException;
-
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetManager;
-import android.util.Log;
 
 public class Script {
     private static String scriptsDir = "scripts";
@@ -201,11 +202,11 @@ public class Script {
         if (isDebugBuild(context)) {
     		
         	// FIXME(uwe):  Simplify this as soon as we drop support for android-7
-            if (android.os.Build.VERSION.SDK_INT >= 8) {
+            if (false && android.os.Build.VERSION.SDK_INT >= 8) {
             	ruby.put("script_context", context);
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
-                toFile = (File) exec("Java::java.io.File.new(Java::android.os.Environment.external_storage_directory, %Q{Android/data/#$package_name/files})");
+                toFile = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
             }
             // FIXME end
             
