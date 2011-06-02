@@ -56,23 +56,24 @@ public class Script {
 
     public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
-        	System.setProperty("jruby.interfaces.useProxy", "true");
-			// ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
-			ruby = new ScriptingContainer();
-			RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
+            System.setProperty("jruby.interfaces.useProxy", "true");
+		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
+		    ruby = new ScriptingContainer();
+		    RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
             config.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
 
             config.setLoader(Script.class.getClassLoader());
-			if (scriptsDir != null) {
-				config.setCurrentDirectory(scriptsDir);
-			}
+		    if (scriptsDir != null) {
+                Log.d(TAG, "Setting JRuby current directory to " + scriptsDir);
+                config.setCurrentDirectory(scriptsDir);
+            }
             if (out != null) {
             	config.setOutput(out);
             	config.setError(out);
             }
+            initialized = true;
             
             copyScriptsIfNeeded(appContext);
-            initialized = true;
         }
 
         return ruby;
@@ -115,8 +116,9 @@ public class Script {
     	scriptsDir = dir;
     	scriptsDirFile = new File(dir);
 		if (ruby != null) {
+            Log.d(TAG, "Changing JRuby current directory to " + scriptsDir);
 			ruby.setCurrentDirectory(scriptsDir);
-    }
+        }
 	}
     
     public static String getDir() {
@@ -194,21 +196,28 @@ public class Script {
     }
 
     private static void copyScriptsIfNeeded(Context context) {
-		File toFile;
+		File toFile = null;
         if (isDebugBuild(context)) {
-			toFile = context.getExternalFilesDir(null);
-            if (toFile != null) {
-			    if (!toFile.exists()) {
-				    toFile.mkdir();
-			    }
-		    } else {
-                Log.e(TAG,
-                        "Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
-                toFile = context.getFilesDir();
+    		
+        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7
+        	System.out.println(new java.io.File(".").getAbsolutePath());
+        	ruby.put("script_context", context);
+        	System.out.println(new java.io.File(".").getAbsolutePath());
+            if (android.os.Build.VERSION.SDK_INT >= 8) {
+            	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
+            } else {
+                toFile = (File) exec("java.io.File.new(android.os.Environment.external_storage_directory, %Q{Android/data/#$package_name/files}");
             }
-        } else {
-			toFile = context.getFilesDir();
-		}
+            // FIXME end
+            
+	        if (toFile == null || (!toFile.exists() && !toFile.mkdirs())) {
+		    	Log.e(TAG,
+                        "Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
+	            toFile = context.getFilesDir();
+            }
+		} else {
+            toFile = context.getFilesDir();
+        }
 		String to = toFile.getAbsolutePath() + "/scripts";
 		Log.i(TAG, "Checking scripts in " + to);
         /* the if makes sure we only do this the first time */

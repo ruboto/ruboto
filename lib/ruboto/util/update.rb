@@ -8,7 +8,7 @@ module Ruboto
       def update_test(force = nil)
         root = Dir.getwd
         if force || !File.exists?("#{root}/test")
-          name = verify_strings.root.elements['string'].text
+          name = verify_strings.root.elements['string'].text.gsub(' ', '')
           puts "\nGenerating Android test project #{name} in #{root}..."
           system "android create test-project -m #{root} -n #{name}Test -p #{root}/test"
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
