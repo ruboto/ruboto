@@ -136,8 +136,10 @@ public class Script {
 
         /* Create directory if it doesn't exist */
         if (!scriptsDirFile.exists()) {
-            // TODO check return code
-            scriptsDirFile.mkdir();
+            boolean dirCreatedOk = scriptsDirFile.mkdirs();
+            if (!dirCreatedOk) {
+                throw new RuntimeException("Unable to create script directory");
+            }
             return true;
         }
 
@@ -201,8 +203,8 @@ public class Script {
 		File toFile = null;
         if (isDebugBuild(context)) {
     		
-        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7
-            if (false && android.os.Build.VERSION.SDK_INT >= 8) {
+        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby < 1.6.3
+            if (org.jruby.runtime.Constants.VERSION != "1.6.2" && android.os.Build.VERSION.SDK_INT >= 8) {
             	ruby.put("script_context", context);
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
