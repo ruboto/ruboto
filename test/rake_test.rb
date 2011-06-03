@@ -4,14 +4,10 @@ require 'fileutils'
 $stdout.sync = true
 
 class RakeTest < Test::Unit::TestCase
-  PACKAGE ='org.ruboto.test_app'
-  APP_NAME = 'RubotoTestApp'
-  TMP_DIR = File.join PROJECT_DIR, 'tmp'
-  APP_DIR = File.join PROJECT_DIR, 'tmp', APP_NAME
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target android-8 --min_sdk android-8 --activity #{APP_NAME}Activity"
+    system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET}"
     raise "gen app failed with return code #$?" unless $? == 0
   end
 
