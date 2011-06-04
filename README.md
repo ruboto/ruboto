@@ -163,7 +163,7 @@ You can update various portions of your generated Ruboto app through the ruboto 
 
     $ ruboto gen core Activity --method_base all-on-or-none --method_include specific-methods-to-include --method_include specific-methods-to-exclude
 
-4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either exclude those methods or add --force to create them anyway (added methods are created without calling super to avoid crashin on legacy hardware).
+4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either use method_exclude to remove methods individually or add '--force exclude' to remove the all. You can also us '--force include' to create them anyway (added methods are created without calling super to avoid crashin on legacy hardware).
 
 Scripts
 -------
