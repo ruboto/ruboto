@@ -7,7 +7,7 @@ class RakeTest < Test::Unit::TestCase
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET}"
+    generate_app
     raise "gen app failed with return code #$?" unless $? == 0
   end
 
@@ -30,6 +30,7 @@ class RakeTest < Test::Unit::TestCase
     loop do
       break if `adb shell ls -d /mnt/sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp =~ %r{^/mnt/sdcard/Android/data/#{PACKAGE}/files/scripts$}
       flunk 'Timeout waiting for scripts directory to appear' if Time.now > start + 60
+      sleep 1
     end
   end
 
@@ -44,6 +45,7 @@ class RakeTest < Test::Unit::TestCase
     loop do
       break if `adb shell ls -d /data/data/#{PACKAGE}/files/scripts`.chomp =~ %r{^/data/data/#{PACKAGE}/files/scripts$}
       flunk 'Timeout waiting for scripts directory to appear' if Time.now > start + 60
+      sleep 1
     end
   end
 

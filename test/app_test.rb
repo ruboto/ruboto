@@ -5,7 +5,7 @@ class AppTest < Test::Unit::TestCase
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET}"
+    generate_app
     raise "gen app failed with return code #$?" unless $? == 0
   end
 
@@ -33,16 +33,17 @@ class AppTest < Test::Unit::TestCase
 
   def assert_code(code)
     filename = "#{APP_DIR}/assets/scripts/ruboto_test_app_activity.rb"
-    s = File.read(filename)
+    s        = File.read(filename)
     s.gsub!(/(require 'ruboto')/, "\\1\n#{code}")
-    File.open(filename, 'w'){|f| f << s}
+    File.open(filename, 'w') { |f| f << s }
     run_app_tests
   end
 
   def run_app_tests
     Dir.chdir "#{APP_DIR}/test" do
-      system "adb uninstall #{PACKAGE}"
-      system 'ant run-tests'
+#      system "adb uninstall #{PACKAGE}"
+#      system 'ant run-tests'
+      system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
       system "adb uninstall #{PACKAGE}"
     end

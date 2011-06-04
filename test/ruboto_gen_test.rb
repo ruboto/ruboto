@@ -12,13 +12,13 @@ class RubotoGenTest < Test::Unit::TestCase
   end
 
   def test_plain_gen
-    system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET}"
+    generate_app
     assert_equal 0, $?, "gen app failed with return code #$?"
   end
 
   if not ON_JRUBY_JARS_1_5_6
     def test_gen_with_psych
-      system "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} --with-psych"
+      generate_app :with_psych => true
       assert_equal 0, $?, "gen app failed with return code #$?"
       assert File.exists?("#{APP_DIR}/libs/psych.jar"), "Failed to generate psych jar"
     end

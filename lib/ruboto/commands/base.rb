@@ -295,7 +295,7 @@ module Ruboto
             def run
               case params['what'].value
               when "jruby" then
-                update_jruby(params['force'].value)
+                update_jruby(params['force'].value) || abort
               when "app" then
                 force = params['force'].value
                 update_test force
@@ -306,7 +306,7 @@ module Ruboto
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
               when "ruboto" then
-                update_ruboto(params['force'].value)
+                update_ruboto(params['force'].value) || abort
               end
             end
           end

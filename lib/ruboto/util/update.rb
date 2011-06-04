@@ -1,6 +1,7 @@
 module Ruboto
   module Util
     module Update
+      include Build
       ###########################################################################
       #
       # Updating components
@@ -74,12 +75,15 @@ EOF
 
         unless force
           if !jruby_core || !jruby_stdlib
-            abort "cannot find existing jruby jars in libs. Make sure you're in the root directory of your app"
+            puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app."
+            return false
           end
 
           current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
-          abort "both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version" if
-          current_jruby_version == new_jruby_version
+          if current_jruby_version == new_jruby_version
+            puts "Both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version."
+            return false
+          end
 
           puts "Current jruby version: #{current_jruby_version}"
           puts "New jruby version: #{new_jruby_version}"
@@ -94,6 +98,7 @@ EOF
         reconfigure_jruby_libs(new_jruby_version, with_psych)
 
         puts "JRuby version is now: #{new_jruby_version}"
+        true
       end
 
       def update_assets(force = nil)
@@ -162,13 +167,16 @@ EOF
           puts "New version: #{from_text[/\$RUBOTO_VERSION = (\d+)/, 1]}"
           puts "Old version: #{to_text ? to_text[/\$RUBOTO_VERSION = (\d+)/, 1] : 'none'}"
 
-          abort "The ruboto.rb version has not changed. Use --force to force update." if
-          from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
+          if from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
+            puts "The ruboto.rb version has not changed. Use --force to force update."
+            return false
+          end
         end
 
         log_action("Copying ruboto.rb and setting the package name") do
           File.open(to, 'w') {|f| f << from_text}
         end
+        true
       end
 
       #
