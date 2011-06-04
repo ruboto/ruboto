@@ -27,20 +27,20 @@ module Ruboto
       #   Aborts if the class is not found or if it is not available for
       #   all api levels
       #
-      def get_class_or_interface(klass, force=false)
+      def get_class_or_interface(klass, force=nil)
         element = verify_api.find_class_or_interface(klass, "either")
 
         abort "ERROR: #{klass} not found" unless element
 
-        unless force
-          abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use --force to create it" if
-          element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
-          abort "#{klass} deprecated for targetSdkVersion, deprecatrd in #{element.attribute('deprecated')}; use --force to create it" if
-          element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
+        unless force == "include"
+          abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use '--force include' to create it" if
+            element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
+          abort "#{klass} deprecated for targetSdkVersion, deprecatrd in #{element.attribute('deprecated')}; use '--force include' to create it" if
+            element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
         end
 
         abort "#{klass} removed for targetSdkVersion, removed in #{element.attribute('api_removed')}" if
-        element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_sdk.to_i
+          element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_sdk.to_i
 
         element
       end
@@ -48,7 +48,7 @@ module Ruboto
       #
       # check_methods: Checks the methods to see if they are available for all api levels
       #
-      def check_methods(methods, force=false)
+      def check_methods(methods, force=nil)
         min_api = verify_min_sdk.to_i
         target_api = verify_target_sdk.to_i
 
@@ -67,22 +67,29 @@ module Ruboto
           end
         end
 
+        abort = false
         new_methods = methods
-        unless force
+        unless force == "include"
           # Inform and remove methods changed inside the scope of the sdk versions
           new_methods = methods.select do |i|
-            if i.attribute('api_added') and i.attribute('api_added').to_i > min_api
-              puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- exclude or force"
+            if i.attribute('api_added') and i.attribute('api_added').to_i > min_api and force == "exclude"
+              false
+            elsif i.attribute('api_added') and i.attribute('api_added').to_i > min_api
+              puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- use method_exclude or force exclude"
+              abort = true
+              false
+            elsif i.attribute('deprecated') and i.attribute('deprecated').to_i <= target_api and force == "exclude"
               false
             elsif i.attribute('deprecated') and i.attribute('deprecated').to_i <= target_api
-              puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- exclude or force"
+              puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- use method_exclude or force exclude"
+              abort = true
               false
             else
               true
             end
           end
 
-          abort("Aborting!") if methods.count != new_methods.count
+          abort("Aborting!") if abort
         end
 
         new_methods
@@ -92,7 +99,7 @@ module Ruboto
       # generate_subclass_or_interface: Creates a subclass or interface based on the specifications.
       #
       def generate_subclass_or_interface(params)
-        defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => false, :implements => ""}
+        defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => nil, :implements => ""}
         params = defaults.merge(params)
         params[:package] = verify_package unless params[:package]
 
@@ -128,7 +135,7 @@ module Ruboto
         %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener android.widget.AdapterView.OnItemSelectedListener).each do |i|
           name = i.split(".")[-1]
           if(params[:class] == name or params[:class] == "all")
-            generate_subclass_or_interface({:package => "org.ruboto.callbacks", :class => i, :name => "Ruboto#{name}"})
+            generate_subclass_or_interface({:package => "org.ruboto.callbacks", :class => i, :name => "Ruboto#{name}", :force => params[:force]})
           end
         end
 

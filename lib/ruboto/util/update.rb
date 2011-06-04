@@ -145,7 +145,7 @@ EOF
         end
       end
 
-      def update_core_classes(force = false)
+      def update_core_classes(force = nil)
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
       end
 

@@ -84,7 +84,7 @@ module Ruboto
                   update_jruby true, params['with-psych'].value
                   update_ruboto true
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
-                  update_core_classes true
+                  update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
                     generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb"
@@ -165,8 +165,9 @@ module Ruboto
               }
 
               option("force"){
-                cast :boolean
-                description "force added and deprecated methods not excluded to be create"
+                argument :required
+                validate {|i| %w(include exclude).include?(i)}
+                description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
               }
 
               def run
@@ -190,8 +191,9 @@ module Ruboto
               }
 
               option("force"){
-                cast :boolean
-                description "force added and deprecated interfaces to be create"
+                argument :required
+                validate {|i| %w(include exclude).include?(i)}
+                description "force added and deprecated interfaces (values: 'include' or 'exclude')"
               }
 
               def run
@@ -238,8 +240,9 @@ module Ruboto
               }
 
               option("force"){
-                cast :boolean
-                description "force added and deprecated methods not excluded to be create"
+                argument :required
+                validate {|i| %w(include exclude).include?(i)}
+                description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
               }
 
               def run
@@ -301,7 +304,7 @@ module Ruboto
                 update_jruby force, params['with-psych'].value
                 update_ruboto force
                 update_manifest nil, nil, force
-                update_core_classes force
+                update_core_classes "exclude"
               when "ruboto" then
                 update_ruboto(params['force'].value)
               end
