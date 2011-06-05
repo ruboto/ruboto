@@ -3,10 +3,7 @@ require 'fileutils'
 
 class AppTest < Test::Unit::TestCase
   def setup
-    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
-    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     generate_app
-    raise "gen app failed with return code #$?" unless $? == 0
   end
 
   def teardown
@@ -19,7 +16,25 @@ class AppTest < Test::Unit::TestCase
 
   if not ON_JRUBY_JARS_1_5_6
     def test_that_yaml_loads
-      assert_code "require 'yaml'"
+      assert_code <<CODE
+class Object
+  def with_large_stack(stack_size_kb = 128, &block)
+    result = nil
+    t = Thread.with_large_stack(&proc{result = block.call})
+    t.join
+    result
+  end
+end
+
+class Thread
+  def self.with_large_stack(stack_size_kb = 128, &block)
+    t = java.lang.Thread.new(nil, block, "block with large stack", stack_size_kb * 1024)
+    t.start
+    t
+  end
+end
+with_large_stack{require 'yaml'}
+CODE
     end
   else
     puts "Skipping YAML tests on jruby-jars-1.5.6"
@@ -45,7 +60,7 @@ class AppTest < Test::Unit::TestCase
 #      system 'ant run-tests'
       system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
-      system "adb uninstall #{PACKAGE}"
+#      system "adb uninstall #{PACKAGE}"
     end
   end
 

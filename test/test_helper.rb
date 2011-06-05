@@ -48,7 +48,15 @@ class Test::Unit::TestCase
   def generate_app(options = {})
     with_psych = options.delete(:with_psych) || false
     raise "Unknown options: #{options.inspect}" unless options.empty?
-    system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}"
+    if not File.exists?(template_dir)
+      puts "Generating app template #{template_dir}"
+      system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{template_dir} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+      raise "gen app failed with return code #$?" unless $? == 0
+    end
+    FileUtils.cp_r template_dir, APP_DIR
   end
 
 end

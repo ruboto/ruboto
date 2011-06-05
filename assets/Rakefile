@@ -121,10 +121,10 @@ desc 'Copy scripts to emulator or device'
 task :update_scripts => BUNDLE_JAR do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
-  if `adb shell ls #{sdcard_path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+  if device_path_exists? sdcard_path
     puts 'Pushing files to apk public file area.'
     data_dir = sdcard_path
-  elsif `adb shell ls #{app_files_path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+  elsif device_path_exists? app_files_path
     puts 'Pushing files to apk private file area.'
     data_dir = app_files_path
   else
@@ -134,6 +134,7 @@ task :update_scripts => BUNDLE_JAR do
     puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
     puts "Reverting to uninstalling and re-installing the apk."
     Rake::Task['install:clean'].invoke
+    next
   end
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
   Dir.chdir('assets') do
@@ -141,8 +142,7 @@ task :update_scripts => BUNDLE_JAR do
       Dir["#{asset_dir}/*"].each do |asset_file|
         next if File.directory? asset_file
         next if File.ctime(asset_file) < last_update
-        print "#{asset_file}: "
-        $stdout.flush
+        print "#{asset_file}: " ; $stdout.flush
         `adb push #{asset_file} #{data_dir}/#{asset_file}`
       end
     end
@@ -156,11 +156,18 @@ namespace :update_scripts do
 end
 
 task :update_test_scripts do
-  manifest
-  Dir['test/assets/scripts/*.rb'].each do |script|
-    `adb push #{script} /data/data/#{package}.tests/files/scripts/`
+  test_scripts_path = "/data/data/#{package}.tests/files/scripts/"
+  if device_path_exists? test_scripts_path
+    Dir['test/assets/scripts/*.rb'].each do |script|
+      print "#{script}: " ; $stdout.flush
+      `adb push #{script} #{test_scripts_path}`
+    end
+    `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
+  else
+    Dir.chdir 'test' do
+      system 'ant install'
+    end
   end
-  `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
 end
 
 task :test => :uninstall do
@@ -175,7 +182,8 @@ namespace :test do
   task :quick => [:update_scripts, :update_test_scripts] do
     Dir.chdir('test') do
       puts 'Running quick tests'
-      system "ant run-tests-quick"
+      sh "ant run-tests-quick"
+      puts "Quick tests returned: #{$?}"
     end
   end
 end
@@ -301,3 +309,7 @@ def app_name() strings :app_name end
 def main_activity() manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name') end
 
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
+
+def device_path_exists?(path)
+  `adb shell ls #{path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+end

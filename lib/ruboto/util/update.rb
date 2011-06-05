@@ -29,7 +29,7 @@ module Ruboto
       <attribute name="emma.enabled" default="false"/>
       <element name="extra-instrument-args" optional="yes"/>
       <sequential>
-        <echo>Running tests ...</echo>
+        <echo>Running tests with failure detection...</echo>
         <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
           <arg line="${adb.device.arg}"/>
           <arg value="shell"/>

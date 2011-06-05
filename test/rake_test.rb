@@ -5,10 +5,7 @@ $stdout.sync = true
 
 class RakeTest < Test::Unit::TestCase
   def setup
-    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
-    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     generate_app
-    raise "gen app failed with return code #$?" unless $? == 0
   end
 
   def teardown
