@@ -16,14 +16,6 @@ def confirm_ruboto_version(required_version, exact=true)
   raise "requires $RUBOTO_VERSION=#{required_version}, current version #{$RUBOTO_VERSION}" if $RUBOTO_VERSION != required_version and exact
 end
 
-puts '*' * 80
-puts 'GEM config:'
-require "rubygems"
-puts Gem::Platform.local
-puts RUBY_PLATFORM
-puts RbConfig::CONFIG["host_os"]
-puts '*' * 80
-
 require 'java'
 
 $package_name = ($activity || $service || $broadcast_receiver).package_name
