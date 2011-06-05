@@ -54,7 +54,10 @@ class Test::Unit::TestCase
     if not File.exists?(template_dir)
       puts "Generating app template #{template_dir}"
       system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{template_dir} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
-      raise "gen app failed with return code #$?" unless $? == 0
+      if $? != 0
+        FileUtils.rm_rf template_dir
+        raise "gen app failed with return code #$?"
+      end
     end
     FileUtils.cp_r template_dir, APP_DIR
   end

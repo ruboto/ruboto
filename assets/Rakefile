@@ -101,6 +101,7 @@ desc 'Restart the application'
 task :restart => [:stop_app, :start_app]
 
 task :uninstall do
+  puts "Uninstalling package #{package}"
   system "adb uninstall #{package}"
 end
 
@@ -311,7 +312,9 @@ def main_activity() manifest.root.elements['application'].elements["activity[@an
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
 
 def device_path_exists?(path)
-  `adb shell ls #{path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+  path_output =`adb shell ls #{path}`
+  puts "Checking path on device: #{path_output}"
+  path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
 end
 
 def package_installed?
