@@ -121,10 +121,10 @@ desc 'Copy scripts to emulator or device'
 task :update_scripts => BUNDLE_JAR do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
-  if device_path_exists? sdcard_path
+  if package_installed? && device_path_exists?(sdcard_path)
     puts 'Pushing files to apk public file area.'
     data_dir = sdcard_path
-  elsif device_path_exists? app_files_path
+  elsif package_installed? && device_path_exists?(app_files_path)
     puts 'Pushing files to apk private file area.'
     data_dir = app_files_path
   else
@@ -312,4 +312,8 @@ def build_project_name() @build_project_name ||= REXML::Document.new(File.read('
 
 def device_path_exists?(path)
   `adb shell ls #{path}`.chomp !~ /No such file or directory|opendir failed, Permission denied/
+end
+
+def package_installed?
+  device_path_exists? "/data/app/#{package}-*.apk"
 end
