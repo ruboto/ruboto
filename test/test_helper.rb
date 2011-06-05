@@ -51,15 +51,19 @@ class Test::Unit::TestCase
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}"
-    if not File.exists?(template_dir)
-      puts "Generating app template #{template_dir}"
-      system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{template_dir} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+    if File.exists?(template_dir)
+      puts "Copying app from template #{template_dir}"
+      FileUtils.cp_r template_dir, APP_DIR
+    else
+      puts "Generating app #{APP_DIR}"
+      system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
       if $? != 0
         FileUtils.rm_rf template_dir
         raise "gen app failed with return code #$?"
       end
+      puts "Storing app as template #{template_dir}"
+      FileUtils.cp_r APP_DIR, template_dir
     end
-    FileUtils.cp_r template_dir, APP_DIR
   end
 
 end
