@@ -58,7 +58,7 @@ CODE
     Dir.chdir "#{APP_DIR}/test" do
 #      system "adb uninstall #{PACKAGE}"
 #      system 'ant run-tests'
-      system 'rake test:quick'
+      system 'rake --trace test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
 #      system "adb uninstall #{PACKAGE}"
     end

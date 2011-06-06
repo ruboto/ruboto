@@ -30,7 +30,7 @@ if ant_loaded
 else
   desc "build package and install it on the emulator or device"
   task :install do
-    system 'ant install'
+    sh 'ant install'
   end
 end
 
@@ -166,7 +166,7 @@ task :update_test_scripts do
     `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
   else
     Dir.chdir 'test' do
-      system 'ant install'
+      sh 'ant install'
     end
   end
 end
