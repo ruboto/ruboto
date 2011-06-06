@@ -4,7 +4,7 @@ UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirn
 BUNDLE_JAR = 'libs/bundle.jar'
 BUNDLE_PATH = 'tmp/bundle'
 
-if RUBY_PLATFORM =~ /java/
+if false && RUBY_PLATFORM =~ /java/
   puts "Detected JRuby.  Loading ANT."
   require 'ant'
   ant_loaded = true
