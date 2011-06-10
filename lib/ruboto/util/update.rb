@@ -219,6 +219,10 @@ EOF
                 next if File.basename(f) =~ /^..?$/
                 FileUtils.move f, "../1.8/" + File.basename(f)
               end
+              Dir["META-INF/jruby.home/lib/ruby/site_ruby/shared/*"].each do |f|
+                next if File.basename(f) =~ /^..?$/
+                FileUtils.move f, "../1.8/" + File.basename(f)
+              end
             end
             Dir.chdir "1.8" do
               `jar -cf ../#{jruby_stdlib} .`
