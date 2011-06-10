@@ -269,8 +269,15 @@ def device_path_exists?(path)
 end
 
 def package_installed?
-  device_path_exists? "/data/app/#{package}-*.apk"
-  true
+  app_path = "/data/app/#{package}-*.apk"
+  path_output =`adb shell ls #{app_path}`
+  if path_output.chomp =~ /No such file or directory/
+    return false
+  end
+  if path_output.chomp !~ /opendir failed, Permission denied/
+    puts "Unable to determine installation state of the app.  Assuming it is installed."
+  end
+  return true
 end
 
 private
