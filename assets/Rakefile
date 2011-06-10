@@ -270,12 +270,15 @@ end
 
 def package_installed?
   app_path = "/data/app/#{package}-*.apk"
-  path_output =`adb shell ls #{app_path}`
-  if path_output.chomp =~ /No such file or directory/
+  path_output = `adb shell ls #{app_path}`.chomp
+  if path_output =~ /No such file or directory/
     return false
   end
-  if path_output.chomp !~ /opendir failed, Permission denied/
+  if path_output =~ /opendir failed, Permission denied/
     puts "Unable to determine installation state of the app.  Assuming it is installed."
+  end
+  if path_output =~ %r{^/data/app/#{package}-\d.apk$}
+    puts "Application already installed."
   end
   return true
 end
