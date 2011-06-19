@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'rubygems'
 
-class Test::Unit::TestCase
+module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
@@ -16,7 +16,10 @@ class Test::Unit::TestCase
   APP_DIR        = File.join TMP_DIR, APP_NAME
   ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-8'
   RUBOTO_CMD     = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
+end
 
+class Test::Unit::TestCase
+  include RubotoTest
   alias old_run run
 
   def run(*args, &block)

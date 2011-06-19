@@ -18,6 +18,14 @@ dirs.each { |d| directory d }
 
 CLEAN.include('tmp', 'bin', generated_libs)
 
+task :default => :debug
+
+desc 'build debug package'
+# task :debug => [:generate_libs, BUNDLE_JAR, :mark_update] do
+task :debug => [BUNDLE_JAR, :mark_update] do
+  sh 'ant debug'
+end
+
 desc "build package and install it on the emulator or device"
 task :install => [BUNDLE_JAR, :mark_update] do
   sh 'ant install'
@@ -45,10 +53,7 @@ task :generate_libs => [generated_libs, jruby_ruboto_jar] do
   cp stdlib, generated_libs
 end
 
-task :debug   => :generate_libs
 task :release => :generate_libs
-
-task :default => :debug
 
 task :tag => :release do
   unless `git branch` =~ /^\* master$/
@@ -100,7 +105,7 @@ namespace :install do
 
   desc 'Build, install, and restart the application'
   task :restart => [:install, :start_app]
-  
+
   namespace :restart do
     desc 'Uninstall, build, install, and restart the application'
     task :clean => [:uninstall, :install, :start_app]
@@ -126,7 +131,7 @@ task :update_scripts => BUNDLE_JAR do
     Rake::Task['install:clean'].invoke
     next
   end
-  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('2011-05-17T00:00:00')
+  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('assets') do
     ['scripts'].each do |asset_dir|
       Dir["#{asset_dir}/*"].each do |asset_file|
@@ -146,8 +151,8 @@ namespace :update_scripts do
 end
 
 task :update_test_scripts do
-  test_scripts_path = "/data/data/#{package}.tests/files/scripts/"
-  if device_path_exists? test_scripts_path
+  test_scripts_path = "/data/data/#{package}.tests/files/scripts"
+  if package_installed?(true) && device_path_exists?(test_scripts_path)
     Dir['test/assets/scripts/*.rb'].each do |script|
       print "#{script}: " ; $stdout.flush
       `adb push #{script} #{test_scripts_path}`
@@ -188,7 +193,7 @@ file BUNDLE_JAR => 'Gemfile' do
   sh "bundle install --path=#{BUNDLE_PATH}"
 
   # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
-  
+
   Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
     scanned_files = []
     Dir["*/lib/**/*"].each do |f|
@@ -211,7 +216,7 @@ end
     EOF
     replace_faulty_code(faulty_file, faulty_code)
   end
-  
+
   Dir["#{BUNDLE_PATH}/ruby/1.8/gems/activemodel-*/lib/active_model/validations.rb"].each do |faulty_file|
     faulty_code = <<-EOF
 Dir[File.dirname(__FILE__) + "/validations/*.rb"].sort.each do |path|
@@ -221,7 +226,7 @@ end
     EOF
     replace_faulty_code(faulty_file, faulty_code)
   end
-  
+
   FileUtils.rm_f BUNDLE_JAR
   Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each_with_index do |gem_dir, i|
     `jar #{i == 0 ? 'c' : 'u'}f #{BUNDLE_JAR} -C #{gem_dir}/lib .`
@@ -264,38 +269,43 @@ def build_project_name() @build_project_name ||= REXML::Document.new(File.read('
 
 def device_path_exists?(path)
   path_output =`adb shell ls #{path}`
-  puts "Checking path on device: #{path_output}"
-  path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
+  result = path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
+  puts "Checking path on device: #{path}: #{result || path_output}"
+  result
 end
 
-def package_installed?
-  app_path = "/data/app/#{package}-*.apk"
-  path_output = `adb shell ls #{app_path}`.chomp
-  if path_output =~ /No such file or directory/
-    return false
+def package_installed? test = false
+  package_name = "#{package}#{'.tests' if test}"
+  app_paths = [0,1,2].map{|i| "/data/app/#{package_name}-#{i}.apk"}
+  app_paths.each{|p| puts "adb shell ls #{p}".chomp}
+  path_outputs = app_paths.map{|p| `adb shell ls #{p}`.chomp}
+  path_outputs.each_with_index do |o, i|
+    if o == app_paths[i]
+      puts "Found package #{app_paths[i]}"
+      return true
+    end
   end
-  if path_output =~ /opendir failed, Permission denied/
-    puts "Unable to determine installation state of the app.  Assuming it is installed."
-  end
-  if path_output =~ %r{^/data/app/#{package}-\d.apk$}
-    puts "Application already installed."
-  end
-  return true
+#  if path_outputs.any?{|o| o !~ /opendir failed, Permission denied/}
+#    puts "Unable to determine installation state of the app.  Assuming it is installed."
+#    return true
+#  end
+  puts "Package not found: #{package_name}"
+  return false
 end
 
 private
 
 def replace_faulty_code(faulty_file, faulty_code)
-    explicit_requires = Dir["#{faulty_file.chomp('.rb')}/*.rb"].sort.map{|f| File.basename(f)}.map do |filename|
-      "require 'active_model/validations/#{filename}'"
-    end.join("\n")
-    
-    old_code = File.read(faulty_file)
-    new_code = old_code.gsub faulty_code, explicit_requires
-    if new_code != old_code
-      puts "Replaced directory listing code in file #{faulty_file} with explicit requires."
-      File.open(faulty_file, 'w'){|f| f << new_code}
-    else
-      puts "Could not find expected faulty code\n\n#{faulty_code}\n\nin file #{faulty_file}\n\n#{old_code}\n\n"
-    end
+  explicit_requires = Dir["#{faulty_file.chomp('.rb')}/*.rb"].sort.map{|f| File.basename(f)}.map do |filename|
+    "require 'active_model/validations/#{filename}'"
+  end.join("\n")
+
+  old_code = File.read(faulty_file)
+  new_code = old_code.gsub faulty_code, explicit_requires
+  if new_code != old_code
+    puts "Replaced directory listing code in file #{faulty_file} with explicit requires."
+    File.open(faulty_file, 'w'){|f| f << new_code}
+  else
+    puts "Could not find expected faulty code\n\n#{faulty_code}\n\nin file #{faulty_file}\n\n#{old_code}\n\n"
+  end
 end

@@ -1,18 +1,40 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
+require 'test/app_test'
 
 class RubotoGenTest < Test::Unit::TestCase
-  def test_plain_gen
+  include AppTest
+
+  def setup
+    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     generate_app
   end
 
-  if not ON_JRUBY_JARS_1_5_6
-    def test_gen_with_psych
+  def teardown
+    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+  end
+end
+
+if not RubotoTest::ON_JRUBY_JARS_1_5_6
+  class RubotoGenTestWithPsych < Test::Unit::TestCase
+    include AppTest
+    
+    def setup
+      Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+      FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
       generate_app :with_psych => true
+    end
+
+    def teardown
+      # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    end
+
+    def test_psych_jar_exists
       assert File.exists?("#{APP_DIR}/libs/psych.jar"), "Failed to generate psych jar"
     end
-  else
-    puts "Skipping Psych tests on jruby-jars-1.5.6"
-  end
 
+  end
+else
+  puts "Skipping Psych tests on jruby-jars-1.5.6"
 end

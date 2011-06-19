@@ -1,7 +1,10 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
+require 'test/app_test'
 
 class RubotoUpdateTest < Test::Unit::TestCase
+  include AppTest
+  
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
@@ -18,6 +21,9 @@ class RubotoUpdateTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} update app"
       assert_equal 0, $?, "update app failed with return code #$?"
+      assert File.readlines('test/build.properties').grep(/\w/).uniq!.nil?, 'Duplicate lines in build.properties'
+      assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in build.xml'
+      
     end
   end
 

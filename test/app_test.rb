@@ -1,15 +1,8 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
-require 'fileutils'
 
-class AppTest < Test::Unit::TestCase
-  def setup
-    generate_app
-  end
-
-  def teardown
-    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-  end
-
+module AppTest
+  include RubotoTest
+  
   def test_that_tests_work_on_new_project
     run_app_tests
   end
@@ -56,11 +49,8 @@ CODE
 
   def run_app_tests
     Dir.chdir "#{APP_DIR}/test" do
-#      system "adb uninstall #{PACKAGE}"
-#      system 'ant run-tests'
-      system 'rake --trace test:quick'
+      system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
-#      system "adb uninstall #{PACKAGE}"
     end
   end
 

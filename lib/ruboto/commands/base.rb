@@ -82,7 +82,6 @@ module Ruboto
                   update_assets true
                   update_classes true
                   update_jruby true, params['with-psych'].value
-                  update_ruboto true
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
 
@@ -302,7 +301,6 @@ module Ruboto
                 update_assets force
                 update_classes force
                 update_jruby force, params['with-psych'].value
-                update_ruboto force
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
               when "ruboto" then

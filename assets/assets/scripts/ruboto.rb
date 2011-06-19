@@ -40,6 +40,22 @@ module Ruboto
 end
 AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
+class Object 
+  def with_large_stack(stack_size_kb = 64, &block) 
+    result = nil 
+    t = Thread.with_large_stack(&proc{result = block.call}) 
+    t.join 
+    result 
+  end 
+end 
+class Thread 
+  def self.with_large_stack(stack_size_kb = 64, &block) 
+    t = java.lang.Thread.new(nil, block, "block with large stack", stack_size_kb * 1024) 
+    t.start 
+    t 
+  end 
+end
+
 #############################################################################
 #
 # Activity
@@ -172,9 +188,10 @@ def ruboto_configure_activity(klass)
       end
       setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
 
-      p = Proc.new do |num,menu_item|
+      p = Proc.new do |num, menu_item|
         # handles a problem where this is called for context items
-        unless @just_processed_context_item == menu_item
+        # JRUBY-5866 JRuby can't access nested Java class if the class is called 'id'
+        unless @just_processed_context_item == menu_item || menu_item.item_id == JavaUtilities.get_proxy_class('android.R$id').home
           instance_eval &(menu_item.on_click)
           @just_processed_context_item = nil
           true
