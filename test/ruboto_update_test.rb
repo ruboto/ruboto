@@ -17,6 +17,7 @@ class RubotoUpdateTest < Test::Unit::TestCase
       android_home = File.dirname(File.dirname(`which adb`))
     end
     File.open("#{APP_DIR}/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
+    File.open("#{APP_DIR}/test/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
   end
 
   def teardown
