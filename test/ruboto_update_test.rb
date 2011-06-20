@@ -11,6 +11,12 @@ class RubotoUpdateTest < Test::Unit::TestCase
     Dir.chdir TMP_DIR do
       system "tar xzf #{PROJECT_DIR}/examples/RubotoTestApp_0.1.0_jruby_1.6.3.dev.tgz"
     end
+    if ENV['ANDROID_HOME']
+      android_home = ENV['ANDROID_HOME']
+    else
+      android_home = File.dirname(File.dirname(`which adb`))
+    end
+    File.open("#{APP_DIR}/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
   end
 
   def teardown
