@@ -65,7 +65,7 @@ module Ruboto
                 min_sdk = params['min_sdk'].value
                 target = params['target'].value || min_sdk
 
-                abort "Path must be to a directory that does not yet exist. It will be created." if File.exists?(path)
+                abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if File.exists?(path)
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."

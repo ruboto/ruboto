@@ -152,7 +152,7 @@ end
 
 task :update_test_scripts do
   test_scripts_path = "/data/data/#{package}.tests/files/scripts"
-  if package_installed?(true) && device_path_exists?(test_scripts_path)
+  if false && package_installed?(true) && device_path_exists?(test_scripts_path)
     Dir['test/assets/scripts/*.rb'].each do |script|
       print "#{script}: " ; $stdout.flush
       `adb push #{script} #{test_scripts_path}`
