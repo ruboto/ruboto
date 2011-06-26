@@ -10,6 +10,6 @@ end
 
 task :test do
   Dir['test/*_test.rb'].each do |f|
-    load f
+    require f.chomp('.rb')
   end
 end

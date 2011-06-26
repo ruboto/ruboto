@@ -276,7 +276,7 @@ end
 
 def package_installed? test = false
   package_name = "#{package}#{'.tests' if test}"
-  app_paths = [0,1,2].map{|i| "/data/app/#{package_name}-#{i}.apk"}
+  app_paths = ['', '-0', '-1', '-2'].map{|i| "/data/app/#{package_name}#{i}.apk"}
   app_paths.each{|p| puts "adb shell ls #{p}".chomp}
   path_outputs = app_paths.map{|p| `adb shell ls #{p}`.chomp}
   path_outputs.each_with_index do |o, i|

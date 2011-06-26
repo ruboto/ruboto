@@ -14,7 +14,7 @@ module RubotoTest
   APP_NAME       = 'RubotoTestApp'
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
   APP_DIR        = File.join TMP_DIR, APP_NAME
-  ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-8'
+  ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-7'
   RUBOTO_CMD     = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 end
 
