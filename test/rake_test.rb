@@ -26,7 +26,9 @@ class RakeTest < Test::Unit::TestCase
     wait_for_dir("/sdcard/Android/data/#{PACKAGE}/files/scripts")
   end
 
-  unless ANDROID_TARGET == 'android-7'
+  if ANDROID_OS == 'android-7'
+    puts "Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall"
+  else
     def test_that_update_scripts_task_copies_files_to_app_directory_when_permissions_are_not_set
       Dir.chdir APP_DIR do
         system 'rake install:restart:clean'

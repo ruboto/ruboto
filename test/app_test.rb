@@ -3,9 +3,9 @@ require File.expand_path("test_helper", File.dirname(__FILE__))
 module AppTest
   include RubotoTest
 
-  if ['android-7', 'android-8'].include? ANDROID_TARGET
+  if ['android-7', 'android-8'].include? ANDROID_OS
     def test_nothing
-      puts "Skipping instrumentation tests on #{ANDROID_TARGET} since they don't work."
+      puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
     end
   else
     def test_that_tests_work_on_new_project

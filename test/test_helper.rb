@@ -15,7 +15,18 @@ module RubotoTest
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
   APP_DIR        = File.join TMP_DIR, APP_NAME
   ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-7'
+
+  VERSION_TO_API_LEVEL = {
+      '2.1' => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
+      '2.3' => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
+      '2.3.3' => 'android-10', '2.3.4' => 'android-10',
+      '3.0' => 'android-11', '3.1' => 'android-12'
+  }
+  version        = `adb bugreport`.scan(/sdk-eng (.*?) .*? .*? test-keys/)[0][0]
+  ANDROID_OS     = ENV['ANDROID_OS'] || VERSION_TO_API_LEVEL[version] || raise("Unable to detect device/emulator apilevel: #{version.inspect}")
   RUBOTO_CMD     = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
+
+  puts "ANDROID_OS: #{ANDROID_OS}"
 end
 
 class Test::Unit::TestCase
