@@ -203,12 +203,13 @@ public class Script {
 		File toFile = null;
         if (isDebugBuild(context)) {
     		
-        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby < 1.6.3
+        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby 1.6.2
             if (org.jruby.runtime.Constants.VERSION != "1.6.2" && android.os.Build.VERSION.SDK_INT >= 8) {
             	ruby.put("script_context", context);
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
                 toFile = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
+                Log.e(TAG, "Environment.getExternalStorageDirectory(): " + toFile);
             }
             // FIXME end
             

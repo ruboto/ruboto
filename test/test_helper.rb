@@ -22,9 +22,21 @@ module RubotoTest
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
       '3.0' => 'android-11', '3.1' => 'android-12'
   }
-  version        = `adb bugreport`.scan(/sdk-eng (.*?) .*? .*? test-keys/)[0][0]
-  ANDROID_OS     = ENV['ANDROID_OS'] || VERSION_TO_API_LEVEL[version] || raise("Unable to detect device/emulator apilevel: #{version.inspect}")
-  RUBOTO_CMD     = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
+  
+  def self.version_from_device
+    start = Time.now
+    version_output = `adb bugreport`
+    version_scan = `adb bugreport`.scan(/sdk-eng (.*?) .*? .*? test-keys/)[0]
+    raise("Unable to read device/emulator apilevel: #{version_output.inspect}") unless version_scan
+    version = version_scan[0]
+    puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
+    api_level = VERSION_TO_API_LEVEL[version]
+    raise "Unknown version: #{version}" if api_level.nil?
+    api_level
+  end
+
+  ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
+  RUBOTO_CMD = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
   puts "ANDROID_OS: #{ANDROID_OS}"
 end
