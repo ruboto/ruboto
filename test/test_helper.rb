@@ -25,14 +25,16 @@ module RubotoTest
   
   def self.version_from_device
     start = Time.now
-    version_output = `adb bugreport`
-    version_scan = `adb bugreport`.scan(/sdk-eng (.*?) .*? .*? test-keys/)[0]
-    raise("Unable to read device/emulator apilevel: #{version_output.inspect}") unless version_scan
-    version = version_scan[0]
-    puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
-    api_level = VERSION_TO_API_LEVEL[version]
-    raise "Unknown version: #{version}" if api_level.nil?
-    api_level
+    IO.popen('adb bugreport').each_line do |line|
+      if line =~ /sdk-eng (.*?) .*? .*? test-keys/
+        version = $1
+        api_level = VERSION_TO_API_LEVEL[version]
+        raise "Unknown version: #{version}" if api_level.nil?
+        puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
+        return api_level
+      end
+    end
+    raise("Unable to read device/emulator apilevel")
   end
 
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
