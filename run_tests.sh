@@ -8,10 +8,10 @@ elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export PATH=$JRUBY_HOME/bin:$PATH
 fi
 unset GEM_HOME
+bundle install
 if [ "$JRUBY_JARS_VERSION" != "" ] ; then
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
   gem uninstall --all jruby-jars
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
 fi
-bundle install
 rake --trace test
