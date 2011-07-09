@@ -76,7 +76,7 @@ EOF
       def update_jruby(force=nil, with_psych=nil)
         jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
         jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
-        new_jruby_version = JRubyJars::core_jar_path.split('/')[-1][11..-5]
+        new_jruby_version = JRubyJars::VERSION
 
         unless force
           if !jruby_core || !jruby_stdlib

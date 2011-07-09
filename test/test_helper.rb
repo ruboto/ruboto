@@ -24,6 +24,8 @@ module RubotoTest
   }
   
   def self.version_from_device
+    puts "Reading OS version from device/emulator"
+    system "adb wait-for-device"
     start = Time.now
     IO.popen('adb bugreport').each_line do |line|
       if line =~ /sdk-eng (.*?) .*? .*? test-keys/
@@ -34,7 +36,7 @@ module RubotoTest
         return api_level
       end
     end
-    raise("Unable to read device/emulator apilevel")
+    raise "Unable to read device/emulator apilevel"
   end
 
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device

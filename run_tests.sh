@@ -10,7 +10,6 @@ fi
 unset GEM_HOME
 bundle install --system
 if [ "$JRUBY_JARS_VERSION" != "" ] ; then
-  ls -l
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
   gem uninstall --all jruby-jars
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars

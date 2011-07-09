@@ -1,9 +1,9 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
-require 'test/app_test'
+require 'test/app_test_methods'
 
 class RubotoGenTest < Test::Unit::TestCase
-  include AppTest
+  include AppTestMethods
 
   def setup
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -17,8 +17,8 @@ class RubotoGenTest < Test::Unit::TestCase
 end
 
 if not RubotoTest::ON_JRUBY_JARS_1_5_6
-  class RubotoGenTestWithPsych < Test::Unit::TestCase
-    include AppTest
+  class RubotoGenWithPsychTest < Test::Unit::TestCase
+    include AppTestMethods
     
     def setup
       Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
