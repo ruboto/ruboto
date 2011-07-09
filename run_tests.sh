@@ -8,8 +8,9 @@ elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export PATH=$JRUBY_HOME/bin:$PATH
 fi
 unset GEM_HOME
-bundle install
+bundle install --system
 if [ "$JRUBY_JARS_VERSION" != "" ] ; then
+  ls -l
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
   gem uninstall --all jruby-jars
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
