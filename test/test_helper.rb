@@ -40,7 +40,7 @@ module RubotoTest
   end
 
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
-  RUBOTO_CMD = "jruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
+  RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
   puts "ANDROID_OS: #{ANDROID_OS}"
 end
