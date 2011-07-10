@@ -3,13 +3,12 @@
 # BEGIN TIMEOUT #
 TIMEOUT="1800"
 BOSSPID=$$
-echo "Boss PID: $BOSSPID"
 (
   sleep $TIMEOUT
   kill -9 -$BOSSPID
 )&
 TIMERPID=$!
-echo "Timer PID: $TIMERPID"
+echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
 trap "kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
