@@ -59,6 +59,7 @@ public class Script {
         if (ruby == null) {
             Log.d(TAG, "Setting up JRuby runtime");
             System.setProperty("jruby.interfaces.useProxy", "true");
+            System.setProperty("jruby.bytecode.version", "1.5");
 		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
 		    ruby = new ScriptingContainer();
 		    RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
