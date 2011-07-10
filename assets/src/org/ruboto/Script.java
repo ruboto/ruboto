@@ -133,6 +133,12 @@ public class Script {
 
     public static Boolean configDir(String noSdcard) {
         setDir(noSdcard);
+        if (!ruby.getLoadPaths().contains(noSdcard)) {
+            Log.i(TAG, "Adding scripts dir to load path: " + noSdcard);
+            java.util.List paths = ruby.getLoadPaths();
+            paths.add(noSdcard);
+            ruby.setLoadPaths(paths);
+        }
 
         /* Create directory if it doesn't exist */
         if (!scriptsDirFile.exists()) {
@@ -203,13 +209,14 @@ public class Script {
 		File toFile = null;
         if (isDebugBuild(context)) {
     		
-        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby 1.6.2
-            if (org.jruby.runtime.Constants.VERSION != "1.6.2" && android.os.Build.VERSION.SDK_INT >= 8) {
+        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
+            Log.i(TAG, "JRuby VERSION: " + org.jruby.runtime.Constants.VERSION);
+            if (!org.jruby.runtime.Constants.VERSION.equals("1.5.6") && !org.jruby.runtime.Constants.VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
             	ruby.put("script_context", context);
             	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
             } else {
                 toFile = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
-                Log.e(TAG, "Environment.getExternalStorageDirectory(): " + toFile);
+                Log.e(TAG, "Calculated path to sdcard the old way: " + toFile);
             }
             // FIXME end
             
