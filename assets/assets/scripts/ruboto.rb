@@ -255,13 +255,9 @@ def ruboto_setup(klass, init_method="create")
 
   klass.class_eval do
     eval %Q{
-      def when_launched(&block)
-        instance_exec *args, &block
-        on_#{init_method} nil
-      end
-
       def handle_#{init_method}(&block)
-        when_launched &block
+        instance_exec &block
+        #{klass == Java::org.ruboto.RubotoActivity ? "on_create(nil)" : ""}
       end
     }
   end
