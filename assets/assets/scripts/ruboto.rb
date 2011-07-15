@@ -254,12 +254,12 @@ def ruboto_setup(klass, init_method="create")
   ruboto_allow_handlers(klass)
 
   klass.class_eval do
-    def when_launched(&block)
-      instance_exec *args, &block
-      on_create nil
-    end
-
     eval %Q{
+      def when_launched(&block)
+        instance_exec *args, &block
+        on_#{init_method} nil
+      end
+
       def handle_#{init_method}(&block)
         when_launched &block
       end
