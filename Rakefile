@@ -5,7 +5,7 @@ task :gem do
 end
 
 task :release do
-  `gem push #{Dir['ruboto-core-*.gem'][-1]}`
+  sh "gem push #{Dir['ruboto-core-*.gem'][-1]}"
 end
 
 task :test do
