@@ -597,22 +597,22 @@ end
 #
 # Final set up depending on globals
 #
-
-if $activity
+# TODO(uwe): I think ruboto.rb should not contain any conditions so it does not matter when it is required.
+# TODO(uwe): Remove the commented lines after checking with Scott.
+# if $activity
   java_import "org.ruboto.RubotoActivity"
   setup_activity
   ruboto_configure_activity(RubotoActivity)
   ruboto_setup(RubotoActivity)
   setup_view
-end
+# end
 
-if $service
+# if $service
   java_import "org.ruboto.RubotoService"
   ruboto_setup(RubotoService)
-end
+# end
 
-if $broadcast_receiver
+# if $broadcast_receiver
   java_import "org.ruboto.RubotoBroadcastReceiver"
   ruboto_setup(RubotoBroadcastReceiver, "receive")
-end
-
+# end

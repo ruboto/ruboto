@@ -1,5 +1,9 @@
 require 'time'
 
+def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
+def package() manifest.root.attribute('package') end
+def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
+
 UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
 BUNDLE_JAR = 'libs/bundle.jar'
 BUNDLE_PATH = 'tmp/bundle'
@@ -7,21 +11,17 @@ BUNDLE_PATH = 'tmp/bundle'
 require 'rake/clean'
 require 'rexml/document'
 
-generated_libs     = 'generated_libs'
 jars = Dir['libs/*.jar']
 stdlib             = jars.grep(/stdlib/).first #libs/jruby-stdlib-VERSION.jar
 jruby_jar          = jars.grep(/core/).first   #libs/jruby-core-VERSION.jar
-stdlib_precompiled = File.join(generated_libs, 'jruby-stdlib-precompiled.jar')
-jruby_ruboto_jar   = File.join(generated_libs, 'jruby-ruboto.jar')
-dirs = ['tmp/ruby', 'tmp/precompiled', generated_libs]
-dirs.each { |d| directory d }
+MANIFEST_FILE      = 'AndroidManifest.xml'
+APK_FILE           = "bin/#{build_project_name}-debug.apk"
 
-CLEAN.include('tmp', 'bin', generated_libs)
+CLEAN.include('tmp', 'bin')
 
 task :default => :debug
 
 desc 'build debug package'
-# task :debug => [:generate_libs, BUNDLE_JAR, :mark_update] do
 task :debug => [BUNDLE_JAR, :mark_update] do
   sh 'ant debug'
 end
@@ -30,30 +30,6 @@ desc "build package and install it on the emulator or device"
 task :install => [BUNDLE_JAR, :mark_update] do
   sh 'ant install'
 end
-
-file stdlib_precompiled => :compile_stdlib
-file jruby_ruboto_jar => generated_libs do
-  ant.zip(:destfile=>jruby_ruboto_jar) do
-    zipfileset(:src=>jruby_jar) do
-      exclude(:name=>'jni/**')
-      # dx chokes on some of the netdb classes, for some reason
-      exclude(:name=>'jnr/netdb/**')
-    end
-  end
-end
-
-desc "precompile ruby stdlib"
-task :compile_stdlib => [:clean, *dirs] do
-  ant.unzip(:src=>stdlib, :dest=>'tmp/ruby')
-  Dir.chdir('tmp/ruby') { sh "jrubyc . -t ../precompiled" }
-  ant.zip(:destfile=>stdlib_precompiled, :basedir=>'tmp/precompiled')
-end
-
-task :generate_libs => [generated_libs, jruby_ruboto_jar] do
-  cp stdlib, generated_libs
-end
-
-task :release => :generate_libs
 
 task :tag => :release do
   unless `git branch` =~ /^\* master$/
@@ -112,8 +88,15 @@ namespace :install do
   end
 end
 
+file MANIFEST_FILE
+
+file APK_FILE => MANIFEST_FILE do
+  puts "#{MANIFEST_FILE} changed.  Forcing rebuild of #{APK_FILE}."
+  Rake::Task['install:clean'].invoke
+end
+
 desc 'Copy scripts to emulator or device'
-task :update_scripts => BUNDLE_JAR do
+task :update_scripts => [BUNDLE_JAR, APK_FILE] do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
   if package_installed? && device_path_exists?(sdcard_path)
@@ -247,25 +230,17 @@ def mark_update
   File.open(UPDATE_MARKER_FILE, 'w'){|f| f << Time.now.iso8601}
 end
 
-def manifest
-  @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml'))
-end
-
 def strings(name)
   @strings ||= REXML::Document.new(File.read('res/values/strings.xml'))
   value = @strings.elements["//string[@name='#{name.to_s}']"] or raise "string '#{name}' not found in strings.xml"
   value.text
 end
 
-def package() manifest.root.attribute('package') end
-
 def version() strings :version_name end
 
 def app_name() strings :app_name end
 
 def main_activity() manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name') end
-
-def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
 
 def device_path_exists?(path)
   path_output =`adb shell ls #{path}`
@@ -277,7 +252,6 @@ end
 def package_installed? test = false
   package_name = "#{package}#{'.tests' if test}"
   app_paths = ['', '-0', '-1', '-2'].map{|i| "/data/app/#{package_name}#{i}.apk"}
-  app_paths.each{|p| puts "adb shell ls #{p}".chomp}
   path_outputs = app_paths.map{|p| `adb shell ls #{p}`.chomp}
   path_outputs.each_with_index do |o, i|
     if o == app_paths[i]

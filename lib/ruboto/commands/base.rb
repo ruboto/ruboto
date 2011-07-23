@@ -120,6 +120,18 @@ module Ruboto
                 klass = params['class'].value
 
                 generate_inheriting_file klass, name, verify_package, script_name
+
+                app_element = verify_manifest.elements['application']
+                if klass == 'Activity' || klass == 'Service'
+                  tag = klass.downcase
+                  if app_element.elements["#{tag}[@android:name='#{name}']"]
+                    puts "#{klass} already present in manifest."
+                  else
+                    app_element.add_element tag, {"android:name" => "#{"#{verify_package}." if klass == 'Service'}#{name}"}
+                    save_manifest
+                    puts "Added #{tag} to manifest."
+                  end
+                end
               end
             end
 

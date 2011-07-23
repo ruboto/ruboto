@@ -6,13 +6,11 @@ class RubotoGenTest < Test::Unit::TestCase
   include AppTestMethods
 
   def setup
-    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
-    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     generate_app
   end
 
   def teardown
-    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    cleanup_app
   end
 end
 
@@ -21,13 +19,11 @@ if not RubotoTest::ON_JRUBY_JARS_1_5_6
     include AppTestMethods
     
     def setup
-      Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
-      FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
       generate_app :with_psych => true
     end
 
     def teardown
-      # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+      cleanup_app
     end
 
     def test_psych_jar_exists

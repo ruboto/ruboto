@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # BEGIN TIMEOUT #
-TIMEOUT="1800"
+TIMEOUT="3000"
 BOSSPID=$$
 (
   sleep $TIMEOUT
@@ -27,7 +27,7 @@ if [ "$JRUBY_JARS_VERSION" != "" ] ; then
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
   (gem uninstall jruby-jars --all -v "!=$JRUBY_JARS_VERSION") || echo "No superflous jruby-jars gem uninstalled." 
 fi
-rake --trace test
+rake test
 
 
 # BEGIN TIMEOUT #

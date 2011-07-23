@@ -166,23 +166,28 @@ module Ruboto
       #
 
       def generate_inheriting_file(klass, name, package, script_name, dest='.', filename = name)
-        file = File.join(dest, "src/#{package.gsub('.', '/')}", "#{filename}.java")
+        file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{filename}.java")
         text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
         File.open(file, 'w') do |f|
           f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
         end
+        puts "Added file #{file}."
 
         sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("start.rb", script_name)
         FileUtils.mkdir_p File.join(dest, 'assets/scripts')
-        File.open File.join(dest, "assets/scripts/#{script_name}"), "a" do |f|
+        script_file = File.expand_path("assets/scripts/#{script_name}", dest)
+        File.open script_file, "a" do |f|
           f << sample_source
         end
+        puts "Added file #{script_file}."
 
         sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name)
         FileUtils.mkdir_p File.join(dest, 'test/assets/scripts')
-        File.open File.join(dest, "test/assets/scripts/#{script_name.chomp('.rb')}_test.rb"), "a" do |f|
+        test_file = File.expand_path("test/assets/scripts/#{script_name.chomp('.rb')}_test.rb", dest)
+        File.open test_file, "a" do |f|
           f << sample_test_source
         end
+        puts "Added file #{test_file}."
       end
     end
   end

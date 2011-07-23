@@ -9,7 +9,7 @@ class RakeTest < Test::Unit::TestCase
   end
 
   def teardown
-    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    cleanup_app
   end
 
   def test_that_update_scripts_task_copies_files_to_sdcard_if_permissions_are_set

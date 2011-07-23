@@ -49,13 +49,6 @@ module AppTestMethods
       run_app_tests
     end
 
-    def run_app_tests
-      Dir.chdir "#{APP_DIR}/test" do
-        system 'rake test:quick'
-        assert_equal 0, $?, "tests failed with return code #$?"
-      end
-    end
-
   end
 
 end

@@ -74,20 +74,24 @@ public class Script {
             	config.setOutput(out);
             	config.setError(out);
             }
-            initialized = true;
-            
             copyScriptsIfNeeded(appContext);
-        }
+            initialized = true;
+		} else {
+			while (!initialized) {
+                Log.i(TAG, "Waiting for JRuby runtime to initialize.");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException iex) {
+				}
+			}
+		}
 
         return ruby;
     }
 
     public static String execute(String code) {
-        if (!initialized) {
-            return null;
-        }
         try {
-			return ruby.callMethod(exec(code), "inspect", String.class);
+			return getRuby().callMethod(exec(code), "inspect", String.class);
         } catch (RaiseException re) {
 			re.printStackTrace(ruby.getError());
             return null;

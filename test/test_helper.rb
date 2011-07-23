@@ -10,7 +10,7 @@ module RubotoTest
   JRUBY_JARS_VERSION  = gem_spec.version
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 
-  PACKAGE        ='org.ruboto.test_app'
+  PACKAGE        = 'org.ruboto.test_app'
   APP_NAME       = 'RubotoTestApp'
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
   APP_DIR        = File.join TMP_DIR, APP_NAME
@@ -20,7 +20,7 @@ module RubotoTest
       '2.1' => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
       '2.3' => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
-      '3.0' => 'android-11', '3.1' => 'android-12'
+      '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13'
   }
   
   def self.version_from_device
@@ -91,8 +91,23 @@ class Test::Unit::TestCase
         FileUtils.rm_rf template_dir
         raise "gen app failed with return code #$?"
       end
+      Dir.chdir APP_DIR do
+        system 'rake debug'
+        assert_equal 0, $?
+      end
       puts "Storing app as template #{template_dir}"
       FileUtils.cp_r APP_DIR, template_dir
+    end
+  end
+
+  def cleanup_app
+    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+  end
+
+  def run_app_tests
+    Dir.chdir "#{APP_DIR}/test" do
+      system 'rake test:quick'
+      assert_equal 0, $?, "tests failed with return code #$?"
     end
   end
 
