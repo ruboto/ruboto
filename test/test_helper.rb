@@ -83,7 +83,7 @@ class Test::Unit::TestCase
     template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
-      FileUtils.cp_r template_dir, APP_DIR
+      FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
       puts "Generating app #{APP_DIR}"
       system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
