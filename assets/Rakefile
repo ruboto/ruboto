@@ -88,6 +88,9 @@ namespace :install do
   end
 end
 
+puts "Manifest: #{File.mtime(MANIFEST_FILE) if File.exists?(MANIFEST_FILE)}"
+puts "APK     : #{File.mtime(APK_FILE) if File.exists?(APK_FILE)}"
+
 file MANIFEST_FILE
 
 file APK_FILE => MANIFEST_FILE do
