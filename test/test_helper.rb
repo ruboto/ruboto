@@ -96,7 +96,7 @@ class Test::Unit::TestCase
         assert_equal 0, $?
       end
       puts "Storing app as template #{template_dir}"
-      FileUtils.cp_r APP_DIR, template_dir
+      FileUtils.cp_r APP_DIR, template_dir, :preserve => true
     end
   end
 
