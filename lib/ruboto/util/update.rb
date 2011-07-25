@@ -91,7 +91,7 @@ EOF
 
           current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
           if current_jruby_version == new_jruby_version
-            puts "Both jruby versions are #{new_jruby_version}. Nothing to update. Make sure you 'gem update jruby-jars' if there is a new version."
+            puts "JRuby is up to date at version #{new_jruby_version}. Make sure you 'gem update jruby-jars' if there is a new version."
             return false
           end
 
@@ -100,7 +100,7 @@ EOF
         end
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        log_action("Removing #{jruby_core}") {File.delete jruby_core} if jruby_core
+        log_action("Removing #{jruby_core}") {File.delete *Dir.glob("libs/jruby-core-*.jar")} if jruby_core
         log_action("Removing #{jruby_stdlib}") {File.delete jruby_stdlib} if jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
