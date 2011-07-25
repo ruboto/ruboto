@@ -2,7 +2,7 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto-core}
-  s.version = "0.2.0"
+  s.version = "0.2.1"
   s.date = %q{2011-06-20}
   s.authors = ["Daniel Jackoway", "Charles Nutter", "Scott Moyer", 'Uwe Kubosch']
   s.email = %q{ruboto@googlegroups.com}
