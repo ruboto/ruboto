@@ -189,12 +189,14 @@ EOF
         true
       end
 
-      #
-      # reconfigure_jruby_libs:
-      #   - removes unneeded code from jruby-core
-      #   - moves ruby stdlib to the root of the ruby-stdlib jar
-      #
       def reconfigure_jruby_libs(jruby_core_version, with_psych=nil)
+        reconfigure_jruby_core(jruby_core_version)
+        reconfigure_jruby_stdlib(with_psych)
+      end
+
+      # - Removes unneeded code from jruby-core
+      # - Split into smaller jars that can be used separately
+      def reconfigure_jruby_core(jruby_core_version)
         jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         Dir.chdir 'libs' do
           log_action("Removing unneeded classes from #{jruby_core}") do
@@ -203,19 +205,33 @@ EOF
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
               File.delete jruby_core
-              invalid_libs = ['cext', 'jni', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
-                'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf'
+              invalid_libs = [
+                'META-INF' ,'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
+                'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir',
+                'org/jruby/demo', 'org/jruby/embed/bsf', 'org/jruby/embed/osgi',
+                'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
               ]
               if jruby_core_version == '1.6.2'
                 puts 'Retaining FFI for JRuby 1.6.2'
                 invalid_libs.delete('org/jruby/ext/ffi')
               end
               invalid_libs.each {|i| FileUtils.remove_dir i, true}
+
+              Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
+                `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
+                FileUtils.rm_rf dir
+              end
+              
               `jar -cf ../#{jruby_core} .`
             end
             FileUtils.remove_dir "tmp", true
           end
+        end
+      end
 
+      # - Moves ruby stdlib to the root of the jruby-stdlib jar
+      def reconfigure_jruby_stdlib(with_psych=nil)
+        Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
           log_action("Reformatting #{jruby_stdlib}") do
             Dir.mkdir "tmp"
