@@ -22,11 +22,12 @@ module Ruboto
           test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
           File.open("AndroidManifest.xml", 'w'){|f| test_manifest.document.write(f, 4)}
-          instrumentation_property = 'test.runner=org.ruboto.test.InstrumentationTestRunner\n'
+          instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
           prop_lines = File.readlines('build.properties')
           File.open('build.properties', 'a'){|f| f << instrumentation_property} unless prop_lines.include?(instrumentation_property)
           ant_setup_line = /^(\s*<setup\s*\/>)/
           run_tests_override = <<-EOF
+<!-- BEGIN added by ruboto-core -->
     <macrodef name="run-tests-helper">
       <attribute name="emma.enabled" default="false"/>
       <element name="extra-instrument-args" optional="yes"/>
@@ -63,11 +64,15 @@ module Ruboto
     <target name="run-tests-quick" description="Runs tests with previously installed packages">
       <run-tests-helper />
     </target>
-          
+<!-- END added by ruboto-core -->
+
 EOF
           ant_script = File.read('build.xml')
+          # TODO(uwe): Old patches without dlimiter.  Remove when we stop supporting upgrading from ruboto-core 0.2.0 and older.
           ant_script.gsub!(/\s*<macrodef name="run-tests-helper">.*?<\/macrodef>\s*/m, '')
           ant_script.gsub!(/\s*<target name="run-tests-quick".*?<\/target>\s*/m, '')
+          # TODO end
+          ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*/m, '')
           ant_script.gsub!(ant_setup_line, "\\1\n\n#{run_tests_override}")
           File.open('build.xml', 'w'){|f| f << ant_script}
         end

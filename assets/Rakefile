@@ -138,6 +138,7 @@ end
 
 task :update_test_scripts do
   test_scripts_path = "/data/data/#{package}.tests/files/scripts"
+  # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
   if false && package_installed?(true) && device_path_exists?(test_scripts_path)
     Dir['test/assets/scripts/*.rb'].each do |script|
       print "#{script}: " ; $stdout.flush
@@ -262,10 +263,6 @@ def package_installed? test = false
       return true
     end
   end
-#  if path_outputs.any?{|o| o !~ /opendir failed, Permission denied/}
-#    puts "Unable to determine installation state of the app.  Assuming it is installed."
-#    return true
-#  end
   puts "Package not found: #{package_name}"
   return false
 end
