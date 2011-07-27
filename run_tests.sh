@@ -5,7 +5,7 @@ TIMEOUT="3000"
 BOSSPID=$$
 (
   sleep $TIMEOUT
-  kill -9 -$BOSSPID
+  kill -9 $BOSSPID
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
