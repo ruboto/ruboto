@@ -231,10 +231,17 @@ EOF
               `jar -xf #{jruby_core}`
               File.delete jruby_core
               invalid_libs = [
-                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni',
+                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
                 'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
               ]
+
+              # TODO(uwe): Remove when we stop supporting jruby-jars-1.7.0.dev
+              if jruby_core_version == '1.7.0.dev'
+                puts 'Retaining JNR for JRuby 1.7.0.dev'
+                invalid_libs.delete('jnr')
+              end
+              # TODO end
 
               # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
               if jruby_core_version == '1.6.2'
