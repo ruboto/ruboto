@@ -21,6 +21,7 @@ module Ruboto
 
         Dir.chdir File.join(root, 'test') do
           test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
+          test_manifest.elements['application'].attributes['android:icon'] = '@drawable/icon'
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
 
           # TODO(uwe): Trying to push test scripts for faster test cycle, by failing...
@@ -140,8 +141,7 @@ EOF
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', force
         log_action('icons') do
           copier.copy 'res/drawable*/icon.png'
-          # TODO(uwe): The icon for the test project is not displayed on the emulator/device.  Why not?
-          # copier.copy 'res/drawable*/icon.png', 'test'
+          copier.copy 'res/drawable*/icon.png', 'test'
         end
       end
 
