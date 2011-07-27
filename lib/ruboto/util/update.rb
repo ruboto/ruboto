@@ -231,7 +231,7 @@ EOF
               `jar -xf #{jruby_core}`
               File.delete jruby_core
               invalid_libs = [
-                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
+                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni',
                 'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
               ]
