@@ -21,11 +21,4 @@ $activity.handle_create do |bundle|
     end
   end
 
-#  handle_image_click do |view|
-#    if view.id == 43
-#      @text_view.text = 'Image button pressed'
-#    elsif view.id == 44
-#      @text_view.text = 'Button pressed'
-#    end
-#  end
 end

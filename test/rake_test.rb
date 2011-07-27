@@ -1,8 +1,6 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
-$stdout.sync = true
-
 class RakeTest < Test::Unit::TestCase
   def setup
     generate_app
@@ -35,18 +33,6 @@ class RakeTest < Test::Unit::TestCase
         assert_equal 0, $?
       end
       wait_for_dir("/data/data/#{PACKAGE}/files/scripts")
-    end
-  end
-
-  private
-
-  def wait_for_dir(dir)
-    puts "Waiting for app to generate script directory: #{dir}"
-    start = Time.now
-    loop do
-      break if `adb shell ls -d #{dir}`.chomp =~ %r{^#{dir}$}
-      flunk 'Timeout waiting for scripts directory to appear' if Time.now > start + 60
-      sleep 1
     end
   end
 

@@ -79,9 +79,11 @@ module Ruboto
 
                 Dir.chdir root do
                   update_test true
-                  update_assets true
+                  update_assets
+                  update_icons true
                   update_classes true
                   update_jruby true, params['with-psych'].value
+                  update_build_xml
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
 
@@ -310,9 +312,11 @@ module Ruboto
               when "app" then
                 force = params['force'].value
                 update_test force
-                update_assets force
+                update_assets
+                update_icons force
                 update_classes force
                 update_jruby force, params['with-psych'].value
+                update_build_xml
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
               when "ruboto" then

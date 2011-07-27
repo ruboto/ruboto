@@ -77,19 +77,38 @@ class Test::Unit::TestCase
 
   def generate_app(options = {})
     with_psych = options.delete(:with_psych) || false
+    update = options.delete(:update) || false
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}#{'_updated' if update}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
-      puts "Generating app #{APP_DIR}"
-      system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
-      if $? != 0
-        FileUtils.rm_rf template_dir
-        raise "gen app failed with return code #$?"
+      if update
+        Dir.chdir TMP_DIR do
+          system "tar xzf #{PROJECT_DIR}/examples/RubotoTestApp_0.1.0_jruby_1.6.3.dev.tgz"
+        end
+        if ENV['ANDROID_HOME']
+          android_home = ENV['ANDROID_HOME']
+        else
+          android_home = File.dirname(File.dirname(`which adb`))
+        end
+        File.open("#{APP_DIR}/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
+        File.open("#{APP_DIR}/test/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
+        Dir.chdir APP_DIR do
+          FileUtils.touch "libs/psych.jar" if with_psych
+          system "#{RUBOTO_CMD} update app"
+          assert_equal 0, $?, "update app failed with return code #$?"
+        end
+      else
+        puts "Generating app #{APP_DIR}"
+        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+        if $? != 0
+          FileUtils.rm_rf APP_DIR
+          raise "gen app failed with return code #$?"
+        end
       end
       Dir.chdir APP_DIR do
         system 'rake debug'
@@ -108,6 +127,16 @@ class Test::Unit::TestCase
     Dir.chdir "#{APP_DIR}/test" do
       system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
+    end
+  end
+
+  def wait_for_dir(dir)
+    puts "Waiting for app to generate script directory: #{dir}"
+    start = Time.now
+    loop do
+      break if `adb shell ls -d #{dir}`.chomp =~ %r{^#{dir}$}
+      flunk 'Timeout waiting for scripts directory to appear' if Time.now > start + 120
+      sleep 1
     end
   end
 

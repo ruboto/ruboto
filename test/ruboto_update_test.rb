@@ -6,23 +6,7 @@ module UpdateTestMethods
   include RubotoTest
 
   def setup(with_psych = false)
-    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
-    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    Dir.chdir TMP_DIR do
-      system "tar xzf #{PROJECT_DIR}/examples/RubotoTestApp_0.1.0_jruby_1.6.3.dev.tgz"
-    end
-    if ENV['ANDROID_HOME']
-      android_home = ENV['ANDROID_HOME']
-    else
-      android_home = File.dirname(File.dirname(`which adb`))
-    end
-    File.open("#{APP_DIR}/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
-    File.open("#{APP_DIR}/test/local.properties", 'w'){|f| f.puts "sdk.dir=#{android_home}"}
-    Dir.chdir APP_DIR do
-      FileUtils.touch "libs/psych.jar" if with_psych
-      system "#{RUBOTO_CMD} update app"
-      assert_equal 0, $?, "update app failed with return code #$?"
-    end
+    generate_app(:with_psych => with_psych, :update => true)
   end
 
   def teardown
@@ -35,6 +19,13 @@ module UpdateTestMethods
       assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in build.xml'
     end
   end
+
+  def test_icons_are_untouched
+    Dir.chdir APP_DIR do
+      assert_equal 4100, File.size('res/drawable-hdpi/icon.png')
+    end
+  end
+
 end
 
 class RubotoUpdateTest < Test::Unit::TestCase

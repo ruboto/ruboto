@@ -15,12 +15,28 @@ module Ruboto
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
+          # TODO(uwe): Run "android update test"
           puts "Test project already exists.  Use --force to overwrite."
         end
 
         Dir.chdir File.join(root, 'test') do
           test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
+
+          # TODO(uwe): Trying to push test scripts for faster test cycle, by failing...
+          # if test_manifest.elements["uses-permission[@android:name='android.permission.WRITE_INTERNAL_STORAGE']"]
+          #   puts 'Found permission tag'
+          # else
+          #   test_manifest.add_element 'uses-permission', {"android:name" => "android.permission.WRITE_INTERNAL_STORAGE"}
+          #   puts 'Added permission tag'
+          # end
+          # if test_manifest.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
+          #   puts 'Found external permission tag'
+          # else
+          #   test_manifest.add_element 'uses-permission', {"android:name" => "android.permission.WRITE_EXTERNAL_STORAGE"}
+          #   puts 'Added external permission tag'
+          # end
+
           File.open("AndroidManifest.xml", 'w'){|f| test_manifest.document.write(f, 4)}
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
           prop_lines = File.readlines('build.properties')
@@ -111,19 +127,28 @@ EOF
         true
       end
 
-      def update_assets(force = nil)
+      def update_assets
         puts "\nCopying files:"
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
 
-        %w{Rakefile .gitignore assets res test}.each do |f|
+        %w{Rakefile .gitignore assets test}.each do |f|
           log_action(f) {copier.copy f}
+        end
+      end
+
+      def update_icons(force = nil)
+        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', force
+        log_action('icons') do
+          copier.copy 'res/drawable*/icon.png'
+          # TODO(uwe): The icon for the test project is not displayed on the emulator/device.  Why not?
+          # copier.copy 'res/drawable*/icon.png', 'test'
         end
       end
 
       def update_classes(force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java", "src/org/ruboto"}
-        log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test/src/org/ruboto/test"}
+        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java"}
+        log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"}
       end
 
       def update_manifest(min_sdk, target, force = false)
@@ -206,21 +231,24 @@ EOF
               `jar -xf #{jruby_core}`
               File.delete jruby_core
               invalid_libs = [
-                'META-INF' ,'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
-                'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir',
-                'org/jruby/demo', 'org/jruby/embed/bsf', 'org/jruby/embed/osgi',
-                'org/jruby/embed/jsr223', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
+                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
+                'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
+                'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
               ]
+
+              # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
               if jruby_core_version == '1.6.2'
                 puts 'Retaining FFI for JRuby 1.6.2'
                 invalid_libs.delete('org/jruby/ext/ffi')
               end
+              # TODO end
+
               invalid_libs.each {|i| FileUtils.remove_dir i, true}
 
-              Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
-                `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
-                FileUtils.rm_rf dir
-              end
+              #Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
+              #  `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
+              #  FileUtils.rm_rf dir
+              #end
               
               `jar -cf ../#{jruby_core} .`
             end
@@ -283,6 +311,23 @@ EOF
           FileUtils.remove_dir "1.8", true
         end
       end
+
+      def update_build_xml
+        ant_setup_line = /^(\s*<setup\s*\/>)/
+        patch = <<-EOF
+    <!-- BEGIN added by ruboto-core -->
+    <target name="ruboto-install-debug" description="Installs the already built debug package">
+        <install-helper />
+    </target>
+    <!-- END added by ruboto-core -->
+
+    EOF
+        ant_script = File.read('build.xml')
+        ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*\n*/m, '')
+        ant_script.gsub!(ant_setup_line, "\\1\n\n#{patch}")
+        File.open('build.xml', 'w'){|f| f << ant_script}
+      end
+
     end
   end
 end

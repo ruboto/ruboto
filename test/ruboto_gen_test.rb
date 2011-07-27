@@ -12,18 +12,19 @@ class RubotoGenTest < Test::Unit::TestCase
   def teardown
     cleanup_app
   end
+
+  def test_icons_are_updated
+    Dir.chdir APP_DIR do
+      assert_equal 4032, File.size('res/drawable-hdpi/icon.png')
+    end
+  end
+
 end
 
 if not RubotoTest::ON_JRUBY_JARS_1_5_6
-  class RubotoGenWithPsychTest < Test::Unit::TestCase
-    include AppTestMethods
-    
+  class RubotoGenWithPsychTest < RubotoGenTest
     def setup
       generate_app :with_psych => true
-    end
-
-    def teardown
-      cleanup_app
     end
 
     def test_psych_jar_exists

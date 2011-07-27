@@ -4,6 +4,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -41,7 +42,15 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             Script.defineGlobalVariable("$runner", this);
             Script.defineGlobalVariable("$test", this);
             Script.defineGlobalVariable("$suite", suite);
+
+            // TODO(uwe):  Why doesn't this work?
+            // Script.copyScriptsIfNeeded(getContext());
+
             loadScript("test_helper.rb");
+
+            // TODO(uwe):  Why doesn't this work?
+            // String[] scripts = new File(Script.scriptsDirName(getContext())).list();
+
             String[] scripts = getContext().getResources().getAssets().list("scripts");
             for (String f : scripts) {
                 if (f.equals("test_helper.rb")) continue;
@@ -83,6 +92,9 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     private void loadScript(String f) throws IOException {
+        // TODO(uwe):  Why doesn't this work?
+        // InputStream is = new FileInputStream(Script.scriptsDirName(getContext()) + "/" + f);
+
         InputStream is = getContext().getResources().getAssets().open("scripts/" + f);
         BufferedReader buffer = new BufferedReader(new InputStreamReader(is));
         StringBuilder source = new StringBuilder();

@@ -16,6 +16,7 @@ stdlib             = jars.grep(/stdlib/).first #libs/jruby-stdlib-VERSION.jar
 jruby_jar          = jars.grep(/core/).first   #libs/jruby-core-VERSION.jar
 MANIFEST_FILE      = 'AndroidManifest.xml'
 APK_FILE           = "bin/#{build_project_name}-debug.apk"
+TEST_APK_FILE      = "test/bin/#{build_project_name}Test-debug.apk"
 
 CLEAN.include('tmp', 'bin')
 
@@ -27,8 +28,8 @@ task :debug => [BUNDLE_JAR, :mark_update] do
 end
 
 desc "build package and install it on the emulator or device"
-task :install => [BUNDLE_JAR, :mark_update] do
-  sh 'ant install'
+task :install => [APK_FILE, BUNDLE_JAR, :mark_update] do
+  sh 'ant ruboto-install-debug' unless package_installed?
 end
 
 task :tag => :release do
@@ -92,25 +93,31 @@ file MANIFEST_FILE
 
 file APK_FILE => MANIFEST_FILE do
   puts "#{MANIFEST_FILE} changed.  Forcing rebuild of #{APK_FILE}."
-  Rake::Task['install:clean'].invoke
+  Rake::Task['debug'].invoke
 end
 
 desc 'Copy scripts to emulator or device'
 task :update_scripts => [BUNDLE_JAR, APK_FILE] do
   sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
   app_files_path = "/data/data/#{package}/files"
-  if package_installed? && device_path_exists?(sdcard_path)
-    puts 'Pushing files to apk public file area.'
-    data_dir = sdcard_path
-  elsif package_installed? && device_path_exists?(app_files_path)
-    puts 'Pushing files to apk private file area.'
-    data_dir = app_files_path
+  if package_installed?
+    if device_path_exists?(sdcard_path)
+      puts 'Pushing files to apk public file area.'
+      data_dir = sdcard_path
+    elsif device_path_exists?(app_files_path)
+      puts 'Pushing files to apk private file area.'
+      data_dir = app_files_path
+    else
+      puts 'Cannot find the scripts directory on the device.'
+      puts 'If you have a non-rooted device, you need to add'
+      puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
+      puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
+      puts "Reverting to uninstalling and re-installing the apk."
+      Rake::Task['install:clean'].invoke
+      next
+    end
   else
-    puts 'Cannot find the scripts directory on the device.'
-    puts 'If you have a non-rooted device, you need to add'
-    puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
-    puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
-    puts "Reverting to uninstalling and re-installing the apk."
+    puts 'Cannot find the app on the device.  Installing it.'
     Rake::Task['install:clean'].invoke
     next
   end
@@ -136,7 +143,7 @@ end
 task :update_test_scripts do
   test_scripts_path = "/data/data/#{package}.tests/files/scripts"
   # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
-  if false && package_installed?(true) && device_path_exists?(test_scripts_path)
+  if package_installed?(true) && device_path_exists?(test_scripts_path)
     Dir['test/assets/scripts/*.rb'].each do |script|
       print "#{script}: " ; $stdout.flush
       `adb push #{script} #{test_scripts_path}`
@@ -252,12 +259,18 @@ end
 
 def package_installed? test = false
   package_name = "#{package}#{'.tests' if test}"
-  app_paths = ['', '-0', '-1', '-2'].map{|i| "/data/app/#{package_name}#{i}.apk"}
-  path_outputs = app_paths.map{|p| `adb shell ls #{p}`.chomp}
-  path_outputs.each_with_index do |o, i|
-    if o == app_paths[i]
-      puts "Found package #{app_paths[i]}"
-      return true
+  ['', '-0', '-1', '-2'].each do |i|
+    p = "/data/app/#{package_name}#{i}.apk"
+    o = `adb shell ls -l #{p}`.chomp
+    if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(p)}$/
+      apk_file = test ? TEST_APK_FILE : APK_FILE
+      if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+        puts "Found package #{p}"
+        return true
+      else
+        puts "Package #{p} installed, but of wrong size."
+        return false
+      end
     end
   end
   puts "Package not found: #{package_name}"

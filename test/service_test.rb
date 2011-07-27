@@ -2,8 +2,6 @@ require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
 class ServiceTest < Test::Unit::TestCase
-  include RubotoTest
-  
   def setup
     generate_app
   end
@@ -44,6 +42,6 @@ EOF
       File.open(activity_filename, 'w') { |f| f << s }
     end
     run_app_tests
-  end
+    end
 
-end
+  end

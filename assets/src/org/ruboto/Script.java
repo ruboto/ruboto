@@ -58,8 +58,10 @@ public class Script {
     public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
             Log.d(TAG, "Setting up JRuby runtime");
-            System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.bytecode.version", "1.5");
+            System.setProperty("jruby.interfaces.useProxy", "true");
+            System.setProperty("jruby.management.enabled", "false");
+
 		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
 		    ruby = new ScriptingContainer();
 		    RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
@@ -210,10 +212,10 @@ public class Script {
 
     }
 
-    private static void copyScriptsIfNeeded(Context context) {
+    private static String scriptsDirName(Context context) {
 		File toFile = null;
         if (isDebugBuild(context)) {
-    		
+
         	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
             Log.i(TAG, "JRuby VERSION: " + org.jruby.runtime.Constants.VERSION);
             if (!org.jruby.runtime.Constants.VERSION.equals("1.5.6") && !org.jruby.runtime.Constants.VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
@@ -224,7 +226,7 @@ public class Script {
                 Log.e(TAG, "Calculated path to sdcard the old way: " + toFile);
             }
             // FIXME end
-            
+
 	        if (toFile == null || (!toFile.exists() && !toFile.mkdirs())) {
 		    	Log.e(TAG,
                         "Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
@@ -234,6 +236,11 @@ public class Script {
             toFile = context.getFilesDir();
         }
 		String to = toFile.getAbsolutePath() + "/scripts";
+		return to;
+    }
+
+    private static void copyScriptsIfNeeded(Context context) {
+        String to = scriptsDirName(context);
 		Log.i(TAG, "Checking scripts in " + to);
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
