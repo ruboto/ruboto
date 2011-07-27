@@ -231,15 +231,18 @@ EOF
               `jar -xf #{jruby_core}`
               File.delete jruby_core
               invalid_libs = [
-                'META-INF', 'cext', 'com/martiansoftware', 'ext', 'jline', 'jni', 'jnr',
+                'META-INF', 'cext', 'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'jline', 'jni',
+                'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
+                'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
                 'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
               ]
 
-              # TODO(uwe): Remove when we stop supporting jruby-jars-1.7.0.dev
-              if jruby_core_version == '1.7.0.dev'
-                puts 'Retaining JNR for JRuby 1.7.0.dev'
-                invalid_libs.delete('jnr')
+              # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
+              if jruby_core_version < '1.7.0.dev'
+                puts 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0.dev'
+                invalid_libs << 'jnr'
+                invalid_libs.delete 'com/kenai/constantine'
               end
               # TODO end
 
