@@ -290,7 +290,7 @@ EOF
             end
             Dir.chdir "1.8" do
               # excluded_stdlibs = %w{ant cgi digest dl drb ffi irb net optparse racc rbconfig rdoc rexml rinda rss rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd}
-              excluded_stdlibs = %w{} + verify_ruboto_config[:excluded_stdlibs] || []
+              excluded_stdlibs = %w{} + (verify_ruboto_config[:excluded_stdlibs] || [])
               excluded_stdlibs.each { |d| FileUtils.rm_rf d }
 
               # Uncomment this part to split the stdlib into one jar per directory
