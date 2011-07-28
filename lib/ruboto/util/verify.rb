@@ -18,6 +18,16 @@ module Ruboto
         File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
       end
       
+      def verify_test_manifest
+        abort "cannot find your test AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" \
+            unless File.exists? 'test/AndroidManifest.xml'
+        @manifest ||= REXML::Document.new(File.read('test/AndroidManifest.xml')).root
+      end
+
+      def save_test_manifest
+        File.open("test/AndroidManifest.xml", 'w') {|f| verify_test_manifest.document.write(f, 4)}
+      end
+
       def verify_package
         verify_manifest
         @package ||= @manifest.attribute('package').value
@@ -58,6 +68,19 @@ module Ruboto
       def verify_api
         Ruboto::API.api
       end
+
+      def verify_ruboto_config
+        if File.exists? 'ruboto.yml'
+          @ruboto_config ||= YAML::load_file('ruboto.yml')
+        else
+          @ruboto_config = {}
+        end
+      end
+
+      def save_ruboto_config
+        File.open("ruboto.yml", 'w') {|f| YAML.dump verify_ruboto_config}
+      end
+
     end
   end
 end

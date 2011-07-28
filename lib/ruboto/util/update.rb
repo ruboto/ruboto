@@ -230,30 +230,30 @@ EOF
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
               File.delete jruby_core
-              invalid_libs = [
+              excluded_core_packages = [
                 'META-INF', 'cext', 'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'jline', 'jni',
                 'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                 'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
                 'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
-                'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi','org/jruby/javasupport/bsf',
+                'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
               ]
 
               # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
               if jruby_core_version < '1.7.0.dev'
-                puts 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0.dev'
-                invalid_libs << 'jnr'
-                invalid_libs.delete 'com/kenai/constantine'
+                print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0.dev...'
+                excluded_core_packages << 'jnr'
+                excluded_core_packages.delete 'com/kenai/constantine'
               end
               # TODO end
 
               # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
               if jruby_core_version == '1.6.2'
-                puts 'Retaining FFI for JRuby 1.6.2'
-                invalid_libs.delete('org/jruby/ext/ffi')
+                print 'Retaining FFI for JRuby 1.6.2...'
+                excluded_core_packages.delete('org/jruby/ext/ffi')
               end
               # TODO end
 
-              invalid_libs.each {|i| FileUtils.remove_dir i, true}
+              excluded_core_packages.each {|i| FileUtils.remove_dir i, true}
 
               #Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
               #  `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
@@ -289,6 +289,16 @@ EOF
               end
             end
             Dir.chdir "1.8" do
+              # excluded_stdlibs = %w{ant cgi digest dl drb ffi irb net optparse racc rbconfig rdoc rexml rinda rss rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd}
+              excluded_stdlibs = %w{} + verify_ruboto_config[:excluded_stdlibs] || []
+              excluded_stdlibs.each { |d| FileUtils.rm_rf d }
+
+              # Uncomment this part to split the stdlib into one jar per directory
+              # Dir['*'].select{|f| File.directory? f}.each do |d|
+              #   `jar -cf ../jruby-stdlib-#{d}-#{jruby_core_version}.jar #{d}`
+              #   FileUtils.rm_rf d
+              # end
+
               `jar -cf ../#{jruby_stdlib} .`
             end
           end
