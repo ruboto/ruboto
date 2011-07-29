@@ -59,6 +59,7 @@ public class Script {
         if (ruby == null) {
 
 /*
+            http://www.anddev.org/view-layout-resource-problems-f27/dexclassloader-problem-t14666.html
             http://lsd.luminis.nl/osgi-on-google-android-using-apache-felix/
 
             String packagePath = "org.ruboto.core";

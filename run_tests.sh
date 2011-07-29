@@ -32,5 +32,5 @@ rake test
 
 
 # BEGIN TIMEOUT #
-kill -9 $TIMERPID
+# kill -9 $TIMERPID
 # END TIMEOUT #
