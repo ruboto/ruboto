@@ -105,7 +105,7 @@ module Ruboto
 
         class_desc = get_class_or_interface(params[:class] || params[:interface], params[:force])
 
-        puts "Generating methods for #{params[:name]}..."
+        print "Generating methods for #{params[:name]}..."
         methods = class_desc.all_methods(params[:method_base], params[:method_include], params[:method_exclude], params[:implements])
         methods = check_methods(methods, params[:force])
         puts "Done. Methods created: #{methods.count}"

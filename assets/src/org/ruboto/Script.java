@@ -57,6 +57,32 @@ public class Script {
 
     public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
+
+/*
+            http://lsd.luminis.nl/osgi-on-google-android-using-apache-felix/
+
+            String packagePath = "org.ruboto.core";
+            String classPath = "org.jruby.embed.ScriptingContainer";
+
+            String apkName = null;
+            try {
+                apkName = getPackageManager().getApplicationInfo(packagePath,0).sourceDir;
+            } catch (PackageManager.NameNotFoundException e) {
+                // catch this
+            }
+
+            // add path to apk that contains classes you wish to load
+            String extraApkPath = apkName + ":/path/to/extraLib.apk"
+
+            PathClassLoader pathClassLoader = new dalvik.system.PathClassLoader(apkName, ClassLoader.getSystemClassLoader());
+
+            try {
+                Class<?> handler = Class.forName(classPath, true, pathClassLoader);
+            } catch (ClassNotFoundException e) {
+                // catch this
+            }
+*/
+
             Log.d(TAG, "Setting up JRuby runtime");
             System.setProperty("jruby.bytecode.version", "1.5");
             System.setProperty("jruby.interfaces.useProxy", "true");

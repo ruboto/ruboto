@@ -118,7 +118,7 @@ EOF
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
         log_action("Removing #{jruby_core}") {File.delete *Dir.glob("libs/jruby-core-*.jar")} if jruby_core
-        log_action("Removing #{jruby_stdlib}") {File.delete jruby_stdlib} if jruby_stdlib
+        log_action("Removing #{jruby_stdlib}") {File.delete *Dir.glob("libs/jruby-stdlib-*.jar")} if jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
 
@@ -132,7 +132,7 @@ EOF
         puts "\nCopying files:"
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
 
-        %w{Rakefile .gitignore assets test}.each do |f|
+        %w{.gitignore Rakefile assets test}.each do |f|
           log_action(f) {copier.copy f}
         end
       end
@@ -239,8 +239,8 @@ EOF
               ]
 
               # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
-              if jruby_core_version < '1.7.0.dev'
-                print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0.dev...'
+              if jruby_core_version < '1.7.0'
+                print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0...'
                 excluded_core_packages << 'jnr'
                 excluded_core_packages.delete 'com/kenai/constantine'
               end
@@ -269,8 +269,10 @@ EOF
 
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib(with_psych=nil)
+        excluded_stdlibs = %w{} + (verify_ruboto_config[:excluded_stdlibs] || [])
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
+          stdlib_1_8_files = nil
           log_action("Reformatting #{jruby_stdlib}") do
             Dir.mkdir "tmp"
             Dir.chdir "tmp" do
@@ -289,14 +291,17 @@ EOF
               end
             end
             Dir.chdir "1.8" do
-              # excluded_stdlibs = %w{ant cgi digest dl drb ffi irb net optparse racc rbconfig rdoc rexml rinda rss rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd}
-              excluded_stdlibs = %w{} + (verify_ruboto_config[:excluded_stdlibs] || [])
-              excluded_stdlibs.each { |d| FileUtils.rm_rf d }
+              if excluded_stdlibs.any?
+                excluded_stdlibs.each { |d| FileUtils.rm_rf d }
+                print "excluded #{excluded_stdlibs.join(' ')}..."
+              end
+
+              stdlib_1_8_files = Dir['**/*']
 
               # Uncomment this part to split the stdlib into one jar per directory
               # Dir['*'].select{|f| File.directory? f}.each do |d|
-              #   `jar -cf ../jruby-stdlib-#{d}-#{jruby_core_version}.jar #{d}`
-              #   FileUtils.rm_rf d
+              #    `jar -cf ../jruby-stdlib-#{d}-#{JRubyJars::VERSION}.jar #{d}`
+              #    FileUtils.rm_rf d
               # end
 
               `jar -cf ../#{jruby_stdlib} .`
@@ -312,11 +317,15 @@ EOF
               psych_dir = 'psych'
               FileUtils.move "tmp/META-INF/jruby.home/lib/ruby/1.9", psych_dir
               Dir.chdir psych_dir do
+                if excluded_stdlibs.any?
+                  excluded_stdlibs.each { |d| FileUtils.rm_rf d }
+                  print "excluded #{excluded_stdlibs.join(' ')}..."
+                end
                 psych_files = Dir["**/*"]
                 puts if psych_files.any?
                 psych_files.each do |f|
                   next if File.basename(f) =~ /^..?$/
-                  if File.exists? "../1.8/#{f}"
+                  if stdlib_1_8_files.include? f
                     puts "Removing duplicate #{f}"
                     FileUtils.rm_f f
                   end

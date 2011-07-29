@@ -1,4 +1,5 @@
 require 'ruboto/api'
+require 'yaml'
 
 module Ruboto
   module Util

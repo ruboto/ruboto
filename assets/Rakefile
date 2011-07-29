@@ -11,10 +11,8 @@ BUNDLE_PATH = 'tmp/bundle'
 require 'rake/clean'
 require 'rexml/document'
 
-jars = Dir['libs/*.jar']
-stdlib             = jars.grep(/stdlib/).first #libs/jruby-stdlib-VERSION.jar
-jruby_jar          = jars.grep(/core/).first   #libs/jruby-core-VERSION.jar
 MANIFEST_FILE      = 'AndroidManifest.xml'
+RUBOTO_CONFIG_FILE = 'ruboto.yml'
 APK_FILE           = "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE      = "test/bin/#{build_project_name}Test-debug.apk"
 
@@ -90,9 +88,10 @@ namespace :install do
 end
 
 file MANIFEST_FILE
+file RUBOTO_CONFIG_FILE
 
-file APK_FILE => MANIFEST_FILE do
-  puts "#{MANIFEST_FILE} changed.  Forcing rebuild of #{APK_FILE}."
+file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE] do
+  puts "#{MANIFEST_FILE} or #{RUBOTO_CONFIG_FILE} changed.  Forcing rebuild of #{APK_FILE}."
   Rake::Task['debug'].invoke
 end
 
