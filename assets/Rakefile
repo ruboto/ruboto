@@ -15,13 +15,25 @@ MANIFEST_FILE      = 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = 'ruboto.yml'
 APK_FILE           = "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE      = "test/bin/#{build_project_name}Test-debug.apk"
+JRUBY_JARS         = 'libs/jruby-*.jar'
 
 CLEAN.include('tmp', 'bin')
 
 task :default => :debug
 
+file JRUBY_JARS => RUBOTO_CONFIG_FILE do
+  puts '*' * 80
+  if Dir[JRUBY_JARS].empty?
+    puts '* The JRuby jars are missing.'
+  else
+    puts "* The JRuby jars need reconfiguring after changes to #{RUBOTO_CONFIG_FILE}"
+  end
+  puts 'Run "ruboto update jruby" to regenerate the JRuby jars'
+  puts '*' * 80
+end
+
 desc 'build debug package'
-task :debug => [BUNDLE_JAR, :mark_update] do
+task :debug => [JRUBY_JARS, BUNDLE_JAR, :mark_update] do
   sh 'ant debug'
 end
 

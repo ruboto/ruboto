@@ -24,7 +24,7 @@ module Ruboto
           test_manifest.elements['application'].attributes['android:icon'] = '@drawable/icon'
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
 
-          # TODO(uwe): Trying to push test scripts for faster test cycle, by failing...
+          # TODO(uwe): Trying to push test scripts for faster test cycle, but failing...
           # if test_manifest.elements["uses-permission[@android:name='android.permission.WRITE_INTERNAL_STORAGE']"]
           #   puts 'Found permission tag'
           # else
@@ -85,7 +85,7 @@ module Ruboto
 
 EOF
           ant_script = File.read('build.xml')
-          # TODO(uwe): Old patches without dlimiter.  Remove when we stop supporting upgrading from ruboto-core 0.2.0 and older.
+          # TODO(uwe): Old patches without delimiter.  Remove when we stop supporting upgrading from ruboto-core 0.2.0 and older.
           ant_script.gsub!(/\s*<macrodef name="run-tests-helper">.*?<\/macrodef>\s*/m, '')
           ant_script.gsub!(/\s*<target name="run-tests-quick".*?<\/target>\s*/m, '')
           # TODO end

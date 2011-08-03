@@ -599,27 +599,17 @@ def setup_preferences
   @preferences_setup_complete = true
 end
 
-#############################################################################
-#############################################################################
-#
-# Final set up depending on globals
-#
-# TODO(uwe): I think ruboto.rb should not contain any conditions so it does not matter when it is required.
-# TODO(uwe): Remove the commented lines after checking with Scott.
-# if $activity
-  java_import "org.ruboto.RubotoActivity"
-  setup_activity
-  ruboto_configure_activity(RubotoActivity)
-  ruboto_setup(RubotoActivity)
-  setup_view
-# end
+# Setup activity support
+java_import "org.ruboto.RubotoActivity"
+setup_activity
+ruboto_configure_activity(RubotoActivity)
+ruboto_setup(RubotoActivity)
+setup_view
 
-# if $service
-  java_import "org.ruboto.RubotoService"
-  ruboto_setup(RubotoService)
-# end
+# setup service support
+java_import "org.ruboto.RubotoService"
+ruboto_setup(RubotoService)
 
-# if $broadcast_receiver
-  java_import "org.ruboto.RubotoBroadcastReceiver"
-  ruboto_setup(RubotoBroadcastReceiver, "receive")
-# end
+# setup broadcast receiver support
+java_import "org.ruboto.RubotoBroadcastReceiver"
+ruboto_setup(RubotoBroadcastReceiver, "receive")
