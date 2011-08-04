@@ -22,13 +22,14 @@ CLEAN.include('tmp', 'bin')
 task :default => :debug
 
 file JRUBY_JARS => RUBOTO_CONFIG_FILE do
+  next unless File.exists? RUBOTO_CONFIG_FILE
   puts '*' * 80
   if Dir[JRUBY_JARS].empty?
-    puts '* The JRuby jars are missing.'
+    puts '  The JRuby jars are missing.'
   else
-    puts "* The JRuby jars need reconfiguring after changes to #{RUBOTO_CONFIG_FILE}"
+    puts "  The JRuby jars need reconfiguring after changes to #{RUBOTO_CONFIG_FILE}"
   end
-  puts 'Run "ruboto update jruby" to regenerate the JRuby jars'
+  puts '  Run "ruboto update jruby" to regenerate the JRuby jars'
   puts '*' * 80
 end
 
