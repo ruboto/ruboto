@@ -14,8 +14,7 @@ test('initial setup') do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
 end
 
-test('button changes text') do |activity|
-  button = activity.findViewById(43)
-  button.performClick
+test('option_menu changes text') do |activity|
+  activity.window.performPanelIdentifierAction(android.view.Window::FEATURE_OPTIONS_PANEL, 0, 0)
   assert_equal "What hath Matz wrought!", @text_view.text
 end

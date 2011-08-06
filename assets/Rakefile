@@ -3,6 +3,8 @@ require 'time'
 def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
 def package() manifest.root.attribute('package') end
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
+def sdcard_path() @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files" end
+def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
 
 UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
 BUNDLE_JAR = 'libs/bundle.jar'
@@ -23,24 +25,32 @@ task :default => :debug
 
 file JRUBY_JARS => RUBOTO_CONFIG_FILE do
   next unless File.exists? RUBOTO_CONFIG_FILE
+  jruby_jars_mtime = Dir[JRUBY_JARS].map{|f| File.mtime(f)}.min
+  ruboto_yml_mtime = File.mtime(RUBOTO_CONFIG_FILE)
+  next if jruby_jars_mtime > ruboto_yml_mtime
   puts '*' * 80
   if Dir[JRUBY_JARS].empty?
     puts '  The JRuby jars are missing.'
   else
     puts "  The JRuby jars need reconfiguring after changes to #{RUBOTO_CONFIG_FILE}"
+    puts "  #{RUBOTO_CONFIG_FILE}: #{ruboto_yml_mtime}"
+    puts "  #{JRUBY_JARS}: #{jruby_jars_mtime}"
   end
   puts '  Run "ruboto update jruby" to regenerate the JRuby jars'
   puts '*' * 80
 end
 
 desc 'build debug package'
-task :debug => [JRUBY_JARS, BUNDLE_JAR, :mark_update] do
-  sh 'ant debug'
-end
+task :debug => APK_FILE
 
 desc "build package and install it on the emulator or device"
-task :install => [APK_FILE, BUNDLE_JAR, :mark_update] do
-  sh 'ant ruboto-install-debug' unless package_installed?
+task :install => APK_FILE do
+  next if package_installed?
+  if !device_path_exists?(sdcard_path) && !device_path_exists?(app_files_path)
+    Rake::Task['uninstall'].invoke
+  end
+  sh 'ant ruboto-install-debug'
+  clear_update
 end
 
 task :tag => :release do
@@ -89,7 +99,7 @@ end
 
 namespace :install do
   desc 'Uninstall, build, and install the application'
-  task :clean => [:uninstall, :install]
+  task :clean => [:uninstall, :debug, :install]
 
   desc 'Build, install, and restart the application'
   task :restart => [:install, :start_app]
@@ -103,33 +113,41 @@ end
 file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
-file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE] do
-  puts "#{MANIFEST_FILE} or #{RUBOTO_CONFIG_FILE} changed.  Forcing rebuild of #{APK_FILE}."
-  Rake::Task['debug'].invoke
+file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] do
+  puts "#{APK_FILE}: #{File.mtime APK_FILE}" if File.exist?(APK_FILE)
+  puts "#{MANIFEST_FILE}: #{File.mtime MANIFEST_FILE}" if File.exist?(MANIFEST_FILE)
+  puts "#{RUBOTO_CONFIG_FILE}: #{File.mtime RUBOTO_CONFIG_FILE}" if File.exist?(RUBOTO_CONFIG_FILE)
+  puts "#{BUNDLE_JAR}: #{File.mtime BUNDLE_JAR}" if File.exist?(BUNDLE_JAR)
+  puts "#{JRUBY_JARS}: #{Dir[JRUBY_JARS].map{|f| File.mtime(f)}.max.inspect}"
+  if File.exist?(APK_FILE)
+    if (!File.exist?(MANIFEST_FILE) || File.mtime(MANIFEST_FILE) < File.mtime(APK_FILE)) &&
+        (!File.exist?(RUBOTO_CONFIG_FILE) || File.mtime(RUBOTO_CONFIG_FILE) < File.mtime(APK_FILE)) &&
+        (!File.exist?(BUNDLE_JAR) || File.mtime(BUNDLE_JAR) < File.mtime(APK_FILE)) &&
+        (Dir[JRUBY_JARS].empty? || Dir[JRUBY_JARS].map{|f| File.mtime(f)}.max < File.mtime(APK_FILE))
+      puts
+      puts 'skipping'
+      puts
+      next
+    end
+    puts "#{MANIFEST_FILE}, #{RUBOTO_CONFIG_FILE}, #{JRUBY_JARS}, or #{BUNDLE_JAR} changed.  Forcing rebuild of #{APK_FILE}."
+  end
+  sh 'ant debug'
 end
 
 desc 'Copy scripts to emulator or device'
-task :update_scripts => [BUNDLE_JAR, APK_FILE] do
-  sdcard_path = "/mnt/sdcard/Android/data/#{package}/files"
-  app_files_path = "/data/data/#{package}/files"
-  if package_installed?
-    if device_path_exists?(sdcard_path)
-      puts 'Pushing files to apk public file area.'
-      data_dir = sdcard_path
-    elsif device_path_exists?(app_files_path)
-      puts 'Pushing files to apk private file area.'
-      data_dir = app_files_path
-    else
-      puts 'Cannot find the scripts directory on the device.'
-      puts 'If you have a non-rooted device, you need to add'
-      puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
-      puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
-      puts "Reverting to uninstalling and re-installing the apk."
-      Rake::Task['install:clean'].invoke
-      next
-    end
+task :update_scripts => :install do
+  if device_path_exists?(sdcard_path)
+    puts 'Pushing files to apk public file area.'
+    data_dir = sdcard_path
+  elsif device_path_exists?(app_files_path)
+    puts 'Pushing files to apk private file area.'
+    data_dir = app_files_path
   else
-    puts 'Cannot find the app on the device.  Installing it.'
+    puts 'Cannot find the scripts directory on the device.'
+    puts 'If you have a non-rooted device, you need to add'
+    puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
+    puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
+    puts "Reverting to uninstalling and re-installing the apk."
     Rake::Task['install:clean'].invoke
     next
   end
@@ -138,7 +156,7 @@ task :update_scripts => [BUNDLE_JAR, APK_FILE] do
     ['scripts'].each do |asset_dir|
       Dir["#{asset_dir}/*"].each do |asset_file|
         next if File.directory? asset_file
-        next if File.ctime(asset_file) < last_update
+        next if File.mtime(asset_file) < last_update
         print "#{asset_file}: " ; $stdout.flush
         `adb push #{asset_file} #{data_dir}/#{asset_file}`
       end
@@ -239,15 +257,15 @@ end
   Rake::Task['install'].invoke
 end
 
-task :mark_update do
-  mark_update
-end
-
 # Methods
 
-def mark_update
+def mark_update(time = Time.now)
   FileUtils.mkdir_p File.dirname(UPDATE_MARKER_FILE)
-  File.open(UPDATE_MARKER_FILE, 'w'){|f| f << Time.now.iso8601}
+  File.open(UPDATE_MARKER_FILE, 'w'){|f| f << time.iso8601}
+end
+
+def clear_update
+  FileUtils.rm_f UPDATE_MARKER_FILE
 end
 
 def strings(name)
