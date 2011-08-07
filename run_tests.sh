@@ -5,6 +5,9 @@ TIMEOUT="3600"
 BOSSPID=$$
 (
   sleep $TIMEOUT
+  echo
+  echo "Test timed out after $TIMEOUT seconds."
+  echo
   kill -9 $BOSSPID
 )&
 TIMERPID=$!
