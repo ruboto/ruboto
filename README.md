@@ -40,7 +40,7 @@ Command-line Tools
 <a name="application_generator"></a>
 ### Application generator
 
-    $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min_sdk another-android-version --activity MainActivityName
+    $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min-sdk another-android-version --activity MainActivityName
 Version values must be specified using'android-' and the sdk level number (e.g., android-8 is froyo).
 
 <a name="class_generator"></a>

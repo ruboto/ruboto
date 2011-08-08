@@ -42,14 +42,14 @@ module Ruboto
                 argument :required
                 description "Path to where you want your app.  Defaults to the last part of the package name."
               }
-              option("min_sdk") {
-                argument :required
-                defaults 'android-7'
-                description "Minimum android version supported. must begin with 'android-'."
-              }
               option("target") {
                 argument :required
-                description "Android version to target. must begin with 'android-' (e.g., 'android-8' for froyo)"
+                defaults 'android-7'
+                description "Android version to target. Must begin with 'android-' (e.g., 'android-8' for froyo)"
+              }
+              option("min-sdk") {
+                argument :required
+                description "Minimum android version supported. Must begin with 'android-'."
               }
 
               option("with-psych") {
@@ -62,8 +62,8 @@ module Ruboto
                 name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
                 activity = params['activity'].value || "#{name}Activity"
                 path = params['path'].value || package.split('.').last
-                min_sdk = params['min_sdk'].value
-                target = params['target'].value || min_sdk
+                target = params['target'].value
+                min_sdk = params['min-sdk'].value || target
 
                 abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if File.exists?(path)
 

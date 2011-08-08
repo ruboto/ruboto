@@ -108,7 +108,7 @@ class Test::Unit::TestCase
         end
       else
         puts "Generating app #{APP_DIR}"
-        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --min_sdk #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
         if $? != 0
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"
