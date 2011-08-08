@@ -1,4 +1,4 @@
-activity Java::org.ruboto.test_app.RubotoTestAppActivity
+activity Java::org.ruboto.test_app.ImageButtonActivity
 
 setup do |activity|
   start = Time.now

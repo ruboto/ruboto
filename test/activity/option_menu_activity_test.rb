@@ -1,4 +1,4 @@
-activity Java::org.ruboto.test_app.RubotoTestAppActivity
+activity Java::org.ruboto.test_app.OptionMenuActivity
 
 setup do |activity|
   start = Time.now

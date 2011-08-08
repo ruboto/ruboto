@@ -1,5 +1,4 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
-require 'fileutils'
 
 class RakeTest < Test::Unit::TestCase
   def setup
