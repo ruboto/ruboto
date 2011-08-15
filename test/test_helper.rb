@@ -37,7 +37,7 @@ module RubotoTest
         puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
         return api_level
       end
-      if line =~ /[ro.build.version.sdk]: [(\d+)]/
+      if line =~ /\[ro\.build\.version\.sdk\]: \[(\d+)\]/
         return $1
       end
     end

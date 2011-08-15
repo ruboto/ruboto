@@ -18,6 +18,16 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
+  def test_gen_class_activity_with_lowercase_should_fail
+    Dir.chdir APP_DIR do
+      system "#{RUBOTO_CMD} gen class activity --name VeryNewActivity"
+      assert !File.exists?('src/org/ruboto/test_app/VeryNewActivity.java')
+      assert !File.exists?('assets/scripts/very_new_activity.rb')
+      assert !File.exists?('test/assets/scripts/very_new_activity_test.rb')
+      assert File.read('AndroidManifest.xml') !~ /VeryNewActivity/
+    end
+  end
+
 end
 
 if not RubotoTest::ON_JRUBY_JARS_1_5_6

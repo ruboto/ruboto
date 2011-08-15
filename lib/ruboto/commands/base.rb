@@ -102,7 +102,9 @@ module Ruboto
 
               argument("class"){
                 required
-                description "the Android Class that you want."
+                alternatives = Dir[File.join(Ruboto::ASSETS, "src/Inheriting*.java")].map{|f| File.basename(f)[10..-6]} - ['Class']
+                description "the Android Class that you want: #{alternatives[0..-2].map{|c| "#{c}, "}}or #{alternatives[-1]}"
+                validate {|v| alternatives.include? v}
               }
 
               option("script_name"){

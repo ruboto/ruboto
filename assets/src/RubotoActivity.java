@@ -127,11 +127,13 @@ THE_CONSTANTS
     } else {
       try {
           new Script(scriptName).execute();
+          /* TODO(uwe): Add a way to add callbacks from a class or just forward all calls to the instance
           rubyClassName = this.getClass().getSimpleName();
           if (getRuby().get(rubyClassName) != null) {
   		    rubyInstance = Script.exec(rubyClassName + ".new");
   		    getRuby().callMethod(rubyInstance, "on_create", configBundle);
           }
+          */
       } catch(IOException e){
         e.printStackTrace();
         ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
