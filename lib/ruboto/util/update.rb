@@ -159,6 +159,7 @@ EOF
           end
           if min_sdk.to_i >= 11
             verify_manifest.elements['application'].attributes['android:hardwareAccelerated'] ||= 'true'
+            verify_manifest.elements['application'].attributes['android:largeHeap'] ||= 'true'
           end
           app_element = verify_manifest.elements['application']
           if app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
@@ -177,10 +178,6 @@ EOF
           else
             verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk, "android:targetSdkVersion" => target}
           end
-          # # <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-          # unless sdcard_permission_element = verify_manifest.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
-          #   verify_manifest.add_element 'uses-permission', {"android:name" => 'android.permission.WRITE_EXTERNAL_STORAGE'}
-          # end
           save_manifest
         end
       end
