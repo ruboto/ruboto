@@ -71,6 +71,10 @@ module Ruboto
                 puts "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
                 exit $? unless $? == 0
+                unless File.exists? path
+                  puts "Android project was not created"
+                  exit_failure!
+                end
                 Dir.chdir path do
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
                   File.open("res/values/strings.xml", 'w') {|f| verify_strings.document.write(f, 4)}
