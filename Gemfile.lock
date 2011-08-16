@@ -1,12 +1,8 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    arrayfields (4.7.4)
-    fattr (2.1.0)
     jruby-jars (1.6.3)
-    main (4.2.0)
-      arrayfields (>= 4.7.4)
-      fattr (>= 2.1.0)
+    main (4.7.1)
 
 PLATFORMS
   java

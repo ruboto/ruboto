@@ -2,7 +2,7 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto-core}
-  s.version = "0.3.0.rc.2"
+  s.version = "0.3.0.rc.3"
   s.date = Date.today.strftime '%Y-%m-%d'
   s.authors = ["Daniel Jackoway", "Charles Nutter", "Scott Moyer", 'Uwe Kubosch']
   s.email = %q{ruboto@googlegroups.com}
@@ -13,6 +13,6 @@ Gem::Specification.new do |s|
   s.files = FileList['[A-Z]*', "assets/**/*", "bin/*", 'lib/**/*', 'test/**/*'].to_a
   s.executables = ['ruboto']
   s.default_executable = 'ruboto'
-  s.add_dependency('main', '~>4.4')
+  s.add_dependency('main', '~>4.7', '>4.7.1')
   s.add_dependency('jruby-jars', '>=1.5.6')
 end
