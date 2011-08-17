@@ -6,18 +6,19 @@ def build_project_name() @build_project_name ||= REXML::Document.new(File.read('
 def sdcard_path() @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files" end
 def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
 
-UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
-BUNDLE_JAR = 'libs/bundle.jar'
-BUNDLE_PATH = 'tmp/bundle'
-
 require 'rake/clean'
 require 'rexml/document'
 
+UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
+BUNDLE_JAR = 'libs/bundle.jar'
+BUNDLE_PATH = 'tmp/bundle'
 MANIFEST_FILE      = 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = 'ruboto.yml'
 APK_FILE           = "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE      = "test/bin/#{build_project_name}Test-debug.apk"
 JRUBY_JARS         = 'libs/jruby-*.jar'
+RESOURCE_FILES     = Dir['res/**/*']
+JAVA_SOURCE_FILES  = Dir['src/**/*.java']
 
 CLEAN.include('tmp', 'bin')
 
@@ -45,7 +46,13 @@ task :debug => APK_FILE
 
 desc "build package and install it on the emulator or device"
 task :install => APK_FILE do
-  next if package_installed?
+  case package_installed?
+  when true
+    puts "Package already installed."
+    next
+  when false
+    puts "Package installed, but of wrong size."
+  end
   if !device_path_exists?(sdcard_path) && !device_path_exists?(app_files_path)
     Rake::Task['uninstall'].invoke
   end
@@ -113,23 +120,20 @@ end
 file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
-file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] do
-  puts "#{APK_FILE}: #{File.mtime APK_FILE}" if File.exist?(APK_FILE)
-  puts "#{MANIFEST_FILE}: #{File.mtime MANIFEST_FILE}" if File.exist?(MANIFEST_FILE)
-  puts "#{RUBOTO_CONFIG_FILE}: #{File.mtime RUBOTO_CONFIG_FILE}" if File.exist?(RUBOTO_CONFIG_FILE)
-  puts "#{BUNDLE_JAR}: #{File.mtime BUNDLE_JAR}" if File.exist?(BUNDLE_JAR)
-  puts "#{JRUBY_JARS}: #{Dir[JRUBY_JARS].map{|f| File.mtime(f)}.max.inspect}"
+file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
   if File.exist?(APK_FILE)
-    if (!File.exist?(MANIFEST_FILE) || File.mtime(MANIFEST_FILE) < File.mtime(APK_FILE)) &&
-        (!File.exist?(RUBOTO_CONFIG_FILE) || File.mtime(RUBOTO_CONFIG_FILE) < File.mtime(APK_FILE)) &&
-        (!File.exist?(BUNDLE_JAR) || File.mtime(BUNDLE_JAR) < File.mtime(APK_FILE)) &&
-        (Dir[JRUBY_JARS].empty? || Dir[JRUBY_JARS].map{|f| File.mtime(f)}.max < File.mtime(APK_FILE))
+    changed_prereqs = t.prerequisites.select do |p|
+      File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
+    end
+
+    if changed_prereqs.empty?
       puts
       puts 'skipping'
       puts
       next
     end
-    puts "#{MANIFEST_FILE}, #{RUBOTO_CONFIG_FILE}, #{JRUBY_JARS}, or #{BUNDLE_JAR} changed.  Forcing rebuild of #{APK_FILE}."
+    changed_prereqs.each{|f| puts "#{f} changed."}
+    puts "Forcing rebuild of #{APK_FILE}."
   end
   sh 'ant debug'
 end
@@ -295,16 +299,13 @@ def package_installed? test = false
     if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(p)}$/
       apk_file = test ? TEST_APK_FILE : APK_FILE
       if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
-        puts "Found package #{p}"
         return true
       else
-        puts "Package #{p} installed, but of wrong size."
         return false
       end
     end
   end
-  puts "Package not found: #{package_name}"
-  return false
+  return nil
 end
 
 private
