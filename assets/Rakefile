@@ -46,18 +46,7 @@ task :debug => APK_FILE
 
 desc "build package and install it on the emulator or device"
 task :install => APK_FILE do
-  case package_installed?
-  when true
-    puts "Package already installed."
-    next
-  when false
-    puts "Package installed, but of wrong size."
-  end
-  if !device_path_exists?(sdcard_path) && !device_path_exists?(app_files_path)
-    Rake::Task['uninstall'].invoke
-  end
-  sh 'ant ruboto-install-debug'
-  clear_update
+  install_apk
 end
 
 task :tag => :release do
@@ -100,8 +89,7 @@ desc 'Restart the application'
 task :restart => [:stop_app, :start_app]
 
 task :uninstall do
-  puts "Uninstalling package #{package}"
-  system "adb uninstall #{package}"
+  uninstall_apk
 end
 
 namespace :install do
@@ -135,11 +123,11 @@ file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] + J
     changed_prereqs.each{|f| puts "#{f} changed."}
     puts "Forcing rebuild of #{APK_FILE}."
   end
-  sh 'ant debug'
+  build_apk
 end
 
 desc 'Copy scripts to emulator or device'
-task :update_scripts => :install do
+task :update_scripts do
   if device_path_exists?(sdcard_path)
     puts 'Pushing files to apk public file area.'
     data_dir = sdcard_path
@@ -148,13 +136,18 @@ task :update_scripts => :install do
     data_dir = app_files_path
   else
     puts 'Cannot find the scripts directory on the device.'
-    puts 'If you have a non-rooted device, you need to add'
-    puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
-    puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
+    unless manifest.root.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
+      puts 'If you have a non-rooted device, you need to add'
+      puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
+      puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
+    end
     puts "Reverting to uninstalling and re-installing the apk."
-    Rake::Task['install:clean'].invoke
+    uninstall_apk
+    build_apk
+    install_apk
     next
   end
+  Rake::Task['install'].invoke
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('assets') do
     ['scripts'].each do |asset_dir|
@@ -287,7 +280,6 @@ def main_activity() manifest.root.elements['application'].elements["activity[@an
 def device_path_exists?(path)
   path_output =`adb shell ls #{path}`
   result = path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
-  puts "Checking path on device: #{path}: #{result || path_output}"
   result
 end
 
@@ -323,4 +315,25 @@ def replace_faulty_code(faulty_file, faulty_code)
   else
     puts "Could not find expected faulty code\n\n#{faulty_code}\n\nin file #{faulty_file}\n\n#{old_code}\n\n"
   end
+end
+
+def install_apk
+  case package_installed?
+  when true
+    puts "Package already installed."
+    return
+  when false
+    puts "Package installed, but of wrong size."
+  end
+  sh 'ant ruboto-install-debug'
+  clear_update
+end
+
+def build_apk
+  sh 'ant debug'
+end
+
+def uninstall_apk
+  puts "Uninstalling package #{package}"
+  system "adb uninstall #{package}"
 end
