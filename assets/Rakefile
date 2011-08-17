@@ -154,6 +154,7 @@ task :update_scripts do
       Dir["#{asset_dir}/*"].each do |asset_file|
         next if File.directory? asset_file
         next if File.mtime(asset_file) < last_update
+        next if asset_file =~ /~$/
         print "#{asset_file}: " ; $stdout.flush
         `adb push #{asset_file} #{data_dir}/#{asset_file}`
       end
