@@ -129,10 +129,10 @@ end
 desc 'Copy scripts to emulator or device'
 task :update_scripts do
   if device_path_exists?(sdcard_path)
-    puts 'Pushing files to apk public file area.'
+    data_dir_name = 'public'
     data_dir = sdcard_path
   elsif device_path_exists?(app_files_path)
-    puts 'Pushing files to apk private file area.'
+    data_dir_name = 'private'
     data_dir = app_files_path
   else
     puts 'Cannot find the scripts directory on the device.'
@@ -148,6 +148,7 @@ task :update_scripts do
     next
   end
   Rake::Task['install'].invoke
+  puts "Pushing files to apk #{data_dir_name} file area."
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('assets') do
     ['scripts'].each do |asset_dir|
