@@ -340,6 +340,6 @@ def uninstall_apk
   system "adb uninstall #{package}"
   if $? != 0 && package_installed?
     puts "Uninstall failed exit code #{$?}"
-    exit 1
+    exit $?
   end
 end
