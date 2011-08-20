@@ -78,16 +78,16 @@ task :emulator do
   system 'emulator -partition-size 1024 -avd Android_3.0'
 end
 
-task :start_app do
+task :start do
   `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
 end
 
-task :stop_app do
+task :stop do
   `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
 end
 
 desc 'Restart the application'
-task :restart => [:stop_app, :start_app]
+task :restart => [:stop, :start]
 
 task :uninstall do
   uninstall_apk
@@ -163,7 +163,7 @@ end
 
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
-  task :restart => [:stop_app, :update_scripts, :start_app]
+  task :restart => [:stop, :update_scripts, :start]
 end
 
 task :update_test_scripts do
