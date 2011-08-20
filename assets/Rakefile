@@ -348,7 +348,7 @@ def install_apk
 end
 
 def uninstall_apk
-  return unless package_installed?.nil?
+  return if package_installed?.nil?
   puts "Uninstalling package #{package}"
   system "adb uninstall #{package}"
   if $? != 0 && package_installed?
