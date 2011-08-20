@@ -157,8 +157,7 @@ module Ruboto
         params = parameters
         args = ""
         if params.size > 1
-          args = ", args"
-          rv << "Object[] args = {" + params.map{|i| i[0]}.join(", ") + "};"
+          args = ", new Object[]{" + params.map{|i| i[0]}.join(", ") + "}"
         elsif params.size > 0
           args = ", " + params.map{|i| i[0]}.join(", ")
         end
