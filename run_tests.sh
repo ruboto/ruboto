@@ -31,7 +31,7 @@ if [ "$JRUBY_JARS_VERSION" != "" ] ; then
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
   (gem uninstall jruby-jars --all -v "!=$JRUBY_JARS_VERSION") || echo "No superflous jruby-jars gem uninstalled." 
 fi
-rake test
+rake test --trace
 
 
 # BEGIN TIMEOUT #
