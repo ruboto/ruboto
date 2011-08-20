@@ -27,16 +27,16 @@ task :default => :debug
 
 file JRUBY_JARS => RUBOTO_CONFIG_FILE do
   next unless File.exists? RUBOTO_CONFIG_FILE
-  jruby_jars_mtime = Dir[JRUBY_JARS].map{|f| File.mtime(f)}.min
+  jruby_jars_mtime = JRUBY_JARS.map{|f| File.mtime(f)}.min
   ruboto_yml_mtime = File.mtime(RUBOTO_CONFIG_FILE)
   next if jruby_jars_mtime > ruboto_yml_mtime
   puts '*' * 80
-  if Dir[JRUBY_JARS].empty?
+  if JRUBY_JARS.empty?
     puts '  The JRuby jars are missing.'
   else
     puts "  The JRuby jars need reconfiguring after changes to #{RUBOTO_CONFIG_FILE}"
     puts "  #{RUBOTO_CONFIG_FILE}: #{ruboto_yml_mtime}"
-    puts "  #{JRUBY_JARS}: #{jruby_jars_mtime}"
+    puts "  #{JRUBY_JARS.join(', ')}: #{jruby_jars_mtime}"
   end
   puts '  Run "ruboto update jruby" to regenerate the JRuby jars'
   puts '*' * 80
@@ -109,7 +109,7 @@ end
 file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
-file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
+file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
   if File.exist?(APK_FILE)
     changed_prereqs = t.prerequisites.select do |p|
       File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
