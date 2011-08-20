@@ -156,7 +156,7 @@ module Ruboto
 
         params = parameters
         args = ""
-        if params.size > 3
+        if params.size > 1
           args = ", args"
           rv << "Object[] args = {" + params.map{|i| i[0]}.join(", ") + "};"
         elsif params.size > 0
@@ -177,13 +177,7 @@ module Ruboto
           convert_return = ", #{return_class}.class"
         end
 
-        if return_class == 'Integer'
-          # TODO(uwe): This is a fix for JRUBY-5937  Remove when the issue is fixed.
-          rv << "#{return_cast}((Number)getRuby().callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return})).intValue();"
-          # TODO end
-        else
         rv << "#{return_cast}getRuby().callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"
-        end
         rv
       end
 

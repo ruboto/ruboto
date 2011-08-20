@@ -10,15 +10,16 @@ require 'rake/clean'
 require 'rexml/document'
 
 UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
-BUNDLE_JAR = 'libs/bundle.jar'
-BUNDLE_PATH = 'tmp/bundle'
-MANIFEST_FILE      = 'AndroidManifest.xml'
-RUBOTO_CONFIG_FILE = 'ruboto.yml'
-APK_FILE           = "bin/#{build_project_name}-debug.apk"
-TEST_APK_FILE      = "test/bin/#{build_project_name}Test-debug.apk"
-JRUBY_JARS         = 'libs/jruby-*.jar'
-RESOURCE_FILES     = Dir['res/**/*']
-JAVA_SOURCE_FILES  = Dir['src/**/*.java']
+BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
+BUNDLE_PATH        = File.expand_path 'tmp/bundle'
+MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
+RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
+GEM_FILE           = File.expand_path('Gemfile.apk')
+APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
+TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
+JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
+RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
+JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
 
 CLEAN.include('tmp', 'bin')
 
@@ -123,7 +124,7 @@ file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, JRUBY_JARS, BUNDLE_JAR] + J
     changed_prereqs.each{|f| puts "#{f} changed."}
     puts "Forcing rebuild of #{APK_FILE}."
   end
-  build_apk
+  sh 'ant debug'
 end
 
 desc 'Copy scripts to emulator or device'
@@ -142,9 +143,13 @@ task :update_scripts do
       puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
     end
     puts "Reverting to uninstalling and re-installing the apk."
-    uninstall_apk
-    build_apk
-    install_apk
+    Rake::Task[:uninstall].reenable
+    Rake::Task[:uninstall].invoke
+    FileUtils.rm_f APK_FILE
+    Rake::Task[APK_FILE].reenable
+    Rake::Task[APK_FILE].invoke
+    Rake::Task[:install].reenable
+    Rake::Task[:install].invoke
     next
   end
   Rake::Task['install'].invoke
@@ -202,15 +207,15 @@ namespace :test do
   end
 end
 
-file 'Gemfile'
+file GEM_FILE
 
 desc 'Generate bundle jar from Gemfile'
-file BUNDLE_JAR => 'Gemfile' do
-  next unless File.exists? 'Gemfile'
+file BUNDLE_JAR => GEM_FILE do
+  next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
 
   FileUtils.mkdir_p BUNDLE_PATH
-  sh "bundle install --path=#{BUNDLE_PATH}"
+  sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
 
   # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
 
@@ -246,6 +251,25 @@ end
     EOF
     replace_faulty_code(faulty_file, faulty_code)
   end
+  # FIXME end
+
+  # Expand JARs
+  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+    Dir['*'].each do |gem_lib|
+      next if gem_lib =~ /jdbc-sqlite/
+      Dir.chdir "#{gem_lib}/lib" do
+        Dir['**/*.jar'].each do |jar|
+          puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
+
+          `jar xf #{jar}`
+          FileUtils.rm_f(jar)
+          # FileUtils.touch(jar + '.rb')
+          # FileUtils.touch(jar.chomp('jar') + 'rb')
+        end
+      end
+    end
+  end
+
 
   FileUtils.rm_f BUNDLE_JAR
   Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each_with_index do |gem_dir, i|
@@ -331,11 +355,8 @@ def install_apk
   clear_update
 end
 
-def build_apk
-  sh 'ant debug'
-end
-
 def uninstall_apk
+  return unless package_installed?
   puts "Uninstalling package #{package}"
   system "adb uninstall #{package}"
   if $? != 0 && package_installed?
