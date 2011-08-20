@@ -96,14 +96,6 @@ end
 namespace :install do
   desc 'Uninstall, build, and install the application'
   task :clean => [:uninstall, APK_FILE, :install]
-
-  desc 'Build, install, and restart the application'
-  task :restart => [:install, :start_app]
-
-  namespace :restart do
-    desc 'Uninstall, build, install, and restart the application'
-    task :clean => [:uninstall, APK_FILE, :install, :start_app]
-  end
 end
 
 file MANIFEST_FILE

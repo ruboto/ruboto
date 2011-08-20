@@ -15,7 +15,7 @@ class RakeTest < Test::Unit::TestCase
     File.open("#{APP_DIR}/AndroidManifest.xml", 'w') { |f| f << manifest }
 
     Dir.chdir APP_DIR do
-      system 'rake install:restart:clean'
+      system 'rake install:clean start'
       assert_equal 0, $?
     end
 
@@ -28,7 +28,7 @@ class RakeTest < Test::Unit::TestCase
   else
     def test_that_update_scripts_task_copies_files_to_app_directory_when_permissions_are_not_set
       Dir.chdir APP_DIR do
-        system 'rake install:restart:clean'
+        system 'rake install:clean start'
         assert_equal 0, $?
       end
       wait_for_dir("/data/data/#{PACKAGE}/files/scripts")
