@@ -106,13 +106,7 @@ file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + 
     changed_prereqs = t.prerequisites.select do |p|
       File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
     end
-
-    if changed_prereqs.empty?
-      puts
-      puts 'skipping'
-      puts
-      next
-    end
+    next if changed_prereqs.empty?
     changed_prereqs.each{|f| puts "#{f} changed."}
     puts "Forcing rebuild of #{APK_FILE}."
   end

@@ -61,22 +61,17 @@ public class Script {
 /*
             http://www.anddev.org/view-layout-resource-problems-f27/dexclassloader-problem-t14666.html
             http://lsd.luminis.nl/osgi-on-google-android-using-apache-felix/
-
             String packagePath = "org.ruboto.core";
             String classPath = "org.jruby.embed.ScriptingContainer";
-
+            System.out.println("packagePath: " + packagePath);
             String apkName = null;
             try {
                 apkName = getPackageManager().getApplicationInfo(packagePath,0).sourceDir;
+                System.out.println("apkName: " + apkName);
             } catch (PackageManager.NameNotFoundException e) {
-                // catch this
+                // FIXME(uwe): Ask the user to install the platform APK, then stop or restart this app.
             }
-
-            // add path to apk that contains classes you wish to load
-            String extraApkPath = apkName + ":/path/to/extraLib.apk"
-
             PathClassLoader pathClassLoader = new dalvik.system.PathClassLoader(apkName, ClassLoader.getSystemClassLoader());
-
             try {
                 Class<?> handler = Class.forName(classPath, true, pathClassLoader);
             } catch (ClassNotFoundException e) {
@@ -91,17 +86,15 @@ public class Script {
 
 		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
 		    ruby = new ScriptingContainer();
-		    RubyInstanceConfig config = ruby.getProvider().getRubyInstanceConfig();
-            config.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
-
-            config.setLoader(Script.class.getClassLoader());
+            ruby.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
+            ruby.setClassLoader(Script.class.getClassLoader());
 		    if (scriptsDir != null) {
                 Log.d(TAG, "Setting JRuby current directory to " + scriptsDir);
-                config.setCurrentDirectory(scriptsDir);
+                ruby.setCurrentDirectory(scriptsDir);
             }
             if (out != null) {
-            	config.setOutput(out);
-            	config.setError(out);
+            	ruby.setOutput(out);
+            	ruby.setError(out);
             }
             copyScriptsIfNeeded(appContext);
             initialized = true;
