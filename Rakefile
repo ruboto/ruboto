@@ -47,3 +47,10 @@ task :install_platform => PLATFORM_DEBUG_APK do
     sh 'rake install'
   end
 end
+
+desc 'Uninstall the Ruboto Core platform debug apk'
+task :uninstall_platform => PLATFORM_PROJECT do
+  Dir.chdir(PLATFORM_PROJECT) do
+    sh 'rake uninstall'
+  end
+end
