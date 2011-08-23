@@ -90,6 +90,9 @@ class Test::Unit::TestCase
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+
+    system 'rake install_platform' unless with_psych
+
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}#{'_updated' if update}#{"_without_#{excluded_stdlibs.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)

@@ -70,6 +70,7 @@ public class Script {
 
             try {
                 scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer");
+                System.out.println("Found JRuby in this APK");
                 classLoader = Script.class.getClassLoader();
             } catch (ClassNotFoundException e1) {
                 String packagePath = "org.ruboto.core";
@@ -77,18 +78,19 @@ public class Script {
                 try {
                     apkName = appContext.getPackageManager().getApplicationInfo(packagePath, 0).sourceDir;
                 } catch (PackageManager.NameNotFoundException e) {
+                    System.out.println("JRuby not found");
                     Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id="
                             + packagePath));
                     appContext.startActivity(goToMarket);
                     return false;
                 }
 
+                System.out.println("Found JRuby in platform APK");
                 classLoader = new PathClassLoader(apkName, Script.class.getClassLoader());
                 try {
                     scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer", true, classLoader);
                 } catch (ClassNotFoundException e) {
-                    // FIXME(uwe): ScriptingContainer not found in the platform
-                    // APK...
+                    // FIXME(uwe): ScriptingContainer not found in the platform APK...
                     e.printStackTrace();
                     return false;
                 }
@@ -99,7 +101,11 @@ public class Script {
                 Class<?> compileModeClass = Class
                         .forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
                 callScriptingContainerMethod(Void.class, "setCompileMode", compileModeClass.getEnumConstants()[2]);
-                callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
+
+                // callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
+        	    Method setClassLoaderMethod = ruby.getClass().getMethod("setClassLoader", ClassLoader.class);
+        	    setClassLoaderMethod.invoke(ruby, classLoader);
+
                 Thread.currentThread().setContextClassLoader(classLoader);
 
                 if (scriptsDir != null) {
@@ -107,8 +113,13 @@ public class Script {
                     callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
                 }
                 if (out != null) {
-                    callScriptingContainerMethod(Void.class, "setOutput", out);
-                    callScriptingContainerMethod(Void.class, "setError", out);
+                    // callScriptingContainerMethod(Void.class, "setOutput", out);
+        	        Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
+        	        setOutputMethod.invoke(ruby, out);
+
+                    // callScriptingContainerMethod(Void.class, "setError", out);
+        	        Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
+        	        setErrorMethod.invoke(ruby, out);
                 }
                 copyScriptsIfNeeded(appContext);
                 initialized = true;
@@ -197,7 +208,17 @@ public class Script {
     }
 
     public static void put(String name, Object object) {
-        callScriptingContainerMethod(Void.class, "put", name, object);
+        // callScriptingContainerMethod(Void.class, "put", name, object);
+        try {
+            Method putMethod = ruby.getClass().getMethod("put", String.class, Object.class);
+            putMethod.invoke(ruby, name, object);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException(ite);
+        }
     }
     
     public static void defineGlobalVariable(String name, Object object) {
@@ -235,7 +256,17 @@ public class Script {
             Log.i(TAG, "Adding scripts dir to load path: " + noSdcard);
             List<String> paths = loadPath;
             paths.add(noSdcard);
-            callScriptingContainerMethod(Void.class, "setLoadPaths", paths);
+            // callScriptingContainerMethod(Void.class, "setLoadPaths", paths);
+            try {
+                Method setLoadPathsMethod = ruby.getClass().getMethod("setLoadPaths", List.class);
+                setLoadPathsMethod.invoke(ruby, paths);
+            } catch (NoSuchMethodException nsme) {
+                throw new RuntimeException(nsme);
+            } catch (IllegalAccessException iae) {
+                throw new RuntimeException(iae);
+            } catch (java.lang.reflect.InvocationTargetException ite) {
+                throw new RuntimeException(ite);
+            }
         }
 
         /* Create directory if it doesn't exist */
@@ -407,8 +438,18 @@ public class Script {
         return Script.execute(getContents());
     }
 
-	public static void callMethod(Object object, String methodName, Object[] objects) {
-		callScriptingContainerMethod(Void.class, "callMethod", object, methodName, objects);
+	public static void callMethod(Object receiver, String methodName, Object[] args) {
+		// callScriptingContainerMethod(Void.class, "callMethod", receiver, methodName, args);
+        try {
+            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class);
+            callMethodMethod.invoke(ruby, receiver, methodName, args);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException(ite);
+        }
     }
 
 	public static void callMethod(Object object, String methodName, Object arg) {
@@ -421,7 +462,17 @@ public class Script {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
-		return callScriptingContainerMethod(returnType, "callMethod", receiver, methodName, args, returnType);
+		// return callScriptingContainerMethod(returnType, "callMethod", receiver, methodName, args, returnType);
+        try {
+            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
+            return (T) callMethodMethod.invoke(ruby, receiver, methodName, args, returnType);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException(ite);
+        }
 	}
 
 	public static <T> T callMethod(Object receiver, String methodName,
