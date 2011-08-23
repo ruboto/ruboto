@@ -1,11 +1,13 @@
 package org.ruboto;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -19,17 +21,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
 
-import org.jruby.RubyInstanceConfig;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.exceptions.RaiseException;
+import dalvik.system.PathClassLoader;
 
 public class Script {
     private static String scriptsDir = "scripts";
     private static File scriptsDirFile = null;
 
     private String name = null;
-    private static ScriptingContainer ruby;
+    private static Object ruby;
     private static boolean initialized = false;
 
     private String contents = null;
@@ -47,93 +50,158 @@ public class Script {
         }
     };
 
-    public static boolean initialized() {
-        return initialized;
-    }
+	public static boolean isInitialized() {
+		return initialized;
+	}
 
-    public static synchronized ScriptingContainer setUpJRuby(Context appContext) {
+    public static synchronized boolean setUpJRuby(Context appContext) {
         return setUpJRuby(appContext, System.out);
     }
 
-    public static synchronized ScriptingContainer setUpJRuby(Context appContext, PrintStream out) {
+    public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (ruby == null) {
-
-/*
-            http://www.anddev.org/view-layout-resource-problems-f27/dexclassloader-problem-t14666.html
-            http://lsd.luminis.nl/osgi-on-google-android-using-apache-felix/
-            String packagePath = "org.ruboto.core";
-            String classPath = "org.jruby.embed.ScriptingContainer";
-            System.out.println("packagePath: " + packagePath);
-            String apkName = null;
-            try {
-                apkName = getPackageManager().getApplicationInfo(packagePath,0).sourceDir;
-                System.out.println("apkName: " + apkName);
-            } catch (PackageManager.NameNotFoundException e) {
-                // FIXME(uwe): Ask the user to install the platform APK, then stop or restart this app.
-            }
-            PathClassLoader pathClassLoader = new dalvik.system.PathClassLoader(apkName, ClassLoader.getSystemClassLoader());
-            try {
-                Class<?> handler = Class.forName(classPath, true, pathClassLoader);
-            } catch (ClassNotFoundException e) {
-                // catch this
-            }
-*/
-
             Log.d(TAG, "Setting up JRuby runtime");
             System.setProperty("jruby.bytecode.version", "1.5");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
 
-		    // ruby = new ScriptingContainer(LocalContextScope.THREADSAFE);
-		    ruby = new ScriptingContainer();
-            ruby.setCompileMode(RubyInstanceConfig.CompileMode.OFF);
-            ruby.setClassLoader(Script.class.getClassLoader());
-		    if (scriptsDir != null) {
-                Log.d(TAG, "Setting JRuby current directory to " + scriptsDir);
-                ruby.setCurrentDirectory(scriptsDir);
-            }
-            if (out != null) {
-            	ruby.setOutput(out);
-            	ruby.setError(out);
-            }
-            copyScriptsIfNeeded(appContext);
-            initialized = true;
-		} else {
-			while (!initialized) {
-                Log.i(TAG, "Waiting for JRuby runtime to initialize.");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException iex) {
-				}
-			}
-		}
+            ClassLoader classLoader;
+            Class<?> scriptingContainerClass;
 
-        return ruby;
+            try {
+                scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer");
+                classLoader = Script.class.getClassLoader();
+            } catch (ClassNotFoundException e1) {
+                String packagePath = "org.ruboto.core";
+                String apkName = null;
+                try {
+                    apkName = appContext.getPackageManager().getApplicationInfo(packagePath, 0).sourceDir;
+                } catch (PackageManager.NameNotFoundException e) {
+                    Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id="
+                            + packagePath));
+                    appContext.startActivity(goToMarket);
+                    return false;
+                }
+
+                classLoader = new PathClassLoader(apkName, Script.class.getClassLoader());
+                try {
+                    scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer", true, classLoader);
+                } catch (ClassNotFoundException e) {
+                    // FIXME(uwe): ScriptingContainer not found in the platform
+                    // APK...
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            try {
+                ruby = scriptingContainerClass.getConstructor().newInstance();
+                Class<?> compileModeClass = Class
+                        .forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
+                callScriptingContainerMethod(Void.class, "setCompileMode", compileModeClass.getEnumConstants()[2]);
+                callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
+                Thread.currentThread().setContextClassLoader(classLoader);
+
+                if (scriptsDir != null) {
+                    Log.d(TAG, "Setting JRuby current directory to " + scriptsDir);
+                    callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
+                }
+                if (out != null) {
+                    callScriptingContainerMethod(Void.class, "setOutput", out);
+                    callScriptingContainerMethod(Void.class, "setError", out);
+                }
+                copyScriptsIfNeeded(appContext);
+                initialized = true;
+                return true;
+            } catch (ClassNotFoundException e) {
+                // FIXME(uwe): ScriptingContainer not found in the platform APK...
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return false;
+        } else {
+            while (!initialized) {
+                Log.i(TAG, "Waiting for JRuby runtime to initialize.");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException iex) {
+                }
+            }
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T callScriptingContainerMethod(Class<T> returnType, String methodName, Object... args) {
+        Class<?>[] argClasses = new Class[args.length];
+        for (int i = 0; i < argClasses.length; i++) {
+            argClasses[i] = args[i].getClass();
+        }
+        try {
+        	Method method = ruby.getClass().getMethod(methodName, argClasses);
+        	System.out.println("callScriptingContainerMethod: method: " + method);
+        	T result = (T) method.invoke(ruby, args);
+        	System.out.println("callScriptingContainerMethod: result: " + result);
+            return result;
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+        	try {
+                e.printStackTrace();
+        	} catch (NullPointerException npe) {
+        	}
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String execute(String code) {
         try {
-			return getRuby().callMethod(exec(code), "inspect", String.class);
-        } catch (RaiseException re) {
-			re.printStackTrace(ruby.getError());
+        	Object result = exec(code);
+			return result != null ? callMethod(result, "inspect", String.class) : "null";
+        } catch (RuntimeException re) {
+        	// System.err.println(re.getMessage());
+			re.printStackTrace();
             return null;
         }
     }
 
-	public static Object exec(String code) throws RaiseException {
-		return ruby.runScriptlet(code);
+	public static Object exec(String code) {
+        return callScriptingContainerMethod(Object.class, "runScriptlet", code);
 	}
 
     public static void defineGlobalConstant(String name, Object object) {
-		ruby.put(name, object);
+    	put(name, object);
+    }
+
+    public static void put(String name, Object object) {
+        callScriptingContainerMethod(Void.class, "put", name, object);
     }
     
     public static void defineGlobalVariable(String name, Object object) {
-		ruby.put(name, object);
-    }
-    
-	public static ScriptingContainer getRuby() {
-    	return ruby;
+		defineGlobalConstant(name, object);
     }
 
     /*************************************************************************************************
@@ -146,7 +214,7 @@ public class Script {
     	scriptsDirFile = new File(dir);
 		if (ruby != null) {
             Log.d(TAG, "Changing JRuby current directory to " + scriptsDir);
-			ruby.setCurrentDirectory(scriptsDir);
+            callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
         }
 	}
     
@@ -160,11 +228,14 @@ public class Script {
 
     public static Boolean configDir(String noSdcard) {
         setDir(noSdcard);
-        if (!ruby.getLoadPaths().contains(noSdcard)) {
+		Method getLoadPathsMethod;
+        List<String> loadPath = callScriptingContainerMethod(List.class, "getLoadPaths");
+        
+        if (!loadPath.contains(noSdcard)) {
             Log.i(TAG, "Adding scripts dir to load path: " + noSdcard);
-            java.util.List paths = ruby.getLoadPaths();
+            List<String> paths = loadPath;
             paths.add(noSdcard);
-            ruby.setLoadPaths(paths);
+            callScriptingContainerMethod(Void.class, "setLoadPaths", paths);
         }
 
         /* Create directory if it doesn't exist */
@@ -236,15 +307,15 @@ public class Script {
 		File toFile = null;
         if (isDebugBuild(context)) {
 
-        	// FIXME(uwe):  Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
-            Log.i(TAG, "JRuby VERSION: " + org.jruby.runtime.Constants.VERSION);
-            if (!org.jruby.runtime.Constants.VERSION.equals("1.5.6") && !org.jruby.runtime.Constants.VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
-            	ruby.put("script_context", context);
-            	toFile = (File) exec("script_context.getExternalFilesDir(nil)");
-            } else {
+        	// FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
+            // Log.i(TAG, "JRuby VERSION: " + org.jruby.runtime.Constants.VERSION);
+            // if (!org.jruby.runtime.Constants.VERSION.equals("1.5.6") && !org.jruby.runtime.Constants.VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
+            //     ruby.put("script_context", context);
+            //     toFile = (File) exec("script_context.getExternalFilesDir(nil)");
+            // } else {
                 toFile = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
                 Log.e(TAG, "Calculated path to sdcard the old way: " + toFile);
-            }
+            // }
             // FIXME end
 
 	        if (toFile == null || (!toFile.exists() && !toFile.mkdirs())) {
@@ -323,8 +394,45 @@ public class Script {
      * Script Actions
      */
 
+    public static String getScriptFilename() {
+        return callScriptingContainerMethod(String.class, "getScriptFilename");
+    }
+
+    public static void setScriptFilename(String name) {
+        callScriptingContainerMethod(Void.class, "setScriptFilename", name);
+    }
+
     public String execute() throws IOException {
-    	Script.getRuby().setScriptFilename(name);
+    	setScriptFilename(name);
         return Script.execute(getContents());
     }
+
+	public static void callMethod(Object object, String methodName, Object[] objects) {
+		callScriptingContainerMethod(Void.class, "callMethod", object, methodName, objects);
+    }
+
+	public static void callMethod(Object object, String methodName, Object arg) {
+		callMethod(object, methodName, new Object[] { arg });
+	}
+
+	public static void callMethod(Object object, String methodName) {
+		callMethod(object, methodName, new Object[] {});
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
+		return callScriptingContainerMethod(returnType, "callMethod", receiver, methodName, args, returnType);
+	}
+
+	public static <T> T callMethod(Object receiver, String methodName,
+			Object arg, Class<T> returnType) {
+		return callMethod(receiver, methodName, new Object[]{arg}, returnType);
+	}
+
+	public static <T> T callMethod(Object receiver, String methodName,
+			Class<T> returnType) {
+		return callMethod(receiver, methodName, new Object[]{}, returnType);
+	}
+
 }
+

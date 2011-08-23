@@ -51,7 +51,10 @@ module Ruboto
                 argument :required
                 description "Minimum android version supported. Must begin with 'android-'."
               }
-
+              option("with-jruby") {
+                description "Generate the JRuby jars jar"
+                cast :boolean
+              }
               option("with-psych") {
                 description "Generate the Psych YAML parser jar"
                 cast :boolean
@@ -86,7 +89,7 @@ module Ruboto
                   update_assets
                   update_icons true
                   update_classes true
-                  update_jruby true, params['with-psych'].value
+                  update_jruby true, params['with-psych'].value if params['with-jruby'].value || params['with-psych'].value
                   update_build_xml
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
@@ -97,6 +100,24 @@ module Ruboto
                 end
 
                 puts "\nHello, #{name}\n"
+              end
+            end
+
+            mode "jruby" do
+              include Ruboto::Util::LogAction
+              include Ruboto::Util::Build
+              include Ruboto::Util::Update
+              include Ruboto::Util::Verify
+
+              option("with-psych") {
+                description "Generate the Psych YAML parser jar"
+                cast :boolean
+              }
+
+              def run
+                Dir.chdir root do
+                  update_jruby true, params['with-psych'].value
+                end
               end
             end
 

@@ -1,28 +1,19 @@
 package THE_PACKAGE;
 
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.javasupport.util.RuntimeHelpers;
-import org.jruby.runtime.builtin.IRubyObject;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.exceptions.RaiseException;
 import org.ruboto.Script;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private ScriptingContainer __ruby__;
 
 THE_CONSTANTS
-  private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
+
+    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
 THE_CONSTRUCTORS
 
-  private ScriptingContainer getRuby() {
-    if (__ruby__ == null) __ruby__ = Script.getRuby();
-    return __ruby__;
-  }
-
-  public void setCallbackProc(int id, IRubyObject obj) {
+  public void setCallbackProc(int id, Object obj) {
     callbackProcs[id] = obj;
   }
 	
 THE_METHODS
+
 }

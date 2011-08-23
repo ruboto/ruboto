@@ -13,18 +13,14 @@ import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.jruby.exceptions.RaiseException;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.javasupport.util.RuntimeHelpers;
-import org.jruby.runtime.builtin.IRubyObject;
 import org.ruboto.Script;
 
 public class ActivityTest extends ActivityInstrumentationTestCase2 {
     private final Object setup;
-    private final IRubyObject block;
+    private final Object block;
     private final String filename;
 
-    public ActivityTest(Class activityClass, String filename, IRubyObject setup, String name, IRubyObject block) {
+    public ActivityTest(Class activityClass, String filename, Object setup, String name, Object block) {
         super(activityClass.getPackage().getName(), activityClass);
         this.filename = filename;
         this.setup = setup;
@@ -36,29 +32,32 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
     public void runTest() throws Exception {
         Log.i(getClass().getName(), "runTest");
         Log.i(getClass().getName(), "runTest: " + getName());
-        Script.setUpJRuby(getActivity());
+        if (Script.setUpJRuby(getActivity())) {
         Log.i(getClass().getName(), "ruby ok");
         try {
             final Activity activity = getActivity();
             Log.i(getClass().getName(), "activity ok");
             runTestOnUiThread(new Runnable() {
                 public void run() {
-                    String oldFile = Script.getRuby().getScriptFilename();
+                    String oldFile = Script.getScriptFilename();
 
                     Log.i(getClass().getName(), "calling setup");
-                    Script.getRuby().setScriptFilename(filename);
-                    Script.getRuby().callMethod(setup, "call", activity);
+                    Script.setScriptFilename(filename);
+                    Script.callMethod(setup, "call", activity);
                     Log.i(getClass().getName(), "setup ok");
                     
-                    Script.getRuby().setScriptFilename(filename);
-                    Script.getRuby().callMethod(block, "call", activity);
-                    Script.getRuby().setScriptFilename(oldFile);
+                    Script.setScriptFilename(filename);
+                    Script.callMethod(block, "call", activity);
+                    Script.setScriptFilename(oldFile);
                 }
             });
         } catch (Throwable t) {
             throw new AssertionFailedError(t.getMessage());
         }
         Log.i(getClass().getName(), "runTest ok");
+        } else {
+            throw new AssertionFailedError("Ruboto Core platform is missing.");
+        }
     }
 
 }

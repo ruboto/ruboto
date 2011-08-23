@@ -176,7 +176,7 @@ module Ruboto
           convert_return = ", #{return_class}.class"
         end
 
-        rv << "#{return_cast}getRuby().callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"
+        rv << "#{return_cast}Script.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"
         rv
       end
 
@@ -186,7 +186,7 @@ module Ruboto
           attribute("name"), parameters,
           if_else(
               "callbackProcs[#{constant_string}] != null",
-              [super_string] + try_catch(ruby_call, ["re.printStackTrace();", default_return]),
+              [super_string] + ruby_call,
               [super_return]
           )
         ).indent.join("\n")

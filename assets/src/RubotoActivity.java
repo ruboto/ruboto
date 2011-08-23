@@ -2,44 +2,23 @@ package THE_PACKAGE;
 
 import java.io.IOException;
 
-import org.jruby.Ruby;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.exceptions.RaiseException;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.javasupport.util.RuntimeHelpers;
-import org.jruby.runtime.builtin.IRubyObject;
 import org.ruboto.Script;
 
 import android.app.ProgressDialog;
 import android.os.Handler;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private ScriptingContainer __ruby__;
   private String scriptName;
-  private String rubyClassName;
-  private Object rubyInstance;
   private int splash = 0;
   private String remoteVariable = "";
   public Object[] args;
   private ProgressDialog loadingDialog; 
 
 THE_CONSTANTS
-  private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
-  private ScriptingContainer getRuby() {
-    if (__ruby__ == null) {
-        __ruby__ = Script.getRuby();
+  private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
-        if (__ruby__ == null) {
-          Script.setUpJRuby(this);
-          __ruby__ = Script.getRuby();
-        }
-    }
-
-    return __ruby__;
-  }
-
-  public void setCallbackProc(int id, IRubyObject obj) {
+  public void setCallbackProc(int id, Object obj) {
     callbackProcs[id] = obj;
   }
 	
@@ -74,8 +53,8 @@ THE_CONSTANTS
 
     super.onCreate(arg0);
     
-    if (Script.getRuby() != null) {
-      backgroundCreate();
+    if (Script.isInitialized()) {
+        backgroundCreate();
     	finishCreate();
     } else {
       if (splash == 0) {
@@ -90,10 +69,16 @@ THE_CONSTANTS
 
   private final Handler loadingHandler = new Handler();
   
-  private final Thread loadingThread = new Thread() {
-      public void run(){
-        backgroundCreate();
-        loadingHandler.post(loadingComplete);
+    private final Thread loadingThread = new Thread() {
+        public void run(){
+            Script.setUpJRuby(RubotoActivity.this);
+            if (Script.isInitialized()) {
+                backgroundCreate();
+                loadingHandler.post(loadingComplete);
+            } else {
+            	// FIXME(uwe): Improve handling of missing Ruboto Core platform.
+                finish();
+            }
       }
   };
   
@@ -106,10 +91,10 @@ THE_CONSTANTS
     }
   };
 
-  private void backgroundCreate() {
-      getRuby().put("$activity", this);
-      getRuby().put("$bundle", args[0]);
-  }
+    private void backgroundCreate() {
+        Script.put("$activity", this);
+        Script.put("$bundle", args[0]);
+    }
 
   private void finishCreate() {
     android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
@@ -129,9 +114,9 @@ THE_CONSTANTS
           new Script(scriptName).execute();
           /* TODO(uwe): Add a way to add callbacks from a class or just forward all calls to the instance
           rubyClassName = this.getClass().getSimpleName();
-          if (getRuby().get(rubyClassName) != null) {
+          if (Script.get(rubyClassName) != null) {
   		    rubyInstance = Script.exec(rubyClassName + ".new");
-  		    getRuby().callMethod(rubyInstance, "on_create", configBundle);
+  		    Script.callMethod(rubyInstance, "on_create", configBundle);
           }
           */
       } catch(IOException e){

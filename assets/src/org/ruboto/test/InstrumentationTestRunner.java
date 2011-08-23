@@ -22,15 +22,11 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.jruby.exceptions.RaiseException;
-import org.jruby.javasupport.JavaEmbedUtils;
-import org.jruby.RubyClass;
-import org.jruby.runtime.builtin.IRubyObject;
 import org.ruboto.Script;
 
 public class InstrumentationTestRunner extends android.test.InstrumentationTestRunner {
     private Class activityClass;
-    private IRubyObject setup;
+    private Object setup;
     private TestSuite suite;
     
     public TestSuite getAllTests() {
@@ -38,7 +34,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         suite = new TestSuite("Sweet");
         
         try {
-            Script.setUpJRuby(getTargetContext());
+            if (Script.setUpJRuby(getTargetContext())) {
             Script.defineGlobalVariable("$runner", this);
             Script.defineGlobalVariable("$test", this);
             Script.defineGlobalVariable("$suite", suite);
@@ -57,9 +53,12 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                 Log.i(getClass().getName(), "Found script: " + f);
                 loadScript(f);
             }
+            } else {
+                addError(suite, new RuntimeException("Ruboto Core platform is missing"));
+            }
         } catch (IOException e) {
           addError(suite, e);
-        } catch (RaiseException e) {
+        } catch (RuntimeException e) {
           addError(suite, e);
         }
         return suite;
@@ -69,15 +68,15 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         this.activityClass = activityClass;
     }
 
-    public void setup(IRubyObject block) {
+    public void setup(Object block) {
         this.setup = block;
     }
 
-    public void test(String name, IRubyObject block) {
+    public void test(String name, Object block) {
         if (android.os.Build.VERSION.SDK_INT <= 8) {
           name ="runTest";
         }
-        Test test = new ActivityTest(activityClass, Script.getRuby().getScriptFilename(), setup, name, block);
+        Test test = new ActivityTest(activityClass, Script.getScriptFilename(), setup, name, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
@@ -106,12 +105,12 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         buffer.close();
 
         Log.d(getClass().getName(), "Loading test script: " + f);
-        String oldFilename = Script.getRuby().getScriptFilename();
-        Script.getRuby().setScriptFilename(f);
-        Script.getRuby().put("$script_code", source.toString());
-        Script.getRuby().setScriptFilename(f);
-        Script.getRuby().runScriptlet("$test.instance_eval($script_code)");
-        Script.getRuby().setScriptFilename(oldFilename);
+        String oldFilename = Script.getScriptFilename();
+        Script.setScriptFilename(f);
+        Script.put("$script_code", source.toString());
+        Script.setScriptFilename(f);
+        Script.execute("$test.instance_eval($script_code)");
+        Script.setScriptFilename(oldFilename);
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }
 

@@ -1,36 +1,19 @@
 package THE_PACKAGE;
 
-import org.jruby.Ruby;
-import org.jruby.javasupport.util.RuntimeHelpers;
-import org.jruby.runtime.builtin.IRubyObject;
-import org.jruby.javasupport.JavaUtil;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.exceptions.RaiseException;
 import org.ruboto.Script;
 import java.io.IOException;
 import android.app.ProgressDialog;
 
 public abstract class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private ScriptingContainer __ruby__;
   private String scriptName;
   private String remoteVariable = "";
   public Object[] args;
 
 THE_CONSTANTS
-  private IRubyObject[] callbackProcs = new IRubyObject[CONSTANTS_COUNT];
 
-  private ScriptingContainer getRuby() {
-    if (__ruby__ == null) __ruby__ = Script.getRuby();
+  private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
-    if (__ruby__ == null) {
-      Script.setUpJRuby(this);
-      __ruby__ = Script.getRuby();
-    }
-
-    return __ruby__;
-  }
-
-  public void setCallbackProc(int id, IRubyObject obj) {
+  public void setCallbackProc(int id, Object obj) {
     callbackProcs[id] = obj;
   }
 	
@@ -54,14 +37,15 @@ THE_CONSTANTS
 
     super.onCreate();
 
-    getRuby();
-
-    Script.defineGlobalVariable("$service", this);
-
-    try {
-      new Script(scriptName).execute();
-    } catch(IOException e) {
-      e.printStackTrace();
+    if (Script.setUpJRuby(this)) {
+        Script.defineGlobalVariable("$service", this);
+        try {
+            new Script(scriptName).execute();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    } else {
+      // FIXME(uwe):  What to do if the Ruboto Core plarform cannot be found?
     }
   }
 
@@ -71,6 +55,7 @@ THE_CONSTANTS
    */
 
 THE_METHODS
-}	
+
+}
 
 

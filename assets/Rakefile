@@ -50,6 +50,10 @@ task :install => APK_FILE do
   install_apk
 end
 
+task :release do
+  sh 'ant release'
+end
+
 task :tag => :release do
   unless `git branch` =~ /^\* master$/
     puts "You must be on the master branch to release!"
