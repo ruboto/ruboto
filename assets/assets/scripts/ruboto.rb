@@ -44,9 +44,11 @@ class Object
   def with_large_stack(opts = {}, &block)
     opts = {:size => opts} if opts.is_a? Integer
     opts = {:name => 'Block with large stack'}.update(opts)
+    exception = nil
     result = nil
-    t = Thread.with_large_stack(opts, &proc{result = block.call})
+    t = Thread.with_large_stack(opts, &proc{result = block.call rescue exception = $!})
     t.join
+    raise exception if exception
     result
   end
 end

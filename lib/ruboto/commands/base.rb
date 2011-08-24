@@ -335,7 +335,7 @@ module Ruboto
             def run
               case params['what'].value
               when "jruby" then
-                update_jruby(params['force'].value) || abort
+                update_jruby(params['force'].value, params['with-psych'].value) || abort
               when "app" then
                 force = params['force'].value
                 update_test force

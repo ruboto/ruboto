@@ -228,7 +228,8 @@ EOF
               `jar -xf #{jruby_core}`
               File.delete jruby_core
               excluded_core_packages = [
-                'META-INF', 'cext', 'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'jline', 'jni',
+                'META-INF', 'cext', 'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
+                'jline', 'jni',
                 'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                 'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
                 'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',

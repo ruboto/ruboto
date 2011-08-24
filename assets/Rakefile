@@ -146,14 +146,12 @@ task :update_scripts do
   puts "Pushing files to apk #{data_dir_name} file area."
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('assets') do
-    ['scripts'].each do |asset_dir|
-      Dir["#{asset_dir}/*"].each do |asset_file|
-        next if File.directory? asset_file
-        next if File.mtime(asset_file) < last_update
-        next if asset_file =~ /~$/
-        print "#{asset_file}: " ; $stdout.flush
-        `adb push #{asset_file} #{data_dir}/#{asset_file}`
-      end
+    Dir["scripts/**/*"].each do |asset_file|
+      next if File.directory? asset_file
+      next if File.mtime(asset_file) < last_update
+      next if asset_file =~ /~$/
+      print "#{asset_file}: "; $stdout.flush
+      `adb push #{asset_file} #{data_dir}/#{asset_file}`
     end
   end
   mark_update
