@@ -79,9 +79,6 @@ public class Script {
                     apkName = appContext.getPackageManager().getApplicationInfo(packagePath, 0).sourceDir;
                 } catch (PackageManager.NameNotFoundException e) {
                     System.out.println("JRuby not found");
-                    Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id="
-                            + packagePath));
-                    appContext.startActivity(goToMarket);
                     return false;
                 }
 

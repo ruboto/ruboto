@@ -132,7 +132,7 @@ EOF
         puts "\nCopying files:"
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
 
-        %w{.gitignore Rakefile assets test}.each do |f|
+        %w{.gitignore Rakefile assets res/layout test}.each do |f|
           log_action(f) {copier.copy f}
         end
       end

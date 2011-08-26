@@ -80,6 +80,7 @@ module Ruboto
                 end
                 Dir.chdir path do
                   FileUtils.rm_f 'res/layout/main.xml'
+                  puts 'Removed file res/layout/main.xml'
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
                   File.open("res/values/strings.xml", 'w') {|f| verify_strings.document.write(f, 4)}
                 end

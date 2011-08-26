@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal|center_vertical"
+>
+<!--                                                                                                                                                                                                                                 
+-->
+  <ImageButton
+      android:id="@+id/image"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:src="@drawable/icon"
+      android:layout_weight="1"
+      android:scaleType="fitCenter"
+      android:onClick="getRubotoCore"
+  />
+  <TextView android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to Ruboto!  This is the first Ruboto application installed on this device.  To continue, you need to install the Ruboto Core platform package.  Click on the image above to go to the market and d\
+ownload and install the Ruboto Core platform package.  Then return back here to start the app." />
+</LinearLayout>

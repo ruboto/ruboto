@@ -5,7 +5,11 @@ import java.io.IOException;
 import org.ruboto.Script;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
+import android.view.View;
+import android.widget.TextView;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private String scriptName;
@@ -71,16 +75,53 @@ THE_CONSTANTS
   
     private final Thread loadingThread = new Thread() {
         public void run(){
-            Script.setUpJRuby(RubotoActivity.this);
-            if (Script.isInitialized()) {
+            if (Script.setUpJRuby(RubotoActivity.this)) {
                 backgroundCreate();
                 loadingHandler.post(loadingComplete);
             } else {
             	// FIXME(uwe): Improve handling of missing Ruboto Core platform.
-                finish();
+
+                // Display nice screen explaining what is happening.
+                try {
+                    setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
+                } catch (Exception e) {}
+                if (loadingDialog != null) {
+                    loadingDialog.dismiss();
+                    loadingDialog = null;
+                }
+
+
+                while (!Script.setUpJRuby(RubotoActivity.this)) {
+                    try { Thread.sleep(2000); } catch (InterruptedException ie) {}
+                }
+
+                // android.os.Looper.prepare();
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        if (splash == 0) {
+                            loadingDialog = ProgressDialog.show(RubotoActivity.this, null, "Starting...", true, false);
+                        } else {
+                            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+                            setContentView(splash);
+                        }
+                    }
+                });
+                backgroundCreate();
+                loadingHandler.post(loadingComplete);
             }
       }
   };
+
+    public void getRubotoCore(View view) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=org.ruboto.core")));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            try {
+                TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
+                textView.setText("Could not find the Android Market App.  You will have to install Ruboto Core manually.  Bummer!");
+            } catch (Exception e) {}
+        }
+    }
   
   private final Runnable loadingComplete = new Runnable(){
     public void run(){
