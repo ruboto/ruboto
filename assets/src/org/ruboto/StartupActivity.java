@@ -22,46 +22,6 @@ public class StartupActivity extends android.app.Activity {
     private BroadcastReceiver receiver;
     private boolean appStarted = false;
 
-    @Override
-    public void onCreate(android.os.Bundle arg0) {
-        super.onCreate(arg0);
-
-        if (Script.isInitialized()) {
-    	    startRubotoActivity();
-    	    return;
-        }
-
-        showProgress();
-
-        new Thread() {
-            public void run(){
-                if (Script.setUpJRuby(StartupActivity.this)) {
-                    runOnUiThread(new Runnable(){
-                        public void run(){
-                            if (loadingDialog != null) {
-                                loadingDialog.dismiss();
-                                loadingDialog = null;
-                            }
-	                        startRubotoActivity();
-                        }
-                    });
-                } else {
-                    try {
-                        setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
-                    } catch (Exception e) {}
-                    if (loadingDialog != null) {
-                        loadingDialog.dismiss();
-                        loadingDialog = null;
-                    }
-                }
-            }
-        }.start();
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     public void onPause() {
         super.onPause();
         if (receiver != null) {
@@ -71,25 +31,49 @@ public class StartupActivity extends android.app.Activity {
     }
 
     public void onResume() {
+        Log.d("RUBOTO", "onResume: ");
         super.onResume();
-        if(appStarted) return;
-        if (Script.setUpJRuby(StartupActivity.this)) {
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    showProgress();
-                    startRubotoActivity();
-                }
-            });
+
+        if(appStarted) {
+            Log.d("RUBOTO", "onResume: CAoo already started!");
+            return;
+        }
+
+        Log.d("RUBOTO", "onResume: Checking JRuby");
+        if (Script.isInitialized()) {
+            Log.d("RUBOTO", "Already initialized");
+    	    startRubotoActivity();
         } else {
-            receiver = new BroadcastReceiver(){
-                public void onReceive(Context context, Intent intent) {
-                    Log.i(StartupActivity.class.getSimpleName(), "received broadcast: " + intent);
-                    startRubotoActivity();
+            Log.d("RUBOTO", "Not initialized");
+            showProgress();
+            new Thread(new Runnable() {
+                public void run() {
+                    final boolean jrubyOk = Script.setUpJRuby(StartupActivity.this);
+                    if (jrubyOk) {
+                        Log.d("RUBOTO", "onResume: JRuby OK");
+                        startRubotoActivity();
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Log.d("RUBOTO", "onResume: Checking JRuby - IN UI thread");
+                                try {
+                                    setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
+                                } catch (Exception e) {}
+                                hideProgress();
+                            }
+                        });
+                        receiver = new BroadcastReceiver(){
+                            public void onReceive(Context context, Intent intent) {
+                                Log.i(StartupActivity.class.getSimpleName(), "received broadcast: " + intent);
+                                startRubotoActivity();
+                            }
+                        };
+                        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+                        filter.addDataScheme("package");
+                        registerReceiver(receiver, filter);
+                    }
                 }
-            };
-            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-            filter.addDataScheme("package");
-            registerReceiver(receiver, filter);
+            }).start();
         }
     }
 
@@ -115,19 +99,34 @@ public class StartupActivity extends android.app.Activity {
         configBundle.putString("Script", "startup_activity.rb");
         i.putExtra("RubotoActivity Config", configBundle);
         startActivity(i);
+        hideProgress();
         finish();
     }
 
     private void showProgress() {
-        Log.i("RUBOTO", "Showing progress");
-	    try {
-    		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
-		} catch (Exception e) {}
-        if (splash != 0) {
-            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-            setContentView(splash);
-        } else {
-            loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
+        if (loadingDialog == null) {
+            Log.i("RUBOTO", "Showing progress");
+            if (splash == 0) {
+        	    try {
+            		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
+        		} catch (Exception e) {
+        		    splash = -1;
+        		}
+    		}
+            if (splash > 0) {
+                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+                setContentView(splash);
+            } else {
+                loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
+            }
+        }
+    }
+
+    private void hideProgress() {
+        if (loadingDialog != null) {
+            Log.d("RUBOTO", "Hide progress");
+            loadingDialog.dismiss();
+            loadingDialog = null;
         }
     }
 
