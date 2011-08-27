@@ -137,35 +137,44 @@ THE_CONSTANTS
         Script.put("$bundle", args[0]);
     }
 
-  private void finishCreate() {
-    android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
+    private void finishCreate() {
+        android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
-    if (configBundle != null) {
-      setRemoteVariable(configBundle.getString("Remote Variable"));
-      if (configBundle.getBoolean("Define Remote Variable")) {
-        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
-        setRemoteVariable(configBundle.getString("Remote Variable"));
-      }
-      if (configBundle.getString("Initialize Script") != null) {
-        Script.execute(configBundle.getString("Initialize Script"));
-      }
-      Script.execute(remoteVariable + "on_create($bundle)");
-    } else {
-      try {
-          new Script(scriptName).execute();
-          /* TODO(uwe): Add a way to add callbacks from a class or just forward all calls to the instance
-          rubyClassName = this.getClass().getSimpleName();
-          if (Script.get(rubyClassName) != null) {
-  		    rubyInstance = Script.exec(rubyClassName + ".new");
-  		    Script.callMethod(rubyInstance, "on_create", configBundle);
-          }
-          */
-      } catch(IOException e){
-        e.printStackTrace();
-        ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
-      }
+        if (configBundle != null) {
+            if (configBundle.getString("Script") != null) {
+                try {
+                    new Script(configBundle.getString("Script")).execute();
+                } catch(IOException e){
+                    e.printStackTrace();
+                    ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
+                }
+            } else {
+                setRemoteVariable(configBundle.getString("Remote Variable"));
+                if (configBundle.getBoolean("Define Remote Variable")) {
+                    Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
+                    setRemoteVariable(configBundle.getString("Remote Variable"));
+                }
+                if (configBundle.getString("Initialize Script") != null) {
+                    Script.execute(configBundle.getString("Initialize Script"));
+                }
+                Script.execute(remoteVariable + "on_create($bundle)");
+            }
+        } else {
+            try {
+                new Script(scriptName).execute();
+                /* TODO(uwe): Add a way to add callbacks from a class or just forward all calls to the instance
+                rubyClassName = this.getClass().getSimpleName();
+                if (Script.get(rubyClassName) != null) {
+  		            rubyInstance = Script.exec(rubyClassName + ".new");
+  		            Script.callMethod(rubyInstance, "on_create", configBundle);
+                }
+                */
+            } catch(IOException e){
+                e.printStackTrace();
+                ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
+            }
+        }
     }
-  }
 
   /****************************************************************************************
    * 

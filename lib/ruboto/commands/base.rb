@@ -63,7 +63,7 @@ module Ruboto
               def run
                 package = params['package'].value
                 name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
-                activity = params['activity'].value || "#{name}Activity"
+                activity = params['activity'].value || "StartupActivity"
                 path = params['path'].value || package.split('.').last
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
@@ -72,13 +72,15 @@ module Ruboto
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."
-                system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
+                system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a StartupActivity"
                 exit $? unless $? == 0
                 unless File.exists? path
                   puts "Android project was not created"
                   exit_failure!
                 end
                 Dir.chdir path do
+                  FileUtils.rm_f "src/#{package.gsub '.', '/'}/#{activity}.java"
+                  puts "Removed file #{"src/#{package.gsub '.', '/'}/#{activity}"}.java"
                   FileUtils.rm_f 'res/layout/main.xml'
                   puts 'Removed file res/layout/main.xml'
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')

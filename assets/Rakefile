@@ -83,7 +83,7 @@ task :emulator do
 end
 
 task :start do
-  `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
+  `adb shell am start -a android.intent.action.MAIN -n #{package}/#{main_activity}`
 end
 
 task :stop do
