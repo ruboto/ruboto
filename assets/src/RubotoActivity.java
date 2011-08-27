@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,8 +16,8 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private String scriptName;
   private int splash = 0;
   private String remoteVariable = "";
-  public Object[] args;
-  private ProgressDialog loadingDialog; 
+  private Object[] args;
+  private ProgressDialog loadingDialog;
 
 THE_CONSTANTS
 
@@ -57,16 +58,11 @@ THE_CONSTANTS
 
     super.onCreate(arg0);
     
-    if (Script.isInitialized()) {
+    if (Script.isInitialized() && (configBundle == null || !configBundle.containsKey("Startup"))) {
         backgroundCreate();
     	finishCreate();
     } else {
-      if (splash == 0) {
-        loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
-      } else {
-        requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-        setContentView(splash);
-      }
+      showProgress();
       loadingThread.start();
     }
   }
@@ -85,11 +81,7 @@ THE_CONSTANTS
                 try {
                     setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
                 } catch (Exception e) {}
-                if (loadingDialog != null) {
-                    loadingDialog.dismiss();
-                    loadingDialog = null;
-                }
-
+                hideProgress();
 
                 while (!Script.setUpJRuby(RubotoActivity.this)) {
                     try { Thread.sleep(2000); } catch (InterruptedException ie) {}
@@ -98,12 +90,7 @@ THE_CONSTANTS
                 // android.os.Looper.prepare();
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        if (splash == 0) {
-                            loadingDialog = ProgressDialog.show(RubotoActivity.this, null, "Starting...", true, false);
-                        } else {
-                            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-                            setContentView(splash);
-                        }
+                        showProgress();
                     }
                 });
                 backgroundCreate();
@@ -176,11 +163,38 @@ THE_CONSTANTS
         }
     }
 
+    private void showProgress() {
+        if (loadingDialog == null) {
+            Log.i("RUBOTO", "Showing progress");
+            if (splash == 0) {
+        	    try {
+            		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
+        		} catch (Exception e) {
+        		    splash = -1;
+        		}
+    		}
+            if (splash > 0) {
+                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+                setContentView(splash);
+            } else {
+                loadingDialog = ProgressDialog.show(this, null, "Starting...", true, false);
+            }
+        }
+    }
+
+    private void hideProgress() {
+        if (loadingDialog != null) {
+            Log.d("RUBOTO", "Hide progress");
+            loadingDialog.dismiss();
+            loadingDialog = null;
+        }
+    }
+
   /****************************************************************************************
    * 
    *  Generated Methods
    */
 
 THE_METHODS
-}	
 
+}

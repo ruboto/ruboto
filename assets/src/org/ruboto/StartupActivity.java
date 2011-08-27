@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class StartupActivity extends android.app.Activity {
     private int splash = 0;
@@ -22,36 +23,51 @@ public class StartupActivity extends android.app.Activity {
     private BroadcastReceiver receiver;
     private boolean appStarted = false;
 
-    public void onPause() {
-        super.onPause();
-        if (receiver != null) {
-    	    unregisterReceiver(receiver);
-    	    receiver = null;
-        }
-    }
-
     public void onResume() {
         Log.d("RUBOTO", "onResume: ");
         super.onResume();
 
         if(appStarted) {
-            Log.d("RUBOTO", "onResume: CAoo already started!");
+            Log.d("RUBOTO", "onResume: App already started!");
             return;
         }
 
         Log.d("RUBOTO", "onResume: Checking JRuby");
         if (Script.isInitialized()) {
             Log.d("RUBOTO", "Already initialized");
-    	    startRubotoActivity();
+    	    startRubotoActivity(false);
         } else {
             Log.d("RUBOTO", "Not initialized");
             showProgress();
+            receiver = new BroadcastReceiver(){
+                public void onReceive(Context context, Intent intent) {
+                    Log.i(StartupActivity.class.getSimpleName(), "received broadcast: " + intent);
+                    Log.i(StartupActivity.class.getSimpleName(), "URI: " + intent.getData());
+                    if (intent.getData().toString().equals("package:org.ruboto.core")) {
+                        Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_SHORT).show();
+                        showProgress();
+                        if (Script.setUpJRuby(StartupActivity.this)) {
+                            startRubotoActivity(true);
+                        } else {
+                            hideProgress();
+                            Toast.makeText(context,"Failed to initialize Ruboto Core.",Toast.LENGTH_SHORT).show();
+                            try {
+                            TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
+                            textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
+                            } catch (Exception e) {}
+                        }
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addDataScheme("package");
+            registerReceiver(receiver, filter);
             new Thread(new Runnable() {
                 public void run() {
                     final boolean jrubyOk = Script.setUpJRuby(StartupActivity.this);
                     if (jrubyOk) {
                         Log.d("RUBOTO", "onResume: JRuby OK");
-                        startRubotoActivity();
+                        startRubotoActivity(true);
                     } else {
                         runOnUiThread(new Runnable() {
                             public void run() {
@@ -62,18 +78,17 @@ public class StartupActivity extends android.app.Activity {
                                 hideProgress();
                             }
                         });
-                        receiver = new BroadcastReceiver(){
-                            public void onReceive(Context context, Intent intent) {
-                                Log.i(StartupActivity.class.getSimpleName(), "received broadcast: " + intent);
-                                startRubotoActivity();
-                            }
-                        };
-                        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-                        filter.addDataScheme("package");
-                        registerReceiver(receiver, filter);
                     }
                 }
             }).start();
+        }
+    }
+
+    public void onPause() {
+        super.onPause();
+        if (receiver != null) {
+    	    unregisterReceiver(receiver);
+    	    receiver = null;
         }
     }
 
@@ -89,7 +104,7 @@ public class StartupActivity extends android.app.Activity {
         }
     }
 
-    public void startRubotoActivity() {
+    public void startRubotoActivity(boolean startup) {
         if(appStarted) return;
         appStarted = true;
         Log.i("RUBOTO", "Starting next activity");
@@ -97,6 +112,9 @@ public class StartupActivity extends android.app.Activity {
         i.setClassName(getPackageName(), "org.ruboto.RubotoActivity");
         Bundle configBundle = new Bundle();
         configBundle.putString("Script", "startup_activity.rb");
+        if (startup) {
+            configBundle.putBoolean("Startup", true);
+        }
         i.putExtra("RubotoActivity Config", configBundle);
         startActivity(i);
         hideProgress();
