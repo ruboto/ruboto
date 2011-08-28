@@ -1,8 +1,9 @@
 require 'rake'
+require 'ruboto/version'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto-core}
-  s.version = "0.4.0.dev.0"
+  s.version = Ruboto::VERSION
   s.date = Date.today.strftime '%Y-%m-%d'
   s.authors = ["Daniel Jackoway", "Charles Nutter", "Scott Moyer", 'Uwe Kubosch']
   s.email = %q{ruboto@googlegroups.com}

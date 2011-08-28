@@ -101,7 +101,7 @@ module Ruboto
       def generate_subclass_or_interface(params)
         defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => nil, :implements => ""}
         params = defaults.merge(params)
-        params[:package] = verify_package unless params[:package]
+        params[:package] ||= verify_package
 
         class_desc = get_class_or_interface(params[:class] || params[:interface], params[:force])
 

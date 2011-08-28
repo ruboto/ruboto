@@ -149,6 +149,12 @@ EOF
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java"}
         log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"}
+        Dir["src/#{verify_package.gsub('.', '/')}/*.java"].each do |f|
+          if File.read(f) =~ /public class (.*?) extends org.ruboto.Ruboto(Activity|BroadcastReceiver|Service) \{/
+            puts "Regenerating #$1"
+            generate_inheriting_file($2, $1, verify_package)
+          end
+        end
       end
 
       def update_manifest(min_sdk, target, force = false)
