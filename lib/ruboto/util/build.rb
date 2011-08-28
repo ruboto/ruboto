@@ -164,16 +164,14 @@ module Ruboto
       # generate_inheriting_file:
       #   Builds a script based subclass of Activity, Service, or BroadcastReceiver
       #
-      def generate_inheriting_file(klass, name, package, script_name, dest='.', filename = name)
-        with_java = false
-        if with_java
-          file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{filename}.java")
-          text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
-          File.open(file, 'w') do |f|
-            f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
-          end
-          puts "Added file #{file}."
+      def generate_inheriting_file(klass, name, package, script_name = "#{underscore(name)}.rb")
+        dest = '.'
+        file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{name}.java")
+        text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
+        File.open(file, 'w') do |f|
+          f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
         end
+        puts "Added file #{file}."
 
         sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("start.rb", script_name)
         FileUtils.mkdir_p File.join(dest, 'assets/scripts')

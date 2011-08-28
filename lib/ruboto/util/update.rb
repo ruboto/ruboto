@@ -152,7 +152,7 @@ EOF
       end
 
       def update_manifest(min_sdk, target, force = false)
-        log_action("\nAdding activities (StartupActivity, RubotoActivity, and RubotoDialog) and SDK versions to the manifest") do
+        log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
           if sdk_element = verify_manifest.elements['uses-sdk']
             min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
             target ||= sdk_element.attributes["android:targetSdkVersion"]
@@ -162,16 +162,15 @@ EOF
             verify_manifest.elements['application'].attributes['android:largeHeap'] ||= 'true'
           end
           app_element = verify_manifest.elements['application']
-          app_element.elements["activity[@android:label='@string/app_name']"].attributes["android:name"] = "org.ruboto.StartupActivity"
           if app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             puts 'found activity tag'
           else
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
+            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity", 'android:exported' => 'false'}
           end
           if app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
             puts 'found dialog tag'
           else
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", "android:theme" => "@android:style/Theme.Dialog"}
+            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 'android:exported' => 'false', "android:theme" => "@android:style/Theme.Dialog"}
           end
           if sdk_element
             sdk_element.attributes["android:minSdkVersion"] = min_sdk

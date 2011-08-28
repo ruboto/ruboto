@@ -63,7 +63,7 @@ module Ruboto
               def run
                 package = params['package'].value
                 name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
-                activity = params['activity'].value || "StartupActivity"
+                activity = params['activity'].value || "#{name}Activity"
                 path = params['path'].value || package.split('.').last
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
@@ -72,7 +72,7 @@ module Ruboto
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."
-                system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a StartupActivity"
+                system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
                 exit $? unless $? == 0
                 unless File.exists? path
                   puts "Android project was not created"
@@ -99,7 +99,7 @@ module Ruboto
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
-                    generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb"
+                    generate_inheriting_file "Activity", activity, package
                   end
                 end
 
