@@ -7,165 +7,93 @@ import org.ruboto.Script;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-  private String scriptName;
-  private int splash = 0;
-  private String remoteVariable = "";
-  public Object[] args;
-  private ProgressDialog loadingDialog; 
+    private String scriptName;
+    private String remoteVariable = "";
+    private Object[] args;
+    private Bundle configBundle;
 
 THE_CONSTANTS
 
-  private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
+    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
-  public void setCallbackProc(int id, Object obj) {
-    callbackProcs[id] = obj;
-  }
+    public void setCallbackProc(int id, Object obj) {
+        callbackProcs[id] = obj;
+    }
 	
-  public THE_RUBOTO_CLASS setRemoteVariable(String var) {
-    remoteVariable = ((var == null) ? "" : (var + "."));
-    return this;
-  }
-
-  public void setSplash(int a_res){
-    splash = a_res;
-  }
-
-  public void setScriptName(String name){
-    scriptName = name;
-  }
-
-  /****************************************************************************************
-   * 
-   *  Activity Lifecycle: onCreate
-   */
-	
-  @Override
-  public void onCreate(android.os.Bundle arg0) {
-    args = new Object[1];
-    args[0] = arg0;
-
-    android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
-
-    if (configBundle != null && configBundle.containsKey("Theme")) {
-      setTheme(configBundle.getInt("Theme"));
+    public THE_RUBOTO_CLASS setRemoteVariable(String var) {
+        remoteVariable = ((var == null) ? "" : (var + "."));
+        return this;
     }
 
-    super.onCreate(arg0);
-    
-    if (Script.isInitialized()) {
-        backgroundCreate();
-    	finishCreate();
-    } else {
-      if (splash == 0) {
-        loadingDialog = ProgressDialog.show(this, null, "Loading...", true, false);
-      } else {
-        requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-        setContentView(splash);
-      }
-      loadingThread.start();
+    public void setScriptName(String name) {
+        scriptName = name;
     }
-  }
 
-  private final Handler loadingHandler = new Handler();
-  
-    private final Thread loadingThread = new Thread() {
-        public void run(){
-            if (Script.setUpJRuby(RubotoActivity.this)) {
-                backgroundCreate();
-                loadingHandler.post(loadingComplete);
-            } else {
-            	// FIXME(uwe): Improve handling of missing Ruboto Core platform.
+    /****************************************************************************************
+     *
+     *  Activity Lifecycle: onCreate
+     */
+	
+    @Override
+    public void onCreate(Bundle bundle) {
+        args = new Object[1];
+        args[0] = bundle;
 
-                // Display nice screen explaining what is happening.
-                try {
-                    setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
-                } catch (Exception e) {}
-                if (loadingDialog != null) {
-                    loadingDialog.dismiss();
-                    loadingDialog = null;
-                }
+        configBundle = getIntent().getBundleExtra("RubotoActivity Config");
 
-
-                while (!Script.setUpJRuby(RubotoActivity.this)) {
-                    try { Thread.sleep(2000); } catch (InterruptedException ie) {}
-                }
-
-                // android.os.Looper.prepare();
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (splash == 0) {
-                            loadingDialog = ProgressDialog.show(RubotoActivity.this, null, "Starting...", true, false);
-                        } else {
-                            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-                            setContentView(splash);
-                        }
-                    }
-                });
-                backgroundCreate();
-                loadingHandler.post(loadingComplete);
+        if (configBundle != null) {
+            if (configBundle.containsKey("Theme")) {
+                setTheme(configBundle.getInt("Theme"));
             }
-      }
-  };
+            if (configBundle.containsKey("Script")) {
+                if (this.getClass().getName() == RubotoActivity.class.getName()) {
+                    setScriptName(configBundle.getString("Script"));
+                } else {
+                    throw new IllegalArgumentException("Only local Intents may set script name.");
+                }
+            }
+        }
 
-    public void getRubotoCore(View view) {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=org.ruboto.core")));
-        } catch (android.content.ActivityNotFoundException anfe) {
-            try {
-                TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
-                textView.setText("Could not find the Android Market App.  You will have to install Ruboto Core manually.  Bummer!");
-            } catch (Exception e) {}
+        super.onCreate(bundle);
+    
+        if (Script.isInitialized()) {
+            prepareJRuby();
+    	    loadScript();
         }
     }
-  
-  private final Runnable loadingComplete = new Runnable(){
-    public void run(){
-      if (loadingDialog != null) loadingDialog.dismiss();
-      finishCreate();
-      onStart();
-      onResume();
-    }
-  };
 
-    private void backgroundCreate() {
+    // This causes JRuby to initialize and takes while
+    protected void prepareJRuby() {
         Script.put("$activity", this);
         Script.put("$bundle", args[0]);
     }
 
-  private void finishCreate() {
-    android.os.Bundle configBundle = getIntent().getBundleExtra("RubotoActivity Config");
-
-    if (configBundle != null) {
-      setRemoteVariable(configBundle.getString("Remote Variable"));
-      if (configBundle.getBoolean("Define Remote Variable")) {
-        Script.defineGlobalVariable(configBundle.getString("Remote Variable"), this);
-        setRemoteVariable(configBundle.getString("Remote Variable"));
-      }
-      if (configBundle.getString("Initialize Script") != null) {
-        Script.execute(configBundle.getString("Initialize Script"));
-      }
-      Script.execute(remoteVariable + "on_create($bundle)");
-    } else {
-      try {
-          new Script(scriptName).execute();
-          /* TODO(uwe): Add a way to add callbacks from a class or just forward all calls to the instance
-          rubyClassName = this.getClass().getSimpleName();
-          if (Script.get(rubyClassName) != null) {
-  		    rubyInstance = Script.exec(rubyClassName + ".new");
-  		    Script.callMethod(rubyInstance, "on_create", configBundle);
-          }
-          */
-      } catch(IOException e){
-        e.printStackTrace();
-        ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
-      }
+    protected void loadScript() {
+        try {
+            if (scriptName != null) {
+                new Script(scriptName).execute();
+            } else if (configBundle != null && configBundle.getString("Remote Variable") != null) {
+                setRemoteVariable(configBundle.getString("Remote Variable"));
+                if (configBundle.getBoolean("Define Remote Variable")) {
+                    Script.defineGlobalVariable(remoteVariable, this);
+                }
+                if (configBundle.getString("Initialize Script") != null) {
+                    Script.execute(configBundle.getString("Initialize Script"));
+                }
+                Script.execute(remoteVariable + "on_create($bundle)");
+            }
+        } catch(IOException e){
+            e.printStackTrace();
+            ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
+        }
     }
-  }
 
   /****************************************************************************************
    * 
@@ -173,5 +101,5 @@ THE_CONSTANTS
    */
 
 THE_METHODS
-}	
 
+}

@@ -79,6 +79,8 @@ module Ruboto
                   exit_failure!
                 end
                 Dir.chdir path do
+                  FileUtils.rm_f "src/#{package.gsub '.', '/'}/#{activity}.java"
+                  puts "Removed file #{"src/#{package.gsub '.', '/'}/#{activity}"}.java"
                   FileUtils.rm_f 'res/layout/main.xml'
                   puts 'Removed file res/layout/main.xml'
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
@@ -97,7 +99,7 @@ module Ruboto
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
-                    generate_inheriting_file "Activity", activity, package, "#{underscore(activity)}.rb"
+                    generate_inheriting_file "Activity", activity, package
                   end
                 end
 

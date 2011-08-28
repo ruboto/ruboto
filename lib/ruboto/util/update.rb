@@ -165,12 +165,12 @@ EOF
           if app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             puts 'found activity tag'
           else
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity"}
+            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity", 'android:exported' => 'false'}
           end
           if app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
             puts 'found dialog tag'
           else
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", "android:theme" => "@android:style/Theme.Dialog"}
+            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 'android:exported' => 'false', "android:theme" => "@android:style/Theme.Dialog"}
           end
           if sdk_element
             sdk_element.attributes["android:minSdkVersion"] = min_sdk
