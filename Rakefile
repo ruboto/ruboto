@@ -51,7 +51,7 @@ namespace :platform do
   desc 'Generate a Ruboto Core platform release apk'
   task :release => PLATFORM_RELEASE_APK
 
-  file PLATFORM_RELEASE_APK do
+  file PLATFORM_RELEASE_APK => PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
       sh 'rake release'
     end
