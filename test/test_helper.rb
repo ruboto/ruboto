@@ -92,9 +92,9 @@ class Test::Unit::TestCase
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
     if with_psych || excluded_stdlibs
-      system 'rake uninstall_platform'
+      system 'rake platform:uninstall'
     else
-      system 'rake install_platform'
+      system 'rake platform:install'
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
