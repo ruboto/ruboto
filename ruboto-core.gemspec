@@ -1,5 +1,5 @@
 require 'rake'
-require 'ruboto/version'
+require 'lib/ruboto/version'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto-core}
