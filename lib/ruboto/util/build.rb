@@ -2,6 +2,8 @@ module Ruboto
   module Util
     module Build
       include Verify
+      SCRIPTS_DIR = 'src'
+      
       ###########################################################################
       #
       # Build Subclass or Interface:
@@ -174,8 +176,8 @@ module Ruboto
         puts "Added file #{file}."
 
         sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("start.rb", script_name)
-        FileUtils.mkdir_p File.join(dest, 'assets/scripts')
-        script_file = File.expand_path("assets/scripts/#{script_name}", dest)
+        FileUtils.mkdir_p File.join(dest, SCRIPTS_DIR)
+        script_file = File.expand_path("#{SCRIPTS_DIR}/#{script_name}", dest)
         File.open script_file, "a" do |f|
           f << sample_source
         end

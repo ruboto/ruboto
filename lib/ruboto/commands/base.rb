@@ -91,6 +91,7 @@ module Ruboto
                 Dir.chdir root do
                   update_test true
                   update_assets
+                  update_ruboto true
                   update_icons true
                   update_classes true
                   update_jruby true, params['with-psych'].value if params['with-jruby'].value || params['with-psych'].value
@@ -138,7 +139,7 @@ module Ruboto
 
               option("script_name"){
                 argument :required
-                description "name of the ruby script in assets/scripts/ that this class will execute. should end in .rb. optional"
+                description "name of the ruby script that this class will execute. Should end in .rb.  Optional."
               }
 
               option("name"){
@@ -344,6 +345,7 @@ module Ruboto
                 force = params['force'].value
                 update_test force
                 update_assets
+                update_ruboto force
                 update_icons force
                 update_classes force
                 update_jruby force, params['with-psych'].value
