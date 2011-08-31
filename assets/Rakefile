@@ -15,6 +15,7 @@ BUNDLE_PATH        = File.expand_path 'tmp/bundle'
 MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
 GEM_FILE           = File.expand_path('Gemfile.apk')
+GEM_LOCK_FILE      = File.expand_path('Gemfile.apk.lock')
 APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
 JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
@@ -145,13 +146,13 @@ task :update_scripts do
   Rake::Task['install'].invoke
   puts "Pushing files to apk #{data_dir_name} file area."
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
-  Dir.chdir('assets') do
-    Dir["scripts/**/*"].each do |asset_file|
-      next if File.directory? asset_file
-      next if File.mtime(asset_file) < last_update
-      next if asset_file =~ /~$/
-      print "#{asset_file}: "; $stdout.flush
-      `adb push #{asset_file} #{data_dir}/#{asset_file}`
+  Dir.chdir('src') do
+    Dir["**/*.rb"].each do |script_file|
+      next if File.directory? script_file
+      next if File.mtime(script_file) < last_update
+      next if script_file =~ /~$/
+      print "#{script_file}: "; $stdout.flush
+      `adb push #{script_file} #{data_dir}/#{script_file}`
     end
   end
   mark_update
@@ -196,9 +197,10 @@ namespace :test do
 end
 
 file GEM_FILE
+file GEM_LOCK_FILE
 
 desc 'Generate bundle jar from Gemfile'
-file BUNDLE_JAR => GEM_FILE do
+file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
 

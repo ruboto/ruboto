@@ -135,6 +135,15 @@ EOF
         %w{.gitignore Rakefile assets res/layout test}.each do |f|
           log_action(f) {copier.copy f}
         end
+
+        # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
+        old_scripts_dir = 'assets/scripts'
+        if File.exists? old_scripts_dir
+          FileUtils.mv Dir["#{old_scripts_dir}/**/*"], SCRIPTS_DIR
+          FileUtils.rm_rf old_scripts_dir
+        end
+        # FIXME end
+        
       end
 
       def update_icons(force = nil)
@@ -195,8 +204,8 @@ EOF
       def update_ruboto(force=nil)
         verify_manifest
 
-        from = File.expand_path(Ruboto::GEM_ROOT + "/assets/assets/scripts/ruboto.rb")
-        to = File.expand_path("./assets/scripts/ruboto.rb")
+        from = File.expand_path(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto.rb")
+        to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
 
         from_text = File.read(from)
         to_text = File.read(to) if File.exists?(to)

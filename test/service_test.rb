@@ -2,6 +2,8 @@ require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
 class ServiceTest < Test::Unit::TestCase
+  SRC_DIR ="#{APP_DIR}/src"
+
   def setup
     generate_app
   end
@@ -13,7 +15,7 @@ class ServiceTest < Test::Unit::TestCase
   def test_service_startup
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Service --name RubotoTestService"
-      service_filename = "#{APP_DIR}/assets/scripts/ruboto_test_service.rb"
+      service_filename = "#{SRC_DIR}/ruboto_test_service.rb"
       assert File.exists? service_filename
       File.open(service_filename, 'w'){|f| f << <<EOF}
 require 'ruboto'
@@ -34,7 +36,7 @@ $service.handle_start_command do
 end
 EOF
 
-      activity_filename = "#{APP_DIR}/assets/scripts/ruboto_test_app_activity.rb"
+      activity_filename = "#{SRC_DIR}/ruboto_test_app_activity.rb"
       s        = File.read(activity_filename)
       s.gsub!(/^(end)$/, "
   startService(android.content.Intent.new($activity.application_context, $package.RubotoTestService.java_class))

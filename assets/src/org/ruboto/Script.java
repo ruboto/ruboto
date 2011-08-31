@@ -38,6 +38,7 @@ public class Script {
     private String contents = null;
 
     public static final String TAG = "RUBOTO"; // for logging
+    private static String JRUBY_VERSION;
 
     /*************************************************************************************************
      * 
@@ -94,6 +95,12 @@ public class Script {
             }
 
             try {
+                try {
+                    JRUBY_VERSION = (String) Class.forName("org.jruby.runtime.Constants", true, classLoader).getDeclaredField("VERSION").get(String.class);
+                } catch (java.lang.NoSuchFieldException nsfex) {
+                    nsfex.printStackTrace();
+                    JRUBY_VERSION = "ERROR";
+                }
                 ruby = scriptingContainerClass.getConstructor().newInstance();
                 Class<?> compileModeClass = Class
                         .forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
@@ -118,7 +125,11 @@ public class Script {
         	        Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
         	        setErrorMethod.invoke(ruby, out);
                 }
-                copyScriptsIfNeeded(appContext);
+                String extraScriptsDir = scriptsDirName(appContext);
+                Log.i(TAG, "Checking scripts in " + extraScriptsDir);
+                if (configDir(extraScriptsDir)) {
+                    Log.i(TAG, "Added extra scripts path: " + extraScriptsDir);
+                }
                 initialized = true;
                 return true;
             } catch (ClassNotFoundException e) {
@@ -230,11 +241,11 @@ public class Script {
     public static void setDir(String dir) {
     	scriptsDir = dir;
     	scriptsDirFile = new File(dir);
-		if (ruby != null) {
+        if (ruby != null) {
             Log.d(TAG, "Changing JRuby current directory to " + scriptsDir);
             callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
         }
-	}
+    }
     
     public static String getDir() {
     	return scriptsDir;
@@ -246,7 +257,7 @@ public class Script {
 
     public static Boolean configDir(String noSdcard) {
         setDir(noSdcard);
-		Method getLoadPathsMethod;
+        Method getLoadPathsMethod;
         List<String> loadPath = callScriptingContainerMethod(List.class, "getLoadPaths");
         
         if (!loadPath.contains(noSdcard)) {
@@ -332,35 +343,36 @@ public class Script {
     }
 
     private static String scriptsDirName(Context context) {
-		File toFile = null;
+        File storageDir = null;
         if (isDebugBuild(context)) {
 
-        	// FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
-            // Log.i(TAG, "JRuby VERSION: " + org.jruby.runtime.Constants.VERSION);
-            // if (!org.jruby.runtime.Constants.VERSION.equals("1.5.6") && !org.jruby.runtime.Constants.VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
-            //     ruby.put("script_context", context);
-            //     toFile = (File) exec("script_context.getExternalFilesDir(nil)");
-            // } else {
-                toFile = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
-                Log.e(TAG, "Calculated path to sdcard the old way: " + toFile);
-            // }
+            // FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
+            Log.i(TAG, "JRuby VERSION: " + JRUBY_VERSION);
+            if (!JRUBY_VERSION.equals("1.5.6") && !JRUBY_VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
+                put("script_context", context);
+                storageDir = (File) exec("script_context.getExternalFilesDir(nil)");
+            } else {
+                storageDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
+                Log.e(TAG, "Calculated path to sdcard the old way: " + storageDir);
+            }
             // FIXME end
 
-	        if (toFile == null || (!toFile.exists() && !toFile.mkdirs())) {
-		    	Log.e(TAG,
+            if (storageDir == null || (!storageDir.exists() && !storageDir.mkdirs())) {
+                Log.e(TAG,
                         "Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
-	            toFile = context.getFilesDir();
+                storageDir = context.getFilesDir();
             }
-		} else {
-            toFile = context.getFilesDir();
+        } else {
+            storageDir = context.getFilesDir();
         }
-		String to = toFile.getAbsolutePath() + "/scripts";
-		return to;
+        return storageDir.getAbsolutePath() + "/scripts";
     }
 
     private static void copyScriptsIfNeeded(Context context) {
         String to = scriptsDirName(context);
-		Log.i(TAG, "Checking scripts in " + to);
+		Log.i(TAG, "Checking scripts in "
+
+		+ to);
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
 			Log.i(TAG, "Copying scripts to " + to);
@@ -432,7 +444,7 @@ public class Script {
 
     public String execute() throws IOException {
     	setScriptFilename(name);
-        return Script.execute(getContents());
+        return Script.execute("load '" + name + "'");
     }
 
 	public static void callMethod(Object receiver, String methodName, Object[] args) {
