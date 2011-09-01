@@ -172,9 +172,9 @@ The main thing Ruboto offers you is the ability to write Ruby scripts to define 
 
 Here's how it works:
 
-First of all, your scripts are found in `assets/scripts/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method handle_foo_bar on the Android object. In your scripts, they are defined as `$class_name`. That was really abstract, so here's an example. 
+First of all, your scripts are found in `src/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method handle_foo_bar on the Android object. In your scripts, they are defined as `$class_name`. That was really abstract, so here's an example.
 
-You generate an app with the option `--activity FooActivity`, which means that ruboto will generate a FooActivity for you. So you open `assets/scripts/foo_activity.rb` in your favorite text editor. If you want an activity that does nothing but Log when it gets launched and when it gets destroyed (in the onCreate and onPause methods). You want your script to look like this:
+You generate an app with the option `--activity FooActivity`, which means that ruboto will generate a FooActivity for you. So you open `src/foo_activity.rb` in your favorite text editor. If you want an activity that does nothing but Log when it gets launched and when it gets destroyed (in the onCreate and onPause methods). You want your script to look like this:
 
     require 'ruboto.rb' #scripts will not work without doing this
     $activity.handle_create do |bundle|
@@ -198,7 +198,7 @@ Each class has only one method that you can nest other calls inside of (ie. what
 
 The arguments passed to the block you give `handle_` methods are the same as the arguments that the java methods take. Consult the Android documentation.
 
-Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-core/blob/master/assets/assets/scripts/ruboto.rb) where everything is defined.
+Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-core/blob/master/assets/src/ruboto.rb) where everything is defined.
 
 Testing
 -------

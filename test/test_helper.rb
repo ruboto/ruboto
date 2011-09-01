@@ -13,13 +13,13 @@ module RubotoTest
     gem_spec = Gem.searcher.find('jruby-jars')
   end
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-  JRUBY_JARS_VERSION  = gem_spec.version
+  JRUBY_JARS_VERSION = gem_spec.version
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 
-  PACKAGE        = 'org.ruboto.test_app'
-  APP_NAME       = 'RubotoTestApp'
-  TMP_DIR        = File.join PROJECT_DIR, 'tmp'
-  APP_DIR        = File.join TMP_DIR, APP_NAME
+  PACKAGE = 'org.ruboto.test_app'
+  APP_NAME = 'RubotoTestApp'
+  TMP_DIR = File.join PROJECT_DIR, 'tmp'
+  APP_DIR = File.join TMP_DIR, APP_NAME
   ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-7'
 
   VERSION_TO_API_LEVEL = {
@@ -28,7 +28,7 @@ module RubotoTest
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
       '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13'
   }
-  
+
   def self.version_from_device
     puts "Reading OS version from device/emulator"
     system "adb wait-for-device"
@@ -113,8 +113,8 @@ class Test::Unit::TestCase
           android_home = File.dirname(File.dirname(`which adb`))
         end
         Dir.chdir APP_DIR do
-          File.open('local.properties', 'w'){|f| f.puts "sdk.dir=#{android_home}"}
-          File.open('test/local.properties', 'w'){|f| f.puts "sdk.dir=#{android_home}"}
+          File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
+          File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
           FileUtils.touch "libs/psych.jar" if with_psych
           exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
           system "#{RUBOTO_CMD} update app"
@@ -149,9 +149,13 @@ class Test::Unit::TestCase
   end
 
   def run_app_tests
-    Dir.chdir "#{APP_DIR}/test" do
-      system 'rake test:quick'
-      assert_equal 0, $?, "tests failed with return code #$?"
+    if ['android-7', 'android-8'].include? ANDROID_OS
+      puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
+    else
+      Dir.chdir "#{APP_DIR}/test" do
+        system 'rake test:quick'
+        assert_equal 0, $?, "tests failed with return code #$?"
+      end
     end
   end
 
@@ -167,7 +171,7 @@ class Test::Unit::TestCase
 
   def exclude_stdlibs(excluded_stdlibs)
     puts "Adding ruboto.yml: #{excluded_stdlibs.join(' ')}"
-    File.open('ruboto.yml', 'w'){|f| f << YAML.dump({:excluded_stdlibs => excluded_stdlibs})}
+    File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:excluded_stdlibs => excluded_stdlibs}) }
   end
 
 end
