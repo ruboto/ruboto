@@ -143,7 +143,7 @@ module Ruboto
 
         hash = {:package => "org.ruboto"}
         %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
-        hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").push("onReceive").join(",")
+        hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").join(",")
 
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver android.view.View).each do |i|
           name = i.split(".")[-1]

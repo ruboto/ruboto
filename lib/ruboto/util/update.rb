@@ -163,6 +163,21 @@ EOF
             puts "Regenerating #$1"
             generate_inheriting_file($2, $1, verify_package)
           end
+
+          # FIXME(uwe): Remove when we stop supporting upgrading from ruboto-core 0.3.3 and older
+          script_content = File.read(f)
+          if script_content =~ /public class .*? extends org.ruboto.RubotoBroadcastReceiver \{/
+            if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/
+              puts "Putting receiver script in a block"
+              File.open(f, 'w') do |of|
+                f.puts '$broadcast_receiver.handle_receive do |context, intent|'
+                f << script_content
+                f.puts 'end'
+              end
+            end
+          end
+          # FIXME end
+          
         end
       end
 

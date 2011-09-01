@@ -7,6 +7,8 @@ import org.ruboto.Script;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 public class InheritingActivity extends org.ruboto.RubotoActivity {
     private int splash = 0;
     private ProgressDialog loadingDialog;
+    private boolean dialogCancelled = false;
     private BroadcastReceiver receiver;
     private boolean appStarted = false;
 
@@ -82,6 +85,14 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
     	    receiver = null;
         }
         super.onPause();
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        if (dialogCancelled) {
+            System.runFinalizersOnExit(true);
+            System.exit(0);
+        }
     }
 
     private void initJRuby(final boolean firstTime) {
@@ -150,7 +161,13 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
                 requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
-                loadingDialog = ProgressDialog.show(this, null, "Starting...", true, false);
+                loadingDialog = ProgressDialog.show(this, null, "Starting...", true, true);
+                loadingDialog.setOnCancelListener(new OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        dialogCancelled = true;
+                        finish();
+                    }
+                });
             }
         }
     }
