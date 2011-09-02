@@ -162,6 +162,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
                 setContentView(splash);
             } else {
                 loadingDialog = ProgressDialog.show(this, null, "Starting...", true, true);
+                loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setOnCancelListener(new OnCancelListener() {
                     public void onCancel(DialogInterface dialog) {
                         dialogCancelled = true;
