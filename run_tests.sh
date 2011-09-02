@@ -26,6 +26,7 @@ elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export PATH=$JRUBY_HOME/bin:$PATH
 fi
 unset GEM_HOME
+gem install bundler
 bundle install --system
 if [ "$JRUBY_JARS_VERSION" != "" ] ; then
   gem install -v "$JRUBY_JARS_VERSION" jruby-jars
