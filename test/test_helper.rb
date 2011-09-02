@@ -153,7 +153,7 @@ class Test::Unit::TestCase
       puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
     else
       Dir.chdir "#{APP_DIR}/test" do
-        system 'rake test:quick'
+        system 'rake test'
         assert_equal 0, $?, "tests failed with return code #$?"
       end
     end
