@@ -102,9 +102,8 @@ public class Script {
                     JRUBY_VERSION = "ERROR";
                 }
                 ruby = scriptingContainerClass.getConstructor().newInstance();
-                Class<?> compileModeClass = Class
-                        .forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
-                callScriptingContainerMethod(Void.class, "setCompileMode", compileModeClass.getEnumConstants()[2]);
+                Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
+                callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
 
                 // callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
         	    Method setClassLoaderMethod = ruby.getClass().getMethod("setClassLoader", ClassLoader.class);
@@ -136,7 +135,7 @@ public class Script {
                 // FIXME(uwe): ScriptingContainer not found in the platform APK...
                 e.printStackTrace();
             } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
+                Log.e(TAG, "IllegalArgumentException starting JRuby: " + e.getMessage());
                 e.printStackTrace();
             } catch (SecurityException e) {
                 // TODO Auto-generated catch block

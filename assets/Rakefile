@@ -80,7 +80,7 @@ end
 
 desc 'Start the emulator with larger disk'
 task :emulator do
-  system 'emulator -partition-size 1024 -avd Android_3.0'
+  sh 'emulator -partition-size 1024 -avd Android_3.0'
 end
 
 task :start do
@@ -182,8 +182,8 @@ end
 task :test => :uninstall do
   Dir.chdir('test') do
     puts 'Running tests'
-    system "adb uninstall #{package}.tests"
-    system "ant run-tests"
+    sh "adb uninstall #{package}.tests"
+    sh "ant run-tests"
   end
 end
 
