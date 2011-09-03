@@ -81,7 +81,7 @@ def setup_activity
     def start_ruboto_activity(remote_variable, klass=RubotoActivity, theme=nil, &block)
       $activity_init_block = block
 
-      if @initialized or self == $activity
+      if @initialized or (self == $activity && !$activity.kind_of?(RubotoActivity))
         b = Java::android.os.Bundle.new
         b.putInt("Theme", theme) if theme
         b.putString("Remote Variable", remote_variable)
