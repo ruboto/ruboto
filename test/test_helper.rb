@@ -7,13 +7,18 @@ module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
+  # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
   if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
     gem_spec = Gem::Specification.find_by_path 'jruby-jars'
   else
     gem_spec = Gem.searcher.find('jruby-jars')
   end
+  # FIXME end
+  
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
   JRUBY_JARS_VERSION = gem_spec.version
+
+  # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 
   PACKAGE = 'org.ruboto.test_app'
@@ -95,6 +100,10 @@ class Test::Unit::TestCase
       system 'rake platform:uninstall'
     else
       system 'rake platform:install'
+    end
+    if $? != 0
+      FileUtils.rm_rf 'tmp/RubotoCore'
+      fail 'Error (un)installing RubotoCore'
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
