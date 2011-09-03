@@ -82,12 +82,14 @@ THE_CONSTANTS
             } else if (configBundle != null && configBundle.getString("Remote Variable") != null) {
                 setRemoteVariable(configBundle.getString("Remote Variable"));
                 if (configBundle.getBoolean("Define Remote Variable")) {
-                    Script.defineGlobalVariable(remoteVariable, this);
+                    Script.put(remoteVariable, this);
                 }
                 if (configBundle.getString("Initialize Script") != null) {
                     Script.execute(configBundle.getString("Initialize Script"));
                 }
                 Script.execute(remoteVariable + "on_create($bundle)");
+            } else {
+                throw new RuntimeException("Neither script name nor remote variable was set.");
             }
         } catch(IOException e){
             e.printStackTrace();
