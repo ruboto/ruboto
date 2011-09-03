@@ -38,6 +38,11 @@ task :test do
 end
 
 namespace :platform do
+  desc 'Remove Ruboto Core platform project'
+  task :clean do
+    FileUtils.rm_rf PLATFORM_PROJECT
+  end
+
   desc 'Generate the Ruboto Core platform project'
   task :project => PLATFORM_PROJECT
 
