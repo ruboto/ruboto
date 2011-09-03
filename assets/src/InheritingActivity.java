@@ -52,7 +52,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
         Log.d("RUBOTO", "onResume: Checking JRuby");
         if (Script.isInitialized()) {
             Log.d("RUBOTO", "Already initialized");
-    	    startRubotoActivity();
+    	    fireRubotoActivity();
         } else {
             Log.d("RUBOTO", "Not initialized");
             showProgress();
@@ -104,7 +104,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
                     prepareJRuby();
                     runOnUiThread(new Runnable() {
                         public void run() {
-                            startRubotoActivity();
+                            fireRubotoActivity();
                         }
                     });
                 } else {
@@ -144,7 +144,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
         }
     }
 
-    private void startRubotoActivity() {
+    private void fireRubotoActivity() {
         if(appStarted) return;
         appStarted = true;
         Log.i("RUBOTO", "Starting activity");
