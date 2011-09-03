@@ -5,6 +5,18 @@ PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
 MANIFEST_FILE = "AndroidManifest.xml"
 
+# FIXME(uwe):  Remove when we stop supporting JRuby 1.5.6
+if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
+  gem_spec = Gem::Specification.find_by_path 'jruby-jars'
+else
+  gem_spec = Gem.searcher.find('jruby-jars')
+end
+raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
+JRUBY_JARS_VERSION = gem_spec.version
+ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
+# FIXME end
+
+
 task :default => :gem
 
 desc "Generate a gem"
@@ -30,7 +42,7 @@ namespace :platform do
   task :project => PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
-    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --with-psych --path #{PLATFORM_PROJECT}"
+    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby #{'--with-psych' unless ON_JRUBY_JARS_1_5_6} --path #{PLATFORM_PROJECT}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '2'
