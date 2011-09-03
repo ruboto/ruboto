@@ -364,7 +364,16 @@ module Ruboto
 
           # just running `ruboto`
           def run
-            version = Gem.searcher.find('ruboto').version.version
+            # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
+            if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
+              gem_spec = Gem::Specification.find_by_path 'ruboto'
+            else
+              gem_spec = Gem.searcher.find('ruboto')
+            end
+            # FIXME end
+
+            version = gem_spec.version.version
+
             if params['version'].value
               puts version
             else
