@@ -198,7 +198,7 @@ public class Script {
     public static String execute(String code) {
         Object result = exec(code);
         try {
-			return result != null ? callMethod(result, "inspect", String.class) : "null";
+			return result != null ? result.toString() : "null";
         } catch (RuntimeException re) {
             Log.e(TAG, "RuntimeException calling 'inspect'.  Should not happen!  result: " + result
                     + ", result.getClass(): " + result.getClass());
