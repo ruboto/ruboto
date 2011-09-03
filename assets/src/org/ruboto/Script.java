@@ -196,18 +196,22 @@ public class Script {
     }
 
     public static String execute(String code) {
-        try {
-        	Object result = exec(code);
-			return result != null ? callMethod(result, "inspect", String.class) : "null";
-        } catch (RuntimeException re) {
-        	// System.err.println(re.getMessage());
-			re.printStackTrace();
-            return null;
-        }
+        Object result = exec(code);
+        return result != null ? result.toString() : "null";
     }
 
 	public static Object exec(String code) {
-        return callScriptingContainerMethod(Object.class, "runScriptlet", code);
+        // return callScriptingContainerMethod(Object.class, "runScriptlet", code);
+        try {
+            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+            return runScriptletMethod.invoke(ruby, code);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw ((RuntimeException) ite.getCause());
+        }
 	}
 
     public static void defineGlobalConstant(String name, Object object) {
@@ -479,7 +483,7 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
+            throw (RuntimeException) ite.getCause();
         }
 	}
 
