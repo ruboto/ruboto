@@ -35,10 +35,24 @@ public class Script {
     private static Object ruby;
     private static boolean initialized = false;
 
-    private String contents = null;
+    private static String localContextScope = "SINGLETON";
+    private static String localVariableBehavior = "TRANSIENT";
 
     public static final String TAG = "RUBOTO"; // for logging
     private static String JRUBY_VERSION;
+
+    /*************************************************************************************************
+     * 
+     * Static Methods: ScriptingContainer config
+     */
+
+    public static void setLocalContextScope(String val) {
+        localContextScope = val;
+    }
+
+    public static void setLocalVariableBehavior(String val) {
+        localVariableBehavior = val;
+    }
 
     /*************************************************************************************************
      * 
@@ -101,7 +115,15 @@ public class Script {
                     nsfex.printStackTrace();
                     JRUBY_VERSION = "ERROR";
                 }
-                ruby = scriptingContainerClass.getConstructor().newInstance();
+
+                Class scopeClass = Class.forName("org.jruby.embed.LocalContextScope", true, scriptingContainerClass.getClassLoader());
+                Class behaviorClass = Class.forName("org.jruby.embed.LocalVariableBehavior", true, scriptingContainerClass.getClassLoader());
+
+                ruby = scriptingContainerClass
+                         .getConstructor(scopeClass, behaviorClass)
+                         .newInstance(Enum.valueOf(scopeClass, localContextScope), 
+                                      Enum.valueOf(behaviorClass, localVariableBehavior));
+
                 Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
                 callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
 
@@ -187,7 +209,9 @@ public class Script {
 
     public static String execute(String code) {
         Object result = exec(code);
-        return result != null ? result.toString() : "null";
+        return result != null ? result.toString() : "nil";
+// TODO: Why is callMethod returning "main"?
+//		return result != null ? callMethod(result, "inspect", String.class) : "null"; 
     }
 
 	public static Object exec(String code) {
@@ -363,9 +387,8 @@ public class Script {
 
     private static void copyScriptsIfNeeded(Context context) {
         String to = scriptsDirName(context);
-		Log.i(TAG, "Checking scripts in "
+		Log.i(TAG, "Checking scripts in " + to);
 
-		+ to);
         /* the if makes sure we only do this the first time */
         if (configDir(to)) {
 			Log.i(TAG, "Copying scripts to " + to);
@@ -380,12 +403,7 @@ public class Script {
     */
 
     public Script(String name) {
-        this(name, null);
-    }
-
-    public Script(String name, String contents) {
         this.name = name;
-        this.contents = contents;
     }
 
     /*************************************************************************************************
@@ -403,7 +421,6 @@ public class Script {
 
     public Script setName(String name) {
         this.name = name;
-        // TODO: Other states possible
         return this;
     }
 
@@ -418,8 +435,7 @@ public class Script {
             source.append(line).append("\n");
         }
         buffer.close();
-        contents = source.toString();
-        return contents;
+        return source.toString();
     }
 
     /*************************************************************************************************
@@ -436,7 +452,7 @@ public class Script {
     }
 
     public String execute() throws IOException {
-    	setScriptFilename(name);
+    	Script.setScriptFilename(name);
         return Script.execute("load '" + name + "'");
     }
 
