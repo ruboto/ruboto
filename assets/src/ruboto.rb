@@ -260,17 +260,19 @@ end
 # Ruboto Set up for all app types (Activity, Service, BroadcastReceiver)
 #
 
-def ruboto_setup(klass, init_method="create")
+def ruboto_setup(klass, init_method = true)
   # Setup ability to handle callbacks
   ruboto_allow_handlers(klass)
 
-  klass.class_eval do
-    eval %Q{
-      def handle_#{init_method}(&block)
+  if init_method
+    klass.class_eval do
+      eval %Q{
+      def handle_create(&block)
         instance_exec &block
         #{klass == Java::org.ruboto.RubotoActivity ? "on_create(nil)" : ""}
       end
     }
+    end
   end
 end
 
@@ -616,4 +618,4 @@ ruboto_setup(RubotoService)
 
 # setup broadcast receiver support
 java_import "org.ruboto.RubotoBroadcastReceiver"
-ruboto_setup(RubotoBroadcastReceiver, "receive")
+ruboto_setup(RubotoBroadcastReceiver, false)
