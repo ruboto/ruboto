@@ -15,5 +15,5 @@ Gem::Specification.new do |s|
   s.executables = ['ruboto']
   s.default_executable = 'ruboto'
   s.add_dependency('main', '~>4.7', '>=4.7.2')
-  s.add_dependency('jruby-jars', '>=1.5.6')
+  # s.add_dependency('jruby-jars', '>=1.5.6')
 end
