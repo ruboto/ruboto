@@ -9,7 +9,8 @@
 #
 #######################################################
 
-$RUBOTO_VERSION = 8
+require 'ruboto/version'
+$RUBOTO_VERSION = 9
 
 def confirm_ruboto_version(required_version, exact=true)
   raise "requires $RUBOTO_VERSION=#{required_version} or greater, current version #{$RUBOTO_VERSION}" if $RUBOTO_VERSION < required_version and not exact

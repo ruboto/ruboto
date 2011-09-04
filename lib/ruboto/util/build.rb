@@ -175,21 +175,25 @@ module Ruboto
         end
         puts "Added file #{file}."
 
-        sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("start.rb", script_name)
-        FileUtils.mkdir_p File.join(dest, SCRIPTS_DIR)
         script_file = File.expand_path("#{SCRIPTS_DIR}/#{script_name}", dest)
-        File.open script_file, "a" do |f|
-          f << sample_source
+        if !File.exists? script_file
+          sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("start.rb", script_name)
+          FileUtils.mkdir_p File.join(dest, SCRIPTS_DIR)
+          File.open script_file, "a" do |f|
+            f << sample_source
+          end
+          puts "Added file #{script_file}."
         end
-        puts "Added file #{script_file}."
 
-        sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name)
-        FileUtils.mkdir_p File.join(dest, 'test/assets/scripts')
         test_file = File.expand_path("test/assets/scripts/#{script_name.chomp('.rb')}_test.rb", dest)
-        File.open test_file, "a" do |f|
-          f << sample_test_source
+        if !File.exists? test_file
+          sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name)
+          FileUtils.mkdir_p File.join(dest, 'test/assets/scripts')
+          File.open test_file, "a" do |f|
+            f << sample_test_source
+          end
+          puts "Added file #{test_file}."
         end
-        puts "Added file #{test_file}."
       end
     end
   end
