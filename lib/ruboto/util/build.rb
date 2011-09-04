@@ -170,10 +170,11 @@ module Ruboto
         dest = '.'
         file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{name}.java")
         text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
+        file_existed = File.exists?(file)
         File.open(file, 'w') do |f|
           f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
         end
-        puts "Added file #{file}."
+        puts "#{file_existed ? 'Updated' : 'Added'} file #{file}."
 
         script_file = File.expand_path("#{SCRIPTS_DIR}/#{script_name}", dest)
         if !File.exists? script_file
