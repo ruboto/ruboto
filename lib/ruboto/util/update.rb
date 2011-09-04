@@ -160,24 +160,26 @@ EOF
         log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"}
         Dir["src/#{verify_package.gsub('.', '/')}/*.java"].each do |f|
           if File.read(f) =~ /public class (.*?) extends org.ruboto.Ruboto(Activity|BroadcastReceiver|Service) \{/
-            puts "Regenerating #$1"
-            generate_inheriting_file($2, $1, verify_package)
-          end
+            subclass_name, class_name = $1, $2
+            puts "Regenerating #{subclass_name}"
+            generate_inheriting_file(class_name, subclass_name, verify_package)
 
-          # FIXME(uwe): Remove when we stop supporting upgrading from ruboto-core 0.3.3 and older
-          script_content = File.read(f)
-          if script_content =~ /public class .*? extends org.ruboto.RubotoBroadcastReceiver \{/
-            if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/
-              puts "Putting receiver script in a block"
-              File.open(f, 'w') do |of|
-                f.puts '$broadcast_receiver.handle_receive do |context, intent|'
-                f << script_content
-                f.puts 'end'
+            # FIXME(uwe): Remove when we stop supporting upgrading from ruboto-core 0.3.3 and older
+            if class_name == 'BroadcastReceiver'
+              script_file = File.expand_path("#{SCRIPTS_DIR}/#{underscore(subclass_name)}.rb")
+              script_content = File.read(script_file)
+              if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/
+                puts "Putting receiver script in a block in #{script_file}"
+                File.open(script_file, 'w') do |of|
+                  of.puts '$broadcast_receiver.handle_receive do |context, intent|'
+                  of << script_content
+                  of.puts 'end'
+                end
               end
             end
+            # FIXME end
+
           end
-          # FIXME end
-          
         end
       end
 
