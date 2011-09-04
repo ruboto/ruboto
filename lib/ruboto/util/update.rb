@@ -8,15 +8,15 @@ module Ruboto
       #
       def update_test(force = nil)
         root = Dir.getwd
-        if force || !File.exists?("#{root}/test")
+        if !File.exists?("#{root}/test")
           name = verify_strings.root.elements['string'].text.gsub(' ', '')
           puts "\nGenerating Android test project #{name} in #{root}..."
           system "android create test-project -m #{root} -n #{name}Test -p #{root}/test"
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
-          # TODO(uwe): Run "android update test"
-          puts "Test project already exists.  Use --force to overwrite."
+          puts "\nUpdating Android test project #{name} in #{root}..."
+          system "android update test-project -m #{root} -p #{root}/test"
         end
 
         Dir.chdir File.join(root, 'test') do
@@ -217,28 +217,17 @@ EOF
       end
 
       def update_ruboto(force=nil)
-        verify_manifest
-
-        from = File.expand_path(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto.rb")
-        to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
-
-        from_text = File.read(from)
-        to_text = File.read(to) if File.exists?(to)
-
-        unless force
-          puts "New version: #{from_text[/\$RUBOTO_VERSION = (\d+)/, 1]}"
-          puts "Old version: #{to_text ? to_text[/\$RUBOTO_VERSION = (\d+)/, 1] : 'none'}"
-
-          if from_text[/\$RUBOTO_VERSION = (\d+)/, 1] == to_text[/\$RUBOTO_VERSION = (\d+)/, 1]
-            puts "The ruboto.rb version has not changed. Use --force to force update."
-            return false
-          end
-        end
-
         log_action("Copying ruboto.rb") do
-          File.open(to, 'w') {|f| f << from_text}
+          from = File.expand_path(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto.rb")
+          to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
+          FileUtils.cp from, to
         end
-        true
+        log_action("Copying ruboto/version.rb") do
+          from = File.expand_path(Ruboto::GEM_ROOT + "/lib/ruboto/version.rb")
+          to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
+          FileUtils.mkdir_p File.dirname(to)
+          FileUtils.cp from, to
+        end
       end
 
       def reconfigure_jruby_libs(jruby_core_version, with_psych=nil)
@@ -252,8 +241,9 @@ EOF
         jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         Dir.chdir 'libs' do
           log_action("Removing unneeded classes from #{jruby_core}") do
-            Dir.mkdir "tmp"
-            Dir.chdir "tmp" do
+            FileUtils.rm_rf 'tmp'
+            Dir.mkdir 'tmp'
+            Dir.chdir 'tmp' do
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
               File.delete jruby_core
