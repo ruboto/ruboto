@@ -466,7 +466,7 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
+            throw (RuntimeException)(ite.getCause());
         }
     }
 

@@ -3,7 +3,7 @@ require 'ruboto'
 ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
 
 $activity.handle_create do |bundle|
-  setTitle 'This is the Title'
+  setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map{|s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
   setup_content do
     linear_layout :orientation => LinearLayout::VERTICAL do
