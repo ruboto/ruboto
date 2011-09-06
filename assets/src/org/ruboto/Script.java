@@ -425,7 +425,7 @@ public class Script {
     }
 
     public String getContents() throws IOException {
-        BufferedReader buffer = new BufferedReader(new FileReader(getFile()), 8192);
+        BufferedReader buffer = new BufferedReader(new java.io.InputStreamReader(getClass().getClassLoader().getResourceAsStream(name)), 8192);
         StringBuilder source = new StringBuilder();
         while (true) {
             String line = buffer.readLine();
@@ -452,8 +452,8 @@ public class Script {
     }
 
     public String execute() throws IOException {
-    	Script.setScriptFilename(name);
-        return Script.execute("load '" + name + "'");
+    	Script.setScriptFilename(getClass().getClassLoader().getResource(name).getPath());
+        return Script.execute(getContents());
     }
 
 	public static void callMethod(Object receiver, String methodName, Object[] args) {
@@ -466,7 +466,7 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
+            throw (RuntimeException)(ite.getCause());
         }
     }
 

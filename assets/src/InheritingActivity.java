@@ -27,6 +27,8 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
     private boolean appStarted = false;
 
 	public void onCreate(Bundle bundle) {
+        Log.d("RUBOTO", "onCreate: ");
+
 	    try {
     		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
 		} catch (Exception e) {
@@ -80,6 +82,8 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
     }
 
     public void onPause() {
+        Log.d("RUBOTO", "onPause: ");
+
         if (receiver != null) {
     	    unregisterReceiver(receiver);
     	    receiver = null;
@@ -88,6 +92,8 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
     }
 
     public void onDestroy() {
+        Log.d("RUBOTO", "onDestroy: ");
+
         super.onDestroy();
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
@@ -150,7 +156,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
         Log.i("RUBOTO", "Starting activity");
         loadScript();
         onStart();
-        onResume();
+        super.onResume();
         hideProgress();
     }
 
