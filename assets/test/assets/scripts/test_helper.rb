@@ -8,6 +8,6 @@ def assert_equal(expected, actual, message = "'#{expected}' expected, but got '#
   raise message unless expected == actual
 end
 
-def assert_less_than_or_equal(limit, actual, message = "Expected '#{expected}' to be less than or equal to '#{limit}'")
-  raise message unless expected <= limit
+def assert_less_than_or_equal(limit, actual, message = "Expected '#{actual}' to be less than or equal to '#{limit}'")
+  raise message unless actual <= limit
 end
