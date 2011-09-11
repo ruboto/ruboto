@@ -173,7 +173,7 @@ public class Script {
 
     private static void handleInitException(Exception e) {
         Log.e(TAG, "Exception starting JRuby");
-        Log.e(TAG, e.getMessage());
+        Log.e(TAG, e.getMessage() != null ? e.getMessage() : e.getClass().getName());
         e.printStackTrace();
         ruby = null;
     }
