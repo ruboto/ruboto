@@ -9,29 +9,27 @@ class RakeTest < Test::Unit::TestCase
     cleanup_app
   end
 
-  def test_that_update_scripts_task_copies_files_to_sdcard_if_permissions_are_set
-    manifest = File.read("#{APP_DIR}/AndroidManifest.xml")
-    manifest.gsub! %r{</manifest>}, %Q{ <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />\n</manifest>}
-    File.open("#{APP_DIR}/AndroidManifest.xml", 'w') { |f| f << manifest }
-
-    Dir.chdir APP_DIR do
-      system 'rake install:clean start'
-      assert_equal 0, $?
-    end
-
-    # wait_for_dir("/mnt/sdcard/Android/data/#{PACKAGE}/files/scripts")
-    wait_for_dir("/sdcard/Android/data/#{PACKAGE}/files/scripts")
-  end
-
   if ANDROID_OS == 'android-7'
     puts "Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall"
   else
-    def test_that_update_scripts_task_copies_files_to_app_directory_when_permissions_are_not_set
+    def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
       Dir.chdir APP_DIR do
-        system 'rake install:clean start'
+        activity_filename = "src/ruboto_test_app_activity.rb"
+        s = File.read(activity_filename)
+        s.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
+        File.open(activity_filename, 'w') { |f| f << s }
+
+        test_filename = "test/assets/scripts/ruboto_test_app_activity_test.rb"
+        s2 = File.read(test_filename)
+        s2.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
+        File.open(test_filename, 'w') { |f| f << s2 }
+
+        apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+        system 'rake test:quick'
         assert_equal 0, $?
+        assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
+        assert `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp =~ %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}
       end
-      wait_for_dir("/data/data/#{PACKAGE}/files/scripts")
     end
   end
 

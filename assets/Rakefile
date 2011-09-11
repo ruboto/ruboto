@@ -21,6 +21,7 @@ TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.
 JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
 RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
+RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
 
 CLEAN.include('tmp', 'bin')
 
@@ -46,9 +47,26 @@ end
 desc 'build debug package'
 task :debug => APK_FILE
 
+namespace :debug do
+  desc 'build debug package if compiled files have changed'
+  task :quick => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
+    build_apk(t)
+  end
+end
+
 desc "build package and install it on the emulator or device"
 task :install => APK_FILE do
   install_apk
+end
+
+namespace :install do
+  desc 'uninstall, build, and install the application'
+  task :clean => [:uninstall, APK_FILE, :install]
+
+  desc 'Install the application, but only if compiled files are changed.'
+  task :quick => 'debug:quick' do
+    install_apk
+  end
 end
 
 task :release do
@@ -98,54 +116,21 @@ task :uninstall do
   uninstall_apk
 end
 
-namespace :install do
-  desc 'Uninstall, build, and install the application'
-  task :clean => [:uninstall, APK_FILE, :install]
-end
-
 file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
-file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
-  if File.exist?(APK_FILE)
-    changed_prereqs = t.prerequisites.select do |p|
-      File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
-    end
-    next if changed_prereqs.empty?
-    changed_prereqs.each{|f| puts "#{f} changed."}
-    puts "Forcing rebuild of #{APK_FILE}."
-  end
-  sh 'ant debug'
+file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES do |t|
+  build_apk(t)
 end
 
 desc 'Copy scripts to emulator or device'
-task :update_scripts do
-  if device_path_exists?(sdcard_path)
-    data_dir_name = 'public'
-    data_dir = sdcard_path
-  elsif device_path_exists?(app_files_path)
-    data_dir_name = 'private'
-    data_dir = app_files_path
-  else
-    puts 'Cannot find the scripts directory on the device.'
-    unless manifest.root.elements["uses-permission[@android:name='android.permission.WRITE_EXTERNAL_STORAGE']"]
-      puts 'If you have a non-rooted device, you need to add'
-      puts %q{    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />}
-      puts 'to the AndroidManifest.xml file to enable the update_scripts rake task.'
-    end
-    puts "Reverting to uninstalling and re-installing the apk."
-    Rake::Task[:uninstall].reenable
-    Rake::Task[:uninstall].invoke
-    FileUtils.rm_f APK_FILE
-    Rake::Task[APK_FILE].reenable
-    Rake::Task[APK_FILE].invoke
-    Rake::Task[:install].reenable
-    Rake::Task[:install].invoke
-    next
-  end
-  Rake::Task['install'].invoke
+task :update_scripts => ['install:quick'] do
+  data_dir_name = 'public'
+  data_dir = "#{sdcard_path}/scripts"
+  `adb shell mkdir -p #{data_dir}` if !device_path_exists?(data_dir)
   puts "Pushing files to apk #{data_dir_name} file area."
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
+  # TODO(uwe): Use `adb sync src` instead?
   Dir.chdir('src') do
     Dir["**/*.rb"].each do |script_file|
       next if File.directory? script_file
@@ -166,7 +151,7 @@ end
 task :update_test_scripts do
   test_scripts_path = "/data/data/#{package}.tests/files/scripts"
   # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
-  if package_installed?(true) && device_path_exists?(test_scripts_path)
+  if false && package_installed?(true) && device_path_exists?(test_scripts_path)
     Dir['test/assets/scripts/*.rb'].each do |script|
       print "#{script}: " ; $stdout.flush
       `adb push #{script} #{test_scripts_path}`
@@ -331,6 +316,18 @@ def replace_faulty_code(faulty_file, faulty_code)
   else
     puts "Could not find expected faulty code\n\n#{faulty_code}\n\nin file #{faulty_file}\n\n#{old_code}\n\n"
   end
+end
+
+def build_apk(t)
+  if File.exist?(APK_FILE)
+    changed_prereqs = t.prerequisites.select do |p|
+      File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
+    end
+    return if changed_prereqs.empty?
+    changed_prereqs.each{|f| puts "#{f} changed."}
+    puts "Forcing rebuild of #{APK_FILE}."
+  end
+  sh 'ant debug'
 end
 
 def install_apk
