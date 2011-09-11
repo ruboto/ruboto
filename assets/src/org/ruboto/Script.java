@@ -272,19 +272,18 @@ public class Script {
     	return scriptsDirFile;
     }
 
-    public static Boolean configDir(String noSdcard) {
-        setDir(noSdcard);
+    public static Boolean configDir(String scriptsDir) {
+        setDir(scriptsDir);
         Method getLoadPathsMethod;
         List<String> loadPath = callScriptingContainerMethod(List.class, "getLoadPaths");
         
-        if (!loadPath.contains(noSdcard)) {
-            Log.i(TAG, "Adding scripts dir to load path: " + noSdcard);
-            List<String> paths = loadPath;
-            paths.add(noSdcard);
-            // callScriptingContainerMethod(Void.class, "setLoadPaths", paths);
+        if (!loadPath.contains(scriptsDir)) {
+            Log.i(TAG, "Adding scripts dir to load path: " + scriptsDir);
+            loadPath.add(0, scriptsDir);
+            // callScriptingContainerMethod(Void.class, "setLoadPaths", loadPath);
             try {
                 Method setLoadPathsMethod = ruby.getClass().getMethod("setLoadPaths", List.class);
-                setLoadPathsMethod.invoke(ruby, paths);
+                setLoadPathsMethod.invoke(ruby, loadPath);
             } catch (NoSuchMethodException nsme) {
                 throw new RuntimeException(nsme);
             } catch (IllegalAccessException iae) {
@@ -294,16 +293,13 @@ public class Script {
             }
         }
 
-        /* Create directory if it doesn't exist */
-        if (!scriptsDirFile.exists()) {
-            boolean dirCreatedOk = scriptsDirFile.mkdirs();
-            if (!dirCreatedOk) {
-                throw new RuntimeException("Unable to create script directory");
-            }
+        if (scriptsDirFile.exists()) {
+            Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
             return true;
+        } else {
+            Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);
+            return false;
         }
-
-        return false;
     }
 
     private static void copyScripts(String from, File to, AssetManager assets) {
@@ -425,7 +421,13 @@ public class Script {
     }
 
     public String getContents() throws IOException {
-        BufferedReader buffer = new BufferedReader(new java.io.InputStreamReader(getClass().getClassLoader().getResourceAsStream(name)), 8192);
+        InputStream is;
+        if (new File(scriptsDir + "/" + name).exists()) {
+            is = new java.io.FileInputStream(scriptsDir + "/" + name);
+        } else {
+            is = getClass().getClassLoader().getResourceAsStream(name);
+        }
+        BufferedReader buffer = new BufferedReader(new java.io.InputStreamReader(is), 8192);
         StringBuilder source = new StringBuilder();
         while (true) {
             String line = buffer.readLine();

@@ -168,16 +168,6 @@ class Test::Unit::TestCase
     end
   end
 
-  def wait_for_dir(dir)
-    puts "Waiting for app to generate script directory: #{dir}"
-    start = Time.now
-    loop do
-      break if `adb shell ls -d #{dir}`.chomp =~ %r{^#{dir}$}
-      flunk 'Timeout waiting for scripts directory to appear' if Time.now > start + 120
-      sleep 1
-    end
-  end
-
   def exclude_stdlibs(excluded_stdlibs)
     puts "Adding ruboto.yml: #{excluded_stdlibs.join(' ')}"
     File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:excluded_stdlibs => excluded_stdlibs}) }
