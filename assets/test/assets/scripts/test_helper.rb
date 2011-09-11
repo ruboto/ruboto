@@ -1,13 +1,13 @@
 require 'java'
 
-def assert(value, message = "#{value.inspect} expected to be true")
-  raise message unless value
+def assert(value, message = nil)
+  raise "#{"#{message}\n" if message}#{value.inspect} expected to be true" unless value
 end
 
-def assert_equal(expected, actual, message = "'#{expected}' expected, but got '#{actual}'")
-  raise message unless expected == actual
+def assert_equal(expected, actual, message = nil)
+  raise "#{"#{message}\n" if message}'#{expected}' expected, but got '#{actual}'" unless expected == actual
 end
 
-def assert_less_than_or_equal(limit, actual, message = "Expected '#{actual}' to be less than or equal to '#{limit}'")
-  raise message unless actual <= limit
+def assert_less_than_or_equal(limit, actual, message = nil)
+  raise "#{"#{message}\n" if message}Expected '#{actual}' to be less than or equal to '#{limit}'" unless actual <= limit
 end
