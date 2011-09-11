@@ -33,28 +33,28 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
         Log.i(getClass().getName(), "runTest");
         Log.i(getClass().getName(), "runTest: " + getName());
         if (Script.setUpJRuby(getActivity())) {
-        Log.i(getClass().getName(), "ruby ok");
-        try {
-            final Activity activity = getActivity();
-            Log.i(getClass().getName(), "activity ok");
-            runTestOnUiThread(new Runnable() {
-                public void run() {
-                    String oldFile = Script.getScriptFilename();
+            Log.i(getClass().getName(), "ruby ok");
+            try {
+                final Activity activity = getActivity();
+                Log.i(getClass().getName(), "activity ok");
+                runTestOnUiThread(new Runnable() {
+                    public void run() {
+                        String oldFile = Script.getScriptFilename();
 
-                    Log.i(getClass().getName(), "calling setup");
-                    Script.setScriptFilename(filename);
-                    Script.callMethod(setup, "call", activity);
-                    Log.i(getClass().getName(), "setup ok");
+                        Log.i(getClass().getName(), "calling setup");
+                        Script.setScriptFilename(filename);
+                        Script.callMethod(setup, "call", activity);
+                        Log.i(getClass().getName(), "setup ok");
                     
-                    Script.setScriptFilename(filename);
-                    Script.callMethod(block, "call", activity);
-                    Script.setScriptFilename(oldFile);
-                }
-            });
-        } catch (Throwable t) {
-            throw new AssertionFailedError(t.getMessage());
-        }
-        Log.i(getClass().getName(), "runTest ok");
+                        Script.setScriptFilename(filename);
+                        Script.callMethod(block, "call", activity);
+                        Script.setScriptFilename(oldFile);
+                    }
+                });
+            } catch (Throwable t) {
+                throw new AssertionFailedError(t.getMessage() != null ? t.getMessage() : t.getClass().getName());
+            }
+            Log.i(getClass().getName(), "runTest ok");
         } else {
             throw new AssertionFailedError("Ruboto Core platform is missing.");
         }
