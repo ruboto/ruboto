@@ -35,24 +35,24 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         
         try {
             if (Script.setUpJRuby(getTargetContext())) {
-            Script.defineGlobalVariable("$runner", this);
-            Script.defineGlobalVariable("$test", this);
-            Script.defineGlobalVariable("$suite", suite);
+                Script.defineGlobalVariable("$runner", this);
+                Script.defineGlobalVariable("$test", this);
+                Script.defineGlobalVariable("$suite", suite);
 
-            // TODO(uwe):  Why doesn't this work?
-            // Script.copyScriptsIfNeeded(getContext());
+                // TODO(uwe):  Why doesn't this work?
+                // Script.copyScriptsIfNeeded(getContext());
 
-            loadScript("test_helper.rb");
+                loadScript("test_helper.rb");
 
-            // TODO(uwe):  Why doesn't this work?
-            // String[] scripts = new File(Script.scriptsDirName(getContext())).list();
+                // TODO(uwe):  Why doesn't this work?
+                // String[] scripts = new File(Script.scriptsDirName(getContext())).list();
 
-            String[] scripts = getContext().getResources().getAssets().list("scripts");
-            for (String f : scripts) {
-                if (f.equals("test_helper.rb")) continue;
-                Log.i(getClass().getName(), "Found script: " + f);
-                loadScript(f);
-            }
+                String[] scripts = getContext().getResources().getAssets().list("scripts");
+                for (String f : scripts) {
+                    if (f.equals("test_helper.rb")) continue;
+                    Log.i(getClass().getName(), "Found script: " + f);
+                    loadScript(f);
+                }
             } else {
                 addError(suite, new RuntimeException("Ruboto Core platform is missing"));
             }
