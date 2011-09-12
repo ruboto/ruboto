@@ -155,29 +155,13 @@ task :test => :uninstall do
 end
 
 namespace :test do
-  task :quick => [:update_scripts, 'test:update_scripts'] do
+  task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
+      sh 'ant install'
       sh "ant run-tests-quick"
     end
   end
-
-  task :update_scripts do
-    test_scripts_path = "/data/data/#{package}.tests/files/scripts"
-    # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
-    if false && package_installed?(true) && device_path_exists?(test_scripts_path)
-      Dir['test/assets/scripts/*.rb'].each do |script|
-        print "#{script}: " ; $stdout.flush
-        `adb push #{script} #{test_scripts_path}`
-      end
-      `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
-    else
-      Dir.chdir 'test' do
-        sh 'ant install'
-      end
-    end
-  end
-
 end
 
 file GEM_FILE
@@ -324,7 +308,7 @@ end
 def build_apk(t)
   if File.exist?(APK_FILE)
     changed_prereqs = t.prerequisites.select do |p|
-      File.exist?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
+      File.file?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
     end
     return if changed_prereqs.empty?
     changed_prereqs.each{|f| puts "#{f} changed."}
