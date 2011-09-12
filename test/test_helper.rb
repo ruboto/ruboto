@@ -161,7 +161,7 @@ class Test::Unit::TestCase
     if ['android-7', 'android-8'].include? ANDROID_OS
       puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
     else
-      Dir.chdir "#{APP_DIR}/test" do
+      Dir.chdir APP_DIR do
         system 'rake test:quick'
         assert_equal 0, $?, "tests failed with return code #$?"
       end
