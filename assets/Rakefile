@@ -146,22 +146,6 @@ namespace :update_scripts do
   task :restart => [:stop, :update_scripts, :start]
 end
 
-task :update_test_scripts do
-  test_scripts_path = "/data/data/#{package}.tests/files/scripts"
-  # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
-  if false && package_installed?(true) && device_path_exists?(test_scripts_path)
-    Dir['test/assets/scripts/*.rb'].each do |script|
-      print "#{script}: " ; $stdout.flush
-      `adb push #{script} #{test_scripts_path}`
-    end
-    `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
-  else
-    Dir.chdir 'test' do
-      sh 'ant install'
-    end
-  end
-end
-
 task :test => :uninstall do
   Dir.chdir('test') do
     puts 'Running tests'
@@ -171,12 +155,29 @@ task :test => :uninstall do
 end
 
 namespace :test do
-  task :quick => [:update_scripts, :update_test_scripts] do
+  task :quick => [:update_scripts, 'test:update_scripts'] do
     Dir.chdir('test') do
       puts 'Running quick tests'
       sh "ant run-tests-quick"
     end
   end
+
+  task :update_scripts do
+    test_scripts_path = "/data/data/#{package}.tests/files/scripts"
+    # TODO(uwe): Investigate if we can just push the scripts instead of building and installing the instrumentation APK
+    if false && package_installed?(true) && device_path_exists?(test_scripts_path)
+      Dir['test/assets/scripts/*.rb'].each do |script|
+        print "#{script}: " ; $stdout.flush
+        `adb push #{script} #{test_scripts_path}`
+      end
+      `adb shell ps | grep #{package}.tests | awk '{print $2}' | xargs adb shell kill`
+    else
+      Dir.chdir 'test' do
+        sh 'ant install'
+      end
+    end
+  end
+
 end
 
 file GEM_FILE
@@ -263,7 +264,7 @@ end
 def clear_update
   mark_update File.ctime APK_FILE
   if device_path_exists?(scripts_path)
-    sh "adb shell rm -rf #{scripts_path}"
+    sh "adb shell rm -r #{scripts_path}"
     puts "Deleted scripts directory #{scripts_path}"
   end
 end
