@@ -11,7 +11,7 @@ module Ruboto
         if !File.exists?("#{root}/test")
           name = verify_strings.root.elements['string'].text.gsub(' ', '')
           puts "\nGenerating Android test project #{name} in #{root}..."
-          system "android create test-project -m #{root} -n #{name}Test -p #{root}/test"
+          system %Q{android create test-project -m "#{root.gsub('"', '\"')}" -n "#{name}Test" -p "#{root.gsub('"', '\"')}/test"}
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
