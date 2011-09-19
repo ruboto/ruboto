@@ -1,9 +1,12 @@
 require 'rexml/document'
+require 'lib/ruboto/version'
 
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
 MANIFEST_FILE = "AndroidManifest.xml"
+GEM_FILE = "ruboto-core-#{Ruboto::VERSION}.gem"
+GEM_SPEC_FILE = 'ruboto-core.gemspec'
 
 # FIXME(uwe):  Remove when we stop supporting JRuby 1.5.6
 if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
@@ -20,12 +23,15 @@ ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 task :default => :gem
 
 desc "Generate a gem"
-task :gem do
-  `gem build ruboto-core.gemspec`
+task :gem => GEM_FILE
+
+file GEM_FILE => GEM_SPEC_FILE do
+  puts "Generating #{GEM_FILE}"
+  `gem build #{GEM_SPEC_FILE}`
 end
 
 desc "Push the gem to RubyGems"
-task :release do
+task :release => :gem do
   sh "gem push #{Dir['ruboto-core-*.gem'][-1]}"
 end
 
@@ -50,8 +56,8 @@ namespace :platform do
     sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby #{'--with-psych' unless ON_JRUBY_JARS_1_5_6} --path #{PLATFORM_PROJECT}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
-      manifest.root.attributes['android:versionCode'] = '2'
-      manifest.root.attributes['android:versionName'] = '0.4.1'
+      manifest.root.attributes['android:versionCode'] = '3'
+      manifest.root.attributes['android:versionName'] = '0.4.2'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
