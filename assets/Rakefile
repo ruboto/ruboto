@@ -214,15 +214,24 @@ end
   # Expand JARs
   Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
     Dir['*'].each do |gem_lib|
-      next if gem_lib =~ /jdbc-sqlite/
       Dir.chdir "#{gem_lib}/lib" do
         Dir['**/*.jar'].each do |jar|
-          puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
-
-          `jar xf #{jar}`
+          unless gem_lib =~ /jdbc-sqlite/
+            puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
+            `jar xf #{jar}`
+            if jar == 'arjdbc/jdbc/adapter_java.jar'
+              service_load_code =
+"require 'jruby'
+Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
+"
+              File.open(jar + '.rb', 'w'){|f| f << service_load_code}
+              File.open(jar.chomp('.jar') + '.rb', 'w'){|f| f << service_load_code} if jar.end_with?('.jar')
+            else
+              FileUtils.touch(jar + '.rb')
+              FileUtils.touch(jar.chomp('.jar') + '.rb') if jar.end_with?('.jar')
+            end
+          end
           FileUtils.rm_f(jar)
-          # FileUtils.touch(jar + '.rb')
-          # FileUtils.touch(jar.chomp('jar') + 'rb')
         end
       end
     end
