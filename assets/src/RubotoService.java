@@ -4,7 +4,7 @@ import org.ruboto.Script;
 import java.io.IOException;
 import android.app.ProgressDialog;
 
-public abstract class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private String scriptName;
   private String remoteVariable = "";
   public Object[] args;
@@ -38,9 +38,16 @@ THE_CONSTANTS
     super.onCreate();
 
     if (Script.setUpJRuby(this)) {
+        Script.defineGlobalVariable("$context", this);
         Script.defineGlobalVariable("$service", this);
+
         try {
-            new Script(scriptName).execute();
+            if (scriptName != null) {
+                new Script(scriptName).execute();
+            } else {
+                Script.execute("$service.initialize_ruboto");
+                Script.execute("$service.on_create");
+            }
         } catch(IOException e) {
             e.printStackTrace();
         }

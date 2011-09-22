@@ -1,51 +1,47 @@
 package THE_PACKAGE;
 
-import java.io.IOException;
-
-public abstract class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName;
-    private String remoteVariable = "";
-
-THE_CONSTANTS
-
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
+    private boolean initialized = false;
 
     public void setCallbackProc(int id, Object obj) {
-        callbackProcs[id] = obj;
+        // Error: no callbacks
+        throw new RuntimeException("RubotoBroadcastReceiver does not accept callbacks");
     }
 	
-    public THE_RUBOTO_CLASS setRemoteVariable(String var) {
-        remoteVariable = ((var == null) ? "" : (var + "."));
-        return this;
-    }
-
     public void setScriptName(String name){
         scriptName = name;
     }
 
-    public THE_RUBOTO_CLASS(String scriptName) {
-        setScriptName(scriptName);
-        if (Script.isInitialized()) {
-            loadScript();
-        }
+    public THE_RUBOTO_CLASS() {
+        this(null);
     }
 
-    protected void loadScript() {
-        Script.put("$broadcast_receiver", this);
-        try {
-            new Script(scriptName).execute();
-        } catch(IOException e) {
-            throw new RuntimeException("IOException loading broadcast receiver script", e);
-        }
+    public THE_RUBOTO_CLASS(String name) {
+        super();
+
+        if (name != null)
+            setScriptName(name);
     }
 
-    /****************************************************************************************
-     * 
-     *  Generated Methods
-     */
+    public void onReceive(android.content.Context context, android.content.Intent intent) {
+        if (Script.setUpJRuby(context)) {
+            Script.defineGlobalVariable("$context", context);
+            Script.defineGlobalVariable("$broadcast_receiver", this);
+            Script.defineGlobalVariable("$intent", intent);
 
-THE_METHODS
-
+            try {
+                if (scriptName != null && !initialized) {
+                    new Script(scriptName).execute();
+                    initialized = true;
+                } else {
+                    Script.execute("$broadcast_receiver.on_receive($context, $intent)");
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }	
 
 
