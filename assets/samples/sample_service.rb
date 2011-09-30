@@ -1,6 +1,6 @@
-require 'ruboto'
+require 'ruboto/service'
 
-$service.handle_create do
+$context.start_ruboto_service do
   # define what your service does. Directly put any code that you want
   # executed when onCreate gets called. Define the rest of the
   # behavior with handle_ blocks. See the README for more info.
