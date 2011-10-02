@@ -1,5 +1,6 @@
 package THE_PACKAGE;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.ruboto.Script;
@@ -138,6 +139,9 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
         }).start();
     }
 
+	private static final String RUBOTO_APK = "RubotoCore-release.apk";
+	private static final String RUBOTO_URL = "https://github.com/downloads/ruboto/ruboto-core/" + RUBOTO_APK;
+
     // Called when buton is pressed.
     public void getRubotoCore(View view) {
         try {
@@ -145,7 +149,9 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
         } catch (android.content.ActivityNotFoundException anfe) {
             try {
                 TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
-                textView.setText("Could not find the Android Market App.  You will have to install Ruboto Core manually.  Bummer!");
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(RUBOTO_URL));
+                intent.setDataAndType(Uri.fromFile(new File(getCacheDir(), RUBOTO_APK)), "application/vnd.android.package-archive");
+                startActivity(intent);
             } catch (Exception e) {}
         }
     }
