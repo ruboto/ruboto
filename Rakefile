@@ -60,7 +60,7 @@ namespace :platform do
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '3'
-      manifest.root.attributes['android:versionName'] = '0.4.2'
+      manifest.root.attributes['android:versionName'] = '0.4.3'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }

@@ -11,6 +11,7 @@ module AppTestMethods
     end
 
     assert_code 'ReadSourceFile', "File.read(__FILE__)"
+    assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
 
     Dir[File.expand_path('activity/*_test.rb', File.dirname(__FILE__))].each do |test_src|
       snake_name = test_src.chomp('_test.rb')

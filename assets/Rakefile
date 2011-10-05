@@ -22,6 +22,7 @@ JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
 RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
+APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 
 CLEAN.include('tmp', 'bin')
 
@@ -102,11 +103,11 @@ task :emulator do
 end
 
 task :start do
-  `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
+  start_app
 end
 
 task :stop do
-  `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
+  raise "Unable to stop app.  Only available on emulator." unless stop_app
 end
 
 desc 'Restart the application'
@@ -119,31 +120,26 @@ end
 file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
-file APK_FILE => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES do |t|
+file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t)
 end
 
 desc 'Copy scripts to emulator or device'
 task :update_scripts => ['install:quick'] do
-  `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
-  puts "Pushing files to apk public file area."
-  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
-  # TODO(uwe): Use `adb sync src` instead?
-  Dir.chdir('src') do
-    Dir["**/*.rb"].each do |script_file|
-      next if File.directory? script_file
-      next if File.mtime(script_file) < last_update
-      next if script_file =~ /~$/
-      print "#{script_file}: "; $stdout.flush
-      `adb push #{script_file} #{scripts_path}/#{script_file}`
-    end
-  end
-  mark_update
+  update_scripts
 end
 
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
-  task :restart => [:stop, :update_scripts, :start]
+  task :restart => APK_DEPENDENCIES do |t|
+    if stop_app
+      update_scripts
+    else
+      build_apk(t)
+      install_apk
+    end
+    start_app
+  end
 end
 
 task :test => :uninstall do
@@ -346,4 +342,30 @@ def uninstall_apk
     puts "Uninstall failed exit code #{$?}"
     exit $?
   end
+end
+
+def update_scripts
+  `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
+  puts "Pushing files to apk public file area."
+  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
+  # TODO(uwe): Use `adb sync src` instead?
+  Dir.chdir('src') do
+    Dir["**/*.rb"].each do |script_file|
+      next if File.directory? script_file
+      next if File.mtime(script_file) < last_update
+      next if script_file =~ /~$/
+      print "#{script_file}: "; $stdout.flush
+      `adb push #{script_file} #{scripts_path}/#{script_file}`
+    end
+  end
+  mark_update
+end
+
+def start_app
+  `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
+end
+
+def stop_app
+  output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
+  return output !~ /Operation not permitted/
 end
