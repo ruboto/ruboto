@@ -170,9 +170,10 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   FileUtils.mkdir_p BUNDLE_PATH
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
+  gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
 
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
-    Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+    Dir.chdir gem_path do
       Dir['activerecord-jdbc-adapter-*'].each do |g|
         puts "Removing #{g} gem since it is included in the RubotoCore platform apk."
         FileUtils.rm_rf g
@@ -181,7 +182,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   end
 
   # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
-  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+  Dir.chdir gem_path do
     scanned_files = []
     Dir["*/lib/**/*"].each do |f|
       raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
@@ -195,7 +196,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   # FIXME(uwe):  Remove when directory listing in apk subdirectories work.
   # FIXME(uwe):  http://jira.codehaus.org/browse/JRUBY-5775
-  Dir["#{BUNDLE_PATH}/ruby/1.8/gems/activesupport-*/lib/active_support/core_ext.rb"].each do |faulty_file|
+  Dir["#{gem_path}/activesupport-*/lib/active_support/core_ext.rb"].each do |faulty_file|
     faulty_code = <<-'EOF'
 Dir["#{File.dirname(__FILE__)}/core_ext/*.rb"].sort.each do |path|
   require "active_support/core_ext/#{File.basename(path, '.rb')}"
@@ -204,7 +205,7 @@ end
     replace_faulty_code(faulty_file, faulty_code)
   end
 
-  Dir["#{BUNDLE_PATH}/ruby/1.8/gems/activemodel-*/lib/active_model/validations.rb"].each do |faulty_file|
+  Dir["#{gem_path}/activemodel-*/lib/active_model/validations.rb"].each do |faulty_file|
     faulty_code = <<-EOF
 Dir[File.dirname(__FILE__) + "/validations/*.rb"].sort.each do |path|
   filename = File.basename(path)
@@ -216,7 +217,7 @@ end
   # FIXME end
 
   # Expand JARs
-  Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+  Dir.chdir gem_path do
     Dir['*'].each do |gem_lib|
       Dir.chdir "#{gem_lib}/lib" do
         Dir['**/*.jar'].each do |jar|
@@ -243,7 +244,7 @@ Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
 
 
   FileUtils.rm_f BUNDLE_JAR
-  Dir["#{BUNDLE_PATH}/ruby/1.8/gems/*"].each_with_index do |gem_dir, i|
+  Dir["#{gem_path}/*"].each_with_index do |gem_dir, i|
     `jar #{i == 0 ? 'c' : 'u'}f #{BUNDLE_JAR} -C #{gem_dir}/lib .`
   end
   FileUtils.rm_rf BUNDLE_PATH
