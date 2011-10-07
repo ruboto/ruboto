@@ -171,7 +171,6 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   FileUtils.mkdir_p BUNDLE_PATH
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
 
-
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
       Dir['activerecord-jdbc-adapter-*'].each do |g|
@@ -248,8 +247,6 @@ Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
     `jar #{i == 0 ? 'c' : 'u'}f #{BUNDLE_JAR} -C #{gem_dir}/lib .`
   end
   FileUtils.rm_rf BUNDLE_PATH
-
-  Rake::Task['install'].invoke
 end
 
 # Methods
