@@ -16,6 +16,7 @@ MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
 GEM_FILE           = File.expand_path('Gemfile.apk')
 GEM_LOCK_FILE      = File.expand_path('Gemfile.apk.lock')
+RELEASE_APK_FILE   = File.expand_path "bin/#{build_project_name}-release.apk"
 APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
 JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
@@ -51,7 +52,7 @@ task :debug => APK_FILE
 namespace :debug do
   desc 'build debug package if compiled files have changed'
   task :quick => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
-    build_apk(t)
+    build_apk(t, false)
   end
 end
 
@@ -70,8 +71,10 @@ namespace :install do
   end
 end
 
-task :release do
-  sh 'ant release'
+task :release => RELEASE_APK_FILE
+
+file RELEASE_APK_FILE => APK_DEPENDENCIES do |t|
+  build_apk(t, true)
 end
 
 task :tag => :release do
@@ -121,7 +124,7 @@ file MANIFEST_FILE
 file RUBOTO_CONFIG_FILE
 
 file APK_FILE => APK_DEPENDENCIES do |t|
-  build_apk(t)
+  build_apk(t, false)
 end
 
 desc 'Copy scripts to emulator or device'
@@ -135,7 +138,7 @@ namespace :update_scripts do
     if stop_app
       update_scripts
     else
-      build_apk(t)
+      build_apk(t, false)
       install_apk
     end
     start_app
@@ -295,7 +298,7 @@ def replace_faulty_code(faulty_file, faulty_code)
   end
 end
 
-def build_apk(t)
+def build_apk(t, release)
   if File.exist?(APK_FILE)
     changed_prereqs = t.prerequisites.select do |p|
       File.file?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
@@ -304,7 +307,11 @@ def build_apk(t)
     changed_prereqs.each{|f| puts "#{f} changed."}
     puts "Forcing rebuild of #{APK_FILE}."
   end
-  sh 'ant debug'
+  if release
+    sh 'ant release'
+  else
+    sh 'ant debug'
+  end
 end
 
 def install_apk
