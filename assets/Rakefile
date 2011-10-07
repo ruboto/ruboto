@@ -171,8 +171,17 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   FileUtils.mkdir_p BUNDLE_PATH
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
 
-  # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
 
+  if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
+    Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
+      Dir['activerecord-jdbc-adapter-*'].each do |g|
+        puts "Removing #{g} gem since it is included in the RubotoCore platform apk."
+        FileUtils.rm_rf g
+      end
+    end
+  end
+
+  # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
   Dir.chdir "#{BUNDLE_PATH}/ruby/1.8/gems" do
     scanned_files = []
     Dir["*/lib/**/*"].each do |f|
