@@ -59,8 +59,8 @@ namespace :platform do
     sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby #{'--with-psych' unless ON_JRUBY_JARS_1_5_6} --path #{PLATFORM_PROJECT}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
-      manifest.root.attributes['android:versionCode'] = '403'
-      manifest.root.attributes['android:versionName'] = '0.4.3'
+      manifest.root.attributes['android:versionCode'] = '404'
+      manifest.root.attributes['android:versionName'] = '0.4.4'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
