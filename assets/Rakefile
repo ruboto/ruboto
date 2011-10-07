@@ -181,7 +181,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     end
   end
 
-  # FIXME(uwe):  Should not be necessary.  ARJDBC should not offer the same files as AR.
+  # Should not be necessary.  Different gems should not offer the same files.  Keeping it just in case.
   Dir.chdir gem_path do
     scanned_files = []
     Dir["*/lib/**/*"].each do |f|
@@ -193,28 +193,6 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
       end
     end
   end
-
-  # FIXME(uwe):  Remove when directory listing in apk subdirectories work.
-  # FIXME(uwe):  http://jira.codehaus.org/browse/JRUBY-5775
-  Dir["#{gem_path}/activesupport-*/lib/active_support/core_ext.rb"].each do |faulty_file|
-    faulty_code = <<-'EOF'
-Dir["#{File.dirname(__FILE__)}/core_ext/*.rb"].sort.each do |path|
-  require "active_support/core_ext/#{File.basename(path, '.rb')}"
-end
-    EOF
-    replace_faulty_code(faulty_file, faulty_code)
-  end
-
-  Dir["#{gem_path}/activemodel-*/lib/active_model/validations.rb"].each do |faulty_file|
-    faulty_code = <<-EOF
-Dir[File.dirname(__FILE__) + "/validations/*.rb"].sort.each do |path|
-  filename = File.basename(path)
-  require "active_model/validations/\#{filename}"
-end
-    EOF
-    replace_faulty_code(faulty_file, faulty_code)
-  end
-  # FIXME end
 
   # Expand JARs
   Dir.chdir gem_path do
