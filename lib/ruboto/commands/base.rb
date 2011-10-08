@@ -325,7 +325,7 @@ module Ruboto
             argument("what") {
               required
               validate {|i| %w(jruby app ruboto).include?(i)}
-              description "What do you want to update: 'jruby', 'app', or 'ruboto'"
+              description "What do you want to update: 'app', 'jruby', or 'ruboto'"
             }
 
             option("force") {
@@ -339,8 +339,6 @@ module Ruboto
 
             def run
               case params['what'].value
-              when "jruby" then
-                update_jruby(params['force'].value, params['with-psych'].value) || abort
               when "app" then
                 force = params['force'].value
                 update_test force
@@ -352,6 +350,9 @@ module Ruboto
                 update_build_xml
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
+                update_bundle
+              when "jruby" then
+                update_jruby(params['force'].value, params['with-psych'].value) || abort
               when "ruboto" then
                 update_ruboto(params['force'].value) || abort
               end

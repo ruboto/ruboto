@@ -139,7 +139,7 @@ EOF
         # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
         old_scripts_dir = 'assets/scripts'
         if File.exists? old_scripts_dir
-          FileUtils.mv Dir["#{old_scripts_dir}/**/*"], SCRIPTS_DIR
+          FileUtils.mv Dir["#{old_scripts_dir}/*"], SCRIPTS_DIR
           FileUtils.rm_rf old_scripts_dir
         end
         # FIXME end
@@ -375,6 +375,13 @@ EOF
         ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*\n*/m, '')
         ant_script.gsub!(ant_setup_line, "\\1\n\n#{patch}")
         File.open('build.xml', 'w'){|f| f << ant_script}
+      end
+
+      def update_bundle
+        if File.exist?('Gemfile.apk') && File.exists?('libs/bundle.jar')
+          FileUtils.rm 'libs/bundle.jar'
+          system 'rake bundle'
+        end
       end
 
     end

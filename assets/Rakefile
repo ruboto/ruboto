@@ -9,21 +9,22 @@ def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
 require 'rake/clean'
 require 'rexml/document'
 
+PROJECT_DIR = Dir.getwd
 UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
-BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
-BUNDLE_PATH        = File.expand_path 'tmp/bundle'
-MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
+BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
+BUNDLE_PATH = File.expand_path 'tmp/bundle'
+MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
-GEM_FILE           = File.expand_path('Gemfile.apk')
-GEM_LOCK_FILE      = File.expand_path('Gemfile.apk.lock')
-RELEASE_APK_FILE   = File.expand_path "bin/#{build_project_name}-release.apk"
-APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
-TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
-JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
-RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
-JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
-RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
-APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
+GEM_FILE = File.expand_path('Gemfile.apk')
+GEM_LOCK_FILE = File.expand_path('Gemfile.apk.lock')
+RELEASE_APK_FILE = File.expand_path "bin/#{build_project_name}-release.apk"
+APK_FILE = File.expand_path "bin/#{build_project_name}-debug.apk"
+TEST_APK_FILE = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
+JRUBY_JARS = Dir[File.expand_path 'libs/jruby-*.jar']
+RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
+JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
+RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
+APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 
 CLEAN.include('tmp', 'bin')
 
@@ -31,7 +32,7 @@ task :default => :debug
 
 file JRUBY_JARS => RUBOTO_CONFIG_FILE do
   next unless File.exists? RUBOTO_CONFIG_FILE
-  jruby_jars_mtime = JRUBY_JARS.map{|f| File.mtime(f)}.min
+  jruby_jars_mtime = JRUBY_JARS.map { |f| File.mtime(f) }.min
   ruboto_yml_mtime = File.mtime(RUBOTO_CONFIG_FILE)
   next if jruby_jars_mtime > ruboto_yml_mtime
   puts '*' * 80
@@ -167,6 +168,8 @@ file GEM_FILE
 file GEM_LOCK_FILE
 
 desc 'Generate bundle jar from Gemfile'
+task :bundle => BUNDLE_JAR
+
 file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
@@ -184,16 +187,25 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     end
   end
 
-  # Should not be necessary.  Different gems should not offer the same files.  Keeping it just in case.
+  # Remove duplicate files
   Dir.chdir gem_path do
     scanned_files = []
+    source_files = RUBY_SOURCE_FILES.map { |f| f.gsub("#{PROJECT_DIR}/src/", '') }
     Dir["*/lib/**/*"].each do |f|
+      next if File.directory? f
       raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
       gem_name, lib_file = $1, $2
-      if existing_file = scanned_files.find{|sf| sf =~ %r{(.*?)/lib/#{lib_file}}}
-        puts "Removing duplicate of file #{lib_file} in gem #{gem_name}"
-        puts "Already present in gem #{$1}"
+      if existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} }
+        puts "Overwriting duplicate file #{lib_file} in gem #{$1} with file in #{gem_name}"
+        FileUtils.rm existing_file
+        scanned_files.delete existing_file
+      elsif source_files.include? lib_file
+        puts "Removing duplicate file #{lib_file} in gem #{gem_name}"
+        puts "Already present in project source src/#{lib_file}"
+        FileUtils.rm f
+        next
       end
+      scanned_files << f
     end
   end
 
@@ -202,20 +214,23 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     Dir['*'].each do |gem_lib|
       Dir.chdir "#{gem_lib}/lib" do
         Dir['**/*.jar'].each do |jar|
-          unless gem_lib =~ /jdbc-sqlite/
+          unless jar =~ /sqlite-jdbc/
             puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
             `jar xf #{jar}`
-            if jar == 'arjdbc/jdbc/adapter_java.jar'
-              service_load_code =
-"require 'jruby'
+          end
+          if jar == 'arjdbc/jdbc/adapter_java.jar'
+            jar_load_code = <<-END_CODE
+require 'jruby'
 Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
-"
-              File.open(jar + '.rb', 'w'){|f| f << service_load_code}
-              File.open(jar.chomp('.jar') + '.rb', 'w'){|f| f << service_load_code} if jar.end_with?('.jar')
-            else
-              FileUtils.touch(jar + '.rb')
-              FileUtils.touch(jar.chomp('.jar') + '.rb') if jar.end_with?('.jar')
-            end
+            END_CODE
+          else
+            jar_load_code = ''
+          end
+          puts "Writing dummy JAR file #{jar + '.rb'}"
+          File.open(jar + '.rb', 'w') { |f| f << jar_load_code }
+          if jar.end_with?('.jar')
+            puts "Writing dummy JAR file #{jar.sub(/.jar$/, '.rb')}"
+            File.open(jar.sub(/.jar$/, '.rb'), 'w') { |f| f << jar_load_code }
           end
           FileUtils.rm_f(jar)
         end
@@ -235,7 +250,7 @@ end
 
 def mark_update(time = Time.now)
   FileUtils.mkdir_p File.dirname(UPDATE_MARKER_FILE)
-  File.open(UPDATE_MARKER_FILE, 'w'){|f| f << time.iso8601}
+  File.open(UPDATE_MARKER_FILE, 'w') { |f| f << time.iso8601 }
 end
 
 def clear_update
@@ -252,11 +267,17 @@ def strings(name)
   value.text
 end
 
-def version() strings :version_name end
+def version()
+  strings :version_name
+end
 
-def app_name() strings :app_name end
+def app_name()
+  strings :app_name
+end
 
-def main_activity() manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name') end
+def main_activity()
+  manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name')
+end
 
 def device_path_exists?(path)
   path_output =`adb shell ls #{path}`
@@ -284,7 +305,7 @@ end
 private
 
 def replace_faulty_code(faulty_file, faulty_code)
-  explicit_requires = Dir["#{faulty_file.chomp('.rb')}/*.rb"].sort.map{|f| File.basename(f)}.map do |filename|
+  explicit_requires = Dir["#{faulty_file.chomp('.rb')}/*.rb"].sort.map { |f| File.basename(f) }.map do |filename|
     "require 'active_model/validations/#{filename}'"
   end.join("\n")
 
@@ -292,7 +313,7 @@ def replace_faulty_code(faulty_file, faulty_code)
   new_code = old_code.gsub faulty_code, explicit_requires
   if new_code != old_code
     puts "Replaced directory listing code in file #{faulty_file} with explicit requires."
-    File.open(faulty_file, 'w'){|f| f << new_code}
+    File.open(faulty_file, 'w') { |f| f << new_code }
   else
     puts "Could not find expected faulty code\n\n#{faulty_code}\n\nin file #{faulty_file}\n\n#{old_code}\n\n"
   end
@@ -301,10 +322,10 @@ end
 def build_apk(t, release)
   if File.exist?(APK_FILE)
     changed_prereqs = t.prerequisites.select do |p|
-      File.file?(p) && !Dir[p].empty? && Dir[p].map{|f| File.mtime(f)}.max > File.mtime(APK_FILE)
+      File.file?(p) && !Dir[p].empty? && Dir[p].map { |f| File.mtime(f) }.max > File.mtime(APK_FILE)
     end
     return if changed_prereqs.empty?
-    changed_prereqs.each{|f| puts "#{f} changed."}
+    changed_prereqs.each { |f| puts "#{f} changed." }
     puts "Forcing rebuild of #{APK_FILE}."
   end
   if release
