@@ -9,22 +9,22 @@ def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
 require 'rake/clean'
 require 'rexml/document'
 
-PROJECT_DIR = Dir.getwd
+PROJECT_DIR        = Dir.getwd
 UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
-BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
-BUNDLE_PATH = File.expand_path 'tmp/bundle'
-MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
+BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
+BUNDLE_PATH        = File.expand_path 'tmp/bundle'
+MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
-GEM_FILE = File.expand_path('Gemfile.apk')
-GEM_LOCK_FILE = File.expand_path('Gemfile.apk.lock')
-RELEASE_APK_FILE = File.expand_path "bin/#{build_project_name}-release.apk"
-APK_FILE = File.expand_path "bin/#{build_project_name}-debug.apk"
-TEST_APK_FILE = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
-JRUBY_JARS = Dir[File.expand_path 'libs/jruby-*.jar']
-RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
-JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
-RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
-APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
+GEM_FILE           = File.expand_path('Gemfile.apk')
+GEM_LOCK_FILE      = File.expand_path('Gemfile.apk.lock')
+RELEASE_APK_FILE   = File.expand_path "bin/#{build_project_name}-release.apk"
+APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
+TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
+JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
+RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
+JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
+RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
+APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 
 CLEAN.include('tmp', 'bin')
 
