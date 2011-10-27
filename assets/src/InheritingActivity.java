@@ -142,7 +142,7 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
 	private static final String RUBOTO_APK = "RubotoCore-release.apk";
 	private static final String RUBOTO_URL = "https://github.com/downloads/ruboto/ruboto-core/" + RUBOTO_APK;
 
-    // Called when buton is pressed.
+    // Called when the button is pressed.
     public void getRubotoCore(View view) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=org.ruboto.core")));
@@ -150,7 +150,6 @@ public class InheritingActivity extends org.ruboto.RubotoActivity {
             try {
                 TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
                 Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(RUBOTO_URL));
-                intent.setDataAndType(Uri.fromFile(new File(getCacheDir(), RUBOTO_APK)), "application/vnd.android.package-archive");
                 startActivity(intent);
             } catch (Exception e) {}
         }
