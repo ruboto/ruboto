@@ -6,6 +6,18 @@ module Ruboto
       #
       # Updating components
       #
+
+      def update_android
+        root = Dir.getwd
+
+        # FIXME(uwe): Remove build.xml file to force regeneration.
+        # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
+        FileUtils.rm_f "#{root}/build.xml"
+        # FIXME end
+
+        system "android update project -p #{root}"
+      end
+
       def update_test(force = nil)
         root = Dir.getwd
         if !File.exists?("#{root}/test")
@@ -15,7 +27,12 @@ module Ruboto
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
-          puts "\nUpdating Android test project #{name} in #{root}..."
+          # FIXME(uwe): Remove build.xml file to force regeneration.
+          # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
+          FileUtils.rm_f "#{root}/test/build.xml"
+          # FIXME end
+
+          puts "\nUpdating Android test project #{name} in #{root}/test..."
           system "android update test-project -m #{root} -p #{root}/test"
         end
 
@@ -40,15 +57,24 @@ module Ruboto
 
           File.open("AndroidManifest.xml", 'w'){|f| test_manifest.document.write(f, 4)}
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
-          prop_lines = File.readlines('build.properties')
-          File.open('build.properties', 'a'){|f| f << instrumentation_property} unless prop_lines.include?(instrumentation_property)
-          ant_setup_line = /^(\s*<setup\s*\/>)/
+
+          # FIXME(uwe): Cleanup when we stop supporting Android SDK <= 13
+          prop_file = %w{ant.properties build.properties}.find{|f| File.exists?(f)}
+          prop_lines = File.readlines(prop_file)
+          File.open(prop_file, 'a'){|f| f << instrumentation_property} unless prop_lines.include?(instrumentation_property)
+          # FIXME end
+
+          ant_setup_line = /^(\s*<\/project>)/
           run_tests_override = <<-EOF
 <!-- BEGIN added by ruboto-core -->
+
     <macrodef name="run-tests-helper">
       <attribute name="emma.enabled" default="false"/>
       <element name="extra-instrument-args" optional="yes"/>
+
       <sequential>
+        <xpath input="AndroidManifest.xml" expression="/manifest/@package"
+                output="manifest.package" />
         <echo>Running tests with failure detection...</echo>
         <exec executable="${adb}" failonerror="true" outputproperty="tests.output">
           <arg line="${adb.device.arg}"/>
@@ -90,7 +116,7 @@ EOF
           ant_script.gsub!(/\s*<target name="run-tests-quick".*?<\/target>\s*/m, '')
           # TODO end
           ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*/m, '')
-          ant_script.gsub!(ant_setup_line, "\\1\n\n#{run_tests_override}")
+          raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w'){|f| f << ant_script}
         end
       end
@@ -189,11 +215,12 @@ EOF
             min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
             target ||= sdk_element.attributes["android:targetSdkVersion"]
           end
-          if min_sdk.to_i >= 11
-            verify_manifest.elements['application'].attributes['android:hardwareAccelerated'] ||= 'true'
-            verify_manifest.elements['application'].attributes['android:largeHeap'] ||= 'true'
-          end
           app_element = verify_manifest.elements['application']
+          app_element.attributes['android:icon'] ||= '@drawable/icon'
+          if min_sdk.to_i >= 11
+            app_element.attributes['android:hardwareAccelerated'] ||= 'true'
+            app_element.attributes['android:largeHeap'] ||= 'true'
+          end
           if app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             puts 'found activity tag'
           else
@@ -359,22 +386,6 @@ EOF
           FileUtils.remove_dir "tmp", true
           FileUtils.remove_dir "1.8", true
         end
-      end
-
-      def update_build_xml
-        ant_setup_line = /^(\s*<setup\s*\/>)/
-        patch = <<-EOF
-    <!-- BEGIN added by ruboto-core -->
-    <target name="ruboto-install-debug" description="Installs the already built debug package">
-        <install-helper />
-    </target>
-    <!-- END added by ruboto-core -->
-
-    EOF
-        ant_script = File.read('build.xml')
-        ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*\n*/m, '')
-        ant_script.gsub!(ant_setup_line, "\\1\n\n#{patch}")
-        File.open('build.xml', 'w'){|f| f << ant_script}
       end
 
       def update_bundle

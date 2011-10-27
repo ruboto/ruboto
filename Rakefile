@@ -59,12 +59,12 @@ namespace :platform do
     sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby #{'--with-psych' unless ON_JRUBY_JARS_1_5_6} --path #{PLATFORM_PROJECT}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
-      manifest.root.attributes['android:versionCode'] = '405'
-      manifest.root.attributes['android:versionName'] = '0.4.5'
+      manifest.root.attributes['android:versionCode'] = '406'
+      manifest.root.attributes['android:versionName'] = '0.4.6'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
-      File.open('default.properties', 'w'){|f| f << "target=android-8\n"}
+      File.open('project.properties', 'w'){|f| f << "target=android-8\n"}
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
       keystore_file = File.expand_path('~/android_market.keystore')
       if File.exists?(keystore_file)

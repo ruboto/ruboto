@@ -95,7 +95,7 @@ module Ruboto
                   update_icons true
                   update_classes true
                   update_jruby true, params['with-psych'].value if params['with-jruby'].value || params['with-psych'].value
-                  update_build_xml
+#                  update_build_xml
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
 
@@ -341,13 +341,13 @@ module Ruboto
               case params['what'].value
               when "app" then
                 force = params['force'].value
+                update_android
                 update_test force
                 update_assets
                 update_ruboto force
                 update_icons force
                 update_classes force
                 update_jruby force, params['with-psych'].value
-                update_build_xml
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
                 update_bundle

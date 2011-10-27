@@ -158,7 +158,8 @@ namespace :test do
   task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
-      sh 'ant install'
+      sh 'ant instrument'
+      sh 'ant installi'
       sh "ant run-tests-quick"
     end
   end
@@ -320,13 +321,14 @@ def replace_faulty_code(faulty_file, faulty_code)
 end
 
 def build_apk(t, release)
-  if File.exist?(APK_FILE)
+  apk_file = release ? RELEASE_APK_FILE : APK_FILE
+  if File.exist?(apk_file)
     changed_prereqs = t.prerequisites.select do |p|
       File.file?(p) && !Dir[p].empty? && Dir[p].map { |f| File.mtime(f) }.max > File.mtime(APK_FILE)
     end
     return if changed_prereqs.empty?
     changed_prereqs.each { |f| puts "#{f} changed." }
-    puts "Forcing rebuild of #{APK_FILE}."
+    puts "Forcing rebuild of #{apk_file}."
   end
   if release
     sh 'ant release'
@@ -343,7 +345,7 @@ def install_apk
   when false
     puts "Package installed, but of wrong size."
   end
-  sh 'ant ruboto-install-debug'
+  sh 'ant installd'
   clear_update
 end
 

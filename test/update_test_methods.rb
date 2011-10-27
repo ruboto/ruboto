@@ -15,7 +15,11 @@ module UpdateTestMethods
 
   def test_properties_and_ant_file_has_no_duplicates
     Dir.chdir APP_DIR do
-      assert File.readlines('test/build.properties').grep(/\w/).uniq!.nil?, 'Duplicate lines in build.properties'
+      # FIXME(uwe): Cleanup when we stop support Android SDK <= 13
+      prop_file = %w{test/ant.properties test/build.properties}.find{|f| File.exists?(f)}
+      # FIXME end
+
+      assert File.readlines(prop_file).grep(/\w/).uniq!.nil?, "Duplicate lines in #{prop_file}"
       assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in build.xml'
     end
   end
