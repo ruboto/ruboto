@@ -12,10 +12,11 @@ module Ruboto
 
         # FIXME(uwe): Remove build.xml file to force regeneration.
         # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
+        name = REXML::Document.new(File.read("#{root}/build.xml")).root.attributes['name']
         FileUtils.rm_f "#{root}/build.xml"
         # FIXME end
 
-        system "android update project -p #{root}"
+        system "android update project -p #{root} -n #{name}"
       end
 
       def update_test(force = nil)
