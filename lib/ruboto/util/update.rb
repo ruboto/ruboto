@@ -215,6 +215,9 @@ EOF
           if sdk_element = verify_manifest.elements['uses-sdk']
             min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
             target ||= sdk_element.attributes["android:targetSdkVersion"]
+          else
+            min_sdk ||= MINIMUM_SUPPORTED_SDK
+            target ||= MINIMUM_SUPPORTED_SDK
           end
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/icon'
