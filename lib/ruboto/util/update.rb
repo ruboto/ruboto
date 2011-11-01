@@ -197,6 +197,7 @@ EOF
               script_content = File.read(script_file)
               if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/
                 puts "Putting receiver script in a block in #{script_file}"
+                script_content.gsub! '$broadcast_context', 'context'
                 File.open(script_file, 'w') do |of|
                   of.puts '$broadcast_receiver.handle_receive do |context, intent|'
                   of << script_content
