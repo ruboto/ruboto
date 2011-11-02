@@ -150,7 +150,7 @@ task :test => :uninstall do
   Dir.chdir('test') do
     puts 'Running tests'
     sh "adb uninstall #{package}.tests"
-    sh "ant run-tests"
+    sh "ant instrument install test"
   end
 end
 
