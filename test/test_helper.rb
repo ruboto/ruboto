@@ -31,7 +31,8 @@ module RubotoTest
       '2.1' => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
       '2.3' => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
-      '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13'
+      '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
+      '4.0.1' => 'android-14',
   }
 
   def self.version_from_device

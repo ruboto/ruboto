@@ -88,17 +88,30 @@ public class Script {
                 System.out.println("Found JRuby in this APK");
                 classLoader = Script.class.getClassLoader();
             } catch (ClassNotFoundException e1) {
-                String packagePath = "org.ruboto.core";
+                String packageName = "org.ruboto.core";
                 String apkName = null;
+
                 try {
-                    apkName = appContext.getPackageManager().getApplicationInfo(packagePath, 0).sourceDir;
+                    apkName = appContext.getPackageManager().getApplicationInfo(packageName, 0).sourceDir;
                 } catch (PackageManager.NameNotFoundException e) {
                     System.out.println("JRuby not found");
                     return false;
                 }
 
                 System.out.println("Found JRuby in platform APK");
-                classLoader = new PathClassLoader(apkName, Script.class.getClassLoader());
+                if (true) {
+                    classLoader = new PathClassLoader(apkName, Script.class.getClassLoader());
+                } else {
+                    // Alternative way to get the class loader.  The other way is rumoured to have memory leaks.
+                    try {
+                        Context platformAppContext = appContext.createPackageContext(packageName, Context.CONTEXT_INCLUDE_CODE + Context.CONTEXT_IGNORE_SECURITY);
+                        classLoader = platformAppContext.getClassLoader();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        System.out.println("Could not create package context even if application info could be found.  Should never happen.");
+                        return false;
+                    }
+                }
+                
                 try {
                     scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer", true, classLoader);
                 } catch (ClassNotFoundException e) {
