@@ -79,18 +79,28 @@ public class Script {
             System.setProperty("jruby.bytecode.version", "1.5");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
+            System.setProperty("jruby.objectspace.enabled", "false");
+            System.setProperty("jruby.thread.pooling", "true");
+            System.setProperty("jruby.native.enabled", "false");
+
+            // Uncomment these to debug Ruby source loading
+            // System.setProperty("jruby.debug.loadService", "true");
+            // System.setProperty("jruby.debug.loadService.timing", "true");
+
 
             ClassLoader classLoader;
             Class<?> scriptingContainerClass;
+            String apkName = null;
 
             try {
                 scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer");
                 System.out.println("Found JRuby in this APK");
                 classLoader = Script.class.getClassLoader();
+                try {
+                    apkName = appContext.getPackageManager().getApplicationInfo(appContext.getPackageName(), 0).sourceDir;
+                } catch (NameNotFoundException e) {}
             } catch (ClassNotFoundException e1) {
                 String packageName = "org.ruboto.core";
-                String apkName = null;
-
                 try {
                     apkName = appContext.getPackageManager().getApplicationInfo(packageName, 0).sourceDir;
                 } catch (PackageManager.NameNotFoundException e) {
@@ -103,7 +113,7 @@ public class Script {
                     classLoader = new PathClassLoader(apkName, Script.class.getClassLoader());
                 } else {
                     // Alternative way to get the class loader.  The other way is rumoured to have memory leaks.
-                    try {
+                try {
                         Context platformAppContext = appContext.createPackageContext(packageName, Context.CONTEXT_INCLUDE_CODE + Context.CONTEXT_IGNORE_SECURITY);
                         classLoader = platformAppContext.getClassLoader();
                     } catch (PackageManager.NameNotFoundException e) {
@@ -111,7 +121,7 @@ public class Script {
                         return false;
                     }
                 }
-                
+
                 try {
                     scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer", true, classLoader);
                 } catch (ClassNotFoundException e) {
@@ -146,10 +156,10 @@ public class Script {
 
                 Thread.currentThread().setContextClassLoader(classLoader);
 
-                if (scriptsDir != null) {
-                    Log.d(TAG, "Setting JRuby current directory to " + scriptsDir);
-                    callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
-                }
+                String defaultCurrentDir = appContext.getFilesDir().getPath();
+                Log.d(TAG, "Setting JRuby current directory to " + defaultCurrentDir);
+                callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
+
                 if (out != null) {
                     // callScriptingContainerMethod(Void.class, "setOutput", out);
         	        Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
@@ -159,6 +169,11 @@ public class Script {
         	        Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
         	        setErrorMethod.invoke(ruby, out);
                 }
+
+                String jrubyHome = "file:" + apkName + "!";
+                Log.i(TAG, "Setting JRUBY_HOME: " + jrubyHome);
+                System.setProperty("jruby.home", jrubyHome);
+
                 String extraScriptsDir = scriptsDirName(appContext);
                 Log.i(TAG, "Checking scripts in " + extraScriptsDir);
                 if (configDir(extraScriptsDir)) {
@@ -285,29 +300,34 @@ public class Script {
     	return scriptsDirFile;
     }
 
-    public static Boolean configDir(String scriptsDir) {
-        setDir(scriptsDir);
-        Method getLoadPathsMethod;
-        List<String> loadPath = callScriptingContainerMethod(List.class, "getLoadPaths");
-        
-        if (!loadPath.contains(scriptsDir)) {
-            Log.i(TAG, "Adding scripts dir to load path: " + scriptsDir);
-            loadPath.add(0, scriptsDir);
-            // callScriptingContainerMethod(Void.class, "setLoadPaths", loadPath);
-            try {
-                Method setLoadPathsMethod = ruby.getClass().getMethod("setLoadPaths", List.class);
-                setLoadPathsMethod.invoke(ruby, loadPath);
-            } catch (NoSuchMethodException nsme) {
-                throw new RuntimeException(nsme);
-            } catch (IllegalAccessException iae) {
-                throw new RuntimeException(iae);
-            } catch (java.lang.reflect.InvocationTargetException ite) {
-                throw new RuntimeException(ite);
-            }
+    private static void setLoadPath(List<String> loadPath) {
+        // callScriptingContainerMethod(Void.class, "setLoadPaths", loadPath);
+        try {
+            Method setLoadPathsMethod = ruby.getClass().getMethod("setLoadPaths", List.class);
+            setLoadPathsMethod.invoke(ruby, loadPath);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException(ite);
         }
+    }
 
-        if (scriptsDirFile.exists()) {
+    private static List<String> getLoadPath() {
+        return callScriptingContainerMethod(List.class, "getLoadPaths");
+    }
+
+    public static Boolean configDir(String scriptsDir) {
+        if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
+            List<String> loadPath = getLoadPath();
+
+            if (!loadPath.contains(scriptsDir)) {
+                Log.i(TAG, "Adding scripts dir to load path: " + scriptsDir);
+                loadPath.add(0, scriptsDir);
+                setLoadPath(loadPath);
+            }
             return true;
         } else {
             Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);

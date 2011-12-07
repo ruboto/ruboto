@@ -81,11 +81,18 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
 
-    private void addError(TestSuite suite, final Throwable t) {
-        Log.e(getClass().getName(), "Exception loading tests: " + t);
+    private void addError(TestSuite suite, Throwable t) {
+        Throwable cause = t;
+        while(cause != null) {
+          Log.e(getClass().getName(), "Exception loading tests: " + cause);
+          t = cause;
+          cause = t.getCause();
+        }
+        final Throwable rootCause = t;
+        rootCause.printStackTrace();
         suite.addTest(new TestCase(t.getMessage()) {
             public void runTest() throws java.lang.Throwable {
-                throw t;
+                throw rootCause;
             }
         });
     }
