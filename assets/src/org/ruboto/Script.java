@@ -321,13 +321,7 @@ public class Script {
     public static Boolean configDir(String scriptsDir) {
         if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
-            List<String> loadPath = getLoadPath();
-
-            if (!loadPath.contains(scriptsDir)) {
-                Log.i(TAG, "Adding scripts dir to load path: " + scriptsDir);
-                loadPath.add(0, scriptsDir);
-                setLoadPath(loadPath);
-            }
+            exec("$: << '" + scriptsDir + "' ; $:.uniq!");
             return true;
         } else {
             Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);
