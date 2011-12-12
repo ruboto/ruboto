@@ -84,8 +84,8 @@ public class Script {
             System.setProperty("jruby.native.enabled", "false");
 
             // Uncomment these to debug Ruby source loading
-            // System.setProperty("jruby.debug.loadService", "true");
-            // System.setProperty("jruby.debug.loadService.timing", "true");
+            System.setProperty("jruby.debug.loadService", "true");
+            System.setProperty("jruby.debug.loadService.timing", "true");
 
 
             ClassLoader classLoader;
@@ -321,7 +321,8 @@ public class Script {
     public static Boolean configDir(String scriptsDir) {
         if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
-            exec("$: << '" + scriptsDir + "' ; $:.uniq! ; p $:");
+            setDir(scriptsDir);
+            exec("$:.unshift '" + scriptsDir + "' ; $:.uniq! ; p $:");
             return true;
         } else {
             Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);
