@@ -321,7 +321,7 @@ public class Script {
     public static Boolean configDir(String scriptsDir) {
         if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
-            exec("$: << '" + scriptsDir + "' ; $:.uniq!");
+            exec("$: << '" + scriptsDir + "' ; $:.uniq! ; p $:");
             return true;
         } else {
             Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);
