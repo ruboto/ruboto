@@ -296,6 +296,7 @@ EOF
 
               # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
               if jruby_core_version < '1.7.0'
+                excluded_core_packages << 'org/jruby/compiler/ir'
                 print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0...'
                 excluded_core_packages << 'jnr'
                 excluded_core_packages.delete 'com/kenai/constantine'
