@@ -84,8 +84,8 @@ public class Script {
             System.setProperty("jruby.native.enabled", "false");
 
             // Uncomment these to debug Ruby source loading
-            System.setProperty("jruby.debug.loadService", "true");
-            System.setProperty("jruby.debug.loadService.timing", "true");
+            // System.setProperty("jruby.debug.loadService", "true");
+            // System.setProperty("jruby.debug.loadService.timing", "true");
 
 
             ClassLoader classLoader;
@@ -149,6 +149,9 @@ public class Script {
 
                 Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
                 callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
+
+                // FIXME(uwe): Write tutorial on profiling.
+                // container.getProvider().getRubyInstanceConfig().setProfilingMode(mode);
 
                 // callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
         	    Method setClassLoaderMethod = ruby.getClass().getMethod("setClassLoader", ClassLoader.class);

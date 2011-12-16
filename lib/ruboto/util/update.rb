@@ -286,9 +286,13 @@ EOF
                 'jline', 'jni',
                 'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                 'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
-                'org/apache', 'org/jruby/ant', 'org/jruby/compiler/ir', 'org/jruby/demo', 'org/jruby/embed/bsf',
+                'org/apache', 'org/jruby/ant', 'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
               ]
+
+              # FIXME(uwe): Add one of these when IR is moved to org.jruby.ir
+              # excluded_core_packages << 'org/jruby/compiler'
+              # excluded_core_packages << 'org/jruby/compiler/ir'
 
               # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
               if jruby_core_version < '1.7.0'
