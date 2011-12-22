@@ -286,8 +286,13 @@ EOF
                 'jline', 'jni',
                 'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                 'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
-                'org/apache', 'org/jruby/ant', 'org/jruby/demo', 'org/jruby/embed/bsf',
+                'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
+                'jnr/netdb', 'jnr/ffi/posix/util',
+                'org/apache', 'org/jruby/ant',
+                'org/jruby/compiler/util',
+                'org/jruby/demo', 'org/jruby/embed/bsf',
                 'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
+                'org/jruby/runtime/invokedynamic',
               ]
 
               # FIXME(uwe): Add one of these when IR is moved to org.jruby.ir
@@ -312,6 +317,7 @@ EOF
 
               excluded_core_packages.each {|i| FileUtils.remove_dir i, true}
 
+              # Uncomment this section to get a jar for each top level package in the core
               #Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
               #  `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
               #  FileUtils.rm_rf dir
