@@ -150,6 +150,11 @@ public class Script {
                 Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
                 callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
 
+                // Class traceTypeClass = Class.forName("org.jruby.runtime.backtrace.TraceType", true, classLoader);
+        	    // Method traceTypeForMethod = traceTypeClass.getMethod("traceTypeFor", String.class);
+        	    // Object traceTypeRaw = traceTypeForMethod.invoke(null, "raw");
+                // callScriptingContainerMethod(Void.class, "setTraceType", traceTypeRaw);
+
                 // FIXME(uwe): Write tutorial on profiling.
                 // container.getProvider().getRubyInstanceConfig().setProfilingMode(mode);
 

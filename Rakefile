@@ -5,8 +5,10 @@ PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
 MANIFEST_FILE = "AndroidManifest.xml"
-GEM_FILE = "ruboto-core-#{Ruboto::VERSION}.gem"
-GEM_SPEC_FILE = 'ruboto-core.gemspec'
+GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
+GEM_FILE_OLD = "ruboto-core-#{Ruboto::VERSION}.gem"
+GEM_SPEC_FILE = 'ruboto.gemspec'
+GEM_SPEC_FILE_OLD = 'ruboto-core.gemspec'
 
 # FIXME(uwe):  Remove when we stop supporting JRuby 1.5.6
 if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
@@ -23,11 +25,16 @@ ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 task :default => :gem
 
 desc "Generate a gem"
-task :gem => GEM_FILE
+task :gem => [GEM_FILE, GEM_FILE_OLD]
 
 file GEM_FILE => GEM_SPEC_FILE do
   puts "Generating #{GEM_FILE}"
   `gem build #{GEM_SPEC_FILE}`
+end
+
+file GEM_FILE_OLD => GEM_SPEC_FILE_OLD do
+  puts "Generating #{GEM_FILE_OLD}"
+  `gem build #{GEM_SPEC_FILE_OLD}`
 end
 
 desc "Push the gem to RubyGems"
