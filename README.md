@@ -1,4 +1,4 @@
-Ruboto Core
+Ruboto
 =============
 
 Ruby on Android.
@@ -6,7 +6,7 @@ Ruby on Android.
 Installation
 -------
 
-    $ gem install ruboto-core
+    $ gem install ruboto
 
 Getting Started
 ---------------
@@ -198,7 +198,7 @@ Each class has only one method that you can nest other calls inside of (ie. what
 
 The arguments passed to the block you give `handle_` methods are the same as the arguments that the java methods take. Consult the Android documentation.
 
-Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-core/blob/master/assets/src/ruboto.rb) where everything is defined.
+Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto.rb) where everything is defined.
 
 Testing
 -------
@@ -243,7 +243,7 @@ Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the proj
 "But I don't understand it well enough to contribute by forking the project!" That's fine. Equally helpful:
 
 * Use Ruboto and tell us how it could be better.
-* As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto-core/wiki/)
+* As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto/wiki/)
 * When you gain enough wisdom, reconsider whether you could fork the project.
 
 If contributing code to the project, please run the exising tests and add tests for your changes.  You run the tests using rake
@@ -254,8 +254,8 @@ Getting Help
 ------------
 
 * You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful. 
-* There is further documentation at the [wiki](http://github.com/ruboto/ruboto-core/wiki)
-* If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto-core/issues)
+* There is further documentation at the [wiki](http://github.com/ruboto/ruboto/wiki)
+* If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto/issues)
 * You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
 * There are some sample scripts (just Activities) [here](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/)
 
@@ -290,4 +290,4 @@ Thanks go to:
 * Charles Nutter, a member of the JRuby core team, for mentoring this RSoC project and starting the Ruboto project in the first place with an [irb](http://github.com/ruboto/ruboto-irb)
 * All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors)
 * [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and heavily sponsoring JRuby, which is obviously critical to the project.
-* All [contributors](http://github.com/ruboto/ruboto-core/contributors) and [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors), as much of this code was taken from ruboto-irb.
+* All [contributors](http://github.com/ruboto/ruboto/contributors) and [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors), as much of this code was taken from ruboto-irb.
