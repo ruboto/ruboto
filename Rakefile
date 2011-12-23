@@ -42,7 +42,8 @@ task :release => :gem do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
-  sh "gem push #{Dir['ruboto-core-*.gem'][-1]}"
+  sh "gem push #{GEM_FILE}"
+  sh "gem push #{GEM_FILE_OLD}"
 end
 
 desc "Run the tests"
