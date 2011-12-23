@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.date = Date.today.strftime '%Y-%m-%d'
   s.authors = ["Daniel Jackoway", "Charles Nutter", "Scott Moyer", 'Uwe Kubosch']
   s.email = %q{ruboto@googlegroups.com}
-  s.summary = %q{Platform for writing Android apps in Ruby}
+  s.summary = %q{A platform for developing apps using JRuby on Android.}
   s.homepage = %q{http://ruboto.org/}
-  s.description = %Q{Ruboto - JRuby on Android\nA generator and framework for developing full stand-alone apps for Android.}
+  s.description = %Q{Ruboto - JRuby on Android\nA generator and framework for developing full stand-alone apps for Android usign the Ruby language and libraries.}
   s.rubyforge_project = "ruboto/ruboto-core"
   s.files = FileList['[A-Z]*', "assets/**/*", "bin/*", 'lib/**/*', 'test/**/*'].to_a
   s.executables = ['ruboto']
