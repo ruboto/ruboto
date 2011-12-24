@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email = %q{ruboto@googlegroups.com}
   s.summary = %q{Platform for writing Android apps in Ruby}
   s.homepage = %q{http://ruboto.org/}
-  s.description = %q{Compatibility package to load the new "ruboto" gem.}
+  s.description = %q{Obsolete package.  Use the "ruboto" gem instead.}
   s.rubyforge_project = "ruboto/ruboto-core"
   s.files = []
   s.add_dependency('ruboto', ">=#{Ruboto::VERSION}")
