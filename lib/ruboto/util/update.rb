@@ -67,7 +67,7 @@ module Ruboto
 
           ant_setup_line = /^(\s*<\/project>)/
           run_tests_override = <<-EOF
-<!-- BEGIN added by ruboto-core -->
+<!-- BEGIN added by ruboto -->
 
     <macrodef name="run-tests-helper">
       <attribute name="emma.enabled" default="false"/>
@@ -108,7 +108,7 @@ module Ruboto
     <target name="run-tests-quick" description="Runs tests with previously installed packages">
       <run-tests-helper />
     </target>
-<!-- END added by ruboto-core -->
+<!-- END added by ruboto -->
 
 EOF
           ant_script = File.read('build.xml')
@@ -116,7 +116,7 @@ EOF
           ant_script.gsub!(/\s*<macrodef name="run-tests-helper">.*?<\/macrodef>\s*/m, '')
           ant_script.gsub!(/\s*<target name="run-tests-quick".*?<\/target>\s*/m, '')
           # TODO end
-          ant_script.gsub!(/\s*<!-- BEGIN added by ruboto-core -->.*?<!-- END added by ruboto-core -->\s*/m, '')
+          ant_script.gsub!(/\s*<!-- BEGIN added by ruboto(?:-core)? -->.*?<!-- END added by ruboto(?:-core)? -->\s*/m, '')
           raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w'){|f| f << ant_script}
         end
