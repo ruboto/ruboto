@@ -212,7 +212,7 @@ EOF
       end
 
       def update_manifest(min_sdk, target, force = false)
-        log_action("\nAdding activities (RubotoActivity and RubotoDialog) and SDK versions to the manifest") do
+        log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
           if sdk_element = verify_manifest.elements['uses-sdk']
             min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
             target ||= sdk_element.attributes["android:targetSdkVersion"]
@@ -220,22 +220,33 @@ EOF
             min_sdk ||= MINIMUM_SUPPORTED_SDK
             target ||= MINIMUM_SUPPORTED_SDK
           end
+
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/icon'
+
           if min_sdk.to_i >= 11
             app_element.attributes['android:hardwareAccelerated'] ||= 'true'
             app_element.attributes['android:largeHeap'] ||= 'true'
           end
+
           if app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             puts 'found activity tag'
           else
             app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity", 'android:exported' => 'false'}
           end
+
           if app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
             puts 'found dialog tag'
           else
             app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 'android:exported' => 'false', "android:theme" => "@android:style/Theme.Dialog"}
           end
+
+          if app_element.elements["service[@android:name='org.ruboto.RubotoService']"]
+            puts 'found service tag'
+          else
+            app_element.add_element 'service', {"android:name" => "org.ruboto.RubotoService", 'android:exported' => 'false'}
+          end
+
           if sdk_element
             sdk_element.attributes["android:minSdkVersion"] = min_sdk
             sdk_element.attributes["android:targetSdkVersion"] = target
@@ -261,6 +272,20 @@ EOF
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
           FileUtils.mkdir_p File.dirname(to)
           FileUtils.cp from, to
+        end
+        log_action("Copying additional ruboto script components") do
+          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/*.rb").each do |i|
+            from = File.expand_path(i)
+            to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/#{File.basename(i)}")
+            FileUtils.mkdir_p File.dirname(to)
+            FileUtils.cp from, to
+          end
+          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/util/*.rb").each do |i|
+            from = File.expand_path(i)
+            to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/util/#{File.basename(i)}")
+            FileUtils.mkdir_p File.dirname(to)
+            FileUtils.cp from, to
+          end
         end
       end
 
