@@ -10,9 +10,9 @@ require 'rake/clean'
 require 'rexml/document'
 
 PROJECT_DIR        = Dir.getwd
-UPDATE_MARKER_FILE = File.expand_path(File.join('tmp', 'LAST_UPDATE'), File.dirname(__FILE__))
+UPDATE_MARKER_FILE = File.expand_path(File.join('bin', 'LAST_UPDATE'), File.dirname(__FILE__))
 BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
-BUNDLE_PATH        = File.expand_path 'tmp/bundle'
+BUNDLE_PATH        = File.expand_path 'bin/bundle'
 MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
 GEM_FILE           = File.expand_path('Gemfile.apk')
@@ -26,7 +26,7 @@ JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
 APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 
-CLEAN.include('tmp', 'bin')
+CLEAN.include('bin')
 
 task :default => :debug
 
