@@ -134,6 +134,7 @@ module Ruboto
       #   on the API specifications.
       #
       def generate_core_classes(params)
+        return if app_name('.') == 'RubotoCore'
         %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener android.widget.AdapterView.OnItemSelectedListener).each do |i|
           name = i.split(".")[-1]
           if(params[:class] == name or params[:class] == "all")

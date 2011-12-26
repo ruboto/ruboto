@@ -1,6 +1,8 @@
 module Ruboto
   module Util
     module Update
+      JRUBY_EMBED_JAR_FILE = "libs/jruby-embed.jar"
+
       include Build
       ###########################################################################
       #
@@ -12,7 +14,7 @@ module Ruboto
 
         # FIXME(uwe): Remove build.xml file to force regeneration.
         # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
-        name = REXML::Document.new(File.read("#{root}/build.xml")).root.attributes['name']
+        name = app_name
         FileUtils.rm_f "#{root}/build.xml"
         # FIXME end
 
@@ -123,13 +125,19 @@ EOF
       end
 
       def update_jruby(force=nil, with_psych=nil)
+        puts "update_jruby"
+        unless File.exists? 'libs'
+          puts "Cannot find the 'libs' directory. Make sure you're in the root directory of your app."
+          return false
+        end
         jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
         jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
         new_jruby_version = JRubyJars::VERSION
 
         unless force
           if !jruby_core || !jruby_stdlib
-            puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app."
+            puts "Skipped updating the jruby jars in libs since they are not present."
+            extract_scripting_container_interface(new_jruby_version)
             return false
           end
 
@@ -142,6 +150,8 @@ EOF
           puts "Current jruby version: #{current_jruby_version}"
           puts "New jruby version: #{new_jruby_version}"
         end
+
+        File.delete JRUBY_EMBED_JAR_FILE if File.exists? JRUBY_EMBED_JAR_FILE
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
         log_action("Removing #{jruby_core}") {File.delete *Dir.glob("libs/jruby-core-*.jar")} if jruby_core
@@ -183,8 +193,8 @@ EOF
 
       def update_classes(force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java"}
-        log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"}
+        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java"} unless app_name == 'RubotoCore'
+        log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"} unless app_name == 'RubotoCore'
         Dir["src/#{verify_package.gsub('.', '/')}/*.java"].each do |f|
           if File.read(f) =~ /public class (.*?) extends org.ruboto.Ruboto(Activity|BroadcastReceiver|Service) \{/
             subclass_name, class_name = $1, $2
@@ -208,7 +218,7 @@ EOF
             # FIXME end
 
           end
-        end
+        end unless app_name == 'RubotoCore'
       end
 
       def update_manifest(min_sdk, target, force = false)
@@ -294,6 +304,46 @@ EOF
         reconfigure_jruby_stdlib(with_psych)
       end
 
+      def extract_scripting_container_interface(jruby_core_version)
+        log_action("Extracting ScriptingContainerInterface from #{JRubyJars::core_jar_path} to libs") do
+          copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
+          copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"
+          jruby_core = JRubyJars::core_jar_path.split('/')[-1]
+          Dir.chdir 'libs' do
+              FileUtils.rm_rf 'tmp'
+              Dir.mkdir 'tmp'
+              Dir.chdir 'tmp' do
+                FileUtils.move "../#{jruby_core}", "."
+                `jar -xf #{jruby_core}`
+                File.delete jruby_core
+
+                # Import statements copied from ScriptingContainerInterface.java
+                interface_files = interface_files()
+                `jar -cf ../../#{JRUBY_EMBED_JAR_FILE} #{interface_files.join(' ')}`
+              end
+              FileUtils.remove_dir "tmp", true
+          end
+        end
+      end
+
+      def interface_files
+        interface_imports = <<-EOF
+                import org.jruby.CompatVersion;
+                import org.jruby.Profile;
+                import org.jruby.Ruby;
+                import org.jruby.RubyInstanceConfig.CompileMode;
+                import org.jruby.RubyInstanceConfig.LoadServiceCreator;
+                import org.jruby.RubyInstanceConfig.ProfilingMode;
+                import org.jruby.embed.internal.BiVariableMap;
+                import org.jruby.embed.internal.LocalContextProvider;
+                import org.jruby.runtime.Block;
+                import org.jruby.util.ClassCache;
+                import org.jruby.util.KCode;
+        EOF
+        interface_classes = interface_imports.split("\n").map(&:strip).map { |package| package =~ /import (.*);/; $1 }
+        ['org/jruby/embed/ScriptingContainerInterface.class'] + interface_classes.map { |c| c.gsub(/([A-Z][a-z]+)\.([A-Z])/, '\1$\2').gsub('.', '/') + '.class' }
+      end
+
       # - Removes unneeded code from jruby-core
       # - Split into smaller jars that can be used separately
       def reconfigure_jruby_core(jruby_core_version)
@@ -341,6 +391,7 @@ EOF
               # TODO end
 
               excluded_core_packages.each {|i| FileUtils.remove_dir i, true}
+              interface_files.each {|f| FileUtils.rm_f f} if app_name == 'RubotoCore'
 
               # Uncomment this section to get a jar for each top level package in the core
               #Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|

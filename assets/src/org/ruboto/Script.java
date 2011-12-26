@@ -27,6 +27,8 @@ import java.util.List;
 
 import dalvik.system.PathClassLoader;
 
+import org.jruby.embed.ScriptingContainerInterface;
+
 public class Script {
     private static String scriptsDir = "scripts";
     private static File scriptsDirFile = null;
@@ -150,6 +152,7 @@ public class Script {
                 Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
                 callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
 
+                // Uncomment this to change the stack trace type to "raw"
                 // Class traceTypeClass = Class.forName("org.jruby.runtime.backtrace.TraceType", true, classLoader);
         	    // Method traceTypeForMethod = traceTypeClass.getMethod("traceTypeFor", String.class);
         	    // Object traceTypeRaw = traceTypeForMethod.invoke(null, "raw");

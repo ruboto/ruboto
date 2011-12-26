@@ -94,14 +94,14 @@ module Ruboto
                   update_ruboto true
                   update_icons true
                   update_classes true
-                  update_jruby true, params['with-psych'].value if params['with-jruby'].value || params['with-psych'].value
+                  update_jruby params['with-jruby'].value, params['with-psych'].value
 #                  update_build_xml
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
                     generate_inheriting_file "Activity", activity, package
-                  end
+                  end unless app_name == 'RubotoCore'
                 end
 
                 puts "\nHello, #{name}\n"

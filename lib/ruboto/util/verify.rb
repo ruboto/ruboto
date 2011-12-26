@@ -82,6 +82,14 @@ module Ruboto
         File.open("ruboto.yml", 'w') {|f| YAML.dump verify_ruboto_config}
       end
 
+      def verify_build_xml(reload = false)
+        @build_xml ||= REXML::Document.new(File.read('build.xml'))
+      end
+
+      def app_name(reload = false)
+        verify_build_xml(reload).root.attributes['name']
+      end
+
     end
   end
 end
