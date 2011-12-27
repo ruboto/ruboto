@@ -23,6 +23,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.ruboto.Script;
+import java.util.Set;
+import java.util.HashSet;
 
 public class InstrumentationTestRunner extends android.test.InstrumentationTestRunner {
     private Class activityClass;
@@ -39,23 +41,25 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                 Script.defineGlobalVariable("$test", this);
                 Script.defineGlobalVariable("$suite", suite);
 
-                // TODO(uwe):  Why doesn't this work?
-                // Script.copyScriptsIfNeeded(getContext());
-
                 loadScript("test_helper.rb");
 
-                // TODO(uwe):  Why doesn't this work?
-                // String[] scripts = new File(Script.scriptsDirName(getContext())).list();
-
-                String[] scripts = getContext().getResources().getAssets().list("scripts");
-                for (String f : scripts) {
-                    if (f.equals("test_helper.rb")) continue;
-                    Log.i(getClass().getName(), "Found script: " + f);
-                    loadScript(f);
+                String test_apk_path = getContext().getPackageManager().getApplicationInfo(getContext().getPackageName(), 0).sourceDir;
+                JarFile jar = new JarFile(test_apk_path);
+                Enumeration<JarEntry> entries = jar.entries();
+                while(entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String name = entry.getName();
+                    if (name.indexOf("/") >= 0 || !name.endsWith(".rb")) {
+                        continue;
+                    }
+                    if (name.equals("test_helper.rb")) continue;
+                    loadScript(name);
                 }
             } else {
                 addError(suite, new RuntimeException("Ruboto Core platform is missing"));
             }
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            addError(suite, e);
         } catch (IOException e) {
           addError(suite, e);
         } catch (RuntimeException e) {
@@ -98,10 +102,8 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     private void loadScript(String f) throws IOException {
-        // TODO(uwe):  Why doesn't this work?
-        // InputStream is = new FileInputStream(Script.scriptsDirName(getContext()) + "/" + f);
-
-        InputStream is = getContext().getResources().getAssets().open("scripts/" + f);
+        Log.d(getClass().getName(), "Loading test script: " + f);
+        InputStream is = getClass().getClassLoader().getResourceAsStream(f);
         BufferedReader buffer = new BufferedReader(new InputStreamReader(is));
         StringBuilder source = new StringBuilder();
         while (true) {
@@ -111,7 +113,6 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         }
         buffer.close();
 
-        Log.d(getClass().getName(), "Loading test script: " + f);
         String oldFilename = Script.getScriptFilename();
         Script.setScriptFilename(f);
         Script.put("$script_code", source.toString());

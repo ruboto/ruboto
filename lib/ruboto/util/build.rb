@@ -186,10 +186,9 @@ module Ruboto
           puts "Added file #{script_file}."
         end
 
-        test_file = File.expand_path("test/assets/scripts/#{script_name.chomp('.rb')}_test.rb", dest)
+        test_file = File.expand_path("test/src/#{script_name.chomp('.rb')}_test.rb", dest)
         if !File.exists? test_file
           sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb")).gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name)
-          FileUtils.mkdir_p File.join(dest, 'test/assets/scripts')
           File.open test_file, "a" do |f|
             f << sample_test_source
           end
