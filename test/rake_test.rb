@@ -19,7 +19,7 @@ class RakeTest < Test::Unit::TestCase
         s.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
         File.open(activity_filename, 'w') { |f| f << s }
 
-        test_filename = "test/assets/scripts/ruboto_test_app_activity_test.rb"
+        test_filename = "test/src/ruboto_test_app_activity_test.rb"
         s2 = File.read(test_filename)
         s2.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
         File.open(test_filename, 'w') { |f| f << s2 }
