@@ -83,12 +83,13 @@ THE_CONSTANTS
     protected void loadScript() {
         try {
             if (scriptName != null) {
-                new Script(scriptName).execute();
+    	        Script.setScriptFilename(getClass().getClassLoader().getResource(scriptName).getPath());
+                Script.execute(new Script(scriptName).getContents());
             } else {
                 // TODO: Why doesn't this work? 
                 // Script.callMethod(this, "initialize_ruboto");
                 Script.execute("$activity.initialize_ruboto");
-                // TODO: Why doesn't this work? 
+                // TODO: Why doesn't this work?
                 // Script.callMethod(this, "on_create", args[0]);
                 Script.execute("$activity.on_create($bundle)");
             }
