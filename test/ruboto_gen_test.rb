@@ -24,7 +24,7 @@ class RubotoGenTest < Test::Unit::TestCase
       assert_equal 1, $?.exitstatus
       assert !File.exists?('src/org/ruboto/test_app/VeryNewActivity.java')
       assert !File.exists?('src/very_new_activity.rb')
-      assert !File.exists?('test/assets/scripts/very_new_activity_test.rb')
+      assert !File.exists?('test/src/very_new_activity_test.rb')
       assert File.read('AndroidManifest.xml') !~ /VeryNewActivity/
     end
   end

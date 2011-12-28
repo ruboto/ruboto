@@ -119,6 +119,15 @@ EOF
           ant_script.gsub!(/\s*<!-- BEGIN added by ruboto(?:-core)? -->.*?<!-- END added by ruboto(?:-core)? -->\s*/m, '')
           raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w'){|f| f << ant_script}
+
+          # FIXME(uwe): Remove when we stop supporting update from Ruboto <= 0.5.2
+          if File.directory? 'assets/scripts'
+            log_action 'Moving test scripts to the "src" directory.' do
+              FileUtils.mv Dir['assets/scripts/*'], 'src'
+              FileUtils.rm_rf 'assets/scripts'
+            end
+          end
+          # FIXME end
         end
       end
 

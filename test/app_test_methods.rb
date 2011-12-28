@@ -19,7 +19,7 @@ module AppTestMethods
       Dir.chdir APP_DIR do
         system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}"
         FileUtils.cp "#{snake_name}.rb", "src/"
-        FileUtils.cp test_src, "test/assets/scripts/"
+        FileUtils.cp test_src, "test/src/"
       end
     end
     run_app_tests
