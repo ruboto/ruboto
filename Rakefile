@@ -76,9 +76,9 @@ namespace :platform do
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
       File.open('project.properties', 'w'){|f| f << "target=android-8\n"}
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
-      keystore_file = File.expand_path('~/android_market.keystore')
+      keystore_file = File.expand_path('~/ruboto.keystore')
       if File.exists?(keystore_file)
-        File.open('local.properties', 'a'){|f| f << "key.store=#{keystore_file}\nkey.alias=android_market\n"}
+        File.open('local.properties', 'a'){|f| f << "key.store=#{keystore_file}\nkey.alias=Ruboto\n"}
       end
     end
   end
