@@ -70,13 +70,13 @@ namespace :platform do
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'
-      manifest.root.attributes['android:versionName'] = '0.4.8.dev'
+      manifest.root.attributes['android:versionName'] = '0.4.8'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
       File.open('project.properties', 'w'){|f| f << "target=android-8\n"}
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
-      File.open('ant.properties', 'a'){|f| f << "key.store=${user.home}/ruboto.keystore\nkey.alias=Ruboto\n"}
+      File.open('ant.properties', 'a'){|f| f << "key.store=${user.home}/ruboto_core.keystore\nkey.alias=Ruboto\n"}
     end
   end
 
