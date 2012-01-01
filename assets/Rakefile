@@ -1,3 +1,8 @@
+if `ant -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8) || ($1.to_i == 1 && $2.to_i == 8 && $3.to_i < 1)
+  puts "ANT version 1.8.1 or later required.  Version found: #{$1}.#{$2}.#{$3}"
+  exit 1
+end
+
 require 'time'
 
 def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
