@@ -186,6 +186,7 @@ EOF
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', force
         log_action('icons') do
           copier.copy 'res/drawable*/icon.png'
+          copier.copy 'res/drawable/get_ruboto_core.png'
           copier.copy 'res/drawable*/icon.png', 'test'
         end
       end
