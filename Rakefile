@@ -1,3 +1,4 @@
+require 'rake/clean'
 require 'rexml/document'
 require 'lib/ruboto/version'
 
@@ -21,6 +22,7 @@ JRUBY_JARS_VERSION = gem_spec.version
 ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 # FIXME end
 
+CLEAN.include('ruboto-*.gem', 'tmp')
 
 task :default => :gem
 
