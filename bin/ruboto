@@ -1,4 +1,11 @@
 #!/usr/bin/env ruby
+
+`android list`
+if $? != 0
+  puts "Android SDK not in path"
+  exit 1
+end
+
 require 'ruboto/commands/base'
 
 # Run Base, which will handle actual commands
