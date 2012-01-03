@@ -519,6 +519,7 @@ public class Script {
         } catch (java.lang.reflect.InvocationTargetException ite) {
             printStackTrace(ite);
         }
+        return null;
 	}
 
 	public static <T> T callMethod(Object receiver, String methodName,
@@ -531,14 +532,24 @@ public class Script {
 		return callMethod(receiver, methodName, new Object[]{}, returnType);
 	}
 
-	private static printStackTrace(Throwable t) {
-        Method getOutputMethod = ruby.getClass().getMethod("getOutput");
-        PrintStream out = getOutputMethod.invoke(ruby);
-        # TODO(uwe):  Simplify this when Issue #144 is resolved
+	private static void printStackTrace(Throwable t) {
+        PrintStream out;
     	try {
+            Method getOutputMethod = ruby.getClass().getMethod("getOutput");
+            out = (PrintStream) getOutputMethod.invoke(ruby);
+        } catch (java.lang.NoSuchMethodException nsme) {
+            throw new RuntimeException("ScriptingContainer#getOutput method not found.", nsme);
+        } catch (java.lang.IllegalAccessException iae) {
+            throw new RuntimeException("ScriptingContainer#getOutput method not accessable.", iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException("ScriptingContainer#getOutput failed.", ite);
+        }
+
+        // TODO(uwe):  Simplify this when Issue #144 is resolved
+        try {
             t.printStackTrace(out);
     	} catch (NullPointerException npe) {
-    	    # TODO(uwe): printStackTrace should not fail
+    	    // TODO(uwe): printStackTrace should not fail
             for (java.lang.StackTraceElement ste : t.getStackTrace()) {
                 out.append(ste.toString() + "\n");
             }
