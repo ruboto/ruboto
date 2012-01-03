@@ -169,11 +169,8 @@ public class Script {
                 callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
 
                 if (out != null) {
-                    // callScriptingContainerMethod(Void.class, "setOutput", out);
         	        Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
         	        setOutputMethod.invoke(ruby, out);
-
-                    // callScriptingContainerMethod(Void.class, "setError", out);
         	        Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
         	        setErrorMethod.invoke(ruby, out);
                 }
@@ -229,15 +226,10 @@ public class Script {
         } catch (RuntimeException re) {
             re.printStackTrace();
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-        	try {
-                e.printStackTrace();
-        	} catch (NullPointerException npe) {
-        	}
+            printStackTrace(e);
         } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
@@ -495,7 +487,6 @@ public class Script {
     }
 
 	public static void callMethod(Object receiver, String methodName, Object[] args) {
-		// callScriptingContainerMethod(Void.class, "callMethod", receiver, methodName, args);
         try {
             Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class);
             callMethodMethod.invoke(ruby, receiver, methodName, args);
@@ -504,7 +495,7 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw (RuntimeException)(ite.getCause());
+            printStackTrace(ite);
         }
     }
 
@@ -518,7 +509,6 @@ public class Script {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
-		// return callScriptingContainerMethod(returnType, "callMethod", receiver, methodName, args, returnType);
         try {
             Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
             return (T) callMethodMethod.invoke(ruby, receiver, methodName, args, returnType);
@@ -527,7 +517,7 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw (RuntimeException) ite.getCause();
+            printStackTrace(ite);
         }
 	}
 
@@ -541,5 +531,18 @@ public class Script {
 		return callMethod(receiver, methodName, new Object[]{}, returnType);
 	}
 
-}
+	private static printStackTrace(Throwable t) {
+        Method getOutputMethod = ruby.getClass().getMethod("getOutput");
+        PrintStream out = getOutputMethod.invoke(ruby);
+        # TODO(uwe):  Simplify this when Issue #144 is resolved
+    	try {
+            t.printStackTrace(out);
+    	} catch (NullPointerException npe) {
+    	    # TODO(uwe): printStackTrace should not fail
+            for (java.lang.StackTraceElement ste : t.getStackTrace()) {
+                out.append(ste.toString() + "\n");
+            }
+    	}
+	}
 
+}
