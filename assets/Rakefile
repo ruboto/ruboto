@@ -144,11 +144,10 @@ end
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
   task :restart => APK_DEPENDENCIES do |t|
-    if stop_app
-      update_scripts
-    else
-      build_apk(t, false)
+    if build_apk(t, false) || !stop_app
       install_apk
+    else
+      update_scripts
     end
     start_app
   end
@@ -334,7 +333,7 @@ def build_apk(t, release)
     changed_prereqs = t.prerequisites.select do |p|
       File.file?(p) && !Dir[p].empty? && Dir[p].map { |f| File.mtime(f) }.max > File.mtime(APK_FILE)
     end
-    return if changed_prereqs.empty?
+    return false if changed_prereqs.empty?
     changed_prereqs.each { |f| puts "#{f} changed." }
     puts "Forcing rebuild of #{apk_file}."
   end
@@ -343,6 +342,7 @@ def build_apk(t, release)
   else
     sh 'ant debug'
   end
+  return true
 end
 
 def install_apk
