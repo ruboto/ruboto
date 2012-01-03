@@ -15,7 +15,7 @@ class MinimalAppTest < Test::Unit::TestCase
     upper_limit = 3.1
     lower_limit = upper_limit * 0.85
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB"
-    assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB.  You should lower the limit."
+    assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}MB: #{'%.1f' % apk_size.floor(1)}MB.  You should lower the limit."
   end
 
   def test_minimal_apk_succeeds_tests
