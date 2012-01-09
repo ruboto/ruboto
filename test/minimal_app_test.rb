@@ -3,7 +3,8 @@ require 'bigdecimal'
 
 class MinimalAppTest < Test::Unit::TestCase
   def setup
-    generate_app :excluded_stdlibs => %w{ant cgi digest dl drb ffi irb net optparse racc rbconfig rdoc rexml rinda rss rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd}
+    generate_app :excluded_stdlibs => %w{ant cgi digest dl drb ffi irb net optparse racc rbconfig rdoc rexml rinda rss
+        rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd ../1.9}
   end
 
   def teardown
