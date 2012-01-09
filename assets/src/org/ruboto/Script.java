@@ -322,7 +322,7 @@ public class Script {
         if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
             setDir(scriptsDir);
-            exec("$:.unshift '" + scriptsDir + "' ; $:.uniq! ; p $:");
+            exec("$:.unshift '" + scriptsDir + "' ; $:.uniq!");
             return true;
         } else {
             Log.i(TAG, "Extra scripts dir not present: " + scriptsDir);
