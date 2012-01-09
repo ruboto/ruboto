@@ -108,7 +108,7 @@ class Test::Unit::TestCase
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}#{'_updated' if update}#{"_without_#{excluded_stdlibs.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map{|ed| ed.gsub(/[.\/]/, '_')}.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
