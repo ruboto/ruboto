@@ -371,71 +371,39 @@ EOF
         excluded_stdlibs = %w{} + (verify_ruboto_config[:excluded_stdlibs] || [])
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
-          stdlib_1_8_files = nil
           log_action("Reformatting #{jruby_stdlib}") do
-            FileUtils.mkdir_p "tmp/old"
-            FileUtils.mkdir_p "tmp/new/lib/ruby"
-            Dir.chdir "tmp/old" do
-              # FileUtils.move "../#{jruby_stdlib}", "."
-              `jar -xf ../../#{jruby_stdlib}`
-              # File.delete jruby_stdlib
+            FileUtils.mkdir_p 'tmp'
+            Dir.chdir 'tmp' do
+              FileUtils.mkdir_p 'old'
+              FileUtils.mkdir_p 'new'
+              Dir.chdir 'old' do
+                `jar -xf ../../#{jruby_stdlib}`
+              end
+              FileUtils.move 'old/META-INF/jruby.home/lib', 'new'
 
-              FileUtils.move "META-INF/jruby.home/lib/ruby/1.8", "../new/lib/ruby"
-              Dir["META-INF/jruby.home/lib/ruby/site_ruby/1.8/*"].each do |f|
-                next if File.basename(f) =~ /^..?$/
-                FileUtils.move f, "../new/lib/ruby/1.8/" + File.basename(f)
-              end
-              Dir["META-INF/jruby.home/lib/ruby/site_ruby/shared/*"].each do |f|
-                next if File.basename(f) =~ /^..?$/
-                FileUtils.move f, "../new/lib/ruby/1.8/" + File.basename(f)
-              end
-            end
-            Dir.chdir "tmp/new/lib/ruby/1.8" do
+              FileUtils.rm_rf 'new/lib/ruby/gems'
+
               if excluded_stdlibs.any?
-                excluded_stdlibs.each { |d| FileUtils.rm_rf d }
-                print "excluded #{excluded_stdlibs.join(' ')}..."
-              end
-              stdlib_1_8_files = Dir['**/*']
-            end
-            Dir.chdir "tmp/new" do
-              # Uncomment this part to split the stdlib into one jar per directory
-              # Dir['*'].select{|f| File.directory? f}.each do |d|
-              #    `jar -cf ../jruby-stdlib-#{d}-#{JRubyJars::VERSION}.jar #{d}`
-              #    FileUtils.rm_rf d
-              # end
-
-              `jar -cf ../../#{jruby_stdlib} .`
-            end
-          end
-
-          psych_jar = "psych.jar"
-          psych_already_present = File.exists? psych_jar
-          FileUtils.rm_f psych_jar
-
-          if with_psych || with_psych.nil? && psych_already_present
-            log_action("Adding psych #{File.basename psych_jar}") do
-              psych_dir = 'tmp/psych/lib/ruby/1.8'
-              FileUtils.mkdir_p File.dirname(psych_dir)
-              FileUtils.move "tmp/old/META-INF/jruby.home/lib/ruby/1.9", psych_dir
-              Dir.chdir psych_dir do
-                if excluded_stdlibs.any?
-                  excluded_stdlibs.each { |d| FileUtils.rm_rf d }
-                  print "excluded #{excluded_stdlibs.join(' ')}..."
-                end
-                psych_files = Dir["**/*"]
-                puts if psych_files.any?
-                psych_files.each do |f|
-                  next if File.basename(f) =~ /^..?$/
-                  if stdlib_1_8_files.include? f
-                    puts "Removing duplicate #{f}"
-                    FileUtils.rm_f f
+                ['1.8', '1.9', 'shared'].each do |ld|
+                  excluded_stdlibs.each do |d|
+                    dir = "new/lib/ruby/#{ld}/#{d}"
+                    if File.exists? dir
+                      FileUtils.rm_rf dir
+                    end
                   end
                 end
+                print "excluded #{excluded_stdlibs.join(' ')}..."
               end
-              Dir.chdir 'tmp/psych' do
-                `jar -cf ../../#{psych_jar} .`
+
+              Dir.chdir "new" do
+                # Uncomment this part to split the stdlib into one jar per directory
+                # Dir['*'].select{|f| File.directory? f}.each do |d|
+                #    `jar -cf ../jruby-stdlib-#{d}-#{JRubyJars::VERSION}.jar #{d}`
+                #    FileUtils.rm_rf d
+                # end
+
+                `jar -cf ../../#{jruby_stdlib} .`
               end
-              FileUtils.remove_dir psych_dir, true
             end
           end
 
