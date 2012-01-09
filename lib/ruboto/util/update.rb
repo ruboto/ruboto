@@ -371,7 +371,6 @@ EOF
         excluded_stdlibs = %w{} + (verify_ruboto_config[:excluded_stdlibs] || [])
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
-          # stdlib_1_8_files = nil
           log_action("Reformatting #{jruby_stdlib}") do
             FileUtils.mkdir_p 'tmp'
             Dir.chdir 'tmp' do
@@ -381,13 +380,21 @@ EOF
                 `jar -xf ../../#{jruby_stdlib}`
               end
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new'
-              Dir.chdir "new/lib/ruby/1.8" do
-                if excluded_stdlibs.any?
-                  excluded_stdlibs.each { |d| FileUtils.rm_rf d }
-                  print "excluded #{excluded_stdlibs.join(' ')}..."
+
+              FileUtils.rm_rf 'new/lib/ruby/gems'
+
+              if excluded_stdlibs.any?
+                ['1.8', '1.9', 'shared'].each do |ld|
+                  excluded_stdlibs.each do |d|
+                    dir = "new/lib/ruby/#{ld}/#{d}"
+                    if File.exists? dir
+                      FileUtils.rm_rf dir
+                    end
+                  end
                 end
-                # stdlib_1_8_files = Dir['**/*']
+                print "excluded #{excluded_stdlibs.join(' ')}..."
               end
+
               Dir.chdir "new" do
                 # Uncomment this part to split the stdlib into one jar per directory
                 # Dir['*'].select{|f| File.directory? f}.each do |d|
@@ -399,37 +406,6 @@ EOF
               end
             end
           end
-
-          #psych_jar = "psych.jar"
-          #psych_already_present = File.exists? psych_jar
-          #FileUtils.rm_f psych_jar
-          #
-          #if with_psych || with_psych.nil? && psych_already_present
-          #  log_action("Adding psych #{File.basename psych_jar}") do
-          #    psych_dir = 'tmp/psych/lib/ruby/1.8'
-          #    FileUtils.mkdir_p File.dirname(psych_dir)
-          #    FileUtils.move "tmp/old/META-INF/jruby.home/lib/ruby/1.9", psych_dir
-          #    Dir.chdir psych_dir do
-          #      if excluded_stdlibs.any?
-          #        excluded_stdlibs.each { |d| FileUtils.rm_rf d }
-          #        print "excluded #{excluded_stdlibs.join(' ')}..."
-          #      end
-          #      psych_files = Dir["**/*"]
-          #      puts if psych_files.any?
-          #      psych_files.each do |f|
-          #        next if File.basename(f) =~ /^..?$/
-          #        if stdlib_1_8_files.include? f
-          #          puts "Removing duplicate #{f}"
-          #          FileUtils.rm_f f
-          #        end
-          #      end
-          #    end
-          #    Dir.chdir 'tmp/psych' do
-          #      `jar -cf ../../#{psych_jar} .`
-          #    end
-          #    FileUtils.remove_dir psych_dir, true
-          #  end
-          #end
 
           FileUtils.remove_dir "tmp", true
         end
