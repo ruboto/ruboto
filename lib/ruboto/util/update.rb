@@ -387,18 +387,15 @@ EOF
                 else
                   lib_dirs = ['1.8', '1.9', 'shared']
                 end
+                puts "lib_dirs: #{lib_dirs.inspect}"
                 # TODO end
 
                 lib_dirs.each do |ld|
                   excluded_stdlibs.each do |d|
                     dir = "new/lib/ruby/#{ld}/#{d}"
-                    if File.exists? dir
-                      FileUtils.rm_rf dir
-                    end
+                    FileUtils.rm_rf dir if File.exists? dir
                     file = "#{dir}.rb"
-                    if File.exists? file
-                      FileUtils.rm_rf file
-                    end
+                    FileUtils.rm_rf file if File.exists? file
                   end
                 end
                 print "excluded #{excluded_stdlibs.join(' ')}..."
