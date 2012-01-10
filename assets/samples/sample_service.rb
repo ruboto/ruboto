@@ -1,14 +1,17 @@
 require 'ruboto/service'
+require 'ruboto/util/toast'
 
 $context.start_ruboto_service do
-  # define what your service does. Directly put any code that you want
-  # executed when onCreate gets called. Define the rest of the
-  # behavior with handle_ blocks. See the README for more info.
-
   # Services are complicated and don't really make sense unless you
   # show the interaction between the Service and other parts of your
-  # app
+  # app.
   # For now, just take a look at the explanation and example in
   # online:
   # http://developer.android.com/reference/android/app/Service.html
+
+  def on_start_command(intent, flags, startId)
+    toast "Hello from the service"
+    self.class::START_NOT_STICKY
+  end
+
 end

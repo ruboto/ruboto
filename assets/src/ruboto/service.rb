@@ -26,7 +26,7 @@ module Ruboto
       self
     end
   
-    def start_ruboto_service(global_variable_name, klass=RubotoService, &block)
+    def start_ruboto_service(global_variable_name = '$service', klass=RubotoService, &block)
       $context_init_block = block
       $new_context_global = global_variable_name
   
