@@ -5,10 +5,10 @@ module AppTestMethods
 
   def test_activity_tests
     # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
-    if not ON_JRUBY_JARS_1_5_6
-      assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
-    else
+    if ON_JRUBY_JARS_1_5_6
       puts "Skipping YAML tests on jruby-jars-1.5.6"
+    else
+      assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
     end
 
     assert_code 'ReadSourceFile', "File.read(__FILE__)"
