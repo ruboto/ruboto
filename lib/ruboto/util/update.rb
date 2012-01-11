@@ -387,7 +387,6 @@ EOF
                 else
                   lib_dirs = ['1.8', '1.9', 'shared']
                 end
-                puts "lib_dirs: #{lib_dirs.inspect}"
                 # TODO end
 
                 lib_dirs.each do |ld|
