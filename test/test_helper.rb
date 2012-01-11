@@ -91,13 +91,12 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
-    with_psych = options.delete(:with_psych) || false
     update = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
-    if with_psych || excluded_stdlibs
+    if excluded_stdlibs
       system 'rake platform:uninstall'
     else
       system 'rake platform:install'
@@ -108,7 +107,7 @@ class Test::Unit::TestCase
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{'_with_psych' if with_psych}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map{|ed| ed.gsub(/[.\/]/, '_')}.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map{|ed| ed.gsub(/[.\/]/, '_')}.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
@@ -125,14 +124,13 @@ class Test::Unit::TestCase
         Dir.chdir APP_DIR do
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
-          FileUtils.touch "libs/psych.jar" if with_psych
           exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
           system "#{RUBOTO_CMD} update app"
           assert_equal 0, $?, "update app failed with return code #$?"
         end
       else
         puts "Generating app #{APP_DIR}"
-        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET} #{'--with-psych' if with_psych}"
+        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET}"
         if $? != 0
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"

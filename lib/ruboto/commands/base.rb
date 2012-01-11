@@ -55,10 +55,6 @@ module Ruboto
                 description "Generate the JRuby jars jar"
                 cast :boolean
               }
-              option("with-psych") {
-                description "Generate the Psych YAML parser jar"
-                cast :boolean
-              }
 
               def run
                 package = params['package'].value
@@ -94,7 +90,7 @@ module Ruboto
                   update_ruboto true
                   update_icons true
                   update_classes true
-                  update_jruby true, params['with-psych'].value if params['with-jruby'].value || params['with-psych'].value
+                  update_jruby true if params['with-jruby'].value
 #                  update_build_xml
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
@@ -114,14 +110,9 @@ module Ruboto
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
 
-              option("with-psych") {
-                description "Generate the Psych YAML parser jar"
-                cast :boolean
-              }
-
               def run
                 Dir.chdir root do
-                  update_jruby true, params['with-psych'].value
+                  update_jruby true
                 end
               end
             end
@@ -332,11 +323,6 @@ module Ruboto
               description "force and update even if the version hasn't changed"
             }
 
-            option("with-psych") {
-              description "Generate the Psych YAML parser jar"
-              cast :boolean
-            }
-
             def run
               case params['what'].value
               when "app" then
@@ -347,12 +333,12 @@ module Ruboto
                 update_ruboto force
                 update_icons force
                 update_classes force
-                update_jruby force, params['with-psych'].value
+                update_jruby force
                 update_manifest nil, nil, force
                 update_core_classes "exclude"
                 update_bundle
               when "jruby" then
-                update_jruby(params['force'].value, params['with-psych'].value) || abort
+                update_jruby(params['force'].value) || abort
               when "ruboto" then
                 update_ruboto(params['force'].value) || abort
               end

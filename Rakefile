@@ -68,7 +68,7 @@ namespace :platform do
   task :project => PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
-    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby #{'--with-psych' unless ON_JRUBY_JARS_1_5_6} --path #{PLATFORM_PROJECT}"
+    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'

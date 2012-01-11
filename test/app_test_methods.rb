@@ -4,6 +4,7 @@ module AppTestMethods
   include RubotoTest
 
   def test_activity_tests
+    # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
     if not ON_JRUBY_JARS_1_5_6
       assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
     else
@@ -14,6 +15,9 @@ module AppTestMethods
     assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
 
     Dir[File.expand_path('activity/*_test.rb', File.dirname(__FILE__))].each do |test_src|
+      # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
+      next if ON_JRUBY_JARS_1_5_6 && test_src == 'psych_activity_test.rb'
+
       snake_name = test_src.chomp('_test.rb')
       activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join
       Dir.chdir APP_DIR do

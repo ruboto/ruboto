@@ -5,8 +5,8 @@ module UpdateTestMethods
   include RubotoTest
   include AppTestMethods
 
-  def setup(with_psych = false)
-    generate_app(:with_psych => with_psych, :update => true)
+  def setup
+    generate_app :update => true
   end
 
   def teardown
