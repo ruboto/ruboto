@@ -13,9 +13,8 @@ BOSSPID=$$
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
-trap "kill -9 $TIMERPID" EXIT
+trap "echo killing timer ; kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
-
 
 if [ -e /usr/local/jruby ] ; then
   export JRUBY_HOME=/usr/local/jruby
@@ -34,7 +33,6 @@ if [ "$JRUBY_JARS_VERSION" != "" ] ; then
 fi
 rm -rf tmp/RubotoCore
 rake test --trace
-
 
 # BEGIN TIMEOUT #
 # kill -9 $TIMERPID
