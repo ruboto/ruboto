@@ -144,7 +144,7 @@ EOF
 
         begin
           require 'jruby-jars'
-        rescue
+        rescue LoadError
           puts "Could not find the jruby-jars gem.  You need it to include JRuby in your app.  Please install it using\n\n    gem install jruby-jars\n\n"
           return false
         end
