@@ -24,13 +24,7 @@ elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export JRUBY_HOME=/Library/Frameworks/JRuby.framework/Versions/Current
   export PATH=$JRUBY_HOME/bin:$PATH
 fi
-unset GEM_HOME
-gem install bundler
-bundle install --system
-if [ "$JRUBY_JARS_VERSION" != "" ] ; then
-  gem install -v "$JRUBY_JARS_VERSION" jruby-jars
-  (gem uninstall jruby-jars --all -v "!=$JRUBY_JARS_VERSION") || echo "No superflous jruby-jars gem uninstalled." 
-fi
+
 rm -rf tmp/RubotoCore
 rake test --trace
 

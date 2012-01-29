@@ -7,6 +7,13 @@ module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
+  GEM_PATH = File.join PROJECT_DIR, 'tmp', 'gems'
+  FileUtils.mkdir_p GEM_PATH
+  ENV['GEM_HOME'] = GEM_PATH
+  ENV['GEM_PATH'] = GEM_PATH
+  system 'gem install bundler'
+  system 'bundle'
+
   # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
   if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
     gem_spec = Gem::Specification.find_by_path 'jruby-jars'
@@ -14,24 +21,24 @@ module RubotoTest
     gem_spec = Gem.searcher.find('jruby-jars')
   end
   # FIXME end
-  
+
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-  JRUBY_JARS_VERSION = gem_spec.version
+  JRUBY_JARS_VERSION  = gem_spec.version
 
   # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 
-  PACKAGE = 'org.ruboto.test_app'
-  APP_NAME = 'RubotoTestApp'
-  TMP_DIR = File.join PROJECT_DIR, 'tmp'
-  APP_DIR = File.join TMP_DIR, APP_NAME
+  PACKAGE        = 'org.ruboto.test_app'
+  APP_NAME       = 'RubotoTestApp'
+  TMP_DIR        = File.join PROJECT_DIR, 'tmp'
+  APP_DIR        = File.join TMP_DIR, APP_NAME
   ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-7'
 
   VERSION_TO_API_LEVEL = {
-      '2.1' => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
-      '2.3' => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
+      '2.1'   => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
+      '2.3'   => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
-      '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
+      '3.0'   => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
       '4.0.1' => 'android-14', '4.0.3' => 'android-15',
   }
 
@@ -41,7 +48,7 @@ module RubotoTest
     start = Time.now
     IO.popen('adb bugreport').each_line do |line|
       if line =~ /sdk-eng (.*?) .*? .*? test-keys/
-        version = $1
+        version   = $1
         api_level = VERSION_TO_API_LEVEL[version]
         raise "Unknown version: #{version}" if api_level.nil?
         puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
@@ -91,7 +98,7 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
-    update = options.delete(:update) || false
+    update           = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -107,11 +114,15 @@ class Test::Unit::TestCase
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map{|ed| ed.gsub(/[.\/]/, '_')}.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
+      system "gem install jruby-jars #{"-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']}"
+      assert_equal 0, $?, "install of jruby-jars failed with return code #$?"
+      system %Q{gem uninstall jruby-jars --all -v "!=#{ENV['JRUBY_JARS_VERSION']}"} if ENV['JRUBY_JARS_VERSION']
+
       if update
         Dir.chdir TMP_DIR do
           system "tar xzf #{PROJECT_DIR}/examples/RubotoTestApp_0.1.0_jruby_1.6.3.dev.tgz"
@@ -129,6 +140,10 @@ class Test::Unit::TestCase
           assert_equal 0, $?, "update app failed with return code #$?"
         end
       else
+        unless excluded_stdlibs
+          system 'gem uninstall jruby-jars --all'
+          assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
+        end
         puts "Generating app #{APP_DIR}"
         system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET}"
         if $? != 0

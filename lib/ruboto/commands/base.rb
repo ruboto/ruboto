@@ -320,7 +320,7 @@ module Ruboto
             }
 
             option("force") {
-              description "force and update even if the version hasn't changed"
+              description "force an update even if the version hasn't changed"
             }
 
             def run

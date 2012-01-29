@@ -134,14 +134,23 @@ EOF
       def update_jruby(force=nil)
         jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
         jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
-        new_jruby_version = JRubyJars::VERSION
 
         unless force
           if !jruby_core || !jruby_stdlib
             puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app."
             return false
           end
+        end
 
+        begin
+          require 'jruby-jars'
+        rescue
+          puts "Could not find the jruby-jars gem.  You need it to include JRuby in your app.  Please install it using\n\n    gem install jruby-jars\n\n"
+          return false
+        end
+        new_jruby_version = JRubyJars::VERSION
+
+        unless force
           current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
           if current_jruby_version == new_jruby_version
             puts "JRuby is up to date at version #{new_jruby_version}. Make sure you 'gem update jruby-jars' if there is a new version."
@@ -179,7 +188,7 @@ EOF
           FileUtils.rm_rf old_scripts_dir
         end
         # FIXME end
-        
+
       end
 
       def update_icons(force = nil)
@@ -351,7 +360,7 @@ EOF
               #  `jar -cf ../jruby-core-#{dir.gsub('/', '.')}-#{jruby_core_version}.jar #{dir}`
               #  FileUtils.rm_rf dir
               #end
-              
+
               `jar -cf ../#{jruby_core} .`
             end
             FileUtils.remove_dir "tmp", true

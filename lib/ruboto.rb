@@ -5,7 +5,6 @@ Ruboto.enable_objectspace
 require 'main'
 require 'fileutils'
 require 'rexml/document'
-require 'jruby-jars'
 
 require 'ruboto/util/main_fix'
 

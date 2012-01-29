@@ -11,17 +11,6 @@ GEM_FILE_OLD = "ruboto-core-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 GEM_SPEC_FILE_OLD = 'ruboto-core.gemspec'
 
-# FIXME(uwe):  Remove when we stop supporting JRuby 1.5.6
-if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
-  gem_spec = Gem::Specification.find_by_path 'jruby-jars'
-else
-  gem_spec = Gem.searcher.find('jruby-jars')
-end
-raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-JRUBY_JARS_VERSION = gem_spec.version
-ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
-# FIXME end
-
 CLEAN.include('ruboto-*.gem', 'tmp')
 
 task :default => :gem
