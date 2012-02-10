@@ -73,7 +73,7 @@ THE_CONSTANTS
         }
     }
 
-    // This causes JRuby to initialize and takes while
+    // This causes JRuby to initialize and takes a while.
     protected void prepareJRuby() {
         Script.put("$context", this);
         Script.put("$activity", this);

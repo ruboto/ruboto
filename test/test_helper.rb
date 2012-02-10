@@ -14,20 +14,6 @@ module RubotoTest
   system 'gem install bundler'
   system 'bundle'
 
-  # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
-  if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
-    gem_spec = Gem::Specification.find_by_path 'jruby-jars'
-  else
-    gem_spec = Gem.searcher.find('jruby-jars')
-  end
-  # FIXME end
-
-  raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-  JRUBY_JARS_VERSION  = gem_spec.version
-
-  # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
-  ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
-
   PACKAGE        = 'org.ruboto.test_app'
   APP_NAME       = 'RubotoTestApp'
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
@@ -61,6 +47,12 @@ module RubotoTest
     raise "Unable to read device/emulator apilevel"
   end
 
+  def install_jruby_jars_gem
+    system "gem install jruby-jars #{"-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']}"
+    raise "install of jruby-jars failed with return code #$?" unless $? == 0
+    system %Q{gem uninstall jruby-jars --all -v "!=#{ENV['JRUBY_JARS_VERSION']}"} if ENV['JRUBY_JARS_VERSION']
+  end
+
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
   RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
@@ -69,6 +61,24 @@ end
 
 class Test::Unit::TestCase
   include RubotoTest
+  extend RubotoTest
+
+  install_jruby_jars_gem
+
+  # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
+  if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
+    gem_spec = Gem::Specification.find_by_path 'jruby-jars'
+  else
+    gem_spec = Gem.searcher.find('jruby-jars')
+  end
+  # FIXME end
+
+  raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
+  JRUBY_JARS_VERSION  = gem_spec.version
+
+  # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
+  ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
+
   alias old_run run
 
   def run(*args, &block)
@@ -119,9 +129,7 @@ class Test::Unit::TestCase
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
-      system "gem install jruby-jars #{"-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']}"
-      assert_equal 0, $?, "install of jruby-jars failed with return code #$?"
-      system %Q{gem uninstall jruby-jars --all -v "!=#{ENV['JRUBY_JARS_VERSION']}"} if ENV['JRUBY_JARS_VERSION']
+      install_jruby_jars_gem
 
       if update
         Dir.chdir TMP_DIR do
