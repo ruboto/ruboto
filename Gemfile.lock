@@ -4,7 +4,7 @@ GEM
     arrayfields (4.7.4)
     chronic (0.6.6)
     fattr (2.2.0)
-    jruby-jars (1.6.5.1)
+    jruby-jars (1.6.6)
     main (4.8.1)
       arrayfields (~> 4.7.4)
       chronic (~> 0.6.2)

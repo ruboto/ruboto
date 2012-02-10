@@ -5,7 +5,7 @@ module AppTestMethods
 
   def test_activity_tests
     # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
-    if ON_JRUBY_JARS_1_5_6
+    if Test::Unit::TestCase::ON_JRUBY_JARS_1_5_6
       puts "Skipping YAML tests on jruby-jars-1.5.6"
     else
       assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
@@ -16,7 +16,7 @@ module AppTestMethods
 
     Dir[File.expand_path('activity/*_test.rb', File.dirname(__FILE__))].each do |test_src|
       # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
-      next if ON_JRUBY_JARS_1_5_6 && test_src =~ /psych_activity_test.rb$/
+      next if Test::Unit::TestCase::ON_JRUBY_JARS_1_5_6 && test_src =~ /psych_activity_test.rb$/
 
       snake_name = test_src.chomp('_test.rb')
       activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join

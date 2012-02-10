@@ -11,7 +11,8 @@ module RubotoTest
   FileUtils.mkdir_p GEM_PATH
   ENV['GEM_HOME'] = GEM_PATH
   ENV['GEM_PATH'] = GEM_PATH
-  system 'gem install bundler'
+  `gem query -i -n bundler`
+  system 'gem install bundler' unless $? == 0
   system 'bundle'
 
   PACKAGE        = 'org.ruboto.test_app'
@@ -48,7 +49,9 @@ module RubotoTest
   end
 
   def install_jruby_jars_gem
-    system "gem install jruby-jars #{"-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']}"
+    version_requirement = "-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']
+    `gem query -i -n jruby-jars #{version_requirement}`
+    system "gem install jruby-jars #{version_requirement}" unless $? == 0
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
     system %Q{gem uninstall jruby-jars --all -v "!=#{ENV['JRUBY_JARS_VERSION']}"} if ENV['JRUBY_JARS_VERSION']
   end
