@@ -25,7 +25,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private ProgressDialog loadingDialog;
     private boolean dialogCancelled = false;
     private BroadcastReceiver receiver;
-    private boolean appStarted = false;
+    protected boolean appStarted = false;
 
 	public void onCreate(Bundle bundle) {
         Log.d("RUBOTO", "onCreate: ");
@@ -154,7 +154,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         }
     }
 
-    private void fireRubotoActivity() {
+    protected void fireRubotoActivity() {
         if(appStarted) return;
         appStarted = true;
         Log.i("RUBOTO", "Starting activity");
