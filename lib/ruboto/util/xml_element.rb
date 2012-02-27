@@ -185,7 +185,7 @@ module Ruboto
           (attribute("return") ? attribute("return") : "void"),
           attribute("name"), parameters,
           if_else(
-              "callbackProcs[#{constant_string}] != null",
+              "callbackProcs != null && callbackProcs[#{constant_string}] != null",
               [super_string] + ruby_call,
               [super_return]
           )
