@@ -78,11 +78,13 @@ end
 
 def ruboto_import(package_class)
   klass = java_import(package_class) || eval("Java::#{package_class}")
-  return unless klass
+  return nil unless klass
 
   klass.class_eval do
     extend Ruboto::CallbackClass
     include Ruboto::Callbacks
   end
+
+  klass
 end
 
