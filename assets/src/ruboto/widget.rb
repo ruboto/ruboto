@@ -74,7 +74,7 @@ def ruboto_import_widgets(*widgets)
 end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
-  klass = java_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
+  klass = ruboto_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
   
   return unless klass
 
