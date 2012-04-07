@@ -76,13 +76,12 @@ end
 # Import a class and set it up for handlers
 #
 
-def ruboto_import(package_class)
-  klass = java_import(package_class) || eval("Java::#{package_class}")
-  return unless klass
-
-  klass.class_eval do
-    extend Ruboto::CallbackClass
-    include Ruboto::Callbacks
+def ruboto_import(*package_classes)
+  java_import(package_classes).each do |package_class|
+    package_class.class_eval do
+      extend Ruboto::CallbackClass
+      include Ruboto::Callbacks
+    end
   end
 end
 

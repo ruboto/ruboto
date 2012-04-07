@@ -3,6 +3,19 @@ if `ant -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i ==
   exit 1
 end
 
+# FIXME(uwe): Remove when we stop supporting Android SDK 17.
+# FIXME(uwe): Remember to add code to delete the future obsolete anttasks.jar from the projects
+android_sdk_home = File.read('local.properties')[/^sdk.dir=.*?(?=\s*)$/][8..-1]
+jar_file_name = File.join android_sdk_home, 'tools', 'lib', 'anttasks.jar'
+anttasks_jar_size = File.size(jar_file_name)
+if anttasks_jar_size == 53516
+  puts "Detected faulty anttasks.jar.  Replacing with patched version."
+  FileUtils.copy 'anttasks.jar', jar_file_name
+elsif anttasks_jar_size == 54571
+  puts "Detected patched anttasks.jar."
+end
+#FIXME end
+
 require 'time'
 
 def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
@@ -201,9 +214,23 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
-      Dir['activerecord-jdbc-adapter-*'].each do |g|
+      Dir['{activerecord-jdbc-adapter, jruby-openssl}-*'].each do |g|
         puts "Removing #{g} gem since it is included in the RubotoCore platform apk."
         FileUtils.rm_rf g
+      end
+    end
+  else
+    Dir.chdir gem_path do
+      Dir['jruby-openssl-*/lib'].each do |g|
+        rel_dir = "#{g}/lib/ruby"
+        unless File.exists? rel_dir
+          puts "Relocating #{g} files to match standard load path."
+          dirs = Dir["#{g}/*"]
+          FileUtils.mkdir_p rel_dir
+          dirs.each do |d|
+            FileUtils.move d, rel_dir
+          end
+        end
       end
     end
   end
@@ -235,17 +262,24 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     Dir['*'].each do |gem_lib|
       Dir.chdir "#{gem_lib}/lib" do
         Dir['**/*.jar'].each do |jar|
-          unless jar =~ /sqlite-jdbc/
-            puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
-            `jar xf #{jar}`
-          end
           if jar == 'arjdbc/jdbc/adapter_java.jar'
             jar_load_code = <<-END_CODE
 require 'jruby'
 Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
             END_CODE
+          elsif jar =~ /shared\/jopenssl.jar$/
+            jar_load_code = <<-END_CODE
+require 'jruby'
+puts 'Starting JRuby OpenSSL Service'
+public
+Java::JopensslService.new.basicLoad(JRuby.runtime)
+            END_CODE
           else
             jar_load_code = ''
+          end
+          unless jar =~ /sqlite-jdbc/
+            puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
+            `jar xf #{jar}`
           end
           puts "Writing dummy JAR file #{jar + '.rb'}"
           File.open(jar + '.rb', 'w') { |f| f << jar_load_code }

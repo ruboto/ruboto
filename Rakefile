@@ -57,16 +57,16 @@ namespace :platform do
   task :project => PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
-    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT}"
+    # FIXME(uwe): Use Ruboto::MINIMUM_SUPPORTED_SDK instead of hardcoded android-8
+    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT} --target android-8"
+    # FIXME end
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'
       manifest.root.attributes['android:versionName'] = '0.4.8'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
-      manifest.root.elements['uses-sdk'].attributes['android:targetSdkVersion'] = '8'
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
-      File.open('project.properties', 'w'){|f| f << "target=android-8\n"}
-      File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
+      File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\ngem 'jruby-openssl'\n"}
       File.open('ant.properties', 'a'){|f| f << "key.store=${user.home}/ruboto_core.keystore\nkey.alias=Ruboto\n"}
     end
   end

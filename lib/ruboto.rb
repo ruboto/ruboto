@@ -11,5 +11,6 @@ require 'ruboto/util/main_fix'
 module Ruboto
   GEM_ROOT = File.dirname(File.dirname(__FILE__))
   ASSETS = File.join(GEM_ROOT, "assets")
-  MINIMUM_SUPPORTED_SDK = 'android-7'
+  MINIMUM_SUPPORTED_SDK_LEVEL = 8
+  MINIMUM_SUPPORTED_SDK = "android-#{MINIMUM_SUPPORTED_SDK_LEVEL}"
 end

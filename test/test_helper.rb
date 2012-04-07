@@ -2,6 +2,7 @@ require 'test/unit'
 require 'rubygems'
 require 'fileutils'
 require 'yaml'
+require File.expand_path('lib/ruboto', File.dirname(File.dirname(__FILE__)))
 
 module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
@@ -19,8 +20,7 @@ module RubotoTest
   APP_NAME       = 'RubotoTestApp'
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
   APP_DIR        = File.join TMP_DIR, APP_NAME
-  ANDROID_TARGET = ENV['ANDROID_TARGET'] || 'android-7'
-
+  ANDROID_TARGET = ENV['ANDROID_TARGET'] || Ruboto::MINIMUM_SUPPORTED_SDK
   VERSION_TO_API_LEVEL = {
       '2.1'   => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
       '2.3'   => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
@@ -152,7 +152,8 @@ class Test::Unit::TestCase
         end
       else
         unless excluded_stdlibs
-          system 'gem uninstall jruby-jars --all'
+          `gem query --no-installed -n jruby-jars`
+          system 'gem uninstall jruby-jars --all' if $? != 0
           assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
         end
         puts "Generating app #{APP_DIR}"

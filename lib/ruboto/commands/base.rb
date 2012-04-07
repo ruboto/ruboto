@@ -65,6 +65,8 @@ module Ruboto
                 min_sdk = params['min-sdk'].value || target
 
                 abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if File.exists?(path)
+                abort "Target must match android-<number>: got #{target}" unless target =~ /^android-(\d+)$/
+                abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."

@@ -76,12 +76,13 @@ public class Script {
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
             Log.d(TAG, "Setting up JRuby runtime");
-            System.setProperty("jruby.bytecode.version", "1.5");
+            System.setProperty("jruby.bytecode.version", "1.6");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
             System.setProperty("jruby.objectspace.enabled", "false");
             System.setProperty("jruby.thread.pooling", "true");
             System.setProperty("jruby.native.enabled", "false");
+            // System.setProperty("jruby.compat.version", "RUBY1_8"); // RUBY1_9 is the default
 
             // Uncomment these to debug Ruby source loading
             // System.setProperty("jruby.debug.loadService", "true");
@@ -103,8 +104,11 @@ public class Script {
                 String packageName = "org.ruboto.core";
                 try {
                     apkName = appContext.getPackageManager().getApplicationInfo(packageName, 0).sourceDir;
-                } catch (PackageManager.NameNotFoundException e) {
-                    System.out.println("JRuby not found");
+                } catch (PackageManager.NameNotFoundException e2) {
+                    out.println("JRuby not found in local APK:");
+                    e1.printStackTrace(out);
+                    out.println("JRuby not found in platform APK:");
+                    e2.printStackTrace(out);
                     return false;
                 }
 

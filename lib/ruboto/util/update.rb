@@ -9,14 +9,33 @@ module Ruboto
 
       def update_android
         root = Dir.getwd
+        build_xml_file = "#{root}/build.xml"
+        new_prop_file = "#{root}/project.properties"
+        old_prop_file = "#{root}/default.properties"
+        name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
 
         # FIXME(uwe): Remove build.xml file to force regeneration.
-        # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
-        name = REXML::Document.new(File.read("#{root}/build.xml")).root.attributes['name']
-        FileUtils.rm_f "#{root}/build.xml"
+        # FIXME(uwe): Needed when updating from Android SDK <= 13 to 14
+        # FIXME(uwe): Remove when we stop supporting upgrading from Android SDK <= 13
+        if File.read(build_xml_file) !~ /<!-- version-tag: 1 -->/
+          puts "Forcing generation of new build.xml since upgrading a project generated with Android SDK 13 or older."
+          FileUtils.rm_f build_xml_file
+        end
+        # FIXME end
+
+        # FIXME(uwe):  Simplify when we stop supporting upgrading from Android ASK <= 13
+        prop_file = File.exists?(new_prop_file) ? new_prop_file : old_prop_file
+        version_regexp = /^(target=android-)(\d+)$/
+        if (project_property_file = File.read(prop_file)) =~ version_regexp
+          if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+            puts "Upgrading project to target #{MINIMUM_SUPPORTED_SDK}"
+            File.open(prop_file, 'w'){|f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}")}
+          end
+        end
         # FIXME end
 
         system "android update project -p #{root} -n #{name}"
+        raise "android update project failed with return code #{$?}" unless $? == 0
       end
 
       def update_test(force = nil)
@@ -35,6 +54,7 @@ module Ruboto
 
           puts "\nUpdating Android test project #{name} in #{root}/test..."
           system "android update test-project -m #{root} -p #{root}/test"
+          raise "android update test-project failed with return code #{$?}" unless $? == 0
         end
 
         Dir.chdir File.join(root, 'test') do
@@ -181,6 +201,12 @@ EOF
           log_action(f) {copier.copy f}
         end
 
+        # FIXME(uwe): Remove when we stop supporting Android SDK 17
+        %w{anttasks.jar}.each do |f|
+          log_action(f) {copier.copy f}
+        end
+        # FIXME end
+
         # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
         old_scripts_dir = 'assets/scripts'
         if File.exists? old_scripts_dir
@@ -236,8 +262,16 @@ EOF
             min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
             target ||= sdk_element.attributes["android:targetSdkVersion"]
           else
-            min_sdk ||= MINIMUM_SUPPORTED_SDK
-            target ||= MINIMUM_SUPPORTED_SDK
+            min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
+            target ||= MINIMUM_SUPPORTED_SDK_LEVEL
+          end
+
+          if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+            min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
+          end
+
+          if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+            target = MINIMUM_SUPPORTED_SDK_LEVEL
           end
 
           app_element = verify_manifest.elements['application']
@@ -319,41 +353,58 @@ EOF
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
               File.delete jruby_core
-              excluded_core_packages = [
-                'META-INF', 'cext', 'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
-                'jline', 'jni',
-                'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
-                'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
-                'jnr/netdb', 'jnr/ffi/posix/util',
-                'org/apache', 'org/jruby/ant',
-                'org/jruby/compiler/util',
-                'org/jruby/demo', 'org/jruby/embed/bsf',
-                'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
-                'org/jruby/runtime/invokedynamic',
-              ]
+              if jruby_core_version >= '1.7.0'
+                excluded_core_packages = [
+                    'META-INF', 'cext',
+                    'com/headius',
+                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
+                    'jline', 'jni',
+                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
+                    'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
+                    # 'jnr/netdb', # Needed for jruby-openssl
+                    'jnr/ffi/posix/util',
+                    'org/apache', 'org/jruby/ant',
+                    # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
+                    # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo', 'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
+                    'org/jruby/runtime/invokedynamic',
+                ]
 
-              # FIXME(uwe): Add one of these when IR is moved to org.jruby.ir
-              # excluded_core_packages << 'org/jruby/compiler'
-              # excluded_core_packages << 'org/jruby/compiler/ir'
-
-              # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
-              if jruby_core_version < '1.7.0'
-                excluded_core_packages << 'org/jruby/compiler/ir'
+                # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
+              else
                 print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0...'
-                excluded_core_packages << 'jnr'
-                excluded_core_packages.delete 'com/kenai/constantine'
-              end
-              # TODO end
+                excluded_core_packages = [
+                    'META-INF', 'cext',
+                    'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
+                    'jline', 'jni',
+                    'jnr',
+                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
+                    'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
+                    'jnr/netdb', 'jnr/ffi/posix/util',
+                    'org/apache', 'org/jruby/ant',
+                    'org/jruby/compiler/ir',
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo', 'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
+                    'org/jruby/runtime/invokedynamic',
+                ]
+                # TODO end
 
-              # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
-              if jruby_core_version == '1.6.2'
-                print 'Retaining FFI for JRuby 1.6.2...'
-                excluded_core_packages.delete('org/jruby/ext/ffi')
+                # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
+                if jruby_core_version == '1.6.2'
+                  print 'Retaining FFI for JRuby 1.6.2...'
+                  excluded_core_packages.delete('org/jruby/ext/ffi')
+                end
+                # TODO end
               end
-              # TODO end
 
-              excluded_core_packages.each {|i| FileUtils.remove_dir i, true}
+              excluded_core_packages.each do |i|
+                FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
+              end
 
               # Uncomment this section to get a jar for each top level package in the core
               #Dir['**/*'].select{|f| !File.directory?(f)}.map{|f| File.dirname(f)}.uniq.sort.reverse.each do |dir|
