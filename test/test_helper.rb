@@ -2,9 +2,6 @@ require 'test/unit'
 require 'rubygems'
 require 'fileutils'
 require 'yaml'
-lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
-$LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
-require 'ruboto'
 
 module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
@@ -17,6 +14,9 @@ module RubotoTest
   `gem query -i -n bundler`
   system 'gem install bundler' unless $? == 0
   system 'bundle'
+  lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
+  $LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
+  require 'ruboto'
 
   PACKAGE        = 'org.ruboto.test_app'
   APP_NAME       = 'RubotoTestApp'
