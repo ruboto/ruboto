@@ -33,6 +33,7 @@ public class Script {
 
     private String name = null;
     private static Object ruby;
+    private static PrintStream output = null;
     private static boolean initialized = false;
 
     private static String localContextScope = "SINGLETON";
@@ -70,7 +71,7 @@ public class Script {
 	}
 
     public static synchronized boolean setUpJRuby(Context appContext) {
-        return setUpJRuby(appContext, System.out);
+        return setUpJRuby(appContext, output == null ? System.out : output);
     }
 
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
@@ -173,10 +174,10 @@ public class Script {
                 callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
 
                 if (out != null) {
-        	        Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
-        	        setOutputMethod.invoke(ruby, out);
-        	        Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
-        	        setErrorMethod.invoke(ruby, out);
+                  output = out;
+                  setOutputStream(out);
+                } else if (output != null) {
+                  setOutputStream(output);
                 }
 
                 String jrubyHome = "file:" + apkName + "!";
@@ -206,6 +207,29 @@ public class Script {
             }
         }
         return initialized;
+    }
+
+    public static void setOutputStream(PrintStream out) {
+      if (ruby == null) {
+        output = out;
+      } else {
+        try {
+          Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
+          setOutputMethod.invoke(ruby, out);
+          Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
+          setErrorMethod.invoke(ruby, out);
+        } catch (IllegalArgumentException e) {
+            handleInitException(e);
+        } catch (SecurityException e) {
+            handleInitException(e);
+        } catch (IllegalAccessException e) {
+            handleInitException(e);
+        } catch (InvocationTargetException e) {
+            handleInitException(e);
+        } catch (NoSuchMethodException e) {
+            handleInitException(e);
+        }
+      }
     }
 
     private static void handleInitException(Exception e) {
@@ -256,7 +280,8 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw ((RuntimeException) ite.getCause());
+ //           throw ((RuntimeException) ite.getCause());
+            return null;
         }
 	}
 

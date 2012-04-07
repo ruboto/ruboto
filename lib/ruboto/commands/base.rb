@@ -176,6 +176,11 @@ module Ruboto
                 description "name of the class (and file). Should be CamelCase"
               }
 
+              option("package"){
+                argument :required
+                description "package for the new class (if not specified, uses project package)"
+              }
+
               option("method_base"){
                 required
                 validate {|i| %w(all on none abstract).include?(i)}
@@ -210,7 +215,7 @@ module Ruboto
 
               def run
                 generate_subclass_or_interface(
-                %w(class name method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
+                %w(class name package method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
               end
             end
 
@@ -228,6 +233,11 @@ module Ruboto
                 description "name of the class (and file) that will implement the interface. Should be CamelCase"
               }
 
+              option("package"){
+                argument :required
+                description "package for the new class (if not specified, uses project package)"
+              }
+
               option("force"){
                 argument :required
                 validate {|i| %w(include exclude).include?(i)}
@@ -235,7 +245,7 @@ module Ruboto
               }
 
               def run
-                generate_subclass_or_interface %w(interface name force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+                generate_subclass_or_interface %w(interface name package force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
               end
             end
 

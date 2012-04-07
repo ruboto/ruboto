@@ -35,7 +35,7 @@ module Ruboto
       $context_init_block = block
       $new_context_global = global_variable_name
   
-      if @initialized or (self == $activity && !$activity.kind_of?(RubotoActivity))
+      if @initialized or (self == $activity && !$activity.rubotoAttachable)
         b = Java::android.os.Bundle.new
         b.putInt("Theme", theme) if theme
   
