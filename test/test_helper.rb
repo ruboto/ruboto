@@ -2,7 +2,9 @@ require 'test/unit'
 require 'rubygems'
 require 'fileutils'
 require 'yaml'
-require File.expand_path('lib/ruboto', File.dirname(File.dirname(__FILE__)))
+lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
+$LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
+require 'ruboto'
 
 module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))

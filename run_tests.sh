@@ -23,6 +23,7 @@ if [ -e /usr/local/jruby ] ; then
 elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export JRUBY_HOME=/Library/Frameworks/JRuby.framework/Versions/Current
   export PATH=$JRUBY_HOME/bin:$PATH
+  jruby --version
 fi
 
 rm -rf tmp/RubotoCore
