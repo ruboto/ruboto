@@ -29,7 +29,6 @@ if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
   jruby --version
 fi
 
-bundle
 rm -rf tmp/RubotoCore
 rake test --trace
 
