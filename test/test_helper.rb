@@ -11,6 +11,7 @@ module RubotoTest
   FileUtils.mkdir_p GEM_PATH
   ENV['GEM_HOME'] = GEM_PATH
   ENV['GEM_PATH'] = GEM_PATH
+  ENV['PATH'] += ":#{GEM_PATH}/bin"
   Gem.path << GEM_PATH
   Gem.refresh
   `gem query -i -n bundler`

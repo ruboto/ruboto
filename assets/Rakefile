@@ -209,6 +209,9 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   puts "Generating #{BUNDLE_JAR}"
 
   FileUtils.mkdir_p BUNDLE_PATH
+  p ENV['PATH']
+  sh 'echo $PATH'
+  sh 'which bundle'
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
   gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
 
