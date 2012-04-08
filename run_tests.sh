@@ -26,6 +26,7 @@ elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   jruby --version
 fi
 
+bundle
 rm -rf tmp/RubotoCore
 rake test --trace
 
