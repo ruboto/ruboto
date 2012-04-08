@@ -13,9 +13,11 @@ module RubotoTest
   ENV['GEM_PATH'] = GEM_PATH
   `gem query -i -n bundler`
   system 'gem install bundler' unless $? == 0
-  system 'bundle'
+  system 'bundle --system'
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
   $LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
+  Gem.path << GEM_PATH
+  Gem.refresh
   require 'ruboto'
 
   PACKAGE        = 'org.ruboto.test_app'
