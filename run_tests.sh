@@ -18,11 +18,14 @@ trap "echo killing timer ; kill -9 $TIMERPID" EXIT
 
 if [ -e /usr/local/jruby ] ; then
   export JRUBY_HOME=/usr/local/jruby
-  export PATH=$JRUBY_HOME/bin:$PATH
-  jruby --version
+  CUSTOM_JRUBY_SET=yes
 elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
   export JRUBY_HOME=/Library/Frameworks/JRuby.framework/Versions/Current
-  export PATH=$JRUBY_HOME/bin:$PATH
+  CUSTOM_JRUBY_SET=yes
+fi
+
+if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
+  export PATH=$JRUBY_HOME/bin:$JRUBY_HOME/lib/ruby/gems/*/bin:$PATH
   jruby --version
 fi
 
