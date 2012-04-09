@@ -364,7 +364,9 @@ EOF
                     'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
                     # 'jnr/netdb', # Needed for jruby-openssl
                     'jnr/ffi/posix/util',
-                    'org/apache', 'org/jruby/ant',
+                    'org/apache',
+                    'org/bouncycastle',
+                    'org/jruby/ant',
                     # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
                     'org/jruby/compiler/util',
