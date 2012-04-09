@@ -8,11 +8,11 @@ end
 android_sdk_home = File.read('local.properties')[/^sdk.dir=.*?(?=\s*)$/][8..-1]
 jar_file_name = File.join android_sdk_home, 'tools', 'lib', 'anttasks.jar'
 anttasks_jar_size = File.size(jar_file_name)
-if anttasks_jar_size == 53516
-  puts "Detected faulty anttasks.jar.  Replacing with patched version."
+if anttasks_jar_size == 53516 || anttasks_jar_size == 53527 # OS X and Linux
+  puts "Detected faulty Andoid SDK revision 17 anttasks.jar.  Replacing with patched version."
   FileUtils.copy 'anttasks.jar', jar_file_name
 elsif anttasks_jar_size == 54571
-  puts "Detected patched anttasks.jar."
+  puts "Detected patched Andoid SDK revision 17 anttasks.jar."
 end
 #FIXME end
 
