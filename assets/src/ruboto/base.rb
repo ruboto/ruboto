@@ -77,7 +77,7 @@ end
 #
 
 def ruboto_import(*package_classes)
-  java_import(package_classes).each do |package_class|
+  [*java_import(package_classes)].each do |package_class|
     package_class.class_eval do
       extend Ruboto::CallbackClass
       include Ruboto::Callbacks

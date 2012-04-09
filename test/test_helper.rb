@@ -11,7 +11,7 @@ module RubotoTest
   FileUtils.mkdir_p GEM_PATH
   ENV['GEM_HOME'] = GEM_PATH
   ENV['GEM_PATH'] = GEM_PATH
-  ENV['PATH'] += ":#{GEM_PATH}/bin"
+  ENV['PATH'] = "#{GEM_PATH}/bin:#{ENV['PATH']}"
   Gem.path << GEM_PATH
   Gem.refresh
   `gem query -i -n bundler`
@@ -58,7 +58,12 @@ module RubotoTest
     `gem query -i -n jruby-jars #{version_requirement}`
     system "gem install jruby-jars #{version_requirement}" unless $? == 0
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
-    system %Q{gem uninstall jruby-jars --all -v "!=#{ENV['JRUBY_JARS_VERSION']}"} if ENV['JRUBY_JARS_VERSION']
+    if ENV['JRUBY_JARS_VERSION']
+      exclusion_clause = %Q{-v "!=#{ENV['JRUBY_JARS_VERSION']}"}
+      `gem query -u -n jruby-jars #{exclusion_clause}`
+      system %Q{gem uninstall jruby-jars --all #{exclusion_clause}"} unless $? == 0
+      raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
+    end
   end
 
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
