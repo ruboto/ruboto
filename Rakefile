@@ -66,7 +66,13 @@ namespace :platform do
       manifest.root.attributes['android:versionName'] = '0.4.8'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
-      File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\ngem 'jruby-openssl'\n"}
+      File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
+
+      # FIXME(uwe):  Add this when either jruby-openssl is simplified or most devices are Android 4
+      # FIXME(uwe):  Reeference: #154 and http://code.google.com/p/android/issues/detail?id=22586
+      # File.open('Gemfile.apk', 'w'){|f| f << "gem 'jruby-openssl'\n"}
+      # FIXME end
+
       File.open('ant.properties', 'a'){|f| f << "key.store=${user.home}/ruboto_core.keystore\nkey.alias=Ruboto\n"}
     end
   end
