@@ -362,10 +362,10 @@ EOF
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
                     'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
-                    # 'jnr/netdb', # Needed for jruby-openssl
+                    'jnr/netdb', # TODO(uwe): Issue #154 Needed for jruby-openssl
                     'jnr/ffi/posix/util',
                     'org/apache',
-                    'org/bouncycastle',
+                    'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/jruby/ant',
                     # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
