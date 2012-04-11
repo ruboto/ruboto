@@ -19,7 +19,7 @@ class ServiceTest < Test::Unit::TestCase
       assert File.exists? service_filename
       File.open(service_filename, 'w'){|f| f << <<EOF}
 require 'ruboto'
-    
+
 $service.handle_create do
   Thread.start do
     loop do
