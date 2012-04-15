@@ -1,8 +1,12 @@
-require 'jruby'
-require 'rbconfig'
-org.jruby.ext.psych.PsychLibrary.new.load(JRuby.runtime, false)
-$LOADED_FEATURES << 'psych.so'
-$LOAD_PATH << File.join(Config::CONFIG['libdir'], 'ruby/1.9')
+# TODO(uwe): Remove when we stop supporting Ruby 1.8 mode
+if RUBY_VERSION < "1.9"
+  require 'jruby'
+  require 'rbconfig'
+  org.jruby.ext.psych.PsychLibrary.new.load(JRuby.runtime, false)
+  $LOADED_FEATURES << 'psych.so'
+  $LOAD_PATH << File.join(Config::CONFIG['libdir'], 'ruby/1.9')
+end
+
 require 'psych.rb'
 
 Psych::Parser

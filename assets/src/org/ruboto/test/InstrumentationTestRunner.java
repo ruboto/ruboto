@@ -19,6 +19,7 @@ import java.util.Enumeration;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -34,15 +35,37 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     public TestSuite getAllTests() {
         Log.i(getClass().getName(), "Finding test scripts");
         suite = new TestSuite("Sweet");
+        String loadStep = "Setup JRuby";
         
         try {
-            if (Script.setUpJRuby(getTargetContext())) {
+            final AtomicBoolean JRubyLoadedOk = new AtomicBoolean();
+
+            // TODO(uwe):  Running with large stack is currently only needed when running with JRuby 1.7.0 and android-10
+            // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0 or android-10
+            Thread t = new Thread(null, new Runnable() {
+                public void run() {
+                    JRubyLoadedOk.set(Script.setUpJRuby(getTargetContext()));
+                }
+            }, "Setup JRuby from instrumentation test runner", 64 * 1024);
+            try {
+                t.start();
+                t.join();
+            } catch(InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Interrupted starting JRuby", ie);
+            }
+            // TODO end
+
+            if (JRubyLoadedOk.get()) {
+                loadStep = "Setup global variables";
                 Script.defineGlobalVariable("$runner", this);
                 Script.defineGlobalVariable("$test", this);
                 Script.defineGlobalVariable("$suite", suite);
 
+                loadStep = "Load test helper";
                 loadScript("test_helper.rb");
 
+                loadStep = "Get app test source dir";
                 String test_apk_path = getContext().getPackageManager().getApplicationInfo(getContext().getPackageName(), 0).sourceDir;
                 JarFile jar = new JarFile(test_apk_path);
                 Enumeration<JarEntry> entries = jar.entries();
@@ -53,17 +76,18 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                         continue;
                     }
                     if (name.equals("test_helper.rb")) continue;
+                    loadStep = "Load " + name;
                     loadScript(name);
                 }
             } else {
-                addError(suite, new RuntimeException("Ruboto Core platform is missing"));
+                addError(suite, loadStep, new RuntimeException("Ruboto Core platform is missing"));
             }
         } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-            addError(suite, e);
+            addError(suite, loadStep, e);
         } catch (IOException e) {
-          addError(suite, e);
+          addError(suite, loadStep, e);
         } catch (RuntimeException e) {
-          addError(suite, e);
+          addError(suite, loadStep, e);
         }
         return suite;
     }
@@ -85,10 +109,10 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
 
-    private void addError(TestSuite suite, Throwable t) {
+    private void addError(TestSuite suite, String loadStep, Throwable t) {
         Throwable cause = t;
         while(cause != null) {
-          Log.e(getClass().getName(), "Exception loading tests: " + cause);
+          Log.e(getClass().getName(), "Exception loading tests (" + loadStep + "): " + cause);
           t = cause;
           cause = t.getCause();
         }
