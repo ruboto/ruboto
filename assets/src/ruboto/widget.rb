@@ -74,7 +74,13 @@ def ruboto_import_widgets(*widgets)
 end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
-  klass = ruboto_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
+  if class_name.is_a?(String) or class_name.is_a?(Symbol)
+    klass = ruboto_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
+  else
+    klass = class_name
+    ruboto_import klass
+    class_name = klass.java_class.name.split('.')[-1]
+  end
   
   return unless klass
 
@@ -110,6 +116,8 @@ def ruboto_import_widget(class_name, package_name="android.widget")
   setup_image_button if class_name == :ImageButton
   setup_linear_layout if class_name == :LinearLayout
   setup_relative_layout if class_name == :RelativeLayout
+
+  klass
 end
 
 #
