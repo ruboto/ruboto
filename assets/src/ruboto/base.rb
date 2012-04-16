@@ -77,7 +77,14 @@ end
 #
 
 def ruboto_import(*package_classes)
-  [*java_import(package_classes)].each do |package_class|
+  # TODO(uwe): The first part of this "if" is only needed for JRuby 1.6.x.  Simplify when we stop supporting JRuby 1.6.x
+  if package_classes.size == 1
+    imported_classes = [*(java_import(*package_classes) || eval("Java::#{package_classes[0]}"))]
+  else
+    imported_classes = java_import(package_classes)
+  end
+
+  imported_classes.each do |package_class|
     package_class.class_eval do
       extend Ruboto::CallbackClass
       include Ruboto::Callbacks

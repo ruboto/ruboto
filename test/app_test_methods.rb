@@ -11,8 +11,9 @@ module AppTestMethods
       assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
     end
 
-    assert_code 'ReadSourceFile', "File.read(__FILE__)"
+    assert_code 'ReadSourceFile', 'File.read(__FILE__)'
     assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
+    assert_code 'RepeatRubotoImport', 'ruboto_import :TextView ; ruboto_import :TextView'
 
     Dir[File.expand_path('activity/*_test.rb', File.dirname(__FILE__))].each do |test_src|
       # TODO(uwe): Remove check when we stop supporting jruby-jars 1.5.6
