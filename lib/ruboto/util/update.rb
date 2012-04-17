@@ -197,7 +197,7 @@ EOF
         puts "\nCopying files:"
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
 
-        %w{.gitignore Rakefile assets res/layout test}.each do |f|
+        %w{.gitignore Rakefile assets libs res/layout test}.each do |f|
           log_action(f) {copier.copy f}
         end
 
@@ -362,7 +362,6 @@ EOF
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
                     'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
-                    'jnr/netdb', # TODO(uwe): Issue #154 Needed for jruby-openssl
                     'jnr/ffi/posix/util',
                     'org/apache',
                     'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
