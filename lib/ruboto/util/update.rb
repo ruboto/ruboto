@@ -201,12 +201,6 @@ EOF
           log_action(f) {copier.copy f}
         end
 
-        # FIXME(uwe): Remove when we stop supporting Android SDK 17
-        %w{anttasks.jar}.each do |f|
-          log_action(f) {copier.copy f}
-        end
-        # FIXME end
-
         # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
         old_scripts_dir = 'assets/scripts'
         if File.exists? old_scripts_dir
