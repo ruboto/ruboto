@@ -69,9 +69,16 @@ module Ruboto
                 abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
 
                 root = File.expand_path(path)
+
+                # check for android
+                which_android = IO.popen('which android')
+                if which_android.readlines.empty?
+                    puts "Are you sure you have android in the path, and it is not relative? (ignore this if you are on windows)"
+                end
+
                 puts "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
-                exit $? unless $? == 0
+                $?.send(:exit) unless $? == 0
                 unless File.exists? path
                   puts "Android project was not created"
                   exit_failure!
