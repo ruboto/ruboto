@@ -195,9 +195,18 @@ EOF
 
       def update_assets
         puts "\nCopying files:"
-        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
 
-        %w{.gitignore Rakefile assets libs res/layout test}.each do |f|
+        # FIXME(uwe):  Remove when we stop supporting updating from Ruboto <= 0.5.4
+        if File.exists?('Rakefile') && !File.exists?('rakelib/ruboto.rake')
+          FileUtils.rm 'Rakefile'
+        end
+        # FIXME end
+
+        weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
+        %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
+
+        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
+        %w{assets libs rakelib res/layout test}.each do |f|
           log_action(f) {copier.copy f}
         end
 
