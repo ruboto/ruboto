@@ -43,7 +43,7 @@ RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
 APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
-KEYSTORE_FILE      = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? key_store.chomp.sub(/^key.store=/, '') : "#{build_project_name}.keystore"
+KEYSTORE_FILE      = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS     = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 
 CLEAN.include('bin')
