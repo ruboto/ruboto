@@ -57,6 +57,8 @@ Ex:
 
 Can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
 
+_Note: While the command line calls below still work, there is an easier way to do this within your scripts. The new way of generating interfaces and subclasses is described in the wiki [Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks)._
+
 For classes that need subclassing (e.g., PhoneStateListener, SQLiteOpenHelper, View)
 
     $ ruboto gen subclass AndroidPackageAndClassName --name YourClassName --method_base all-on-or-none --method_include methods --method_exclude methods
