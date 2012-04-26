@@ -134,13 +134,6 @@ module Ruboto
       #   on the API specifications.
       #
       def generate_core_classes(params)
-        %w(android.view.View.OnClickListener android.widget.AdapterView.OnItemClickListener android.widget.AdapterView.OnItemSelectedListener).each do |i|
-          name = i.split(".")[-1]
-          if(params[:class] == name)
-            generate_subclass_or_interface({:package => "org.ruboto.callbacks", :class => i, :name => "Ruboto#{name}", :force => params[:force]})
-          end
-        end
-
         hash = {:package => "org.ruboto"}
         %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
         hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").join(",")
@@ -148,7 +141,7 @@ module Ruboto
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver).each do |i|
           name = i.split(".")[-1]
           if(params[:class] == name or params[:class] == "all")
-            generate_subclass_or_interface(hash.merge({:template => name == "View" ? "InheritingClass" : "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
+            generate_subclass_or_interface(hash.merge({:template => "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
           end
         end
 
