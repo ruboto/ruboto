@@ -344,7 +344,7 @@ public class Script {
     }
 
     private static List<String> getLoadPath() {
-        return callScriptingContainerMethod(List.class, "getLoadPaths");
+        return (List<String>)callScriptingContainerMethod(List.class, "getLoadPaths");
     }
 
     public static Boolean configDir(String scriptsDir) {
@@ -503,7 +503,7 @@ public class Script {
      */
 
     public static String getScriptFilename() {
-        return callScriptingContainerMethod(String.class, "getScriptFilename");
+        return (String)callScriptingContainerMethod(String.class, "getScriptFilename");
     }
 
     public static void setScriptFilename(String name) {
