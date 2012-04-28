@@ -29,7 +29,7 @@ module Ruboto
         if (project_property_file = File.read(prop_file)) =~ version_regexp
           if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
             puts "Upgrading project to target #{MINIMUM_SUPPORTED_SDK}"
-            File.open(prop_file, 'w'){|f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}")}
+            File.open(prop_file, 'w') { |f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}") }
           end
         end
         # FIXME end
@@ -76,13 +76,13 @@ module Ruboto
           #   puts 'Added external permission tag'
           # end
 
-          File.open("AndroidManifest.xml", 'w'){|f| test_manifest.document.write(f, 4)}
+          File.open("AndroidManifest.xml", 'w') { |f| test_manifest.document.write(f, 4) }
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
 
           # FIXME(uwe): Cleanup when we stop supporting Android SDK <= 13
-          prop_file = %w{ant.properties build.properties}.find{|f| File.exists?(f)}
+          prop_file = %w{ant.properties build.properties}.find { |f| File.exists?(f) }
           prop_lines = File.readlines(prop_file)
-          File.open(prop_file, 'a'){|f| f << instrumentation_property} unless prop_lines.include?(instrumentation_property)
+          File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
           # FIXME end
 
           ant_setup_line = /^(\s*<\/project>)/
@@ -130,7 +130,7 @@ module Ruboto
     </target>
 <!-- END added by ruboto -->
 
-EOF
+          EOF
           ant_script = File.read('build.xml')
           # TODO(uwe): Old patches without delimiter.  Remove when we stop supporting upgrading from ruboto-core 0.2.0 and older.
           ant_script.gsub!(/\s*<macrodef name="run-tests-helper">.*?<\/macrodef>\s*/m, '')
@@ -138,7 +138,7 @@ EOF
           # TODO end
           ant_script.gsub!(/\s*<!-- BEGIN added by ruboto(?:-core)? -->.*?<!-- END added by ruboto(?:-core)? -->\s*/m, '')
           raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
-          File.open('build.xml', 'w'){|f| f << ant_script}
+          File.open('build.xml', 'w') { |f| f << ant_script }
 
           # FIXME(uwe): Remove when we stop supporting update from Ruboto <= 0.5.2
           if File.directory? 'assets/scripts'
@@ -182,10 +182,10 @@ EOF
         end
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        log_action("Removing #{jruby_core}") {File.delete *Dir.glob("libs/jruby-core-*.jar")} if jruby_core
-        log_action("Removing #{jruby_stdlib}") {File.delete *Dir.glob("libs/jruby-stdlib-*.jar")} if jruby_stdlib
-        log_action("Copying #{JRubyJars::core_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs"}
-        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") {copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs"}
+        log_action("Removing #{jruby_core}") { File.delete *Dir.glob("libs/jruby-core-*.jar") } if jruby_core
+        log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob("libs/jruby-stdlib-*.jar") } if jruby_stdlib
+        log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
+        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
         reconfigure_jruby_libs(new_jruby_version)
 
@@ -207,7 +207,7 @@ EOF
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         %w{assets rakelib res/layout test}.each do |f|
-          log_action(f) {copier.copy f}
+          log_action(f) { copier.copy f }
         end
 
         # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
@@ -231,8 +231,8 @@ EOF
 
       def update_classes(force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        log_action("Ruboto java classes"){copier.copy "src/org/ruboto/*.java"}
-        log_action("Ruboto java test classes"){copier.copy "src/org/ruboto/test/*.java", "test"}
+        log_action("Ruboto java classes") { copier.copy "src/org/ruboto/*.java" }
+        log_action("Ruboto java test classes") { copier.copy "src/org/ruboto/test/*.java", "test" }
         Dir["src/#{verify_package.gsub('.', '/')}/*.java"].each do |f|
           if File.read(f) =~ /public class (.*?) extends org.ruboto.Ruboto(Activity|BroadcastReceiver|Service) \{/
             subclass_name, class_name = $1, $2
@@ -308,6 +308,11 @@ EOF
       end
 
       def update_core_classes(force = nil)
+        # FIXME(uwe): Remove when we stop supporting updating from Ruboto 0.5.5 and older.
+        FileUtils.rm_rf 'src/org/ruboto/callbacks'
+        FileUtils.rm_f  'src/org/ruboto/RubotoView.java'
+        # FIXME end
+
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
       end
 
@@ -344,7 +349,7 @@ EOF
         reconfigure_jruby_stdlib
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         %w{libs}.each do |f|
-          log_action(f) {copier.copy f}
+          log_action(f) { copier.copy f }
         end
       end
 
