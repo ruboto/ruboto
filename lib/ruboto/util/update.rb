@@ -206,7 +206,7 @@ EOF
         %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        %w{assets libs rakelib res/layout test}.each do |f|
+        %w{assets rakelib res/layout test}.each do |f|
           log_action(f) {copier.copy f}
         end
 
@@ -342,6 +342,10 @@ EOF
       def reconfigure_jruby_libs(jruby_core_version)
         reconfigure_jruby_core(jruby_core_version)
         reconfigure_jruby_stdlib
+        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
+        %w{libs}.each do |f|
+          log_action(f) {copier.copy f}
+        end
       end
 
       # - Removes unneeded code from jruby-core
@@ -373,7 +377,9 @@ EOF
                     # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
                     'org/jruby/compiler/util',
                     'org/jruby/demo', 'org/jruby/embed/bsf',
-                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
+                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi',
+                    # 'org/jruby/ext/ffi', # Used by several JRuby core classes
+                    'org/jruby/javasupport/bsf',
                     'org/jruby/runtime/invokedynamic',
                 ]
 

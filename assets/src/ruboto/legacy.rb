@@ -16,7 +16,7 @@ require 'ruboto/activity'
 module Ruboto
   module Callbacks
     def method_missing(name, *args, &block)
-      if name.to_s =~ /^handle_(.*)/ and (const = self.class.const_get("CB_#{$1.upcase}"))
+      if name.to_s =~ /^handle_(.*)/ && self.class.respond_to?(:const_get) && (const = self.class.const_get("CB_#{$1.upcase}"))
         setCallbackProc(const, block)
         self
       else
@@ -25,7 +25,7 @@ module Ruboto
     end
 
     def respond_to?(name)
-      return true if name.to_s =~ /^handle_(.*)/ and self.class.const_get("CB_#{$1.upcase}")
+      return true if name.to_s =~ /^handle_(.*)/ && self.class.respond_to?(:const_get) && self.class.const_get("CB_#{$1.upcase}")
       super
     end
 

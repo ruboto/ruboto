@@ -9,6 +9,7 @@ class RakeTest < Test::Unit::TestCase
     cleanup_app
   end
 
+  # FIXME(uwe): Remove condition when we stop supporting android-7
   if ANDROID_OS == 'android-7'
     puts "Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall"
   else
@@ -32,8 +33,18 @@ class RakeTest < Test::Unit::TestCase
         # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
         # FIXME end
 
-        assert `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp =~ %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}
+        assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
       end
+    end
+  end
+
+  def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
+    Dir.chdir APP_DIR do
+      system 'rake install'
+      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+      FileUtils.touch "src/ruboto_test_app_activity.rb"
+      system 'rake install'
+      assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
   end
 

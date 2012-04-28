@@ -14,8 +14,8 @@ def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
 require 'rake/clean'
 require 'rexml/document'
 
-PROJECT_DIR        = Dir.getwd
-UPDATE_MARKER_FILE = File.expand_path(File.join('bin', 'LAST_UPDATE'), File.dirname(__FILE__))
+PROJECT_DIR        = File.expand_path('..', File.dirname(__FILE__))
+UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
 BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
 BUNDLE_PATH        = File.expand_path 'bin/bundle'
 MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
