@@ -2,6 +2,7 @@ require 'test/unit'
 require 'rubygems'
 require 'fileutils'
 require 'yaml'
+require 'pathname'
 
 module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
@@ -20,6 +21,7 @@ module RubotoTest
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
   $LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
   require 'ruboto'
+  require 'ruboto/version'
 
   PACKAGE        = 'org.ruboto.test_app'
   APP_NAME       = 'RubotoTestApp'
@@ -67,9 +69,15 @@ module RubotoTest
   end
 
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
+  puts "ANDROID_OS: #{ANDROID_OS}"
+
   RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
-  puts "ANDROID_OS: #{ANDROID_OS}"
+  ANDROID_HOME = ENV['ANDROID_HOME'] || File.dirname(File.dirname(Pathname.new(`which adb`.chomp).realpath))
+  puts "ANDROID_HOME: #{ANDROID_HOME}"
+
+  ANDROID_TOOLS_REVISION = File.read("#{ANDROID_HOME}/tools/source.properties").slice(/Pkg.Revision=\d+/).slice(/\d+$/).to_i
+  puts "ANDROID_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
 end
 
 class Test::Unit::TestCase
@@ -137,7 +145,7 @@ class Test::Unit::TestCase
     end
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{"_updated_from_#{update}" if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
@@ -146,16 +154,11 @@ class Test::Unit::TestCase
 
       if update
         Dir.chdir TMP_DIR do
-          system "tar xzf #{PROJECT_DIR}/examples/RubotoTestApp_0.1.0_jruby_1.6.3.dev.tgz"
-        end
-        if ENV['ANDROID_HOME']
-          android_home = ENV['ANDROID_HOME']
-        else
-          android_home = File.dirname(File.dirname(`which adb`))
+          system "tar xzf #{PROJECT_DIR}/examples/#{APP_NAME}_#{update}.tgz"
         end
         Dir.chdir APP_DIR do
-          File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
-          File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{android_home}" }
+          File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
+          File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
           system "#{RUBOTO_CMD} update app"
           assert_equal 0, $?, "update app failed with return code #$?"
@@ -186,6 +189,13 @@ class Test::Unit::TestCase
       end
       puts "Storing app as template #{template_dir}"
       FileUtils.cp_r APP_DIR, template_dir, :preserve => true
+      example_filename = "#{PROJECT_DIR}/examples/#{APP_NAME}_#{Ruboto::VERSION}_tools_r#{ANDROID_TOOLS_REVISION}.tgz"
+      if !excluded_stdlibs && !update # Ruboto::VERSION =~ /^d+\.d+\.d+$/ && && !File.exists?(example_filename)
+        puts "Storing app as example #{example_filename}"
+        Dir.chdir File.dirname(APP_DIR) do
+          system "tar czf #{example_filename} #{File.basename(APP_DIR)}"
+        end
+      end
     end
   end
 

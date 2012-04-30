@@ -1,5 +1,22 @@
 require File.expand_path("update_test_methods", File.dirname(__FILE__))
 
-class RubotoUpdateTest < Test::Unit::TestCase
+# TODO(uwe): Delete obsolete examples when we stop supporting updating from them.
+
+Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
+  Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"].each do |f|
+    next unless f =~ /^#{RubotoTest::APP_NAME}_(.*)_tools_r(.*)\.tgz$/
+    ruboto_version = $1
+    tools_version = $2
+    self.class.class_eval <<EOF
+class RubotoUpdate#{ruboto_version.gsub('.', '_')}Tools#{tools_version}Test < Test::Unit::TestCase
   include UpdateTestMethods
+
+  def setup
+    @old_ruboto_version = '#{ruboto_version}'
+    generate_app :update => '#{ruboto_version}_tools_r#{tools_version}'
+  end
+
+end
+EOF
+  end
 end

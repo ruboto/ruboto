@@ -11,7 +11,7 @@ setup do |activity|
 end
 
 test('stack depth') do |activity|
-  os_offset = {13 => 1}[android.os.Build::VERSION::SDK_INT].to_i
+  os_offset = {13 => 1, 15 => 1}[android.os.Build::VERSION::SDK_INT].to_i
   jruby_offset = {
       '1.5.6'     => [-2, -5, -6, -8],
   }[org.jruby.runtime.Constants::VERSION] || [0,0,0,0]

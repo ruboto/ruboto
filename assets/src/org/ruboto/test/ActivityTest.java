@@ -19,12 +19,14 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
     private final Object setup;
     private final Object block;
     private final String filename;
+    private final boolean onUiThread;
 
-    public ActivityTest(Class activityClass, String filename, Object setup, String name, Object block) {
+    public ActivityTest(Class activityClass, String filename, Object setup, String name, boolean onUiThread, Object block) {
         super(activityClass.getPackage().getName(), activityClass);
         this.filename = filename;
         this.setup = setup;
         setName(filename + "#" + name);
+        this.onUiThread = onUiThread;
         this.block = block;
         Log.i(getClass().getName(), "Instance: " + getName());
     }
@@ -37,7 +39,7 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
             try {
                 final Activity activity = getActivity();
                 Log.i(getClass().getName(), "activity ok");
-                runTestOnUiThread(new Runnable() {
+                Runnable testRunnable = new Runnable() {
                     public void run() {
                         String oldFile = Script.getScriptFilename();
 
@@ -50,9 +52,16 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
                         Script.callMethod(block, "call", activity);
                         Script.setScriptFilename(oldFile);
                     }
-                });
+                };
+                if (onUiThread) {
+                    runTestOnUiThread(testRunnable);
+                } else {
+                    testRunnable.run();
+                }
             } catch (Throwable t) {
-                throw new AssertionFailedError(t.getMessage() != null ? t.getMessage() : t.getClass().getName());
+                AssertionFailedError afe = new AssertionFailedError("Exception running test.");
+                afe.initCause(t);
+                throw afe;
             }
             Log.i(getClass().getName(), "runTest ok");
         } else {

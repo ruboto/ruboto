@@ -33,6 +33,7 @@ public class Script {
 
     private String name = null;
     private static Object ruby;
+    private static boolean isDebugBuild = false;
     private static PrintStream output = null;
     private static boolean initialized = false;
 
@@ -76,7 +77,8 @@ public class Script {
 
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
-            Log.d(TAG, "Setting up JRuby runtime");
+            setDebugBuild(appContext);
+            Log.d(TAG, "Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
             System.setProperty("jruby.bytecode.version", "1.6");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
@@ -400,21 +402,20 @@ public class Script {
 		}
     }
     
-    private static boolean isDebugBuild(Context context) {
+    private static void setDebugBuild(Context context) {
         PackageManager pm = context.getPackageManager();
         PackageInfo pi;
         try {
             pi = pm.getPackageInfo(context.getPackageName(), 0);
-            return ((pi.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+            isDebugBuild = ((pi.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
         } catch (NameNotFoundException e) {
-            return false;
+            isDebugBuild = false;
         }
-
     }
 
     private static String scriptsDirName(Context context) {
         File storageDir = null;
-        if (isDebugBuild(context)) {
+        if (isDebugBuild) {
 
             // FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
             Log.i(TAG, "JRuby VERSION: " + JRUBY_VERSION);
@@ -525,6 +526,9 @@ public class Script {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
             printStackTrace(ite);
+            if (isDebugBuild) {
+                throw new RuntimeException(ite);
+            }
         }
     }
 

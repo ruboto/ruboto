@@ -15,11 +15,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Enumeration;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -101,10 +102,19 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     public void test(String name, Object block) {
+        test(name, null, block);
+    }
+
+    public void test(String name, Map options, Object block) {
+        // FIXME(uwe): Remove when we stop supporting Android 2.2
         if (android.os.Build.VERSION.SDK_INT <= 8) {
           name ="runTest";
         }
-        Test test = new ActivityTest(activityClass, Script.getScriptFilename(), setup, name, block);
+        // FIXME end
+
+        boolean runOnUiThread = options == null || options.get("ui") == "true";
+
+        Test test = new ActivityTest(activityClass, Script.getScriptFilename(), setup, name, runOnUiThread, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
