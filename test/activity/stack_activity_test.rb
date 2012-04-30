@@ -14,6 +14,7 @@ test('stack depth') do |activity|
   os_offset = {13 => 1, 15 => 1}[android.os.Build::VERSION::SDK_INT].to_i
   jruby_offset = {
       '1.5.6'     => [-2, -5, -6, -8],
+      '1.7.0.dev' => [ 0, -1,  0,  0],
   }[org.jruby.runtime.Constants::VERSION] || [0,0,0,0]
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
   assert_equal 44 + os_offset + jruby_offset[0], activity.find_view_by_id(42).text.to_i, version_message

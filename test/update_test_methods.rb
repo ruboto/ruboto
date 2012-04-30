@@ -5,6 +5,11 @@ module UpdateTestMethods
   include RubotoTest
   include AppTestMethods
 
+  def setup(old_ruboto_version, old_tools_version)
+    @old_ruboto_version = old_ruboto_version
+    generate_app :update => "#{old_ruboto_version}_tools_r#{old_tools_version}"
+  end
+
   def teardown
     cleanup_app
   end

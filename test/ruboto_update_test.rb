@@ -10,12 +10,9 @@ Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
     self.class.class_eval <<EOF
 class RubotoUpdate#{ruboto_version.gsub('.', '_')}Tools#{tools_version}Test < Test::Unit::TestCase
   include UpdateTestMethods
-
   def setup
-    @old_ruboto_version = '#{ruboto_version}'
-    generate_app :update => '#{ruboto_version}_tools_r#{tools_version}'
+    super('#{ruboto_version}', '#{tools_version}')
   end
-
 end
 EOF
   end

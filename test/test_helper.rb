@@ -190,7 +190,7 @@ class Test::Unit::TestCase
       puts "Storing app as template #{template_dir}"
       FileUtils.cp_r APP_DIR, template_dir, :preserve => true
       example_filename = "#{PROJECT_DIR}/examples/#{APP_NAME}_#{Ruboto::VERSION}_tools_r#{ANDROID_TOOLS_REVISION}.tgz"
-      if !excluded_stdlibs && !update # Ruboto::VERSION =~ /^d+\.d+\.d+$/ && && !File.exists?(example_filename)
+      if !excluded_stdlibs && !update && Ruboto::VERSION =~ /^d+\.d+\.d+$/ # && !File.exists?(example_filename)
         puts "Storing app as example #{example_filename}"
         Dir.chdir File.dirname(APP_DIR) do
           system "tar czf #{example_filename} #{File.basename(APP_DIR)}"
