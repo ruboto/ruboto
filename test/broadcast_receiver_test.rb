@@ -66,7 +66,7 @@ EOF
       test_content = File.read(test_filename)
 
       assert test_content.sub!(/'button changes text'/, "'button changes text', :ui => false")
-      assert test_content.sub!(/button.performClick/, "activity.run_on_ui_thread{button.performClick}\nsleep 0.1")
+      assert test_content.sub!(/button.performClick/, "activity.run_on_ui_thread{button.performClick}\nsleep 0.2")
       assert test_content.sub!(/What hath Matz wrought!/, message)
       File.open(test_filename, 'w') { |f| f << test_content }
     end
