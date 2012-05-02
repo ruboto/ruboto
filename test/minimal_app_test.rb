@@ -15,6 +15,7 @@ class MinimalAppTest < Test::Unit::TestCase
     apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
     upper_limit = {
 #        '1.5.6'     => 3.7,
+        '1.6.7'     => 3.2,
         '1.7.0.dev' => 4.0,
     }[JRUBY_JARS_VERSION.to_s] || 3.7
     lower_limit = upper_limit * 0.9
