@@ -66,7 +66,15 @@ EOF
       test_content = File.read(test_filename)
 
       assert test_content.sub!(/'button changes text'/, "'button changes text', :ui => false")
-      assert test_content.sub!(/button.performClick/, "activity.run_on_ui_thread{button.performClick}\nsleep 2.0")
+      assert test_content.sub!(/  button.performClick/, <<EOF)
+  clicked_at = nil
+  activity.run_on_ui_thread do
+    button.performClick
+    clicked_at = Time.now
+  end
+
+  sleep 0.1 until clicked_at && (@text_view.text == '#{message}' || (Time.now - clicked_at) > 10
+EOF
       assert test_content.sub!(/What hath Matz wrought!/, message)
       File.open(test_filename, 'w') { |f| f << test_content }
     end
