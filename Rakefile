@@ -32,13 +32,15 @@ file GEM_FILE_OLD => GEM_SPEC_FILE_OLD do
 end
 
 task :install => :gem do
-  begin
-    cmd1 = "gem query -i -n ruboto -v #{Ruboto::VERSION}"
-    cmd2 = "gem install ruboto -v #{Ruboto::VERSION}"
-    cmd = "#{cmd1} || #{cmd2}"
-    sh(cmd)
-  rescue RuntimeError
-    sh "sudo #{cmd2}"
+  `gem query -i -n ruboto -v #{Ruboto::VERSION}`
+  if $? != 0
+    cmd = "gem install ruboto -v #{Ruboto::VERSION}"
+    output = `#{cmd}`
+    if $? == 0
+      puts output
+    else
+      sh "sudo #{cmd}"
+    end
   end
 end
 
@@ -64,6 +66,9 @@ task :release => [:gem, :example] do
   sh "git push --tags"
   sh "gem push #{GEM_FILE}"
   sh "gem push #{GEM_FILE_OLD}"
+  sh "git add #{EXAMPLE_FILE}"
+  sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' #{EXAMPLE_FILE}"
+  sh "git push"
 end
 
 desc "Run the tests"

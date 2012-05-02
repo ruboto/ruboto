@@ -17,6 +17,8 @@ require 'ruboto/core_ext/object'
 module Ruboto
   module Commands
     module Base
+      include Ruboto::SdkVersions
+
       def self.main
         Main {
           mode "gen" do
@@ -25,7 +27,6 @@ module Ruboto
               include Ruboto::Util::Build
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
-              include Ruboto::SdkVersions
 
               option("package"){
                 required
