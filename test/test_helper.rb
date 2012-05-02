@@ -102,6 +102,7 @@ module RubotoTest
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
   JRUBY_JARS_VERSION = gem_spec.version
   puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
+  puts "RUBOTO_PLATFORM: #{ENV['RUBOTO_PLATFORM']}"
 
   # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
