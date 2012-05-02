@@ -29,8 +29,26 @@ if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
   jruby --version
 fi
 
-rm -rf tmp/RubotoCore
-rake test --trace
+if [ "$RUBOTO_PLATFORM" == "MASTER" ] ; then
+  echo "Using RubotoCore built from master"
+  rake platform:clean platform:debug
+elif [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
+  rake platform:clean
+else
+  echo "Using current release of RubotoCore"
+  if [ ! -e "tmp/RubotoCore/bin" ] ; then
+    rake platform:debug
+  fi
+  cd tmp/RubotoCore/bin
+  if [ RubotoCore-release.apk -nt RubotoCore-debug.apk -o RubotoCore-release.apk -ot RubotoCore-debug.apk ] ; then
+    wget --no-check-certificate https://github.com/downloads/ruboto/ruboto/RubotoCore-release.apk
+    cp -a RubotoCore-release.apk RubotoCore-debug.apk
+  fi
+  cd -
+  rake platform:uninstall
+fi
+
+rake test
 
 # BEGIN TIMEOUT #
 # kill -9 $TIMERPID

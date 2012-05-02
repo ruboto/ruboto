@@ -107,6 +107,9 @@ namespace :platform do
     end
   end
 
+  desc 'Generate a Ruboto Core platform debug apk'
+  task :debug => PLATFORM_DEBUG_APK
+
   file PLATFORM_DEBUG_APK => PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
       sh 'rake debug'

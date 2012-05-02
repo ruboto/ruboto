@@ -75,6 +75,12 @@ module RubotoTest
     RubotoTest::install_jruby_jars_gem
   end
 
+  def uninstall_jruby_jars_gem
+    `gem query --no-installed -n jruby-jars`
+    system 'gem uninstall jruby-jars --all' if $? != 0
+    assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
+  end
+
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
   puts "ANDROID_OS: #{ANDROID_OS}"
 
@@ -138,11 +144,16 @@ class Test::Unit::TestCase
     example          = options.delete(:example) || false
     update           = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
+    standalone       = options.delete(:standalone) || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{"_example_#{example}" if example}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}"
+    template_dir << "_example_#{example}" if example
+    template_dir << '_updated' if update
+    template_dir << '_standalone' if standalone
+    template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
@@ -160,20 +171,16 @@ class Test::Unit::TestCase
           update_app if update
         end
       else
-        unless excluded_stdlibs
-          `gem query --no-installed -n jruby-jars`
-          system 'gem uninstall jruby-jars --all' if $? != 0
-          assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
-        end
+        uninstall_jruby_jars_gem unless standalone
         puts "Generating app #{APP_DIR}"
         system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET}"
         if $? != 0
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"
         end
-        if excluded_stdlibs
+        if standalone
           Dir.chdir APP_DIR do
-            exclude_stdlibs(excluded_stdlibs)
+            exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
             system "#{RUBOTO_CMD} update jruby --force"
             raise "update jruby failed with return code #$?" if $? != 0
           end
