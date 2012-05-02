@@ -29,6 +29,9 @@ if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
   jruby --version
 fi
 
+gem query -i -n bundler || gem install bundler
+bundle install
+
 if [ "$RUBOTO_PLATFORM" == "MASTER" ] ; then
   echo "Using RubotoCore built from master"
   rake platform:clean platform:debug
