@@ -59,7 +59,7 @@ file EXAMPLE_FILE => :install do
 end
 
 desc "Push the gem to RubyGems"
-task :release => [:gem, :example] do
+task :release => [:clean, :gem, :example] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
