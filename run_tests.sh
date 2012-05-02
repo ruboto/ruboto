@@ -36,6 +36,7 @@ if [ "$RUBOTO_PLATFORM" == "MASTER" ] ; then
   echo "Using RubotoCore built from master"
   rake platform:clean platform:debug
 elif [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
+  echo "Standalone: Including JRuby in the app"
   rake platform:clean
 else
   echo "Using current release of RubotoCore"
