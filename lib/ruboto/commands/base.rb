@@ -25,6 +25,7 @@ module Ruboto
               include Ruboto::Util::Build
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
+              include Ruboto::SdkVersions
 
               option("package"){
                 required

@@ -1,10 +1,13 @@
+$:.unshift('lib') unless $:.include?('lib')
 require 'test/unit'
 require 'rubygems'
 require 'fileutils'
 require 'yaml'
-require 'pathname'
+require 'ruboto/sdk_versions'
 
 module RubotoTest
+  include Ruboto::SdkVersions
+
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
@@ -27,7 +30,7 @@ module RubotoTest
   APP_NAME       = 'RubotoTestApp'
   TMP_DIR        = File.join PROJECT_DIR, 'tmp'
   APP_DIR        = File.join TMP_DIR, APP_NAME
-  ANDROID_TARGET = ENV['ANDROID_TARGET'] || Ruboto::MINIMUM_SUPPORTED_SDK
+  ANDROID_TARGET = ENV['ANDROID_TARGET'] || MINIMUM_SUPPORTED_SDK
   VERSION_TO_API_LEVEL = {
       '2.1'   => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
       '2.3'   => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
@@ -77,11 +80,8 @@ module RubotoTest
 
   RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
-  ANDROID_HOME = ENV['ANDROID_HOME'] || File.dirname(File.dirname(Pathname.new(`which adb`.chomp).realpath))
   puts "ANDROID_HOME: #{ANDROID_HOME}"
-
-  ANDROID_TOOLS_REVISION = File.read("#{ANDROID_HOME}/tools/source.properties").slice(/Pkg.Revision=\d+/).slice(/\d+$/).to_i
-  puts "ANDROID_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
+  puts "ANDROID_SDK_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
 
   install_jruby_jars_gem
 
@@ -187,13 +187,6 @@ class Test::Unit::TestCase
       end
       puts "Storing app as template #{template_dir}"
       FileUtils.cp_r APP_DIR, template_dir, :preserve => true
-      example_filename = "#{PROJECT_DIR}/examples/#{APP_NAME}_#{Ruboto::VERSION}_tools_r#{ANDROID_TOOLS_REVISION}.tgz"
-      if !excluded_stdlibs && !update && Ruboto::VERSION =~ /^d+\.d+\.d+$/ # && !File.exists?(example_filename)
-        puts "Storing app as example #{example_filename}"
-        Dir.chdir File.dirname(APP_DIR) do
-          system "tar czf #{example_filename} #{File.basename(APP_DIR)}"
-        end
-      end
     end
   end
 

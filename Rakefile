@@ -1,4 +1,4 @@
-$: << 'lib'
+$:.unshift('lib') unless $:.include?('lib')
 require 'rake/clean'
 require 'rexml/document'
 require 'ruboto/version'
@@ -12,6 +12,7 @@ GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_FILE_OLD = "ruboto-core-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 GEM_SPEC_FILE_OLD = 'ruboto-core.gemspec'
+EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -30,15 +31,39 @@ file GEM_FILE_OLD => GEM_SPEC_FILE_OLD do
   `gem build #{GEM_SPEC_FILE_OLD}`
 end
 
+task :install => :gem do
+  begin
+    cmd1 = "gem query -i -n ruboto -v #{Ruboto::VERSION}"
+    cmd2 = "gem install ruboto -v #{Ruboto::VERSION}"
+    cmd = "#{cmd1} || #{cmd2}"
+    sh(cmd)
+  rescue RuntimeError
+    sh "sudo #{cmd2}"
+  end
+end
+
+desc "Generate an example app"
+task :example => EXAMPLE_FILE
+
+file EXAMPLE_FILE => :install do
+  puts "Creating example app #{EXAMPLE_FILE}"
+  app_name = 'RubotoTestApp'
+  Dir.chdir File.dirname(EXAMPLE_FILE) do
+    FileUtils.rm_rf app_name
+    sh "ruboto gen app --package org.ruboto.test_app --name #{app_name} --path #{app_name}"
+    sh "tar czf #{EXAMPLE_FILE} #{app_name}"
+    FileUtils.rm_rf app_name
+  end
+end
+
 desc "Push the gem to RubyGems"
-task :release => :gem do
+task :release => [:gem, :example] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
   sh "git push --tags"
   sh "gem push #{GEM_FILE}"
   sh "gem push #{GEM_FILE_OLD}"
-  
 end
 
 desc "Run the tests"

@@ -2,6 +2,8 @@ module Ruboto
   module Util
     module Update
       include Build
+      include Ruboto::SdkVersions
+
       ###########################################################################
       #
       # Updating components
