@@ -2,6 +2,7 @@
 require 'ruboto'
 
 # Command-specific dependencies
+require 'ruboto/sdk_versions'
 require 'ruboto/util/asset_copier'
 require 'ruboto/util/log_action'
 require 'ruboto/util/xml_element'

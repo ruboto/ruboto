@@ -1,6 +1,8 @@
+$: << 'lib'
 require 'rake/clean'
 require 'rexml/document'
-require 'lib/ruboto/version'
+require 'ruboto/version'
+require 'ruboto/sdk_versions'
 
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
@@ -57,9 +59,7 @@ namespace :platform do
   task :project => PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
-    # FIXME(uwe): Use Ruboto::MINIMUM_SUPPORTED_SDK instead of hardcoded android-8
-    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT} --target android-8"
-    # FIXME end
+    sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT} --min-sdk #{Ruboto::MINIMUM_SUPPORTED_SDK} --target #{Ruboto::DEFAULT_TARGET_SDK}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'

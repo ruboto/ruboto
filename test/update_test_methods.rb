@@ -3,39 +3,45 @@ require 'test/app_test_methods'
 
 module UpdateTestMethods
   include RubotoTest
-  include AppTestMethods
 
   def setup(old_ruboto_version, old_tools_version)
     @old_ruboto_version = old_ruboto_version
-    generate_app :update => "#{old_ruboto_version}_tools_r#{old_tools_version}"
+    generate_app :example => "#{old_ruboto_version}_tools_r#{old_tools_version}"
   end
 
   def teardown
     cleanup_app
   end
 
-  def test_properties_and_ant_file_has_no_duplicates
+  def test_broadcast_receiver
     Dir.chdir APP_DIR do
-      # FIXME(uwe): Cleanup when we stop support Android SDK <= 13
-      prop_file = %w{test/ant.properties test/build.properties}.find{|f| File.exists?(f)}
-      # FIXME end
 
-      assert File.readlines(prop_file).grep(/\w/).uniq!.nil?, "Duplicate lines in #{prop_file}"
-      assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in build.xml'
-    end
-  end
-
-  def test_icons_are_untouched
-    Dir.chdir APP_DIR do
-      icon_file_size = File.size('res/drawable-hdpi/icon.png')
-      # FIXME(uwe): Simplify when we stop supporting updating from version 0.1.0 and older
-      if @old_ruboto_version == '0.1.0'
-        assert_equal 4100, icon_file_size
-      else
-        assert_equal 4032, icon_file_size
+      # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
+      if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+        puts "Adding a broadcast receiver"
+        system "#{RUBOTO_CMD} _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
       end
       # FIXME end
+
+      update_app
     end
+    run_app_tests
+  end
+
+  def test_broadcast_receiver_updated_twice
+    Dir.chdir APP_DIR do
+
+      # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
+      if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+        puts "Adding a broadcast receiver"
+        system "#{RUBOTO_CMD} _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
+      end
+      # FIXME end
+
+      update_app
+      update_app
+    end
+    run_app_tests
   end
 
 end

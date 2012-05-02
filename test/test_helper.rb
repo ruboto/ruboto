@@ -55,7 +55,7 @@ module RubotoTest
     raise "Unable to read device/emulator apilevel"
   end
 
-  def install_jruby_jars_gem
+  def self.install_jruby_jars_gem
     version_requirement = "-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']
     `gem query -i -n jruby-jars #{version_requirement}`
     system "gem install jruby-jars #{version_requirement}" unless $? == 0
@@ -68,6 +68,10 @@ module RubotoTest
     end
   end
 
+  def install_jruby_jars_gem
+    RubotoTest::install_jruby_jars_gem
+  end
+
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
   puts "ANDROID_OS: #{ANDROID_OS}"
 
@@ -78,11 +82,6 @@ module RubotoTest
 
   ANDROID_TOOLS_REVISION = File.read("#{ANDROID_HOME}/tools/source.properties").slice(/Pkg.Revision=\d+/).slice(/\d+$/).to_i
   puts "ANDROID_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
-end
-
-class Test::Unit::TestCase
-  include RubotoTest
-  extend RubotoTest
 
   install_jruby_jars_gem
 
@@ -95,10 +94,17 @@ class Test::Unit::TestCase
   # FIXME end
 
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-  JRUBY_JARS_VERSION  = gem_spec.version
+  JRUBY_JARS_VERSION = gem_spec.version
+  puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
 
   # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
+
+end
+
+class Test::Unit::TestCase
+  include RubotoTest
+  extend RubotoTest
 
   alias old_run run
 
@@ -129,39 +135,29 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
+    example          = options.delete(:example) || false
     update           = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
-    if excluded_stdlibs
-      system 'rake platform:uninstall'
-    else
-      system 'rake platform:install'
-    end
-    if $? != 0
-      FileUtils.rm_rf 'tmp/RubotoCore'
-      fail 'Error (un)installing RubotoCore'
-    end
-
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
-    template_dir = "#{APP_DIR}_template_#{$$}#{"_updated_from_#{update}" if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
+    template_dir = "#{APP_DIR}_template_#{$$}#{"_example_#{example}" if example}#{'_updated' if update}#{"_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs}"
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
       install_jruby_jars_gem
 
-      if update
+      if example
         Dir.chdir TMP_DIR do
-          system "tar xzf #{PROJECT_DIR}/examples/#{APP_NAME}_#{update}.tgz"
+          system "tar xzf #{PROJECT_DIR}/examples/#{APP_NAME}_#{example}.tgz"
         end
         Dir.chdir APP_DIR do
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
-          system "#{RUBOTO_CMD} update app"
-          assert_equal 0, $?, "update app failed with return code #$?"
+          update_app if update
         end
       else
         unless excluded_stdlibs
@@ -183,9 +179,11 @@ class Test::Unit::TestCase
           end
         end
       end
-      Dir.chdir APP_DIR do
-        system 'rake debug'
-        assert_equal 0, $?
+      unless example && !update
+        Dir.chdir APP_DIR do
+          system 'rake debug'
+          assert_equal 0, $?
+        end
       end
       puts "Storing app as template #{template_dir}"
       FileUtils.cp_r APP_DIR, template_dir, :preserve => true
@@ -199,6 +197,11 @@ class Test::Unit::TestCase
     end
   end
 
+  def update_app
+    system "#{RUBOTO_CMD} update app"
+    assert_equal 0, $?, "update app failed with return code #$?"
+  end
+
   def cleanup_app
     # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
   end
@@ -206,11 +209,24 @@ class Test::Unit::TestCase
   def run_app_tests
     if ['android-7', 'android-8'].include? ANDROID_OS
       puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
+      return
+    end
+    check_platform_installation(Dir['libs/jruby-core-*.jar'].any?)
+    Dir.chdir APP_DIR do
+      system 'rake test:quick'
+      assert_equal 0, $?, "tests failed with return code #$?"
+    end
+  end
+
+  def check_platform_installation(standalone)
+    if standalone
+      system 'rake platform:uninstall'
     else
-      Dir.chdir APP_DIR do
-        system 'rake test:quick'
-        assert_equal 0, $?, "tests failed with return code #$?"
-      end
+      system 'rake platform:install'
+    end
+    if $? != 0
+      FileUtils.rm_rf 'tmp/RubotoCore'
+      fail 'Error (un)installing RubotoCore'
     end
   end
 
