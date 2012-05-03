@@ -47,7 +47,7 @@ end
 desc "Generate an example app"
 task :example => EXAMPLE_FILE
 
-def generate_example
+file EXAMPLE_FILE => :install do
   puts "Creating example app #{EXAMPLE_FILE}"
   app_name = 'RubotoTestApp'
   Dir.chdir File.dirname(EXAMPLE_FILE) do
@@ -56,10 +56,6 @@ def generate_example
     sh "tar czf #{EXAMPLE_FILE} #{app_name}"
     FileUtils.rm_rf app_name
   end
-end
-
-file EXAMPLE_FILE => :install do
-  generate_example
 end
 
 desc "Push the gem to RubyGems"
@@ -71,7 +67,7 @@ task :release => [:clean, :gem] do
   sh "gem push #{GEM_FILE}"
   sh "gem push #{GEM_FILE_OLD}"
 
-  generate_example
+  Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
   sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' #{EXAMPLE_FILE}"
   sh "git push"
