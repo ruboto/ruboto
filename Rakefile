@@ -47,7 +47,7 @@ end
 desc "Generate an example app"
 task :example => EXAMPLE_FILE
 
-file EXAMPLE_FILE => :install do
+def generate_example
   puts "Creating example app #{EXAMPLE_FILE}"
   app_name = 'RubotoTestApp'
   Dir.chdir File.dirname(EXAMPLE_FILE) do
@@ -58,14 +58,20 @@ file EXAMPLE_FILE => :install do
   end
 end
 
+file EXAMPLE_FILE => :install do
+  generate_example
+end
+
 desc "Push the gem to RubyGems"
-task :release => [:clean, :gem, :example] do
+task :release => [:clean, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
   sh "git push --tags"
   sh "gem push #{GEM_FILE}"
   sh "gem push #{GEM_FILE_OLD}"
+
+  generate_example
   sh "git add #{EXAMPLE_FILE}"
   sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' #{EXAMPLE_FILE}"
   sh "git push"
