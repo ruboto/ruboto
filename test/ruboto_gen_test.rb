@@ -35,7 +35,7 @@ class RubotoGenTest < Test::Unit::TestCase
     version = "  PLATFORM: #{RUBOTO_PLATFORM}"
     if RUBOTO_PLATFORM == 'STANDALONE'
       upper_limit = {
-          '1.6.7' => 4200.0,
+          '1.6.7' => 5800.0,
           '1.7.0.dev' => 6666.0,
       }[JRUBY_JARS_VERSION.to_s] || 4200.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
