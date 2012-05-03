@@ -46,6 +46,7 @@ EOF
       File.open(activity_filename, 'w') { |f| f << activity_content }
 
       system "#{RUBOTO_CMD} gen class BroadcastReceiver --name ClickReceiver"
+      FileUtils.rm 'test/src/click_receiver_test.rb'
       receiver_filename = 'src/click_receiver.rb'
       receiver_content = File.read(receiver_filename)
 
@@ -73,7 +74,7 @@ EOF
     clicked_at = Time.now
   end
 
-  sleep 0.1 until clicked_at && (@text_view.text == '#{message}' || (Time.now - clicked_at) > 10
+  sleep 0.1 until clicked_at && (@text_view.text == '#{message}' || (Time.now - clicked_at) > 10)
 EOF
       assert test_content.sub!(/What hath Matz wrought!/, message)
       File.open(test_filename, 'w') { |f| f << test_content }

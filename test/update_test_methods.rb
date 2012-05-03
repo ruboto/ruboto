@@ -26,7 +26,6 @@ module UpdateTestMethods
         test_file = 'test/src/dummy_receiver_test.rb'
         assert File.exists? test_file
         source = File.read(test_file)
-        source.gsub!('SampleActivity', 'RubotoTestAppActivity')
         File.open(test_file, 'w'){|f| f << source}
         update_app
       end
@@ -48,7 +47,6 @@ module UpdateTestMethods
         test_file = 'test/src/dummy_receiver_test.rb'
         assert File.exists? test_file
         source = File.read(test_file)
-        source.gsub!('SampleActivity', 'RubotoTestAppActivity')
         File.open(test_file, 'w'){|f| f << source}
         update_app
         update_app
