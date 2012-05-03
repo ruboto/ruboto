@@ -40,7 +40,13 @@ class RubotoGenTest < Test::Unit::TestCase
       }[JRUBY_JARS_VERSION.to_s] || 4200.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
-      upper_limit = 60.0
+      upper_limit = 64.0
+      upper_limit = {
+          'android-7' => 56.0,
+          'android-10' => 60.0,
+          'android-15' => 64.0,
+      }[ANDROID_TARGET] || 64.0
+      version << ", ANDROID_TARGET: #{ANDROID_TARGET}"
     end
     lower_limit = upper_limit * 0.9
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
