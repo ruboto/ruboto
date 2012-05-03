@@ -32,9 +32,9 @@ file GEM_FILE_OLD => GEM_SPEC_FILE_OLD do
 end
 
 task :install => :gem do
-  `gem query -i -n ruboto -v #{Ruboto::VERSION}`
+  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? != 0
-    cmd = "gem install ruboto -v #{Ruboto::VERSION}"
+    cmd = "gem install ruboto-#{Ruboto::VERSION}.gem"
     output = `#{cmd}`
     if $? == 0
       puts output
