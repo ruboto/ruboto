@@ -40,7 +40,6 @@ class RubotoGenTest < Test::Unit::TestCase
       }[JRUBY_JARS_VERSION.to_s] || 4200.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
-      upper_limit = 64.0
       upper_limit = {
           'android-7' => 56.0,
           'android-10' => 60.0,
