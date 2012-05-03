@@ -1,5 +1,6 @@
-unless ENV['RUBOTO_PLATFORM'] == 'CURRENT' || ENV['RUBOTO_PLATFORM'] == 'MASTER'
-  require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path("test_helper", File.dirname(__FILE__))
+
+if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
   require 'bigdecimal'
 
   class MinimalAppTest < Test::Unit::TestCase
@@ -17,8 +18,8 @@ unless ENV['RUBOTO_PLATFORM'] == 'CURRENT' || ENV['RUBOTO_PLATFORM'] == 'MASTER'
       upper_limit = {
           # '1.5.6' => 3.7,
           '1.6.7' => 3.2,
-          '1.7.0.dev' => 4.0,
-      }[JRUBY_JARS_VERSION.to_s] || 3.7
+          '1.7.0.dev' => 3.2,
+      }[JRUBY_JARS_VERSION.to_s] || 3.2
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}"
       assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB.  #{version_message}"

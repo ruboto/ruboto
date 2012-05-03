@@ -102,11 +102,12 @@ module RubotoTest
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
   JRUBY_JARS_VERSION = gem_spec.version
   puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
-  puts "RUBOTO_PLATFORM: #{ENV['RUBOTO_PLATFORM']}"
+
+  RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
+  puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
 
   # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
   ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
-
 end
 
 class Test::Unit::TestCase
@@ -131,7 +132,8 @@ class Test::Unit::TestCase
 
   def mark_test_end(test_name)
     log
-    log "Ended test #{test_name}: #{passed? ? 'PASSED' : 'FAILED'} after #{(Time.now - @start_time).to_i}s"
+    duration = (Time.now - @start_time).to_i
+    log "Ended test #{test_name}: #{passed? ? 'PASSED' : 'FAILED'} after #{duration / 60}:#{'%02d' % (duration % 60)}"
     log '=' * 80
     log
   end
@@ -168,7 +170,11 @@ class Test::Unit::TestCase
         Dir.chdir APP_DIR do
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
-          exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
+          if standalone
+            exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
+          else
+            FileUtils.rm(Dir['libs/{jruby-*.jar,dexmaker*.jar}'])
+          end
           update_app if update
         end
       else

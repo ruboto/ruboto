@@ -52,7 +52,7 @@ else
   rake platform:uninstall
 fi
 
-rake test
+rake test --trace
 
 # BEGIN TIMEOUT #
 # kill -9 $TIMERPID
