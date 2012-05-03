@@ -14,34 +14,31 @@ module UpdateTestMethods
   end
 
   def test_broadcast_receiver
-    Dir.chdir APP_DIR do
-
-      # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
-      if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+    # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
+    if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+      Dir.chdir APP_DIR do
         puts "Adding a broadcast receiver"
         system "#{RUBOTO_CMD} _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
+        fail "Creation of broadcast receiver failed" if $? != 0
+        update_app
       end
-      # FIXME end
-
-      update_app
+      run_app_tests
     end
-    run_app_tests
+    # FIXME end
   end
 
   def test_broadcast_receiver_updated_twice
-    Dir.chdir APP_DIR do
-
-      # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
-      if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+    # FIXME(uwe): Remove check when we stop supporting updating from ruboto_core (Ruboto before version 0.5.2 2011-12-24)
+    if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.5.2')
+      Dir.chdir APP_DIR do
         puts "Adding a broadcast receiver"
         system "#{RUBOTO_CMD} _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
+        update_app
+        update_app
       end
-      # FIXME end
-
-      update_app
-      update_app
+      run_app_tests
     end
-    run_app_tests
+    # FIXME end
   end
 
 end
