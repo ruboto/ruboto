@@ -188,6 +188,7 @@ module Ruboto
         log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob("libs/jruby-stdlib-*.jar") } if jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
+        log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
 
         reconfigure_jruby_libs(new_jruby_version)
 
@@ -351,10 +352,6 @@ module Ruboto
       def reconfigure_jruby_libs(jruby_core_version)
         reconfigure_jruby_core(jruby_core_version)
         reconfigure_jruby_stdlib
-        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        %w{libs}.each do |f|
-          log_action(f) { copier.copy f }
-        end
       end
 
       # - Removes unneeded code from jruby-core
