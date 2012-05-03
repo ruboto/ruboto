@@ -247,7 +247,7 @@ module Ruboto
               script_file = File.expand_path("#{SCRIPTS_DIR}/#{underscore(subclass_name)}.rb")
               script_content = File.read(script_file)
               if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/ &&
-                  script_content !~ /\$RubotoBroadcastReceiver.new_with_callbacks/
+                  script_content !~ /RubotoBroadcastReceiver.new_with_callbacks/
                 puts "Putting receiver script in a block in #{script_file}"
                 script_content.gsub! '$broadcast_context', 'context'
                 File.open(script_file, 'w') do |of|

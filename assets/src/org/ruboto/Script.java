@@ -282,8 +282,11 @@ public class Script {
         } catch (IllegalAccessException iae) {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
- //           throw ((RuntimeException) ite.getCause());
-            return null;
+            if (isDebugBuild) {
+                throw ((RuntimeException) ite.getCause());
+            } else {
+                return null;
+            }
         }
 	}
 

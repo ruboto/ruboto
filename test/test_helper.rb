@@ -81,6 +81,13 @@ module RubotoTest
     assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
   end
 
+  def install_ruboto_gem(version)
+    version_requirement = "-v #{version}"
+    `gem query -i -n ^ruboto$ #{version_requirement}`
+    system "gem install ruboto #{version_requirement}" unless $? == 0
+    raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
+  end
+
   ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
