@@ -16,6 +16,18 @@ echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 trap "echo killing timer ; kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
+if which ant ; then
+  echo -n
+else
+  if [ -e /etc/profile.d/ant ] ; then
+    . /etc/profile.d/ant
+  else
+    echo Apache ANTis missing!
+    exit 2
+  fi
+fi
+ant -version
+
 if [ -e /usr/local/jruby ] ; then
   export JRUBY_HOME=/usr/local/jruby
   CUSTOM_JRUBY_SET=yes
