@@ -19,10 +19,10 @@ trap "echo killing timer ; kill -9 $TIMERPID" EXIT
 if which ant ; then
   echo -n
 else
-  if [ -e /etc/profile.d/ant ] ; then
-    . /etc/profile.d/ant
+  if [ -e /etc/profile.d/ant.sh ] ; then
+    . /etc/profile.d/ant.sh
   else
-    echo Apache ANTis missing!
+    echo Apache ANT is missing!
     exit 2
   fi
 fi
