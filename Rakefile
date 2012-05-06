@@ -4,7 +4,7 @@ require 'rexml/document'
 require 'ruboto/version'
 require 'ruboto/sdk_versions'
 require 'uri'
-require 'net/https'
+require 'net/http'
 
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
@@ -118,7 +118,6 @@ namespace :platform do
   file PLATFORM_DEBUG_APK => PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
       sh 'rake debug'
-      FileUtils.rm PLATFORM_CURRENT_RELEASE_APK if File.exists? PLATFORM_CURRENT_RELEASE_APK
     end
   end
 
@@ -134,18 +133,14 @@ namespace :platform do
   desc 'Download the current RubotoCore platform release apk'
   task :current => :debug do
     Dir.chdir("#{PLATFORM_PROJECT}/bin") do
-      if !File.exists?(PLATFORM_CURRENT_RELEASE_APK) || File.size(PLATFORM_CURRENT_RELEASE_APK) != File.size(PLATFORM_DEBUG_APK)
+      if !File.exists?(PLATFORM_CURRENT_RELEASE_APK)
         puts 'Downloading the current RubotoCore platform release apk'
-        url = 'https://github.com/downloads/ruboto/ruboto/RubotoCore-release.apk'
-        uri = URI.parse url
-        http = Net::HTTP.new uri.host, uri.port
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        http.use_ssl = true
-        http.start do |agent|
-          content = agent.get(uri.path).read_body
-          File.open(PLATFORM_CURRENT_RELEASE_APK, 'w'){|f| f << content}
-          FileUtils.cp PLATFORM_CURRENT_RELEASE_APK, PLATFORM_DEBUG_APK, :preserve => true
-        end
+        url = 'http://cloud.github.com/downloads/ruboto/ruboto/RubotoCore-release.apk'
+        File.open(PLATFORM_CURRENT_RELEASE_APK, 'w') { |f| f << Net::HTTP.get(URI.parse url) }
+      end
+
+      if File.size(PLATFORM_CURRENT_RELEASE_APK) != File.size(PLATFORM_DEBUG_APK)
+        FileUtils.cp PLATFORM_CURRENT_RELEASE_APK, PLATFORM_DEBUG_APK
       end
     end
   end
