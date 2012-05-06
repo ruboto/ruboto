@@ -245,7 +245,11 @@ class Test::Unit::TestCase
     if standalone
       system 'rake platform:uninstall'
     else
-      system 'rake platform:install'
+      if RUBOTO_PLATFORM == 'CURRENT'
+        system "rake platform:current platform:install"
+      elsif RUBOTO_PLATFORM == 'MASTER'
+        system "rake platform:install"
+      end
     end
     if $? != 0
       FileUtils.rm_rf 'tmp/RubotoCore'
