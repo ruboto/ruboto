@@ -32,40 +32,34 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
     }
 
     public void runTest() throws Exception {
-        Log.i(getClass().getName(), "runTest");
-        Log.i(getClass().getName(), "runTest: " + getName());
-        if (Script.setUpJRuby(getActivity())) {
-            Log.i(getClass().getName(), "ruby ok");
-            try {
-                final Activity activity = getActivity();
-                Log.i(getClass().getName(), "activity ok");
-                Runnable testRunnable = new Runnable() {
-                    public void run() {
-                        String oldFile = Script.getScriptFilename();
+        try {
+            Log.i(getClass().getName(), "runTest: " + getName());
+            final Activity activity = getActivity();
+            Log.i(getClass().getName(), "Activity OK");
+            Runnable testRunnable = new Runnable() {
+                public void run() {
+                    String oldFile = Script.getScriptFilename();
 
-                        Log.i(getClass().getName(), "calling setup");
-                        Script.setScriptFilename(filename);
-                        Script.callMethod(setup, "call", activity);
-                        Log.i(getClass().getName(), "setup ok");
+                    Log.i(getClass().getName(), "calling setup");
+                    Script.setScriptFilename(filename);
+                    Script.callMethod(setup, "call", activity);
+                    Log.i(getClass().getName(), "setup ok");
                     
-                        Script.setScriptFilename(filename);
-                        Script.callMethod(block, "call", activity);
-                        Script.setScriptFilename(oldFile);
-                    }
-                };
-                if (onUiThread) {
-                    runTestOnUiThread(testRunnable);
-                } else {
-                    testRunnable.run();
+                    Script.setScriptFilename(filename);
+                    Script.callMethod(block, "call", activity);
+                    Script.setScriptFilename(oldFile);
                 }
-            } catch (Throwable t) {
-                AssertionFailedError afe = new AssertionFailedError("Exception running test.");
-                afe.initCause(t);
-                throw afe;
+            };
+            if (onUiThread) {
+                runTestOnUiThread(testRunnable);
+            } else {
+                testRunnable.run();
             }
             Log.i(getClass().getName(), "runTest ok");
-        } else {
-            throw new AssertionFailedError("Ruboto Core platform is missing.");
+        } catch (Throwable t) {
+            AssertionFailedError afe = new AssertionFailedError("Exception running test.");
+            afe.initCause(t);
+            throw afe;
         }
     }
 

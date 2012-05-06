@@ -252,7 +252,7 @@ module Ruboto
                 script_content.gsub! '$broadcast_context', 'context'
                 File.open(script_file, 'w') do |of|
                   of.puts 'RubotoBroadcastReceiver.new_with_callbacks do
-    def on_receive(context, intent)'
+  def on_receive(context, intent)'
                   of << script_content
                   of.puts 'end'
                 end
@@ -315,7 +315,7 @@ module Ruboto
       def update_core_classes(force = nil)
         # FIXME(uwe): Remove when we stop supporting updating from Ruboto 0.5.5 and older.
         FileUtils.rm_rf 'src/org/ruboto/callbacks'
-        FileUtils.rm_f  'src/org/ruboto/RubotoView.java'
+        FileUtils.rm_f 'src/org/ruboto/RubotoView.java'
         # FIXME end
 
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
@@ -379,12 +379,16 @@ module Ruboto
                     'org/apache',
                     'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/jruby/ant',
+                    'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
                     'org/jruby/compiler/util',
-                    'org/jruby/demo', 'org/jruby/embed/bsf',
-                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi',
-                    # 'org/jruby/ext/ffi', # Used by several JRuby core classes
+                    'org/jruby/demo',
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
+                    'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
                     'org/jruby/javasupport/bsf',
                     'org/jruby/runtime/invokedynamic',
                 ]
@@ -420,6 +424,15 @@ module Ruboto
 
               excluded_core_packages.each do |i|
                 FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
+              end
+
+              # FIXME(uwe):  Add a Ruboto.yml config for this if it works
+              # Reduces the installation footprint, but also reduces performance
+              if false && "EXCLUDE INVOKERS"
+                invokers = Dir['**/*${INVOKER$*,POPULATOR}.class']
+                log_action("Removing invokers & populators(#{invokers.size})") do
+                  FileUtils.rm invokers
+                end
               end
 
               # Uncomment this section to get a jar for each top level package in the core

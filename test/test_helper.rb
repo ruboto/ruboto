@@ -26,16 +26,16 @@ module RubotoTest
   require 'ruboto'
   require 'ruboto/version'
 
-  PACKAGE        = 'org.ruboto.test_app'
-  APP_NAME       = 'RubotoTestApp'
-  TMP_DIR        = File.join PROJECT_DIR, 'tmp'
-  APP_DIR        = File.join TMP_DIR, APP_NAME
-  ANDROID_TARGET = ENV['ANDROID_TARGET'] || MINIMUM_SUPPORTED_SDK
+  PACKAGE = 'org.ruboto.test_app'
+  APP_NAME = 'RubotoTestApp'
+  TMP_DIR = File.join PROJECT_DIR, 'tmp'
+  APP_DIR = File.join TMP_DIR, APP_NAME
+  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
   VERSION_TO_API_LEVEL = {
-      '2.1'   => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
-      '2.3'   => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
+      '2.1' => 'android-7', '2.1-update1' => 'android-7', '2.2' => 'android-8',
+      '2.3' => 'android-9', '2.3.1' => 'android-9', '2.3.2' => 'android-9',
       '2.3.3' => 'android-10', '2.3.4' => 'android-10',
-      '3.0'   => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
+      '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
       '4.0.1' => 'android-14', '4.0.3' => 'android-15', '4.0.4' => 'android-15'
   }
 
@@ -45,7 +45,7 @@ module RubotoTest
     start = Time.now
     IO.popen('adb bugreport').each_line do |line|
       if line =~ /sdk-eng (.*?) .*? .*? test-keys/
-        version   = $1
+        version = $1
         api_level = VERSION_TO_API_LEVEL[version]
         raise "Unknown version: #{version}" if api_level.nil?
         puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
@@ -152,10 +152,10 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
-    example          = options.delete(:example) || false
-    update           = options.delete(:update) || false
+    example = options.delete(:example) || false
+    update = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
-    standalone       = options.delete(:standalone) || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
+    standalone = options.delete(:standalone) || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
@@ -188,7 +188,7 @@ class Test::Unit::TestCase
       else
         uninstall_jruby_jars_gem unless standalone
         puts "Generating app #{APP_DIR}"
-        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target #{ANDROID_TARGET}"
+        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target android-#{ANDROID_TARGET}"
         if $? != 0
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"
@@ -201,6 +201,14 @@ class Test::Unit::TestCase
           end
         end
       end
+
+      # FIXME(uwe): Installation with dexmaker fails on Android < 4.0.3 due to complex interface structure
+      # Fixme(uwe): Remove when solved
+      # Dir.chdir APP_DIR do
+      #   FileUtils.rm(Dir['libs/dexmaker*.jar']) if standalone && ANDROID_TARGET < 15
+      # end
+      # FIXME end
+
       unless example && !update
         Dir.chdir APP_DIR do
           system 'rake debug'
