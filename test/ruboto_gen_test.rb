@@ -43,7 +43,7 @@ class RubotoGenTest < Test::Unit::TestCase
       upper_limit = {
           7 => 56.0,
           10 => 60.0,
-          15 => 64.0,
+          15 => 65.0,
       }[ANDROID_TARGET] || 64.0
       version << ", ANDROID_TARGET: #{ANDROID_TARGET}"
     end
