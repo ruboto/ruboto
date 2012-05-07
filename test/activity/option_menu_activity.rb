@@ -1,6 +1,7 @@
 require 'ruboto/activity'
 require 'ruboto/widget'
 require 'ruboto/legacy'
+require 'ruboto/menu'
 
 ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
 
