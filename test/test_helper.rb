@@ -88,7 +88,7 @@ module RubotoTest
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
 
-  ANDROID_OS = ENV['ANDROID_OS'] || version_from_device
+  ANDROID_OS = (ENV['ANDROID_OS'] || version_from_device).slice(/\d+/).to_i
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
 
@@ -233,7 +233,7 @@ class Test::Unit::TestCase
   end
 
   def run_app_tests
-    if ['android-7', 'android-8'].include? ANDROID_OS
+    if [7, 8].include? ANDROID_OS
       puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
       return
     end

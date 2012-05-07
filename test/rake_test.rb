@@ -10,7 +10,7 @@ class RakeTest < Test::Unit::TestCase
   end
 
   # FIXME(uwe): Remove condition when we stop supporting android-7
-  if ANDROID_OS == 'android-7'
+  if ANDROID_OS == 7
     puts "Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall"
   else
     def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
