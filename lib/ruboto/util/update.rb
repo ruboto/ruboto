@@ -190,7 +190,7 @@ module Ruboto
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        if false && jruby_core_version == '1.7.0.dev' && Dir.chdir('../..'){verify_target_sdk < 15}
+        if true || !(jruby_core_version == '1.7.0.dev' && Dir.chdir('../..'){verify_target_sdk < 15})
           log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
         end
 
