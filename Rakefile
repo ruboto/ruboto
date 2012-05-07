@@ -132,7 +132,7 @@ namespace :platform do
 
   desc 'Download the current RubotoCore platform release apk'
   task :current => :debug do
-    Dir.chdir("#{PLATFORM_PROJECT}/bin") do
+    Dir.chdir PLATFORM_PROJECT do
       if !File.exists?(PLATFORM_CURRENT_RELEASE_APK)
         puts 'Downloading the current RubotoCore platform release apk'
         url = 'http://cloud.github.com/downloads/ruboto/ruboto/RubotoCore-release.apk'
@@ -141,6 +141,7 @@ namespace :platform do
 
       if File.size(PLATFORM_CURRENT_RELEASE_APK) != File.size(PLATFORM_DEBUG_APK)
         FileUtils.cp PLATFORM_CURRENT_RELEASE_APK, PLATFORM_DEBUG_APK
+        sh 'rake uninstall'
       end
     end
   end
