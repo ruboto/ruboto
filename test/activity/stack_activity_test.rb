@@ -12,8 +12,11 @@ end
 
 test('stack depth') do |activity|
   os_offset = {13 => 1, 15 => 1}[android.os.Build::VERSION::SDK_INT].to_i
-  if RUBOTO_PLATFORM == 'CURRENT'
-    jruby_offset = [0, 0, 0, 0]
+  if org.ruboto.Script.uses_platform_apk?
+    jruby_offset = {
+        '0.4.7' => [0, 0, 0, 0],
+        '0.4.8.dev' => [0, -1, -1, -1],
+    }[org.ruboto.Script.platform_version_name] || [0, 0, 0, 0]
   else
     jruby_offset = {
         '1.5.6' => [-2, -5, -6, -8],

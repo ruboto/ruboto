@@ -42,6 +42,7 @@ public class Script {
 
     public static final String TAG = "RUBOTO"; // for logging
     private static String JRUBY_VERSION;
+    private static String RUBOTO_CORE_VERSION_NAME;
 
     /*************************************************************************************************
      * 
@@ -71,6 +72,14 @@ public class Script {
 		return initialized;
 	}
 
+	public static boolean usesPlatformApk() {
+		return RUBOTO_CORE_VERSION_NAME != null;
+	}
+	
+	public static String getPlatformVersionName() {
+		return RUBOTO_CORE_VERSION_NAME;
+	}
+	
     public static synchronized boolean setUpJRuby(Context appContext) {
         return setUpJRuby(appContext, output == null ? System.out : output);
     }
@@ -106,7 +115,9 @@ public class Script {
             } catch (ClassNotFoundException e1) {
                 String packageName = "org.ruboto.core";
                 try {
-                    apkName = appContext.getPackageManager().getApplicationInfo(packageName, 0).sourceDir;
+                	PackageInfo pkgInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
+                    apkName = pkgInfo.applicationInfo.sourceDir;
+                	RUBOTO_CORE_VERSION_NAME = pkgInfo.versionName;
                 } catch (PackageManager.NameNotFoundException e2) {
                     out.println("JRuby not found in local APK:");
                     e1.printStackTrace(out);
