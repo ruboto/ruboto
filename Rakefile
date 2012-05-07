@@ -98,7 +98,7 @@ namespace :platform do
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'
-      manifest.root.attributes['android:versionName'] = '0.4.8'
+      manifest.root.attributes['android:versionName'] = '0.4.8.dev'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
@@ -117,6 +117,10 @@ namespace :platform do
 
   file PLATFORM_DEBUG_APK => PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
+      if File.exists?(PLATFORM_CURRENT_RELEASE_APK) && File.exists?(PLATFORM_DEBUG_APK) &&
+          File.size(PLATFORM_CURRENT_RELEASE_APK) == File.size(PLATFORM_DEBUG_APK)
+        sh 'rake uninstall'
+      end
       sh 'rake debug'
     end
   end
