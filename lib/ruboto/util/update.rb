@@ -188,7 +188,11 @@ module Ruboto
         log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob("libs/jruby-stdlib-*.jar") } if jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
-        log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
+
+        # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
+        if false && jruby_core_version == '1.7.0.dev' && Dir.chdir('../..'){verify_target_sdk < 15}
+          log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
+        end
 
         reconfigure_jruby_libs(new_jruby_version)
 
@@ -388,7 +392,21 @@ module Ruboto
                     'org/jruby/embed/jsr223',
                     'org/jruby/embed/osgi',
                     # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
+                    'org/jruby/ext/ffi/io',
+                    'org/jruby/ext/ffi/jffi',
                     'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
+
+                    # 'org/jruby/ir', # FIXME(uwe):  Try to modify JRuby to allow this to be removed
+                    'org/jruby/ir/dataflow',
+                    # 'org/jruby/ir/instructions',
+                    # 'org/jruby/ir/interpreter',
+                    # 'org/jruby/ir/operands',
+                    # 'org/jruby/ir/passes',
+                    'org/jruby/ir/representations',
+                    # 'org/jruby/ir/targets',
+                    'org/jruby/ir/transformations',
+                    'org/jruby/ir/util',
+
                     'org/jruby/javasupport/bsf',
                     'org/jruby/runtime/invokedynamic',
                 ]
@@ -427,8 +445,9 @@ module Ruboto
               end
 
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
-              # Reduces the installation footprint, but also reduces performance
-              if false && "EXCLUDE INVOKERS"
+              # Reduces the installation footprint, but also reduces performance and stack usage
+              # FIXME(uwe):  Measure the performance change
+              if false && jruby_core_version == '1.7.0.dev' && Dir.chdir('../..'){verify_target_sdk < 15}
                 invokers = Dir['**/*${INVOKER$*,POPULATOR}.class']
                 log_action("Removing invokers & populators(#{invokers.size})") do
                   FileUtils.rm invokers

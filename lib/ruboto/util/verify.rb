@@ -10,9 +10,10 @@ module Ruboto
       #
 
       def verify_manifest
+        return @manifest if @manifest
         abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
         File.exists? 'AndroidManifest.xml'
-        @manifest ||= REXML::Document.new(File.read('AndroidManifest.xml')).root
+        @manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
       end
 
       def save_manifest
@@ -54,10 +55,11 @@ module Ruboto
       end
 
       def verify_target_sdk
+        return @target_sdk if @target_sdk
         verify_sdk_versions
-        @target_sdk ||= @uses_sdk.attribute('android:targetSdkVersion').value
-        abort "you must specify a target sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @target_sdk
-        @target_sdk
+        target_sdk_attr ||= @uses_sdk.attribute('android:targetSdkVersion').value
+        abort "you must specify a target sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless target_sdk_attr
+        @target_sdk = target_sdk_attr.to_i
       end
 
       def verify_strings

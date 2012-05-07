@@ -90,6 +90,7 @@ module Ruboto
                 puts "Done"
 
                 Dir.chdir root do
+                  update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_test true
                   update_assets
                   update_ruboto true
@@ -97,7 +98,6 @@ module Ruboto
                   update_classes true
                   update_jruby true if params['with-jruby'].value
 #                  update_build_xml
-                  update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
