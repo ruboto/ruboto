@@ -382,7 +382,7 @@ end
 def install_apk
   case package_installed?
   when true
-    puts "Package already installed."
+    puts "Package #{package} already installed."
     return
   when false
     puts "Package installed, but of wrong size."
