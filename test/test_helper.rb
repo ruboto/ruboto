@@ -180,6 +180,8 @@ class Test::Unit::TestCase
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
             exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
+            FileUtils.touch 'libs/jruby-core-x.x.x.jar'
+            FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
           else
             FileUtils.rm(Dir['libs/{jruby-*.jar,dexmaker*.jar}'])
           end
