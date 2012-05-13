@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # BEGIN TIMEOUT #
-TIMEOUT="3700"
+TIMEOUT=4200
 BOSSPID=$$
 (
   sleep $TIMEOUT
