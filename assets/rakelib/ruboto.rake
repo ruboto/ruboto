@@ -405,7 +405,6 @@ def update_scripts
   `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
   puts "Pushing files to apk public file area."
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
-  # TODO(uwe): Use `adb sync src` instead?
   Dir.chdir('src') do
     Dir["**/*.rb"].each do |script_file|
       next if File.directory? script_file

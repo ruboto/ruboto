@@ -34,7 +34,6 @@ module Ruboto
 
       p = Proc.new do |num, menu_item|
         # handles a problem where this is called for context items
-        # TODO(uwe): JRUBY-5866 JRuby can't access nested Java class if the class is called 'id'
         # TODO(uwe): Remove check for SDK version when we stop supporting api level < 11
         unless @just_processed_context_item == menu_item || (android.os.Build::VERSION::SDK_INT >= 11 && menu_item.item_id == AndroidIds.home)
           instance_eval &(menu_item.on_click)

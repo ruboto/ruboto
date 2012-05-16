@@ -16,25 +16,15 @@ module UpdatedExampleTestMethods
 
   def test_properties_and_ant_file_has_no_duplicates
     Dir.chdir APP_DIR do
-      # FIXME(uwe): Cleanup when we stop support Android SDK <= 13
-      prop_file = %w{test/ant.properties test/build.properties}.find{|f| File.exists?(f)}
-      # FIXME end
-
-      assert File.readlines(prop_file).grep(/\w/).uniq!.nil?, "Duplicate lines in #{prop_file}"
-      assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in build.xml'
+      assert File.readlines('test/ant.properties').grep(/\w/).uniq!.nil?, "Duplicate lines in test/ant.properties"
+      assert_equal 1, File.readlines('test/build.xml').grep(/<macrodef name="run-tests-helper">/).size, 'Duplicate macro in test/build.xml'
     end
   end
 
   def test_icons_are_untouched
     Dir.chdir APP_DIR do
       icon_file_size = File.size('res/drawable-hdpi/icon.png')
-      # FIXME(uwe): Simplify when we stop supporting updating from version 0.1.0 and older
-      if @old_ruboto_version == '0.1.0'
-        assert_equal 4100, icon_file_size
-      else
-        assert_equal 4032, icon_file_size
-      end
-      # FIXME end
+      assert_equal 4032, icon_file_size
     end
   end
 
