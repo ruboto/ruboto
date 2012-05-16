@@ -17,15 +17,15 @@ module Ruboto
         name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
 
         # FIXME(uwe): Remove build.xml file to force regeneration.
-        # FIXME(uwe): Needed when updating from Android SDK <= 13 to 14
-        # FIXME(uwe): Remove when we stop supporting upgrading from Android SDK <= 13
+        # FIXME(uwe): Needed when updating apps from Android SDK <= 13 to 14
+        # FIXME(uwe): Remove when we stop supporting upgrading apps from Android SDK <= 13
         if File.read(build_xml_file) !~ /<!-- version-tag: 1 -->/
           puts "Forcing generation of new build.xml since upgrading a project generated with Android SDK 13 or older."
           FileUtils.rm_f build_xml_file
         end
         # FIXME end
 
-        # FIXME(uwe):  Simplify when we stop supporting upgrading from Android ASK <= 13
+        # FIXME(uwe):  Simplify when we stop supporting upgrading apps from Android ASK <= 13
         prop_file = File.exists?(new_prop_file) ? new_prop_file : old_prop_file
         version_regexp = /^(target=android-)(\d+)$/
         if (project_property_file = File.read(prop_file)) =~ version_regexp
@@ -50,7 +50,7 @@ module Ruboto
           puts "Done"
         else
           # FIXME(uwe): Remove build.xml file to force regeneration.
-          # FIXME(uwe): Needed when updating from Android SDK <=13 to 14
+          # FIXME(uwe): Needed when updating apps from Android SDK <= 13 to 14
           FileUtils.rm_f "#{root}/test/build.xml"
           # FIXME end
 
@@ -81,7 +81,7 @@ module Ruboto
           File.open("AndroidManifest.xml", 'w') { |f| test_manifest.document.write(f, 4) }
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
 
-          # FIXME(uwe): Cleanup when we stop supporting Android SDK <= 13
+          # FIXME(uwe): Cleanup when we stop supporting updating apps generated with Android SDK <= 13
           prop_file = %w{ant.properties build.properties}.find { |f| File.exists?(f) }
           prop_lines = File.readlines(prop_file)
           File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
