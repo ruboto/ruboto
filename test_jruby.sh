@@ -21,7 +21,7 @@ if [ -d "$RUBOTO_HOME/tmp/1.8" ] ; then
   bundle install
 fi
 
-gem install $JRUBY_HOME/dist/jruby-jars-1.7.0.dev.gem
+gem install $JRUBY_HOME/dist/jruby-jars-1.7.0.preview1.gem
 
 rm -rf tmp/Ruboto*
 ruby test/ruboto_gen_test.rb -n test_activity_tests
