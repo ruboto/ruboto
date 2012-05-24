@@ -12,9 +12,7 @@ PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
 PLATFORM_CURRENT_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk.current"
 MANIFEST_FILE = "AndroidManifest.xml"
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
-GEM_FILE_OLD = "ruboto-core-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
-GEM_SPEC_FILE_OLD = 'ruboto-core.gemspec'
 EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
 
 CLEAN.include('ruboto-*.gem', 'tmp')
@@ -22,16 +20,11 @@ CLEAN.include('ruboto-*.gem', 'tmp')
 task :default => :gem
 
 desc "Generate a gem"
-task :gem => [GEM_FILE, GEM_FILE_OLD]
+task :gem => GEM_FILE
 
 file GEM_FILE => GEM_SPEC_FILE do
   puts "Generating #{GEM_FILE}"
   `gem build #{GEM_SPEC_FILE}`
-end
-
-file GEM_FILE_OLD => GEM_SPEC_FILE_OLD do
-  puts "Generating #{GEM_FILE_OLD}"
-  `gem build #{GEM_SPEC_FILE_OLD}`
 end
 
 task :install => :gem do
@@ -44,6 +37,8 @@ task :install => :gem do
     else
       sh "sudo #{cmd}"
     end
+  else
+    puts "ruboto-#{Ruboto::VERSION} is already installed."
   end
 end
 
@@ -68,7 +63,6 @@ task :release => [:clean, :gem] do
   sh "git tag #{Ruboto::VERSION}"
   sh "git push --tags"
   sh "gem push #{GEM_FILE}"
-  sh "gem push #{GEM_FILE_OLD}"
 
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
