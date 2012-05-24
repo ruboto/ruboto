@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName = null;
-    private boolean initialized = false;
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks

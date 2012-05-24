@@ -1,13 +1,11 @@
 package org.ruboto;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -15,7 +13,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,6 +81,7 @@ public class Script {
         return setUpJRuby(appContext, output == null ? System.out : output);
     }
 
+    @SuppressWarnings("unchecked")
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
             setDebugBuild(appContext);
@@ -345,24 +343,6 @@ public class Script {
     	return scriptsDirFile;
     }
 
-    private static void setLoadPath(List<String> loadPath) {
-        // callScriptingContainerMethod(Void.class, "setLoadPaths", loadPath);
-        try {
-            Method setLoadPathsMethod = ruby.getClass().getMethod("setLoadPaths", List.class);
-            setLoadPathsMethod.invoke(ruby, loadPath);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
-        }
-    }
-
-    private static List<String> getLoadPath() {
-        return (List<String>)callScriptingContainerMethod(List.class, "getLoadPaths");
-    }
-
     public static Boolean configDir(String scriptsDir) {
         if (new File(scriptsDir).exists()) {
             Log.i(TAG, "Found extra scripts dir: " + scriptsDir);
@@ -434,8 +414,20 @@ public class Script {
             // FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
             Log.i(TAG, "JRuby VERSION: " + JRUBY_VERSION);
             if (!JRUBY_VERSION.equals("1.5.6") && !JRUBY_VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
-                put("script_context", context);
-                storageDir = (File) exec("script_context.getExternalFilesDir(nil)");
+                try {
+					Method method = context.getClass().getMethod("getExternalFilesDir", String.class);
+					storageDir = (File) method.invoke(context, (Object) null);
+				} catch (SecurityException e) {
+					printStackTrace(e);
+				} catch (NoSuchMethodException e) {
+					printStackTrace(e);
+				} catch (IllegalArgumentException e) {
+					printStackTrace(e);
+				} catch (IllegalAccessException e) {
+					printStackTrace(e);
+				} catch (InvocationTargetException e) {
+					printStackTrace(e);
+				}
             } else {
                 storageDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
                 Log.e(TAG, "Calculated path to sdcard the old way: " + storageDir);
@@ -453,19 +445,7 @@ public class Script {
         return storageDir.getAbsolutePath() + "/scripts";
     }
 
-    private static void copyScriptsIfNeeded(Context context) {
-        String to = scriptsDirName(context);
-		Log.i(TAG, "Checking scripts in " + to);
-
-        /* the if makes sure we only do this the first time */
-        if (configDir(to)) {
-			Log.i(TAG, "Copying scripts to " + to);
-        	copyAssets(context, "scripts");
-        }
-    }
-
-
-    /*************************************************************************************************
+     /*************************************************************************************************
     *
     * Constructors
     */

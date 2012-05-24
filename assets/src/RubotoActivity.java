@@ -5,13 +5,7 @@ import java.io.IOException;
 import org.ruboto.Script;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName;

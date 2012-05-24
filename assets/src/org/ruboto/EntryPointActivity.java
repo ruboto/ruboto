@@ -1,8 +1,5 @@
 package org.ruboto;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.ruboto.Script;
 
 import android.app.ProgressDialog;
@@ -14,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -147,7 +143,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=org.ruboto.core")));
         } catch (android.content.ActivityNotFoundException anfe) {
             try {
-                TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
                 Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(RUBOTO_URL));
                 startActivity(intent);
             } catch (Exception e) {}

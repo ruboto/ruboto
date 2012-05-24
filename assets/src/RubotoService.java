@@ -2,11 +2,9 @@ package THE_PACKAGE;
 
 import org.ruboto.Script;
 import java.io.IOException;
-import android.app.ProgressDialog;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private String scriptName;
-  private String remoteVariable = "";
   public Object[] args;
 
 THE_CONSTANTS
