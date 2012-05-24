@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import dalvik.system.PathClassLoader;
 
@@ -81,7 +80,7 @@ public class Script {
         return setUpJRuby(appContext, output == null ? System.out : output);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
             setDebugBuild(appContext);
