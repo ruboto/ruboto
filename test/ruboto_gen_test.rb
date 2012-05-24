@@ -36,7 +36,7 @@ class RubotoGenTest < Test::Unit::TestCase
     if RUBOTO_PLATFORM == 'STANDALONE'
       upper_limit = {
           '1.6.7' => 5800.0,
-          '1.7.0.preview1' => 7261.0,
+          '1.7.0.preview1' => ANDROID_TARGET < 15 ? 7014.0 : 7261.0,
       }[JRUBY_JARS_VERSION.to_s] || 4200.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
