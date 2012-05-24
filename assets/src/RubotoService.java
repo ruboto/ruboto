@@ -15,11 +15,6 @@ THE_CONSTANTS
     callbackProcs[id] = obj;
   }
 	
-  public THE_RUBOTO_CLASS setRemoteVariable(String var) {
-    remoteVariable = ((var == null) ? "" : (var + "."));
-    return this;
-  }
-
   public void setScriptName(String name){
     scriptName = name;
   }
