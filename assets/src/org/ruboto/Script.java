@@ -83,6 +83,10 @@ public class Script {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
+            // BEGIN Ruboto HeapAlloc
+            byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
+            arrayForHeapAllocation = null;
+            // END Ruboto HeapAlloc
             setDebugBuild(appContext);
             Log.d(TAG, "Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
             System.setProperty("jruby.bytecode.version", "1.6");

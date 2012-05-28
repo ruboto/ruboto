@@ -59,15 +59,18 @@ module RubotoTest
   end
 
   def self.install_jruby_jars_gem
-    version_requirement = "-v #{ENV['JRUBY_JARS_VERSION']}" if ENV['JRUBY_JARS_VERSION']
+    jars_version_from_env = ENV['JRUBY_JARS_VERSION']
+    version_requirement = "-v #{jars_version_from_env}" if jars_version_from_env
     `gem query -i -n jruby-jars #{version_requirement}`
-    system "gem install jruby-jars #{version_requirement}" unless $? == 0
+    system "gem install #{'-r' unless jars_version_from_env.nil? || !File.exists?("jruby-jars-#{jars_version_from_env}.gem")} jruby-jars #{version_requirement}" unless $? == 0
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
-    if ENV['JRUBY_JARS_VERSION']
-      exclusion_clause = %Q{-v "!=#{ENV['JRUBY_JARS_VERSION']}"}
-      `gem query -u -n jruby-jars #{exclusion_clause}`
-      system %Q{gem uninstall jruby-jars --all #{exclusion_clause}"} unless $? == 0
-      raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
+    if jars_version_from_env
+      exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
+      `gem query -i -n jruby-jars #{exclusion_clause}`
+      if $? == 0
+        system %Q{gem uninstall jruby-jars --all #{exclusion_clause}}
+        raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
+      end
     end
   end
 
