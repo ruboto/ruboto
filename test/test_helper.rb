@@ -116,9 +116,6 @@ module RubotoTest
 
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
-
-  # FIXME(uwe): Remove when we stop supporting JRuby 1.5.6
-  ON_JRUBY_JARS_1_5_6 = JRUBY_JARS_VERSION == Gem::Version.new('1.5.6')
 end
 
 class Test::Unit::TestCase

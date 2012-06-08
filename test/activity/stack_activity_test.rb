@@ -19,7 +19,6 @@ test('stack depth') do |activity|
     }[org.ruboto.Script.platform_version_name] || [0, 0, 0, 0]
   else
     jruby_offset = {
-        '1.5.6' => [-2, -5, -6, -8],
         '1.7.0.preview1' => [0, -1, -1, -1],
     }[org.jruby.runtime.Constants::VERSION] || [0, 0, 0, 0]
   end

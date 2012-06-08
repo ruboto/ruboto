@@ -3,7 +3,7 @@
 for platform in "CURRENT MASTER STANDALONE" ; do
   for target in "15 10" ; do
     if [ "$platform" == "STANDALONE" ] ; then
-      $jruby_versions = "1.7.0.preview1 1.6.7 1.5.6"
+      $jruby_versions = "1.7.0.preview1 1.6.7"
     elif [ "$platform" == "MASTER" ] ; then
       $jruby_versions = "1.7.0.preview1"
     elif [ "$platform" == "CURRENT" ] ; then
