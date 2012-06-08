@@ -414,9 +414,8 @@ public class Script {
         File storageDir = null;
         if (isDebugBuild) {
 
-            // FIXME(uwe): Simplify this as soon as we drop support for android-7 or JRuby 1.5.6 or JRuby 1.6.2
-            Log.i(TAG, "JRuby VERSION: " + JRUBY_VERSION);
-            if (!JRUBY_VERSION.equals("1.5.6") && !JRUBY_VERSION.equals("1.6.2") && android.os.Build.VERSION.SDK_INT >= 8) {
+            // FIXME(uwe): Simplify this as soon as we drop support for android-7
+            if (android.os.Build.VERSION.SDK_INT >= 8) {
                 try {
 					Method method = context.getClass().getMethod("getExternalFilesDir", String.class);
 					storageDir = (File) method.invoke(context, (Object) null);
