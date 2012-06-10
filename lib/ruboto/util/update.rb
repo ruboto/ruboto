@@ -431,13 +431,6 @@ module Ruboto
                     'org/jruby/runtime/invokedynamic',
                 ]
                 # TODO end
-
-                # TODO(uwe): Remove when we stop supporting jruby-jars-1.6.2
-                if jruby_core_version == '1.6.2'
-                  print 'Retaining FFI for JRuby 1.6.2...'
-                  excluded_core_packages.delete('org/jruby/ext/ffi')
-                end
-                # TODO end
               end
 
               excluded_core_packages.each do |i|
