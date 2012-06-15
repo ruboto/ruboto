@@ -31,7 +31,7 @@ module Ruboto
       start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
     end
   
-    def start_ruboto_activity(global_variable_name, klass=RubotoActivity, theme=nil, &block)
+    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, &block)
       $context_init_block = block
       $new_context_global = global_variable_name
   

@@ -59,9 +59,24 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
 
             if (JRubyLoadedOk.get()) {
                 loadStep = "Setup global variables";
-                Script.defineGlobalVariable("$runner", this);
-                Script.defineGlobalVariable("$test", this);
-                Script.defineGlobalVariable("$suite", suite);
+
+                // TODO(uwe):  Running with large stack is currently only needed when running with JRuby 1.7.0 and android-10
+                // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0 or android-10
+                Thread t2 = new Thread(null, new Runnable() {
+                    public void run() {
+                        Script.put("$runner", InstrumentationTestRunner.this);
+                        Script.put("$test", InstrumentationTestRunner.this);
+                        Script.put("$suite", suite);
+                    }
+                }, "Setup JRuby from instrumentation test runner", 64 * 1024);
+                try {
+                    t2.start();
+                    t2.join();
+                } catch(InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted starting JRuby", ie);
+                }
+                // TODO end
 
                 loadStep = "Load test helper";
                 loadScript("test_helper.rb");

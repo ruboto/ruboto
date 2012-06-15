@@ -307,7 +307,6 @@ public class Script {
     }
 
     public static void put(String name, Object object) {
-        // callScriptingContainerMethod(Void.class, "put", name, object);
         try {
             Method putMethod = ruby.getClass().getMethod("put", String.class, Object.class);
             putMethod.invoke(ruby, name, object);

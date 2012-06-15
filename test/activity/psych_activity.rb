@@ -1,4 +1,4 @@
-# TODO(uwe): Remove when we stop supporting Ruby 1.8 mode
+# TODO(uwe): Remove when we stop supporting psych with Ruby 1.8 mode
 if RUBY_VERSION < "1.9"
   require 'jruby'
   require 'rbconfig'
@@ -8,7 +8,7 @@ if RUBY_VERSION < "1.9"
 end
 # TODO end
 
-with_large_stack{require 'psych.rb'}
+with_large_stack { require 'psych.rb' }
 
 Psych::Parser
 Psych::Handler
@@ -17,14 +17,15 @@ require 'ruboto'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
-$activity.handle_create do |bundle|
+$activity.start_ruboto_activity do
   setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
-  setup_content do
-    linear_layout :orientation => LinearLayout::VERTICAL do
-      @decoded_view = text_view :id => 42, :text => Psych.load('--- foo')
-      # @encoded_view = text_view :id => 43, :text => Psych.dump("foo")
-    end
+  def on_create(bundle)
+    self.content_view =
+        linear_layout :orientation => LinearLayout::VERTICAL do
+          @decoded_view = text_view :id => 42, :text => with_large_stack{Psych.load('--- foo')}
+          @encoded_view = text_view :id => 43, :text => with_large_stack{Psych.dump("foo")}
+        end
   end
 
 end
