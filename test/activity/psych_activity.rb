@@ -24,8 +24,8 @@ $activity.start_ruboto_activity do
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do
           @decoded_view = text_view :id => 42, :text => with_large_stack{Psych.load('--- foo')}
-          # TODO(uwe): Simplify when we stop supporting PSych in Ruby 1.8 mode
-          @encoded_view = text_view :id => 43, :text => with_large_stack{Psych.dump('foo')} unless RUBY_VERSION < '1.9'
+          # TODO(uwe): Simplify when we stop supporting Psych in Ruby 1.8 mode
+          @encoded_view = text_view(:id => 43, :text => with_large_stack{Psych.dump('foo')}) unless RUBY_VERSION < '1.9'
         end
   end
 
