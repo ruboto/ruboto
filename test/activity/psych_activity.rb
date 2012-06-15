@@ -1,5 +1,5 @@
 # TODO(uwe): Remove when we stop supporting psych with Ruby 1.8 mode
-if RUBY_VERSION < "1.9"
+if RUBY_VERSION < '1.9'
   require 'jruby'
   require 'rbconfig'
   org.jruby.ext.psych.PsychLibrary.new.load(JRuby.runtime, false)
@@ -24,7 +24,8 @@ $activity.start_ruboto_activity do
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do
           @decoded_view = text_view :id => 42, :text => with_large_stack{Psych.load('--- foo')}
-          @encoded_view = text_view :id => 43, :text => with_large_stack{Psych.dump("foo")}
+          # TODO(uwe): Simplify when we stop supporting PSych in Ruby 1.8 mode
+          @encoded_view = text_view :id => 43, :text => with_large_stack{Psych.dump('foo')} unless RUBY_VERSION < '1.9'
         end
   end
 
