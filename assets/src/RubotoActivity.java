@@ -12,6 +12,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String remoteVariable = null;
     private Object[] args;
     private Bundle configBundle = null;
+    private Object rubyInstance;
 
 THE_CONSTANTS
 
@@ -79,6 +80,14 @@ THE_CONSTANTS
             if (scriptName != null) {
     	        Script.setScriptFilename(getClass().getClassLoader().getResource(scriptName).getPath());
                 Script.execute(new Script(scriptName).getContents());
+                Object rubyClass = Script.get(getClass().getSimpleName());
+                if (rubyClass != null) {
+                    System.out.println("Instanciating Ruby class: " + getClass().getSimpleName());
+                    Script.put("$java_activity", this);
+                    Script.exec("$ruby_activity = " + rubyClass + ".new($java_activity)");
+                    rubyInstance = Script.get("$ruby_activity");
+                    Script.exec("$ruby_activity.on_create");
+                }
             } else if (configBundle != null) {
                 // TODO: Why doesn't this work? 
                 // Script.callMethod(this, "initialize_ruboto");

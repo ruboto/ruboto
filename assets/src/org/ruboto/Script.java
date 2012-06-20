@@ -281,7 +281,7 @@ public class Script {
         Object result = exec(code);
         return result != null ? result.toString() : "nil";
 // TODO: Why is callMethod returning "main"?
-//		return result != null ? callMethod(result, "inspect", String.class) : "null"; 
+//		return result != null ? callMethod(result, "inspect", String.class) : "null";
     }
 
 	public static Object exec(String code) {
@@ -319,6 +319,19 @@ public class Script {
         }
     }
     
+    public static Object get(String name) {
+        try {
+            Method getMethod = ruby.getClass().getMethod("get", String.class);
+            return getMethod.invoke(ruby, name);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            throw new RuntimeException(ite);
+        }
+    }
+
     public static void defineGlobalVariable(String name, Object object) {
 		defineGlobalConstant(name, object);
     }
