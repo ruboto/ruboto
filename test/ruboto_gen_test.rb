@@ -15,7 +15,9 @@ class RubotoGenTest < Test::Unit::TestCase
 
   def test_icons_are_updated
     Dir.chdir APP_DIR do
-      assert_equal 4032, File.size('res/drawable-hdpi/icon.png')
+      assert_equal 4032, File.size('res/drawable-hdpi/ic_launcher.png')
+      assert_equal 2548, File.size('res/drawable-mdpi/ic_launcher.png')
+      assert_equal 1748, File.size('res/drawable-ldpi/ic_launcher.png')
     end
   end
 
@@ -44,7 +46,7 @@ class RubotoGenTest < Test::Unit::TestCase
       upper_limit = {
           7 => 56.0,
           10 => 60.0,
-          15 => 65.0,
+          15 => 60.0,
       }[ANDROID_TARGET] || 64.0
     end
     lower_limit = upper_limit * 0.9

@@ -346,10 +346,10 @@ module Ruboto
                 update_test force
                 update_assets
                 update_ruboto force
-                update_icons force
                 update_classes force
                 update_jruby force
                 update_manifest nil, nil, force
+                update_icons force
                 update_core_classes "exclude"
                 update_bundle
               when "jruby" then

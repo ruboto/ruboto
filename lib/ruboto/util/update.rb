@@ -61,7 +61,7 @@ module Ruboto
 
         Dir.chdir File.join(root, 'test') do
           test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
-          test_manifest.elements['application'].attributes['android:icon'] = '@drawable/icon'
+          test_manifest.elements['application'].attributes['android:icon'] ||= '@drawable/ic_launcher'
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
 
           # TODO(uwe): Trying to push test scripts for faster test cycle, but failing...
@@ -228,11 +228,23 @@ module Ruboto
       end
 
       def update_icons(force = nil)
-        copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', force
-        log_action('icons') do
-          copier.copy 'res/drawable*/icon.png'
-          copier.copy 'res/drawable/get_ruboto_core.png'
-          copier.copy 'res/drawable*/icon.png', 'test'
+        log_action('Copying icons') do
+          Ruboto::Util::AssetCopier.new(Ruboto::ASSETS, '.', force).copy 'res/drawable/get_ruboto_core.png'
+          icon_path = verify_manifest.elements['application'].attributes['android:icon']
+          test_icon_path = verify_test_manifest.elements['application'].attributes['android:icon']
+          Dir["#{Ruboto::ASSETS}/res/drawable*/ic_launcher.png"].each do |f|
+            src_dir = f.slice(/res\/drawable.*\//)
+            dest_file = icon_path.sub('@drawable/', src_dir) + '.png'
+            if force || !File.exists?(dest_file)
+              FileUtils.mkdir_p File.dirname(dest_file)
+              FileUtils.cp(f, dest_file)
+            end
+            test_dest_file = 'test/' + test_icon_path.sub('@drawable/', src_dir) + '.png'
+            if force || !File.exists?(test_dest_file)
+              FileUtils.mkdir_p File.dirname(test_dest_file)
+              FileUtils.cp(f, test_dest_file)
+            end
+          end
         end
       end
 
@@ -287,7 +299,7 @@ module Ruboto
           end
 
           app_element = verify_manifest.elements['application']
-          app_element.attributes['android:icon'] ||= '@drawable/icon'
+          app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
 
           if min_sdk.to_i >= 11
             app_element.attributes['android:hardwareAccelerated'] ||= 'true'

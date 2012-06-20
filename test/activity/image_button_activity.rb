@@ -8,7 +8,7 @@ $activity.handle_create do |bundle|
   setup_content do
     linear_layout :orientation => LinearLayout::VERTICAL do
       @text_view = text_view :text => 'What hath Matz wrought?', :id => 42
-      image_button :image_resource => $package.R::drawable::icon, :width => :wrap_content, :id => 43
+      image_button :image_resource => $package.R::drawable::get_ruboto_core, :width => :wrap_content, :id => 43
     end
   end
 
