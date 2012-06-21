@@ -65,6 +65,26 @@ end
 
 module Ruboto
   module Activity
+    def initialize(java_instance)
+      @java_instance = java_instance
+    end
+
+    def method_missing(method, *args, &block)
+      return @java_instance.send(method, *args, &block) if @java_instance.respond_to?(method)
+      return @java_instance.java_method(method, [java.lang.String]).call(*args) if respond_to_java?(method)
+      super
+    end
+
+    def respond_to?(method)
+      super || respond_to_java?(method)
+    end
+
+    private
+
+    def respond_to_java?(method)
+      @java_instance.java_class.declared_instance_methods.map(&:name).include?(method.to_s)
+    end
+
   end
 end
   

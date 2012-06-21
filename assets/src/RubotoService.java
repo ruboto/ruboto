@@ -6,6 +6,7 @@ import java.io.IOException;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
   private String scriptName;
   public Object[] args;
+  private Object rubyInstance;
 
 THE_CONSTANTS
 
