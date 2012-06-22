@@ -36,8 +36,8 @@ class BroadcastReceiverTest < Test::Unit::TestCase
     end
 EOF
 
-      assert activity_content.sub!(/  @handle_click = proc do \|view\|\n.*?  end\n/m, <<EOF)
-  @handle_click = proc do |view|
+      assert activity_content.sub!(/  def butterfly\n.*?  end\n/m, <<EOF)
+  def butterfly
     intent = android.content.Intent.new
     intent.set_action '#{action_name}'
     send_broadcast(intent)
