@@ -1,4 +1,4 @@
-activity org.ruboto.test_app.StackDepthActivity
+activity org.ruboto.test_app.StackActivity
 
 setup do |activity|
   start = Time.now
@@ -24,7 +24,7 @@ test('stack depth') do |activity|
   end
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.Script.uses_platform_apk ? org.ruboto.Script.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
   assert_equal 44 + os_offset + jruby_offset[0], activity.find_view_by_id(42).text.to_i, version_message
-  assert_equal 49 + os_offset + jruby_offset[1], activity.find_view_by_id(43).text.to_i, version_message
-  assert_equal 49 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message
-  assert_equal 82 + os_offset + jruby_offset[3], activity.find_view_by_id(45).text.to_i, version_message
+  assert_equal 68 + os_offset + jruby_offset[1], activity.find_view_by_id(43).text.to_i, version_message
+  assert_equal 77 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message
+  assert_equal 93 + os_offset + jruby_offset[3], activity.find_view_by_id(45).text.to_i, version_message
 end

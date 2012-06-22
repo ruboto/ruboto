@@ -151,7 +151,7 @@ module Ruboto
         rv ? "return #{rv}" : default_return
       end
 
-      def ruby_call(on_ruby_instance = false)
+      def ruby_call(on_ruby_instance = false, camelize = false)
         params = parameters
         args = ""
         if params.size > 1
@@ -175,10 +175,14 @@ module Ruboto
         end
 
         if on_ruby_instance
-          ["#{return_cast}Script.callMethod(rubyInstance, \"#{attribute("name").gsub(/[A-Z]/) { |i| "_#{i}" }.downcase}\" #{args}#{convert_return});"]
+          ["#{return_cast}Script.callMethod(rubyInstance, \"#{camelize ? attribute("name") : snake_case_attribute}\" #{args}#{convert_return});"]
         else
           ["#{return_cast}Script.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
         end
+      end
+
+      def snake_case_attribute
+        attribute("name").gsub(/[A-Z]/) { |i| "_#{i}" }.downcase
       end
 
       def method_definition
@@ -186,12 +190,16 @@ module Ruboto
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
             if_else(
-                "rubyInstance != null && Script.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ attribute("name") +"\"}, Boolean.class)",
+                "rubyInstance != null && Script.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ snake_case_attribute + "\"}, Boolean.class)",
                 [super_string] + ruby_call(true),
                 if_else(
-                    "callbackProcs != null && callbackProcs[#{constant_string}] != null",
-                    [super_string] + ruby_call,
-                    [super_return]
+                    "rubyInstance != null && Script.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ attribute("name") +"\"}, Boolean.class)",
+                    [super_string] + ruby_call(true, true),
+                    if_else(
+                        "callbackProcs != null && callbackProcs[#{constant_string}] != null",
+                        [super_string] + ruby_call,
+                        [super_return]
+                    )
                 )
             )
         ).indent.join("\n")

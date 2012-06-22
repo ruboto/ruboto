@@ -17,33 +17,42 @@ class ServiceTest < Test::Unit::TestCase
       system "#{RUBOTO_CMD} gen class Service --name RubotoTestService"
       service_filename = "#{SRC_DIR}/ruboto_test_service.rb"
       assert File.exists? service_filename
-      File.open(service_filename, 'w'){|f| f << <<EOF}
-require 'ruboto'
+      File.open(service_filename, 'w') { |f| f << <<EOF }
+require 'ruboto/service'
 
-$service.handle_create do
-  Thread.start do
-    loop do
-      sleep 1
-      puts "\#{self.class} running..."
+class RubotoTestService
+  include Ruboto::Service
+  def on_create
+    Thread.start do
+      loop do
+        sleep 1
+        puts "\#{self.class} running..."
+      end
     end
+    puts "\#{self.class} started."
+    android.app.Service::START_STICKY
   end
-  puts "\#{self.class} started."
-  android.app.Service::START_STICKY
-end
 
-$service.handle_start_command do
-  android.app.Service::START_STICKY
+  def on_start_command(intent, flags, start_id)
+    android.app.Service::START_STICKY
+  end
 end
 EOF
 
       activity_filename = "#{SRC_DIR}/ruboto_test_app_activity.rb"
-      s        = File.read(activity_filename)
+      s                 = File.read(activity_filename)
       s.gsub!(/^(end)$/, "
-  startService(android.content.Intent.new($activity.application_context, $package.RubotoTestService.java_class))
+  def on_resume
+    startService(android.content.Intent.new(application_context, $package.RubotoTestService.java_class))
+  end
+
+  def on_pause
+    stopService(android.content.Intent.new(application_context, $package.RubotoTestService.java_class))
+  end
 \\1\n")
       File.open(activity_filename, 'w') { |f| f << s }
     end
     run_app_tests
-    end
-
   end
+
+end

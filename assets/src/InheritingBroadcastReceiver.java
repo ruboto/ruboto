@@ -6,7 +6,7 @@ public class InheritingBroadcastReceiver extends org.ruboto.RubotoBroadcastRecei
     private boolean scriptLoaded = false;
 
     public InheritingBroadcastReceiver() {
-        super("start.rb");
+        super("sample_broadcast_receiver.rb");
         if (Script.isInitialized()) {
             scriptLoaded = true;
         }

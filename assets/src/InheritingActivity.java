@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 public class InheritingActivity extends org.ruboto.EntryPointActivity {
 	public void onCreate(Bundle bundle) {
-		setScriptName("start.rb");
+		setScriptName("sample_activity.rb");
 	    super.onCreate(bundle);
 	}
 }
