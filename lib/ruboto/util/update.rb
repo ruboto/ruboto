@@ -25,7 +25,7 @@ module Ruboto
         end
         # FIXME end
 
-        # FIXME(uwe):  Simplify when we stop supporting upgrading apps from Android ASK <= 13
+        # FIXME(uwe):  Simplify when we stop supporting upgrading apps from Android SDK <= 13
         prop_file = File.exists?(new_prop_file) ? new_prop_file : old_prop_file
         version_regexp = /^(target=android-)(\d+)$/
         if (project_property_file = File.read(prop_file)) =~ version_regexp

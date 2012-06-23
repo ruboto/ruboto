@@ -1,12 +1,11 @@
-require 'ruboto/activity'
+require 'ruboto'
 
 ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
 
-class ImageButtonActivity
-  include Ruboto::Activity
-  def on_create(bundle)
-    setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
+$activity.start_ruboto_activity do
+  setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
+  def on_create(bundle)
     click_handler = proc do |view|
       @text_view.setText 'What hath Matz wrought!'
       toast 'Flipped a bit via butterfly'

@@ -165,7 +165,7 @@ module Ruboto
         text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
         file_existed = File.exists?(file)
         File.open(file, 'w') do |f|
-          f << text.gsub("THE_PACKAGE", package).gsub("Inheriting#{klass}", name).gsub("start.rb", script_name)
+          f << text.gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("Inheriting#{klass}", name).gsub("sample_#{underscore(klass)}.rb", script_name)
         end
         puts "#{file_existed ? 'Updated' : 'Added'} file #{file}."
 
