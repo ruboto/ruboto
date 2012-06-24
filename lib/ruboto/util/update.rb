@@ -119,7 +119,7 @@ module Ruboto
               <contains string="${tests.output}" substring="INSTRUMENTATION_FAILED"/>
               <contains string="${tests.output}" substring="FAILURES"/>
               <not>
-                <matches string="${tests.output}" pattern="OK \\(\\d+ tests\\)" multiline="true"/>
+                <matches string="${tests.output}" pattern="OK \\(\\d+ tests?\\)" multiline="true"/>
               </not>
             </or>
           </condition>
