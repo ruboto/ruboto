@@ -512,16 +512,52 @@ public class Script {
      */
 
     public static String getScriptFilename() {
-        return (String)callScriptingContainerMethod(String.class, "getScriptFilename");
+        return callScriptingContainerMethod(String.class, "getScriptFilename");
     }
 
     public static void setScriptFilename(String name) {
         callScriptingContainerMethod(Void.class, "setScriptFilename", name);
     }
 
+    public static String toSnakeCase(String s) {
+        return s.replaceAll(
+            String.format("%s|%s|%s",
+                "(?<=[A-Z])(?=[A-Z][a-z])",
+                "(?<=[^A-Z])(?=[A-Z])",
+                "(?<=[A-Za-z])(?=[^A-Za-z])"
+            ),
+            "_"
+        ).toLowerCase();
+    }
+
+    public static String toCamelCase(String s) {
+        String[] parts = s.replace(".rb", "").split("_");
+        for (int i = 0 ; i < parts.length ; i++) {
+            parts[i] = parts[i].substring(0,1).toUpperCase() + parts[i].substring(1);
+        }
+        return java.util.Arrays.toString(parts).replace(", ", "").replaceAll("[\\[\\]]", "");
+    }
+
     public String execute() throws IOException {
+        Object result;
     	Script.setScriptFilename(getClass().getClassLoader().getResource(name).getPath());
-        return Script.execute(getContents());
+        try {
+            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+            result = runScriptletMethod.invoke(ruby, getContents());
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            if (isDebugBuild) {
+                throw ((RuntimeException) ite.getCause());
+            } else {
+                return null;
+            }
+        }
+        return result != null ? result.toString() : "nil";
+        // TODO: Why is callMethod returning "main"?
+        // return result != null ? callMethod(result, "inspect", String.class) : "null";
     }
 
 	public static void callMethod(Object receiver, String methodName, Object[] args) {

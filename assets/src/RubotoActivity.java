@@ -78,10 +78,8 @@ THE_CONSTANTS
     protected void loadScript() {
         try {
             if (scriptName != null) {
-    	        Script.setScriptFilename(getClass().getClassLoader().getResource(scriptName).getPath());
-                Script.execute(new Script(scriptName).getContents());
-                // String rubyClassName = getClass().getSimpleName();
-                String rubyClassName = toCamelCase(scriptName);
+                new Script(scriptName).execute();
+                String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
                 Object rubyClass = Script.get(rubyClassName);
                 if (rubyClass != null) {
@@ -103,25 +101,6 @@ THE_CONSTANTS
             e.printStackTrace();
             ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
         }
-    }
-
-    static private String toSnakeCase(String s) {
-        return s.replaceAll(
-            String.format("%s|%s|%s",
-                "(?<=[A-Z])(?=[A-Z][a-z])",
-                "(?<=[^A-Z])(?=[A-Z])",
-                "(?<=[A-Za-z])(?=[^A-Za-z])"
-            ),
-            "_"
-        ).toLowerCase();
-    }
-
-    static private String toCamelCase(String s) {
-        String[] parts = s.replace(".rb", "").split("_");
-        for (int i = 0 ; i < parts.length ; i++) {
-            parts[i] = parts[i].substring(0,1).toUpperCase() + parts[i].substring(1);
-        }
-        return java.util.Arrays.toString(parts).replace(", ", "").replaceAll("[\\[\\]]", "");
     }
 
     public boolean rubotoAttachable() {

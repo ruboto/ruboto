@@ -27,6 +27,7 @@ THE_CONSTANTS
 	
   @Override
   public void onCreate() {
+	System.out.println("RubotoService.onCreate()");
     args = new Object[0];
 
     super.onCreate();
@@ -37,7 +38,18 @@ THE_CONSTANTS
 
         try {
             if (scriptName != null) {
+                System.out.println("Loading service script: " + scriptName);
                 new Script(scriptName).execute();
+                String rubyClassName = Script.toCamelCase(scriptName);
+                System.out.println("Looking for Ruby class: " + rubyClassName);
+                Object rubyClass = Script.get(rubyClassName);
+                if (rubyClass != null) {
+                    System.out.println("Instanciating Ruby class: " + rubyClassName);
+                    Script.put("$java_service", this);
+                    Script.exec("$ruby_service = " + rubyClassName + ".new($java_service)");
+                    rubyInstance = Script.get("$ruby_service");
+                    Script.exec("$ruby_service.on_create");
+                }
             } else {
                 Script.execute("$service.initialize_ruboto");
                 Script.execute("$service.on_create");
