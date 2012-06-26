@@ -1,7 +1,5 @@
 require 'ruboto/activity'
-#require 'ruboto/widget'
-#require 'ruboto/legacy'
-#require 'ruboto/menu'
+require 'ruboto/widget'
 require 'ruboto/util/toast'
 
 ruboto_import_widgets :LinearLayout, :TextView
