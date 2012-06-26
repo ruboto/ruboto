@@ -16,6 +16,10 @@ module AppTestMethods
   end
 
   def test_handle_activity_tests
+    Dir.chdir APP_DIR do
+      FileUtils.rm "src/ruboto_test_app_activity.rb"
+      FileUtils.rm "test/src/ruboto_test_app_activity_test.rb"
+    end
     run_activity_tests('handle_activity')
   end
 
@@ -23,7 +27,7 @@ module AppTestMethods
 
   def assert_code(activity_name, code)
     snake_name = activity_name.scan(/[A-Z]+[a-z]+/).map { |s| s.downcase }.join('_')
-    filename = "src/#{snake_name}_activity.rb"
+    filename   = "src/#{snake_name}_activity.rb"
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}Activity"
       s = File.read(filename)

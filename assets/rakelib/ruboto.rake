@@ -142,7 +142,18 @@ task :uninstall do
   uninstall_apk
 end
 
-file MANIFEST_FILE
+file MANIFEST_FILE => :update_manifest
+
+task :update_manifest do
+  sdk_level = File.read('project.properties').scan(/(?:target=android-)(\d+)/)[0][0].to_i
+  manifest = old_manifest = File.read('AndroidManifest.xml')
+  manifest.sub!(/(android:minSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
+  manifest.sub!(/(android:targetSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
+  if manifest != old_manifest
+    File.open('AndroidManifest.xml', 'w'){|f| f << manifest}
+  end
+end
+
 file RUBOTO_CONFIG_FILE
 
 file APK_FILE => APK_DEPENDENCIES do |t|
