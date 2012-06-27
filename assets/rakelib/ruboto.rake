@@ -19,6 +19,7 @@ UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
 BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
 BUNDLE_PATH        = File.expand_path 'bin/bundle'
 MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
+PROJECT_PROPS_FILE = File.expand_path 'project.properties'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
 GEM_FILE           = File.expand_path('Gemfile.apk')
 GEM_LOCK_FILE      = File.expand_path('Gemfile.apk.lock')
@@ -142,16 +143,14 @@ task :uninstall do
   uninstall_apk
 end
 
-file MANIFEST_FILE => :update_manifest
-
-task :update_manifest do
-  sdk_level = File.read('project.properties').scan(/(?:target=android-)(\d+)/)[0][0].to_i
-  manifest = old_manifest = File.read('AndroidManifest.xml')
+file PROJECT_PROPS_FILE
+file MANIFEST_FILE => PROJECT_PROPS_FILE do
+  sdk_level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
+  old_manifest = File.read(MANIFEST_FILE)
+  manifest = old_manifest.dup
   manifest.sub!(/(android:minSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
   manifest.sub!(/(android:targetSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
-  if manifest != old_manifest
-    File.open('AndroidManifest.xml', 'w'){|f| f << manifest}
-  end
+  File.open(MANIFEST_FILE, 'w'){|f| f << manifest} if manifest != old_manifest
 end
 
 file RUBOTO_CONFIG_FILE
