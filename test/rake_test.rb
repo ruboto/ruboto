@@ -54,9 +54,7 @@ class RakeTest < Test::Unit::TestCase
       assert_equal "android:minSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:minSdkVersion='\d+'/)
       assert_equal "android:targetSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:targetSdkVersion='\d+'/)
       prop_file = File.read('project.properties')
-      sleep 1
-      File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-10/, "target=android-6")}
-      puts 'Rebuilding project with new target'
+      File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, "target=android-6")}
       system 'rake debug'
       manifest = File.read('AndroidManifest.xml')
       assert_equal "android:minSdkVersion='6'", manifest.slice(/android:minSdkVersion='\d+'/)
