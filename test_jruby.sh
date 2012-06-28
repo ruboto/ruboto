@@ -3,7 +3,9 @@
 # This script can be run with "git bisect run" to determine which JRuby commit broke the tests
 # Change the test run at the bottom to narrow down the test and make it faster.
 # cd jruby
-# git bisect start HEAD <good revision>
+# git bisect start
+# git bisect good `git rev-list -n 1 --before="2011-10-27 13:37" master`
+# git bisect bad HEAD
 # git bisect run ../ruboto/test_jruby.sh
 
 JRUBY_HOME=`pwd`
@@ -16,6 +18,7 @@ fi
 
 ant clean dist-clean
 ant dist
+rm lib/native/Darwin/libjruby-cext.jnilib
 
 cd $RUBOTO_HOME
 
@@ -27,5 +30,6 @@ gem install -l $JRUBY_HOME/dist/jruby-jars-*.gem
 
 rm -rf tmp/Ruboto*
 
-ruby test/ruboto_gen_test.rb -n test_activity_tests
 # ruby test/broadcast_receiver_test.rb -n test_generated_broadcast_receiver
+# ruby test/ruboto_gen_test.rb -n test_activity_tests
+ruby test/ruboto_gen_test.rb -n test_block_def_activity_tests
