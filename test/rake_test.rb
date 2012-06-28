@@ -51,8 +51,8 @@ class RakeTest < Test::Unit::TestCase
   def test_that_manifest_is_updated_when_project_properties_are_changed
     Dir.chdir APP_DIR do
       manifest = File.read('AndroidManifest.xml')
-      assert_equal "android:minSdkVersion='10'", manifest.slice(/android:minSdkVersion='\d+'/)
-      assert_equal "android:targetSdkVersion='10'", manifest.slice(/android:targetSdkVersion='\d+'/)
+      assert_equal "android:minSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:minSdkVersion='\d+'/)
+      assert_equal "android:targetSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:targetSdkVersion='\d+'/)
       prop_file = File.read('project.properties')
       sleep 1
       File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-10/, "target=android-6")}
