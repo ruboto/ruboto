@@ -3,11 +3,11 @@
 for platform in "CURRENT MASTER STANDALONE" ; do
   for target in "15 10" ; do
     if [ "$platform" == "STANDALONE" ] ; then
-      $jruby_versions = "1.7.0.preview1 1.6.7"
+      $jruby_versions = "1.7.0.preview2.dev 1.6.7"
     elif [ "$platform" == "MASTER" ] ; then
-      $jruby_versions = "1.7.0.preview1"
+      $jruby_versions = "1.7.0.preview2.dev"
     elif [ "$platform" == "CURRENT" ] ; then
-      $jruby_versions = "1.7.0.preview1"
+      $jruby_versions = "1.7.0.dev"
     fi
     for jruby_version in "$jruby_versions" ; do
       export RUBOTO_PLATFORM=$platform

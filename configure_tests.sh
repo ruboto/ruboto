@@ -1,5 +1,5 @@
 #!/bin/bash -e
 
 export RUBOTO_PLATFORM=MASTER   # CURRENT|MASTER|STANDALONE : default = CURRENT
-export ANDROID_TARGET=10
-export JRUBY_JARS_VERSION=1.7.0.preview1
+export ANDROID_TARGET=15
+export JRUBY_JARS_VERSION=1.7.0.preview2.dev

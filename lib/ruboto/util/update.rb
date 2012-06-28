@@ -190,7 +190,7 @@ module Ruboto
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        unless new_jruby_version == '1.7.0.preview1' && verify_target_sdk < 15
+        unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
           log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
         end
 
@@ -452,7 +452,7 @@ module Ruboto
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
               # Reduces the installation footprint, but also reduces performance and stack usage
               # FIXME(uwe):  Measure the performance change
-              if false && jruby_core_version == '1.7.0.preview1' && Dir.chdir('../..'){verify_target_sdk < 15}
+              if false && jruby_core_version =~ /^1.7.0/ && Dir.chdir('../..'){verify_target_sdk < 15}
                 invokers = Dir['**/*${INVOKER$*,POPULATOR}.class']
                 log_action("Removing invokers & populators(#{invokers.size})") do
                   FileUtils.rm invokers

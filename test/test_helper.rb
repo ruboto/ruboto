@@ -255,7 +255,7 @@ class Test::Unit::TestCase
       if RUBOTO_PLATFORM == 'CURRENT'
         system "rake platform:current platform:install"
       elsif RUBOTO_PLATFORM == 'MASTER'
-        system "rake platform:install"
+        system "rake platform:debug platform:install"
       end
     end
     if $? != 0

@@ -340,9 +340,9 @@ end
 def package_installed? test = false
   package_name = "#{package}#{'.tests' if test}"
   ['', '-0', '-1', '-2'].each do |i|
-    p = "/data/app/#{package_name}#{i}.apk"
-    o = `adb shell ls -l #{p}`.chomp
-    if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(p)}$/
+    path = "/data/app/#{package_name}#{i}.apk"
+    o = `adb shell ls -l #{path}`.chomp
+    if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
       apk_file = test ? TEST_APK_FILE : APK_FILE
       if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
         return true
@@ -353,8 +353,6 @@ def package_installed? test = false
   end
   return nil
 end
-
-private
 
 def replace_faulty_code(faulty_file, faulty_code)
   explicit_requires = Dir["#{faulty_file.chomp('.rb')}/*.rb"].sort.map { |f| File.basename(f) }.map do |filename|
@@ -390,14 +388,27 @@ def build_apk(t, release)
 end
 
 def install_apk
+  failure_pattern = /^Failure \[(.*)\]/
+  success_pattern = /^Success/
   case package_installed?
   when true
     puts "Package #{package} already installed."
     return
   when false
-    puts "Package installed, but of wrong size."
+    puts "Package installed, but of different size."
+    output = `adb install -r #{APK_FILE} 2>&1`
+    return if $? == 0 && output !~ failure_pattern && output =~ success_pattern
+    case $1
+    when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
+      puts "Found package signed with different certificate.  Uninstalling it and retrying install."
+    else
+      puts "'adb install' returned an unknown error: (#$?) #{$1 ? "[#$1}]" : output}."
+      puts "Uninstalling #{package} and retrying install."
+    end
+    uninstall_apk
   end
-  sh 'ant installd'
+  output = `adb install #{APK_FILE} 2>&1`
+  raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
   clear_update
 end
 
