@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName = null;
+    private Object rubyInstance;
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
@@ -35,6 +36,15 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         if (scriptName != null) {
             try {
                 new Script(scriptName).execute();
+                String rubyClassName = Script.toCamelCase(scriptName);
+                System.out.println("Looking for Ruby class: " + rubyClassName);
+                Object rubyClass = Script.get(rubyClassName);
+                if (rubyClass != null) {
+                    System.out.println("Instanciating Ruby class: " + rubyClassName);
+                    Script.put("$java_broadcast_receiver", this);
+                    Script.exec("$ruby_broadcast_receiver = " + rubyClassName + ".new($java_broadcast_receiver)");
+                    rubyInstance = Script.get("$ruby_broadcast_receiver");
+                }
             } catch(IOException e) {
                 throw new RuntimeException("IOException loading broadcast receiver script", e);
             }
@@ -42,12 +52,16 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     }
 
     public void onReceive(android.content.Context context, android.content.Intent intent) {
-        Script.put("$context", context);
-        Script.put("$broadcast_receiver", this);
-        Script.put("$intent", intent);
-
         try {
-            Script.execute("$broadcast_receiver.on_receive($context, $intent)");
+            System.out.println("onReceive: " + rubyInstance);
+            Script.put("$context", context);
+            Script.put("$broadcast_receiver", this);
+            Script.put("$intent", intent);
+            if (rubyInstance != null) {
+                Script.exec("$ruby_broadcast_receiver.on_receive($context, $intent)");
+            } else {
+                Script.execute("$broadcast_receiver.on_receive($context, $intent)");
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }

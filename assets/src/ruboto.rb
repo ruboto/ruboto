@@ -12,6 +12,7 @@
 #
 #######################################################
 
+require 'ruboto/base'
 require 'ruboto/activity'
 require 'ruboto/service'
 require 'ruboto/broadcast_receiver'
@@ -21,4 +22,3 @@ require 'ruboto/menu'
 require 'ruboto/util/stack'
 require 'ruboto/util/toast'
 require 'ruboto/legacy'
-
