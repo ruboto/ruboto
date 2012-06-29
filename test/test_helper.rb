@@ -20,7 +20,8 @@ module RubotoTest
   Gem.refresh
   `gem query -i -n bundler`
   system 'gem install bundler' unless $? == 0
-  system 'bundle --system'
+  `bundle check`
+  system 'bundle --system' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
   $LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
   require 'ruboto'
