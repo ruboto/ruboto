@@ -1,8 +1,4 @@
-require 'ruboto/activity'
-require 'ruboto/widget'
-require 'ruboto/legacy'
-require 'ruboto/menu'
-require 'ruboto/util/toast'
+require 'ruboto'
 
 ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
 
