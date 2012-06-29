@@ -10,12 +10,8 @@ setup do |activity|
   assert @text_view
 end
 
-test('initial setup') do |activity|
-  assert_equal "What hath Matz wrought?", @text_view.text
-end
-
 test('button changes text') do |activity|
-  button = activity.findViewById(43)
-  button.performClick
+  assert_equal "What hath Matz wrought?", @text_view.text
+  activity.findViewById(43).performClick
   assert_equal "What hath Matz wrought!", @text_view.text
 end

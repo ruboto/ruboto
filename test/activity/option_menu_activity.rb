@@ -8,12 +8,13 @@ class OptionMenuActivity
   include Ruboto::Activity
 
   def on_create(bundle)
-    setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map{|s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
+    set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
     self.content_view =
-      linear_layout :orientation => LinearLayout::VERTICAL do
-          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42
-      end
+        linear_layout :orientation => LinearLayout::VERTICAL do
+          @text_view = text_view :text  => 'What hath Matz wrought?', :id => 42, :text_size => 48.0,
+                                 :width => :fill_parent, :gravity => android.view.Gravity::CENTER
+        end
   end
 
   def on_create_options_menu(menu)

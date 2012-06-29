@@ -10,11 +10,8 @@ setup do |activity|
   assert @text_view
 end
 
-test('initial setup') do |activity|
-  assert_equal "What hath Matz wrought?", @text_view.text
-end
-
 test('option_menu changes text') do |activity|
+  assert_equal "What hath Matz wrought?", @text_view.text
   activity.window.performPanelIdentifierAction(android.view.Window::FEATURE_OPTIONS_PANEL, 0, 0)
   assert_equal "What hath Matz wrought!", @text_view.text
 end

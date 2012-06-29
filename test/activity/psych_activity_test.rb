@@ -12,5 +12,7 @@ end
 
 test('psych_encode_decode') do |activity|
   assert_equal 'foo', activity.find_view_by_id(42).text.to_s
-  #assert_equal "--- foo\n...\n", activity.find_view_by_id(43).text.to_s
+  if RUBY_VERSION >= '1.9'
+    assert_equal "--- foo\n...\n", activity.find_view_by_id(43).text.to_s
+  end
 end

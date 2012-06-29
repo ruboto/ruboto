@@ -395,7 +395,7 @@ def install_apk
     puts "Package #{package} already installed."
     return
   when false
-    puts "Package installed, but of different size."
+    puts "Package #{package} already installed, but of different size.  Replacing package."
     output = `adb install -r #{APK_FILE} 2>&1`
     return if $? == 0 && output !~ failure_pattern && output =~ success_pattern
     case $1
