@@ -1,6 +1,6 @@
 package THE_PACKAGE;
 
-import org.ruboto.Script;
+import org.ruboto.JRubyAdapter;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 

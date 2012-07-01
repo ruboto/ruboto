@@ -25,25 +25,25 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         if (name != null) {
             setScriptName(name);
         
-            if (Script.isInitialized()) {
+            if (JRubyAdapter.isInitialized()) {
                 loadScript();
             }
         }
     }
 
     protected void loadScript() {
-        Script.put("$broadcast_receiver", this);
+    	JRubyAdapter.put("$broadcast_receiver", this);
         if (scriptName != null) {
             try {
-                new Script(scriptName).execute();
+                JRubyAdapter.exec(new Script(scriptName).getContents());
                 String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = Script.get(rubyClassName);
+                Object rubyClass = JRubyAdapter.get(rubyClassName);
                 if (rubyClass != null) {
                     System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    Script.put("$java_broadcast_receiver", this);
-                    Script.exec("$ruby_broadcast_receiver = " + rubyClassName + ".new($java_broadcast_receiver)");
-                    rubyInstance = Script.get("$ruby_broadcast_receiver");
+                    JRubyAdapter.put("$java_broadcast_receiver", this);
+                    JRubyAdapter.exec("$ruby_broadcast_receiver = " + rubyClassName + ".new($java_broadcast_receiver)");
+                    rubyInstance = JRubyAdapter.get("$ruby_broadcast_receiver");
                 }
             } catch(IOException e) {
                 throw new RuntimeException("IOException loading broadcast receiver script", e);
@@ -54,18 +54,16 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
             System.out.println("onReceive: " + rubyInstance);
-            Script.put("$context", context);
-            Script.put("$broadcast_receiver", this);
-            Script.put("$intent", intent);
+            JRubyAdapter.put("$context", context);
+            JRubyAdapter.put("$broadcast_receiver", this);
+            JRubyAdapter.put("$intent", intent);
             if (rubyInstance != null) {
-                Script.exec("$ruby_broadcast_receiver.on_receive($context, $intent)");
+            	JRubyAdapter.exec("$ruby_broadcast_receiver.on_receive($context, $intent)");
             } else {
-                Script.execute("$broadcast_receiver.on_receive($context, $intent)");
+            	JRubyAdapter.execute("$broadcast_receiver.on_receive($context, $intent)");
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 }	
-
-

@@ -175,9 +175,9 @@ module Ruboto
         end
 
         if on_ruby_instance
-          ["#{return_cast}Script.callMethod(rubyInstance, \"#{camelize ? attribute("name") : snake_case_attribute}\" #{args}#{convert_return});"]
+          ["#{return_cast}JRubyAdapter.callMethod(rubyInstance, \"#{camelize ? attribute("name") : snake_case_attribute}\" #{args}#{convert_return});"]
         else
-          ["#{return_cast}Script.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
+          ["#{return_cast}JRubyAdapter.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
         end
       end
 
@@ -190,10 +190,10 @@ module Ruboto
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
             if_else(
-                "rubyInstance != null && Script.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ snake_case_attribute + "\"}, Boolean.class)",
+                "rubyInstance != null && JRubyAdapter.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ snake_case_attribute + "\"}, Boolean.class)",
                 [super_string] + ruby_call(true),
                 if_else(
-                    "rubyInstance != null && Script.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ attribute("name") +"\"}, Boolean.class)",
+                    "rubyInstance != null && JRubyAdapter.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ attribute("name") +"\"}, Boolean.class)",
                     [super_string] + ruby_call(true, true),
                     if_else(
                         "callbackProcs != null && callbackProcs[#{constant_string}] != null",
