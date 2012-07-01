@@ -24,7 +24,7 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.ruboto.Script;
+import org.ruboto.JRubyAdapter;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -45,7 +45,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0 or android-10
             Thread t = new Thread(null, new Runnable() {
                 public void run() {
-                    JRubyLoadedOk.set(Script.setUpJRuby(getTargetContext()));
+                    JRubyLoadedOk.set(JRubyAdapter.setUpJRuby(getTargetContext()));
                 }
             }, "Setup JRuby from instrumentation test runner", 64 * 1024);
             try {
@@ -64,9 +64,9 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                 // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0 or android-10
                 Thread t2 = new Thread(null, new Runnable() {
                     public void run() {
-                        Script.put("$runner", InstrumentationTestRunner.this);
-                        Script.put("$test", InstrumentationTestRunner.this);
-                        Script.put("$suite", suite);
+                        JRubyAdapter.put("$runner", InstrumentationTestRunner.this);
+                        JRubyAdapter.put("$test", InstrumentationTestRunner.this);
+                        JRubyAdapter.put("$suite", suite);
                     }
                 }, "Setup JRuby from instrumentation test runner", 64 * 1024);
                 try {
@@ -129,7 +129,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
 
         boolean runOnUiThread = options == null || options.get("ui") == "true";
 
-        Test test = new ActivityTest(activityClass, Script.getScriptFilename(), setup, name, runOnUiThread, block);
+        Test test = new ActivityTest(activityClass, JRubyAdapter.getScriptFilename(), setup, name, runOnUiThread, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);
     }
@@ -162,12 +162,12 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         }
         buffer.close();
 
-        String oldFilename = Script.getScriptFilename();
-        Script.setScriptFilename(f);
-        Script.put("$script_code", source.toString());
-        Script.setScriptFilename(f);
-        Script.execute("$test.instance_eval($script_code)");
-        Script.setScriptFilename(oldFilename);
+        String oldFilename = JRubyAdapter.getScriptFilename();
+        JRubyAdapter.setScriptFilename(f);
+        JRubyAdapter.put("$script_code", source.toString());
+        JRubyAdapter.setScriptFilename(f);
+        JRubyAdapter.execute("$test.instance_eval($script_code)");
+        JRubyAdapter.setScriptFilename(oldFilename);
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }
 

@@ -12,18 +12,18 @@ end
 
 test('stack depth') do |activity|
   os_offset = {13 => 1, 15 => 1, 16 => 1}[android.os.Build::VERSION::SDK_INT].to_i
-  if org.ruboto.Script.uses_platform_apk?
+  if org.ruboto.JRubyAdapter.uses_platform_apk?
     jruby_offset = {
         '0.4.7' => [0, 0, 0, 0],
         '0.4.8.dev' => [0, -1, 0, 0],
-    }[org.ruboto.Script.platform_version_name] || [0, 0, 0, 0]
+    }[org.ruboto.JRubyAdapter.platform_version_name] || [0, 0, 0, 0]
   else # STANDALONE
     jruby_offset = {
         '1.7.0.preview1' => [0, -1, -1, -1],
         '1.7.0.preview2.dev' => [0, -1, 0, 0],
     }[org.jruby.runtime.Constants::VERSION] || [0, 0, 0, 0]
   end
-  version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.Script.uses_platform_apk ? org.ruboto.Script.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
+  version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
   assert_equal 43 + os_offset + jruby_offset[0], activity.find_view_by_id(42).text.to_i, version_message
   assert_equal 78 + os_offset + jruby_offset[1], activity.find_view_by_id(43).text.to_i, version_message
   assert_equal 61 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message

@@ -1,7 +1,5 @@
 package org.ruboto;
 
-import org.ruboto.Script;
-
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,7 +30,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 		    splash = -1;
 		}
 
-        if (Script.isInitialized()) {
+        if (JRubyAdapter.isInitialized()) {
             appStarted = true;
 		}
 	    super.onCreate(bundle);
@@ -48,7 +46,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         }
 
         Log.d("RUBOTO", "onResume: Checking JRuby");
-        if (Script.isInitialized()) {
+        if (JRubyAdapter.isInitialized()) {
             Log.d("RUBOTO", "Already initialized");
     	    fireRubotoActivity();
         } else {
@@ -100,7 +98,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private void initJRuby(final boolean firstTime) {
         new Thread(new Runnable() {
             public void run() {
-                final boolean jrubyOk = Script.setUpJRuby(EntryPointActivity.this);
+                final boolean jrubyOk = JRubyAdapter.setUpJRuby(EntryPointActivity.this);
                 if (jrubyOk) {
                     Log.d("RUBOTO", "onResume: JRuby OK");
                     prepareJRuby();

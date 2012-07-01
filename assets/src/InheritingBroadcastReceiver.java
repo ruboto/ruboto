@@ -1,20 +1,20 @@
 package THE_PACKAGE;
 
-import org.ruboto.Script;
+import org.ruboto.JRubyAdapter;
 
 public class InheritingBroadcastReceiver extends org.ruboto.RubotoBroadcastReceiver {
     private boolean scriptLoaded = false;
 
     public InheritingBroadcastReceiver() {
         super("sample_broadcast_receiver.rb");
-        if (Script.isInitialized()) {
+        if (JRubyAdapter.isInitialized()) {
             scriptLoaded = true;
         }
     }
 
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         if (!scriptLoaded) {
-            if (Script.setUpJRuby(context)) {
+            if (JRubyAdapter.setUpJRuby(context)) {
                 loadScript();
                 scriptLoaded = true;
             } else {
