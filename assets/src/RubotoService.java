@@ -33,22 +33,26 @@ THE_CONSTANTS
     super.onCreate();
 
     if (JRubyAdapter.setUpJRuby(this)) {
+        // TODO(uwe):  Only needed for non-class-based definitions
+        // Can be removed if we stop supporting non-class-based definitions
     	JRubyAdapter.defineGlobalVariable("$context", this);
     	JRubyAdapter.defineGlobalVariable("$service", this);
+    	// TODO end
 
         try {
             if (scriptName != null) {
-                System.out.println("Loading service script: " + scriptName);
-                JRubyAdapter.exec(new Script(scriptName).getContents());
                 String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
                 Object rubyClass = JRubyAdapter.get(rubyClassName);
+                if (rubyClass == null) {
+                    System.out.println("Loading script: " + scriptName);
+                    JRubyAdapter.exec(new Script(scriptName).getContents());
+                    rubyClass = JRubyAdapter.get(rubyClassName);
+                }
                 if (rubyClass != null) {
                     System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    JRubyAdapter.put("$java_service", this);
-                    JRubyAdapter.exec("$ruby_service = " + rubyClassName + ".new($java_service)");
-                    rubyInstance = JRubyAdapter.get("$ruby_service");
-                    JRubyAdapter.exec("$ruby_service.on_create");
+                    rubyInstance = JRubyAdapter.callMethod(rubyClass, "new", this, Object.class);
+                    JRubyAdapter.callMethod(rubyInstance, "on_create");
                 }
             } else {
             	JRubyAdapter.execute("$service.initialize_ruboto");
