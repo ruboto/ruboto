@@ -62,7 +62,7 @@ THE_CONSTANTS
 
         super.onCreate(bundle);
     
-        if (Script.isInitialized()) {
+        if (JRubyAdapter.isInitialized()) {
             prepareJRuby();
     	    loadScript();
         }
@@ -70,32 +70,36 @@ THE_CONSTANTS
 
     // This causes JRuby to initialize and takes a while.
     protected void prepareJRuby() {
-        Script.put("$context", this);
-        Script.put("$activity", this);
-        Script.put("$bundle", args[0]);
+    	JRubyAdapter.put("$context", this);
+    	JRubyAdapter.put("$activity", this);
+    	JRubyAdapter.put("$bundle", args[0]);
     }
 
     protected void loadScript() {
         try {
             if (scriptName != null) {
-                new Script(scriptName).execute();
                 String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = Script.get(rubyClassName);
+                Object rubyClass = JRubyAdapter.get(rubyClassName);
+                if (rubyClass == null) {
+                    System.out.println("Loading script: " + scriptName);
+                    JRubyAdapter.exec(new Script(scriptName).getContents());
+                }
+                rubyClass = JRubyAdapter.get(rubyClassName);
                 if (rubyClass != null) {
                     System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    Script.put("$java_activity", this);
-                    Script.exec("$ruby_activity = " + rubyClassName + ".new($java_activity)");
-                    rubyInstance = Script.get("$ruby_activity");
-                    Script.exec("$ruby_activity.on_create($bundle)");
+                    JRubyAdapter.put("$java_activity", this);
+                    JRubyAdapter.exec("$ruby_activity = " + rubyClassName + ".new($java_activity)");
+                    rubyInstance = JRubyAdapter.get("$ruby_activity");
+                    JRubyAdapter.exec("$ruby_activity.on_create($bundle)");
                 }
             } else if (configBundle != null) {
-                // TODO: Why doesn't this work? 
-                // Script.callMethod(this, "initialize_ruboto");
-                Script.execute("$activity.initialize_ruboto");
                 // TODO: Why doesn't this work?
-                // Script.callMethod(this, "on_create", args[0]);
-                Script.execute("$activity.on_create($bundle)");
+                // JRubyAdapter.callMethod(this, "initialize_ruboto");
+            	JRubyAdapter.execute("$activity.initialize_ruboto");
+                // TODO: Why doesn't this work?
+                // JRubyAdapter.callMethod(this, "on_create", args[0]);
+            	JRubyAdapter.execute("$activity.on_create($bundle)");
             }
         } catch(IOException e){
             e.printStackTrace();

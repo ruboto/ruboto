@@ -13,7 +13,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.ruboto.Script;
+import org.ruboto.JRubyAdapter;
 
 public class ActivityTest extends ActivityInstrumentationTestCase2 {
     private final Object setup;
@@ -38,16 +38,16 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
             Log.i(getClass().getName(), "Activity OK");
             Runnable testRunnable = new Runnable() {
                 public void run() {
-                    String oldFile = Script.getScriptFilename();
+                    String oldFile = JRubyAdapter.getScriptFilename();
 
                     Log.i(getClass().getName(), "calling setup");
-                    Script.setScriptFilename(filename);
-                    Script.callMethod(setup, "call", activity);
+                    JRubyAdapter.setScriptFilename(filename);
+                    JRubyAdapter.callMethod(setup, "call", activity);
                     Log.i(getClass().getName(), "setup ok");
                     
-                    Script.setScriptFilename(filename);
-                    Script.callMethod(block, "call", activity);
-                    Script.setScriptFilename(oldFile);
+                    JRubyAdapter.setScriptFilename(filename);
+                    JRubyAdapter.callMethod(block, "call", activity);
+                    JRubyAdapter.setScriptFilename(oldFile);
                 }
             };
             if (onUiThread) {

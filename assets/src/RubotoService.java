@@ -32,27 +32,27 @@ THE_CONSTANTS
 
     super.onCreate();
 
-    if (Script.setUpJRuby(this)) {
-        Script.defineGlobalVariable("$context", this);
-        Script.defineGlobalVariable("$service", this);
+    if (JRubyAdapter.setUpJRuby(this)) {
+    	JRubyAdapter.defineGlobalVariable("$context", this);
+    	JRubyAdapter.defineGlobalVariable("$service", this);
 
         try {
             if (scriptName != null) {
                 System.out.println("Loading service script: " + scriptName);
-                new Script(scriptName).execute();
+                JRubyAdapter.exec(new Script(scriptName).getContents());
                 String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = Script.get(rubyClassName);
+                Object rubyClass = JRubyAdapter.get(rubyClassName);
                 if (rubyClass != null) {
                     System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    Script.put("$java_service", this);
-                    Script.exec("$ruby_service = " + rubyClassName + ".new($java_service)");
-                    rubyInstance = Script.get("$ruby_service");
-                    Script.exec("$ruby_service.on_create");
+                    JRubyAdapter.put("$java_service", this);
+                    JRubyAdapter.exec("$ruby_service = " + rubyClassName + ".new($java_service)");
+                    rubyInstance = JRubyAdapter.get("$ruby_service");
+                    JRubyAdapter.exec("$ruby_service.on_create");
                 }
             } else {
-                Script.execute("$service.initialize_ruboto");
-                Script.execute("$service.on_create");
+            	JRubyAdapter.execute("$service.initialize_ruboto");
+            	JRubyAdapter.execute("$service.on_create");
             }
         } catch(IOException e) {
             e.printStackTrace();
