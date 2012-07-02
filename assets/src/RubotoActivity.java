@@ -68,12 +68,15 @@ THE_CONSTANTS
         }
     }
 
+    // TODO(uwe):  Only needed for non-class-based definitions
+    // Can be removed if we stop supporting non-class-based definitions
     // This causes JRuby to initialize and takes a while.
     protected void prepareJRuby() {
     	JRubyAdapter.put("$context", this);
     	JRubyAdapter.put("$activity", this);
     	JRubyAdapter.put("$bundle", args[0]);
     }
+    // TODO end
 
     protected void loadScript() {
         try {
@@ -84,14 +87,12 @@ THE_CONSTANTS
                 if (rubyClass == null) {
                     System.out.println("Loading script: " + scriptName);
                     JRubyAdapter.exec(new Script(scriptName).getContents());
+                    rubyClass = JRubyAdapter.get(rubyClassName);
                 }
-                rubyClass = JRubyAdapter.get(rubyClassName);
                 if (rubyClass != null) {
                     System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    JRubyAdapter.put("$java_activity", this);
-                    JRubyAdapter.exec("$ruby_activity = " + rubyClassName + ".new($java_activity)");
-                    rubyInstance = JRubyAdapter.get("$ruby_activity");
-                    JRubyAdapter.exec("$ruby_activity.on_create($bundle)");
+                    rubyInstance = JRubyAdapter.callMethod(rubyClass, "new", this, Object.class);
+                    JRubyAdapter.callMethod(rubyInstance, "on_create", args[0]);
                 }
             } else if (configBundle != null) {
                 // TODO: Why doesn't this work?
