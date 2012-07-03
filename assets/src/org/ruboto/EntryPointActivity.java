@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,7 +21,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     protected boolean appStarted = false;
 
 	public void onCreate(Bundle bundle) {
-        Log.d("RUBOTO", "onCreate: ");
+        Log.d("onCreate: ");
 
 	    try {
     		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
@@ -37,25 +36,25 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 	}
 
     public void onResume() {
-        Log.d("RUBOTO", "onResume: ");
+        Log.d("onResume: ");
 
         if(appStarted) {
-            Log.d("RUBOTO", "onResume: App already started!");
+            Log.d("onResume: App already started!");
             super.onResume();
             return;
         }
 
-        Log.d("RUBOTO", "onResume: Checking JRuby");
+        Log.d("onResume: Checking JRuby");
         if (JRubyAdapter.isInitialized()) {
-            Log.d("RUBOTO", "Already initialized");
+            Log.d("Already initialized");
     	    fireRubotoActivity();
         } else {
-            Log.d("RUBOTO", "Not initialized");
+            Log.d("Not initialized");
             showProgress();
             receiver = new BroadcastReceiver(){
                 public void onReceive(Context context, Intent intent) {
-                    Log.i("RUBOTO", "received broadcast: " + intent);
-                    Log.i("RUBOTO", "URI: " + intent.getData());
+                    Log.i("received broadcast: " + intent);
+                    Log.i("URI: " + intent.getData());
                     if (intent.getData().toString().equals("package:org.ruboto.core")) {
                         Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_SHORT).show();
                         if (receiver != null) {
@@ -76,7 +75,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     }
 
     public void onPause() {
-        Log.d("RUBOTO", "onPause: ");
+        Log.d("onPause: ");
 
         if (receiver != null) {
     	    unregisterReceiver(receiver);
@@ -86,7 +85,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     }
 
     public void onDestroy() {
-        Log.d("RUBOTO", "onDestroy: ");
+        Log.d("onDestroy: ");
 
         super.onDestroy();
         if (dialogCancelled) {
@@ -100,7 +99,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
             public void run() {
                 final boolean jrubyOk = JRubyAdapter.setUpJRuby(EntryPointActivity.this);
                 if (jrubyOk) {
-                    Log.d("RUBOTO", "onResume: JRuby OK");
+                    Log.d("onResume: JRuby OK");
                     prepareJRuby();
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -111,7 +110,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                     runOnUiThread(new Runnable() {
                         public void run() {
                             if (firstTime) {
-                                Log.d("RUBOTO", "onResume: Checking JRuby - IN UI thread");
+                                Log.d("onResume: Checking JRuby - IN UI thread");
                                 try {
                                     setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
                                 } catch (Exception e) {
@@ -150,7 +149,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     protected void fireRubotoActivity() {
         if(appStarted) return;
         appStarted = true;
-        Log.i("RUBOTO", "Starting activity");
+        Log.i("Starting activity");
         loadScript();
         onStart();
         super.onResume();
@@ -159,7 +158,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
     private void showProgress() {
         if (loadingDialog == null) {
-            Log.i("RUBOTO", "Showing progress");
+            Log.i("Showing progress");
             if (splash > 0) {
                 requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
@@ -178,7 +177,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
     private void hideProgress() {
         if (loadingDialog != null) {
-            Log.d("RUBOTO", "Hide progress");
+            Log.d("Hide progress");
             loadingDialog.dismiss();
             loadingDialog = null;
         }
