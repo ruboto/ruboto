@@ -23,7 +23,8 @@ module UpdatedExampleTestMethods
 
   def test_icons_are_untouched
     Dir.chdir APP_DIR do
-      icon_file_size = File.size('res/drawable-hdpi/icon.png')
+      icon_file = Dir['res/drawable-hdpi/{icon,ic_launcher}.png'][0]
+      icon_file_size = File.size(icon_file)
       assert_equal 4032, icon_file_size
     end
   end
