@@ -17,9 +17,6 @@ end
 
 require 'java'
 
-$package_name = ($activity || $service || $broadcast_receiver).package_name
-$package      = eval("Java::#{$package_name}")
-
 # Create convenience method for top-level android package so we do not need to prefix with 'Java::'.
 module Kernel
   def android
@@ -28,15 +25,6 @@ module Kernel
 end
 
 java_import "android.R"
-
-module Ruboto
-  java_import "#{$package_name}.R"
-  begin
-    Id = JavaUtilities.get_proxy_class("#{$package_name}.R$id")
-  rescue NameError
-    Java::android.util.Log.d "RUBOTO", "no R$id"
-  end
-end
 AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
 #

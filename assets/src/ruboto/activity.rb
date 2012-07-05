@@ -1,4 +1,5 @@
 require 'ruboto/base'
+require 'ruboto/package'
 
 #######################################################
 #
