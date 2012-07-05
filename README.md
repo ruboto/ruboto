@@ -55,38 +55,9 @@ Ex:
 <a name="callback_generator"></a>
 ### Callback generator
 
-Can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
+You can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
 
-_Note: While the command line calls below still work, there is an easier way to do this within your scripts. The new way of generating interfaces and subclasses is described in the wiki [Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks)._
-
-For classes that need subclassing (e.g., PhoneStateListener, SQLiteOpenHelper, View)
-
-    $ ruboto gen subclass AndroidPackageAndClassName --name YourClassName --method_base all-on-or-none --method_include methods --method_exclude methods
-Ex:
-    $ ruboto gen subclass android.telephony.PhoneStateListener --name MyPhoneStateListener --method_base on
-
-For interfaces that need implementing (e.g., OnClickListener or SensorListener)
-
-    $ ruboto gen interface AndroidPackageAndInterfaceName --name YourClassName
-Ex:
-    $ ruboto gen interface android.hardware.SensorListener --name MySensorListener
-
-Inside your script use: 
-
-    # note that this is different than java_import
-    ruboto_import "your.package.MySensorListener"
-
-Later:
-
-    # Create the callback object
-    @sensor_listener = MySensorListener.new
-
-    # Specify the block to call 
-    @sensor_listener.handle_sensor_changed do |sensor, values|
-      # Do stuff
-    end
-
-    # Register the listener
+Starting with Ruboto 0.6.0 there are easy ways to do this within your scripts. The new way of generating interfaces and subclasses is described in the wiki [Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks)._
 
 <a name="packaging_task"></a>
 ### Packaging task
@@ -174,31 +145,24 @@ The main thing Ruboto offers you is the ability to write Ruby scripts to define 
 
 Here's how it works:
 
-First of all, your scripts are found in `src/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method handle_foo_bar on the Android object. In your scripts, they are defined as `$class_name`. That was really abstract, so here's an example.
+First of all, your scripts are found in `src/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method on_foo_bar on the Android object. That was really abstract, so here's an example.
 
 You generate an app with the option `--activity FooActivity`, which means that ruboto will generate a FooActivity for you. So you open `src/foo_activity.rb` in your favorite text editor. If you want an activity that does nothing but Log when it gets launched and when it gets destroyed (in the onCreate and onPause methods). You want your script to look like this:
 
-    require 'ruboto.rb' #scripts will not work without doing this
-    $activity.handle_create do |bundle|
-      Log.v 'MYAPPNAME', 'onCreate got called!'
-      handle_pause do
+    require 'ruboto/activity' #scripts will not work without doing this
+
+    class FooActivity
+      include Ruboto::Activity
+      def on_create(bundle)
+        Log.v 'MYAPPNAME', 'onCreate got called!'
+      end
+
+      def on_pause
         Log.v 'MYAPPNAME', 'onPause got called!'
       end
     end
 
-If you prefer, you can also do this. It's equivalent:
-
-    require 'ruboto.rb' #scripts will not work without doing this
-    $activity.handle_create do |bundle|
-      Log.v 'MYAPPNAME', 'onCreate got called!'
-    end
-    $activity.handle_pause do
-      Log.v 'MYAPPNAME', 'onPause got called!'
-    end
-
-Each class has only one method that you can nest other calls inside of (ie. what is happening in that first example that removes the need for the second `$activity.`). For Activities and Services, it is `handle_create`, and for BroadcastReceivers, it is `handle_receive`. The general rule is that it corresponds to the first method in the class's lifecycle. But you should never really have to think about it because generating a class generates a sample script that calls that method.
-
-The arguments passed to the block you give `handle_` methods are the same as the arguments that the java methods take. Consult the Android documentation.
+The arguments passed to the methods are the same as the arguments that the java methods take. Consult the Android documentation.
 
 Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto.rb) where everything is defined.
 
