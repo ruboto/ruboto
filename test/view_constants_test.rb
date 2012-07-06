@@ -67,6 +67,7 @@ EOF
       File.open(view_constants_test_filename, 'w') { |f| f << <<EOF }
 activity Java::org.ruboto.test_app.RubotoTestAppActivity
 java_import "android.view.ViewGroup"
+java_import "android.view.Gravity"
 java_import "android.os.Build"
 
 setup do |activity|
@@ -86,6 +87,12 @@ end
 test('LayoutParams Constants') do |activity|
   ViewGroup::LayoutParams.constants.each do |const|
     assert_equal ViewGroup::LayoutParams.const_get(const), view_constant(const)
+  end
+end
+
+test('Gravity Constants') do |activity|
+  Gravity.constants.each do |const|
+    assert_equal Gravity.const_get(const), view_constant(const)
   end
 end
 EOF
