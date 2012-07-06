@@ -33,8 +33,8 @@ AndroidIds = JavaUtilities.get_proxy_class("android.R$id")
 
 module Ruboto
   module CallbackClass
-    def new_with_callbacks &block
-      new.initialize_ruboto_callbacks &block
+    def new_with_callbacks(*args, &block)
+      new(*args).initialize_ruboto_callbacks(&block)
     end
   end
     
@@ -46,13 +46,13 @@ module Ruboto
     end
     
     def ruboto_callback_methods 
-      (singleton_methods - ["on_create", "on_receive"]).select{|i| i =~ /^on_/} 
+      (singleton_methods - ["on_create", "on_receive"]).select{|i| self.class.constants.include?(i.sub(/^on_/, "CB_").upcase) || self.class.constants.include?("CB_#{i}".upcase)}
     end 
 
     def setup_ruboto_callbacks 
       ruboto_callback_methods.each do |i| 
         begin
-          setCallbackProc(self.class.const_get(i.sub(/^on_/, "CB_").upcase), method(i)) 
+          setCallbackProc((self.class.constants.include?(i.sub(/^on_/, "CB_").upcase) && self.class.const_get(i.sub(/^on_/, "CB_").upcase)) || (self.class.constants.include?("CB_#{i}".upcase) && self.class.const_get("CB_#{i}".upcase)), method(i))
         rescue
         end
       end 
