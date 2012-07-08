@@ -89,11 +89,6 @@ class RubotoTestService
 
   def on_start_command(intent, flags, start_id)
     puts "service on_start_command(\#{intent}, \#{flags}, \#{start_id})"
-    getApplication()
-    getApplication
-    get_application
-    application
-
     $ruboto_test_app_activity.set_title 'on_start_command'
     $ruboto_test_app_activity.set_text TARGET_TEXT
 

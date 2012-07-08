@@ -46,13 +46,13 @@ module Ruboto
     end
     
     def ruboto_callback_methods 
-      (singleton_methods - ["on_create", "on_receive"]).select{|i| self.class.constants.include?(i.sub(/^on_/, "CB_").upcase) || self.class.constants.include?("CB_#{i}".upcase)}
+      (singleton_methods - ["on_create", "on_receive"]).select{|i| self.class.constants.include?(i.to_s.sub(/^on_/, "CB_").upcase) || self.class.constants.include?("CB_#{i}".upcase)}
     end 
 
     def setup_ruboto_callbacks 
       ruboto_callback_methods.each do |i| 
         begin
-          setCallbackProc((self.class.constants.include?(i.sub(/^on_/, "CB_").upcase) && self.class.const_get(i.sub(/^on_/, "CB_").upcase)) || (self.class.constants.include?("CB_#{i}".upcase) && self.class.const_get("CB_#{i}".upcase)), method(i))
+          setCallbackProc((self.class.constants.include?(i.to_s.sub(/^on_/, "CB_").upcase) && self.class.const_get(i.to_s.sub(/^on_/, "CB_").upcase)) || (self.class.constants.include?("CB_#{i}".upcase) && self.class.const_get("CB_#{i}".upcase)), method(i))
         rescue
         end
       end 

@@ -27,6 +27,6 @@ test('stack depth') do |activity|
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
   assert_equal 43 + os_offset + jruby_offset[0], activity.find_view_by_id(42).text.to_i, version_message
   assert_equal 48 + os_offset + jruby_offset[1], activity.find_view_by_id(43).text.to_i, version_message
-  assert_equal 46 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message
-  assert_equal 79 + os_offset + jruby_offset[3], activity.find_view_by_id(45).text.to_i, version_message
+  assert_equal 49 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message
+  assert_equal 66 + os_offset + jruby_offset[3], activity.find_view_by_id(45).text.to_i, version_message
 end
