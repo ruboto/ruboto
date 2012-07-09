@@ -207,7 +207,15 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   FileUtils.mkdir_p BUNDLE_PATH
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
-  gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
+  
+  if gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
+    puts "Found gems for Ruby 1.8.  Using ruby 1.8."
+  elsif gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.9.1/gems"][0]
+    puts "Found gems for Ruby 1.9.1.  Using ruby 1.9."
+  else
+    puts "FATAL: gem_path could not be found.  Exiting."
+    exit 1
+  end
 
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
