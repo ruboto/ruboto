@@ -158,11 +158,12 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
     private void showProgress() {
         if (loadingDialog == null) {
-            Log.i("Showing progress");
             if (splash > 0) {
+                Log.i("Showing splash");
                 requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
+                Log.i("Showing progress");
                 loadingDialog = ProgressDialog.show(this, null, "Starting...", true, true);
                 loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setOnCancelListener(new OnCancelListener() {
