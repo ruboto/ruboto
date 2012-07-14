@@ -190,7 +190,7 @@ module Ruboto
         attribute("name").gsub(/[A-Z]/) { |i| "_#{i}" }.downcase
       end
 
-      def method_definition
+      def method_definition(class_name)
         method_call(
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
@@ -213,7 +213,7 @@ module Ruboto
                         )
                 ),
                 [
-                    %Q{Log.i("Method called before JRuby runtime was initialized: " + getClass().getSimpleName() + "##{attribute('name')}");},
+                    %Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
                     super_return,
                 ]
             )
