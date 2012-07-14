@@ -195,20 +195,27 @@ module Ruboto
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
             if_else(
-                "callbackProcs != null && callbackProcs[#{constant_string}] != null",
-                [super_string] + ruby_call,
-                ['String rubyClassName = Script.toCamelCase(scriptName);'] +
-                    if_else(
-                        # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
-                        "(Boolean)JRubyAdapter.runScriptlet(\"p defined?(\" + rubyClassName + \") ; defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                        [super_string] + ruby_call(true),
+                "JRubyAdapter.isInitialized()",
+                if_else(
+                    "callbackProcs != null && callbackProcs[#{constant_string}] != null",
+                    [super_string] + ruby_call,
+                    ['String rubyClassName = Script.toCamelCase(scriptName);'] +
                         if_else(
                             # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
-                            "(Boolean)JRubyAdapter.runScriptlet(\"p defined?(\" + rubyClassName + \") ; defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                            [super_string] + ruby_call(true, true),
-                            [super_return]
+                            "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                            [super_string] + ruby_call(true),
+                            if_else(
+                                # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
+                                "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                                [super_string] + ruby_call(true, true),
+                                [super_return]
+                            )
                         )
-                    )
+                ),
+                [
+                    %Q{Log.i("Method called before JRuby runtime was initialized: " + getClass().getSimpleName() + "##{attribute('name')}");},
+                    super_return,
+                ]
             )
         ).indent.join("\n")
       end
