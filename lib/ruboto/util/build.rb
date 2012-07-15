@@ -125,7 +125,7 @@ module Ruboto
           "CONSTANTS_COUNT" => methods.count.to_s,
           "THE_CONSTRUCTORS" => class_desc.name == "class" ?
           class_desc.get_elements("constructor").map{|i| i.constructor_definition(params[:name])}.join("\n\n") : "",
-          "THE_METHODS" => methods.map{|i| i.method_definition}.join("\n\n")
+          "THE_METHODS" => methods.map{|i| i.method_definition(params[:name])}.join("\n\n")
         }
       end
 

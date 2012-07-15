@@ -161,7 +161,7 @@ public class JRubyAdapter {
 		return isDebugBuild;
 	}
 
-	public static synchronized boolean isInitialized() {
+	public static boolean isInitialized() {
 		return initialized;
 	}
 

@@ -175,7 +175,12 @@ module Ruboto
         end
 
         if on_ruby_instance
-          ["#{return_cast}JRubyAdapter.callMethod(rubyInstance, \"#{camelize ? attribute("name") : snake_case_attribute}\" #{args}#{convert_return});"]
+          args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
+          params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
+          [
+              'JRubyAdapter.put("$ruby_instance", this);',
+              "#{return_cast}JRubyAdapter.runScriptlet(\"$ruby_instance.#{camelize ? attribute("name") : snake_case_attribute}(#{args})\");",
+          ]
         else
           ["#{return_cast}JRubyAdapter.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
         end
@@ -185,22 +190,32 @@ module Ruboto
         attribute("name").gsub(/[A-Z]/) { |i| "_#{i}" }.downcase
       end
 
-      def method_definition
+      def method_definition(class_name)
         method_call(
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
             if_else(
-                "rubyInstance != null && JRubyAdapter.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ snake_case_attribute + "\"}, Boolean.class)",
-                [super_string] + ruby_call(true),
+                "JRubyAdapter.isInitialized()",
                 if_else(
-                    "rubyInstance != null && JRubyAdapter.callMethod(rubyInstance, \"respond_to?\" , new Object[]{\""+ attribute("name") +"\"}, Boolean.class)",
-                    [super_string] + ruby_call(true, true),
-                    if_else(
-                        "callbackProcs != null && callbackProcs[#{constant_string}] != null",
-                        [super_string] + ruby_call,
-                        [super_return]
-                    )
-                )
+                    "callbackProcs != null && callbackProcs[#{constant_string}] != null",
+                    [super_string] + ruby_call,
+                    ['String rubyClassName = Script.toCamelCase(scriptName);'] +
+                        if_else(
+                            # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
+                            "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                            [super_string] + ruby_call(true),
+                            if_else(
+                                # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
+                                "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                                [super_string] + ruby_call(true, true),
+                                [super_return]
+                            )
+                        )
+                ),
+                [
+                    %Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
+                    super_return,
+                ]
             )
         ).indent.join("\n")
       end
