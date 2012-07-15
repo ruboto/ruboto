@@ -166,6 +166,7 @@ module Ruboto
           if (attribute("return").include?(".") or attribute("return") == "int[]")
             return_class = attribute("return")
           elsif attribute("return") == 'int'
+            return_int = true
             return_class = 'Integer'
           else
             return_class = attribute("return").capitalize
@@ -175,12 +176,16 @@ module Ruboto
         end
 
         if on_ruby_instance
+          method_name = camelize ? attribute("name") : snake_case_attribute
           args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
           params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
           [
               'JRubyAdapter.put("$ruby_instance", this);',
-              "#{return_cast}JRubyAdapter.runScriptlet(\"$ruby_instance.#{camelize ? attribute("name") : snake_case_attribute}(#{args})\");",
+              "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{args})\")#{').intValue()' if return_int};",
           ]
+
+          # FIXME(uwe):  This gives exception:  NoMethodError: undefined method `on_start_command' for main:Object
+          # ["#{return_cast}JRubyAdapter.callMethod(this, \"#{method_name}\" #{args}#{convert_return});"]
         else
           ["#{return_cast}JRubyAdapter.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
         end

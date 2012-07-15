@@ -8,8 +8,6 @@ require 'ruboto/util/toast'
 # online:
 # http://developer.android.com/reference/android/app/Service.html
 class SampleService
-  include Ruboto::Service
-
   def on_start_command(intent, flags, startId)
     toast "Hello from the service"
     android.app.Service::START_NOT_STICKY

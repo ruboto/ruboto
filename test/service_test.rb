@@ -71,7 +71,7 @@ require 'ruboto/service'
 
 class RubotoTestService
   TARGET_TEXT = 'What hath Matz wrought!'
-  include Ruboto::Service
+
   def on_create
     puts "service on_create"
     Thread.start do
