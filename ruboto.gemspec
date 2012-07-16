@@ -1,5 +1,5 @@
 require 'rake'
-require 'lib/ruboto/version'
+require File.join(File.dirname(__FILE__), 'lib', 'ruboto', 'version')
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto}
