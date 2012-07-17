@@ -407,6 +407,7 @@ def install_apk
     end
     uninstall_apk
   end
+  puts "Installing package #{package}"
   output = `adb install #{APK_FILE} 2>&1`
   raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
   clear_update

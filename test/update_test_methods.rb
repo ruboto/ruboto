@@ -25,8 +25,11 @@ module UpdateTestMethods
         assert File.exists? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
         assert File.exists? test_file
+
+        #FIXME(uwe):  NOOP?
         source = File.read(test_file)
         File.open(test_file, 'w'){|f| f << source}
+
         update_app
       end
       run_app_tests
@@ -46,8 +49,11 @@ module UpdateTestMethods
         assert File.exists? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
         assert File.exists? test_file
+
+        #FIXME(uwe):  NOOP?
         source = File.read(test_file)
         File.open(test_file, 'w'){|f| f << source}
+
         update_app
         update_app
       end

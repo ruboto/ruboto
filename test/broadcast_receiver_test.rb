@@ -50,7 +50,7 @@ EOF
       receiver_filename = 'src/click_receiver.rb'
       receiver_content = File.read(receiver_filename)
 
-      assert receiver_content.sub!(/  def on_receive\(context, intent\)\n.*?  end\n/m, <<EOF)
+      assert receiver_content.sub!(/  def on_receive\(context, intent\)\n.*?^  end\n/m, <<EOF)
   def on_receive(context, intent)
     Log.d "RUBOTO TEST", "Changing UI text"
     context.run_on_ui_thread{$activity.find_view_by_id(42).text = '#{message}'}
@@ -58,7 +58,7 @@ EOF
   rescue
     Log.e "RUBOTO TEST", "Exception changing UI text: \#{$!.message}"
     Log.e "RUBOTO TEST", $!.message
-    Log.e "RUBOTO TEST", $!.backtrace.join("\n")
+    Log.e "RUBOTO TEST", $!.backtrace.join("\\n")
   end
 EOF
       File.open(receiver_filename, 'w') { |f| f << receiver_content }

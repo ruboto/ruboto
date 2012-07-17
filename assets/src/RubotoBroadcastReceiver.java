@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName = null;
-    private Object rubyInstance;
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
@@ -38,31 +37,60 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     	JRubyAdapter.put("$broadcast_receiver", this);
     	// TODO end
 
-        if (scriptName != null) {
-            try {
+        try {
+            if (scriptName != null) {
                 String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = JRubyAdapter.get(rubyClassName);
-                if (rubyClass == null) {
-                    System.out.println("Loading script: " + scriptName);
-                    JRubyAdapter.exec(new Script(scriptName).getContents());
+                Object rubyClass = null;
+                String script = new Script(scriptName).getContents();
+                if (script.matches("(?s).*class " + rubyClassName + ".*")) {
+                    if (!rubyClassName.equals(getClass().getSimpleName())) {
+                        System.out.println("Script defines methods on meta class");
+                        JRubyAdapter.put("$java_instance", this);
+                        JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                    }
+                } else {
                     rubyClass = JRubyAdapter.get(rubyClassName);
                 }
-                if (rubyClass != null) {
-                    System.out.println("Instanciating Ruby class: " + rubyClassName);
-                    rubyInstance = JRubyAdapter.callMethod(rubyClass, "new", this, Object.class);
+                if (rubyClass == null) {
+                    System.out.println("Loading script: " + scriptName);
+                    if (script.matches("(?s).*class " + rubyClassName + ".*")) {
+                        System.out.println("Script contains class definition");
+                        if (rubyClassName.equals(getClass().getSimpleName())) {
+                            System.out.println("Script has separate Java class");
+
+                            // TODO(uwe):  Why doesnt this work?
+                            // JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
+
+                            // TODO(uwe):  Workaround...
+                            JRubyAdapter.runScriptlet(rubyClassName + " = Java::" + getClass().getName());
+                        }
+                        // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                    }
+                    JRubyAdapter.setScriptFilename(scriptName);
+                    JRubyAdapter.runScriptlet(script);
+                    rubyClass = JRubyAdapter.get(rubyClassName);
                 }
-            } catch(IOException e) {
-                throw new RuntimeException("IOException loading broadcast receiver script", e);
             }
+        } catch(IOException e) {
+            throw new RuntimeException("IOException loading broadcast receiver script", e);
         }
     }
 
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
-            System.out.println("onReceive: " + rubyInstance);
-            if (rubyInstance != null) {
-            	JRubyAdapter.callMethod(rubyInstance, "on_receive", new Object[]{context, intent});
+            Log.d("onReceive: " + this);
+            // FIXME(uwe):  Change to use callMethod instead of runScriptlet
+            String rubyClassName = Script.toCamelCase(scriptName);
+            if ((Boolean)JRubyAdapter.runScriptlet("defined?(" + rubyClassName + ") == 'constant' && " + rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :on_receive}")) {
+                Log.d("onReceive: Ruby method found");
+                // FIXME(uwe):  Change to use callMethod instead of global variables
+                JRubyAdapter.put("$context", context);
+                JRubyAdapter.put("$intent", intent);
+                JRubyAdapter.put("$ruby_instance", this);
+                JRubyAdapter.runScriptlet("$ruby_instance.on_receive($context, $intent)");
+
+            	// JRubyAdapter.callMethod(this, "on_receive", new Object[]{context, intent});
             } else {
                 // TODO(uwe):  Only needed for non-class-based definitions
                 // Can be removed if we stop supporting non-class-based definitions
