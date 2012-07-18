@@ -15,7 +15,7 @@ test('stack depth') do |activity|
   if org.ruboto.JRubyAdapter.uses_platform_apk?
     jruby_offset = {
         '0.4.7' => [0, 0, 0, 0],
-        '0.4.8.dev' => [0, 1, 4, -1],
+        '0.4.8.dev' => [0, 1, 4, 4],
     }[org.ruboto.JRubyAdapter.platform_version_name] || [0, 0, 0, 0]
   else
     jruby_offset = {
