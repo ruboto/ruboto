@@ -87,8 +87,15 @@ THE_CONSTANTS
                 if (script.matches("(?s).*class " + rubyClassName + ".*")) {
                     if (!rubyClassName.equals(getClass().getSimpleName())) {
                         System.out.println("Script defines methods on meta class");
-                        JRubyAdapter.put("$java_instance", this);
-                        JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                        if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.0.dev") || ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.")) {
+                            JRubyAdapter.put("$java_instance", this);
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.") && ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.")) {
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.callMethod(this, "singleton_class", Object.class));
+                        } else {
+                            throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
+                        }
                     }
                 } else {
                     rubyClass = JRubyAdapter.get(rubyClassName);
@@ -101,24 +108,41 @@ THE_CONSTANTS
                             System.out.println("Script has separate Java class");
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                         }
-                        // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                        System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                     }
                     JRubyAdapter.setScriptFilename(scriptName);
                     JRubyAdapter.runScriptlet(script);
                     rubyClass = JRubyAdapter.get(rubyClassName);
                 }
                 if (rubyClass != null) {
-                    System.out.println("Call on_create on: " + this);
-                    JRubyAdapter.put("$ruby_instance", this);
-                    JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
+                    System.out.println("Call on_create on: " + this + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+                    // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                    if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.0.dev")) {
+                        JRubyAdapter.put("$ruby_instance", this);
+                        JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
+                    } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+                        JRubyAdapter.callMethod(this, "on_create", args[0]);
+                    } else {
+                        throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+                    }
                 }
             } else if (configBundle != null) {
-                // TODO: Why doesn't this work?
-                // JRubyAdapter.callMethod(this, "initialize_ruboto");
-            	JRubyAdapter.execute("$activity.initialize_ruboto");
-                // TODO: Why doesn't this work?
-                // JRubyAdapter.callMethod(this, "on_create", args[0]);
-            	JRubyAdapter.execute("$activity.on_create($bundle)");
+                // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.0.dev")) {
+            	    JRubyAdapter.execute("$activity.initialize_ruboto");
+                } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+            	    JRubyAdapter.callMethod(this, "initialize_ruboto");
+                } else {
+                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+            	}
+            	// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.0.dev")) {
+            	    JRubyAdapter.execute("$activity.on_create($bundle)");
+                } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+                    JRubyAdapter.callMethod(this, "on_create", args[0]);
+                } else {
+                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+            	}
             }
         } catch(IOException e){
             e.printStackTrace();
