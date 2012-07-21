@@ -28,7 +28,9 @@ else
 fi
 ant -version
 
-if [ -e /usr/local/jruby ] ; then
+if [ "$RUBY_IMPL" != "" ] ; then
+  rvm use $RUBY_IMPL
+elif [ -e /usr/local/jruby ] ; then
   export JRUBY_HOME=/usr/local/jruby
   CUSTOM_JRUBY_SET=yes
 elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
