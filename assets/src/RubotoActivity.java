@@ -114,7 +114,7 @@ THE_CONSTANTS
                         }
                     }
                     try {
-                        throw new RuntimeExection("Stack depth: " + Thread.currentThread().getStackTrace().length);
+                        throw new RuntimeException("Stack depth: " + Thread.currentThread().getStackTrace().length);
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                     }
