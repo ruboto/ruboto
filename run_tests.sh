@@ -30,18 +30,18 @@ ant -version
 
 if [ "$RUBY_IMPL" != "" ] ; then
   rvm use $RUBY_IMPL
-elif [ -e /usr/local/jruby ] ; then
-  export JRUBY_HOME=/usr/local/jruby
-  CUSTOM_JRUBY_SET=yes
-elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
-  export JRUBY_HOME=/Library/Frameworks/JRuby.framework/Versions/Current
-  CUSTOM_JRUBY_SET=yes
+# elif [ -e /usr/local/jruby ] ; then
+#   export JRUBY_HOME=/usr/local/jruby
+#   CUSTOM_JRUBY_SET=yes
+# elif [ -e /Library/Frameworks/JRuby.framework/Versions/Current ] ; then
+#   export JRUBY_HOME=/Library/Frameworks/JRuby.framework/Versions/Current
+#   CUSTOM_JRUBY_SET=yes
 fi
 
-if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
-  export PATH=$JRUBY_HOME/bin:$JRUBY_HOME/lib/ruby/gems/*/bin:$PATH
-  jruby --version
-fi
+# if [ "$CUSTOM_JRUBY_SET" == "yes" ] ; then
+#   export PATH=$JRUBY_HOME/bin:$JRUBY_HOME/lib/ruby/gems/*/bin:$PATH
+#   jruby --version
+# fi
 
 rake platform:clean
 rake test --trace
