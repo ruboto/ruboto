@@ -1,4 +1,7 @@
 STACK_DEPTH_SCRIPT = java.lang.Thread.current_thread.stack_trace.length.to_s
+
+raise "Stack level: #{STACK_DEPTH_SCRIPT}" rescue puts $!.backtrace.join("\n")
+
 require 'ruboto'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
