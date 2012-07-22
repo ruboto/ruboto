@@ -88,10 +88,10 @@ THE_CONSTANTS
                     if (!rubyClassName.equals(getClass().getSimpleName())) {
                         System.out.println("Script defines methods on meta class");
                         // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                        if (isPreOneSeven() || isRubyOneEight()) {
+                        if (isJRubyPreOneSeven() || isRubyOneEight()) {
                             JRubyAdapter.put("$java_instance", this);
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                        } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.") && ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.")) {
+                        } else if (isJRubyOneSeven() && isRubyOneNine()) {
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.callMethod(this, "singleton_class", Object.class));
                         } else {
                             throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
@@ -109,7 +109,7 @@ THE_CONSTANTS
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                         }
                         // FIXME(uwe):  Why does this fail when running the navigation test with older JRuby?
-                        if (!isPreOneSeven()) {
+                        if (!isJRubyPreOneSeven()) {
                           System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                         }
                     }
@@ -120,10 +120,10 @@ THE_CONSTANTS
                 if (rubyClass != null) {
                     System.out.println("Call on_create on: " + this + ", " + JRubyAdapter.get("JRUBY_VERSION"));
                     // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                    if (isPreOneSeven()) {
+                    if (isJRubyPreOneSeven()) {
                         JRubyAdapter.put("$ruby_instance", this);
                         JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
-                    } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+                    } else if (isJRubyOneSeven()) {
                         JRubyAdapter.callMethod(this, "on_create", args[0]);
                     } else {
                         throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
@@ -131,17 +131,17 @@ THE_CONSTANTS
                 }
             } else if (configBundle != null) {
                 // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (isPreOneSeven()) {
+                if (isJRubyPreOneSeven()) {
             	    JRubyAdapter.execute("$activity.initialize_ruboto");
-                } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+                } else if (isJRubyOneSeven()) {
             	    JRubyAdapter.callMethod(this, "initialize_ruboto");
                 } else {
                     throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
             	}
             	// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (isPreOneSeven()) {
+                if (isJRubyPreOneSeven()) {
             	    JRubyAdapter.execute("$activity.on_create($bundle)");
-                } else if (((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.")) {
+                } else if (isJRubyOneSeven()) {
                     JRubyAdapter.callMethod(this, "on_create", args[0]);
                 } else {
                     throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
@@ -161,8 +161,16 @@ THE_CONSTANTS
         return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.");
     }
 
-    private boolean isPreOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+    private boolean isRubyOneNine() {
+        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.");
+    }
+
+    private boolean isJRubyPreOneSeven() {
+        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+    }
+
+    private boolean isJRubyOneSeven() {
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.");
     }
 
   /****************************************************************************************
