@@ -29,6 +29,7 @@ fi
 ant -version
 
 if [ "$RUBY_IMPL" != "" ] ; then
+  rvm install $RUBY_IMPL
   rvm use $RUBY_IMPL
 # elif [ -e /usr/local/jruby ] ; then
 #   export JRUBY_HOME=/usr/local/jruby

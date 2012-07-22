@@ -31,6 +31,7 @@ end
 task :install => :gem do
   `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? != 0
+    puts 'Installing gem'
     cmd = "gem install ruboto-#{Ruboto::VERSION}.gem"
     output = `#{cmd}`
     if $? == 0
@@ -42,6 +43,24 @@ task :install => :gem do
     puts "ruboto-#{Ruboto::VERSION} is already installed."
   end
 end
+
+task :uninstall do
+  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  if $? == 0
+    puts 'Uninstalling gem'
+    cmd = "gem uninstall ruboto -v #{Ruboto::VERSION}"
+    output = `#{cmd}`
+    if $? == 0
+      puts output
+    else
+      sh "sudo #{cmd}"
+    end
+  else
+    puts "ruboto-#{Ruboto::VERSION} is not installed."
+  end
+end
+
+task :reinstall => [:uninstall, :clean, :install]
 
 desc "Generate an example app"
 task :example => EXAMPLE_FILE
