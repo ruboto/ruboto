@@ -13,6 +13,7 @@
 #######################################################
 
 require 'ruboto/base'
+require 'ruboto/package'
 require 'ruboto/activity'
 require 'ruboto/service'
 require 'ruboto/broadcast_receiver'
