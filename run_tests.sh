@@ -29,17 +29,16 @@ fi
 ant -version
 
 if [ "$RUBY_IMPL" != "" ] ; then
+  if [ -e /etc/profile.d/rvm.sh ] ; then
+    . /etc/profile.d/rvm.sh
+  fi
   if which rvm ; then
-    echo -n
   else
-    if [ -e /etc/profile.d/rvm.sh ] ; then
-      . /etc/profile.d/rvm.sh
-    else
-      echo RVM is missing!
-      exit 2
-    fi
+    echo RVM is missing!
+    exit 2
   fi
   rvm --version
+  echo -n
 
   rvm install $RUBY_IMPL
   rvm use $RUBY_IMPL
