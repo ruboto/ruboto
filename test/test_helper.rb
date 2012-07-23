@@ -94,6 +94,8 @@ module RubotoTest
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
 
+  puts RUBY_DESCRIPTION
+
   ANDROID_OS = (ENV['ANDROID_OS'] || version_from_device).slice(/\d+/).to_i
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
