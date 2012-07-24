@@ -32,8 +32,7 @@ if [ "$RUBY_IMPL" != "" ] ; then
   if [ -e /etc/profile.d/rvm.sh ] ; then
     . /etc/profile.d/rvm.sh
   fi
-  if which rvm ; then
-  else
+  if !(which rvm) ; then
     echo RVM is missing!
     exit 2
   fi
