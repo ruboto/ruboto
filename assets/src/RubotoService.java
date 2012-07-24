@@ -21,7 +21,7 @@ THE_CONSTANTS
 
   /****************************************************************************************
    * 
-   *  Activity Lifecycle: onCreate
+   *  Service Lifecycle: onCreate
    */
 	
   @Override
@@ -47,8 +47,15 @@ THE_CONSTANTS
                 if (script.matches("(?s).*class " + rubyClassName + ".*")) {
                     if (!rubyClassName.equals(getClass().getSimpleName())) {
                         System.out.println("Script defines methods on meta class");
-                        JRubyAdapter.put("$java_instance", this);
-                        JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                        if (isJRubyPreOneSeven() || isRubyOneEight()) {
+                            JRubyAdapter.put("$java_instance", this);
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        } else if (isJRubyOneSeven() && isRubyOneNine()) {
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.callMethod(this, "singleton_class", Object.class));
+                        } else {
+                            throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
+                        }
                     }
                 } else {
                     rubyClass = JRubyAdapter.get(rubyClassName);
@@ -69,12 +76,27 @@ THE_CONSTANTS
                 }
                 if (rubyClass != null) {
                     System.out.println("Call on_create on: " + this);
-                    JRubyAdapter.put("$ruby_instance", this);
-                    JRubyAdapter.runScriptlet("$ruby_instance.on_create");
+                    // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                    if (isJRubyPreOneSeven()) {
+                        JRubyAdapter.put("$ruby_instance", this);
+                        JRubyAdapter.runScriptlet("$ruby_instance.on_create");
+                    } else if (isJRubyOneSeven()) {
+                        JRubyAdapter.callMethod(this, "on_create");
+                    } else {
+                        throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+                    }
                 }
             } else {
-            	JRubyAdapter.execute("$service.initialize_ruboto");
-            	JRubyAdapter.execute("$service.on_create");
+                // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                if (isJRubyPreOneSeven()) {
+            	    JRubyAdapter.runScriptlet("$service.initialize_ruboto");
+            	    JRubyAdapter.runScriptlet("$service.on_create");
+                } else if (isJRubyOneSeven()) {
+            	    JRubyAdapter.callMethod(this, "initialize_ruboto");
+                    JRubyAdapter.callMethod(this, "on_create", args[0]);
+                } else {
+                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+            	}
             }
         } catch(IOException e) {
             e.printStackTrace();
@@ -83,6 +105,22 @@ THE_CONSTANTS
       // FIXME(uwe):  What to do if the Ruboto Core plarform cannot be found?
     }
   }
+
+    private boolean isRubyOneEight() {
+        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.");
+    }
+
+    private boolean isRubyOneNine() {
+        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.");
+    }
+
+    private boolean isJRubyPreOneSeven() {
+        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+    }
+
+    private boolean isJRubyOneSeven() {
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.");
+    }
 
   /****************************************************************************************
    * 

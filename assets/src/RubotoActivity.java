@@ -132,16 +132,10 @@ THE_CONSTANTS
             } else if (configBundle != null) {
                 // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
                 if (isJRubyPreOneSeven()) {
-            	    JRubyAdapter.execute("$activity.initialize_ruboto");
+            	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
+            	    JRubyAdapter.runScriptlet("$activity.on_create($bundle)");
                 } else if (isJRubyOneSeven()) {
             	    JRubyAdapter.callMethod(this, "initialize_ruboto");
-                } else {
-                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-            	}
-            	// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (isJRubyPreOneSeven()) {
-            	    JRubyAdapter.execute("$activity.on_create($bundle)");
-                } else if (isJRubyOneSeven()) {
                     JRubyAdapter.callMethod(this, "on_create", args[0]);
                 } else {
                     throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));

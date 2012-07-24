@@ -46,8 +46,15 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                 if (script.matches("(?s).*class " + rubyClassName + ".*")) {
                     if (!rubyClassName.equals(getClass().getSimpleName())) {
                         System.out.println("Script defines methods on meta class");
-                        JRubyAdapter.put("$java_instance", this);
-                        JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                        if (isJRubyPreOneSeven() || isRubyOneEight()) {
+                            JRubyAdapter.put("$java_instance", this);
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                        } else if (isJRubyOneSeven() && isRubyOneNine()) {
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.callMethod(this, "singleton_class", Object.class));
+                        } else {
+                            throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
+                        }
                     }
                 } else {
                     rubyClass = JRubyAdapter.get(rubyClassName);
@@ -80,28 +87,36 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
             Log.d("onReceive: " + this);
-            // FIXME(uwe):  Change to use callMethod instead of runScriptlet
-            String rubyClassName = Script.toCamelCase(scriptName);
-            if ((Boolean)JRubyAdapter.runScriptlet("defined?(" + rubyClassName + ") == 'constant' && " + rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :on_receive}")) {
-                Log.d("onReceive: Ruby method found");
-                // FIXME(uwe):  Change to use callMethod instead of global variables
+            // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
+            if (isJRubyPreOneSeven()) {
                 JRubyAdapter.put("$context", context);
                 JRubyAdapter.put("$intent", intent);
-                JRubyAdapter.put("$ruby_instance", this);
-                JRubyAdapter.runScriptlet("$ruby_instance.on_receive($context, $intent)");
-
-            	// JRubyAdapter.callMethod(this, "on_receive", new Object[]{context, intent});
-            } else {
-                // TODO(uwe):  Only needed for non-class-based definitions
-                // Can be removed if we stop supporting non-class-based definitions
-                JRubyAdapter.put("$context", context);
                 JRubyAdapter.put("$broadcast_receiver", this);
-                JRubyAdapter.put("$intent", intent);
-            	JRubyAdapter.execute("$broadcast_receiver.on_receive($context, $intent)");
-            	// TODO end
-            }
+                JRubyAdapter.runScriptlet("$broadcast_receiver.on_receive($context, $intent)");
+            } else if (isJRubyOneSeven()) {
+        	    JRubyAdapter.callMethod(this, "on_receive", new Object[]{context, intent});
+            } else {
+                throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+        	}
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-}	
+
+    private boolean isRubyOneEight() {
+        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.");
+    }
+
+    private boolean isRubyOneNine() {
+        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.");
+    }
+
+    private boolean isJRubyPreOneSeven() {
+        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+    }
+
+    private boolean isJRubyOneSeven() {
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.");
+    }
+
+}
