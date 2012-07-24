@@ -45,14 +45,16 @@ module Ruboto
       self
     end
     
-    def ruboto_callback_methods 
-      (singleton_methods - ["on_create", "on_receive"]).select{|i| self.class.constants.include?(i.to_s.sub(/^on_/, "CB_").upcase) || self.class.constants.include?("CB_#{i}".upcase)}
+    def ruboto_callback_methods
+      # FIXME(uwe): Remove to_sym conversion when we stop supporting Ruby 1.8 mode
+      (singleton_methods - ["on_create", "on_receive"]).select{|i| self.class.constants.map(&:to_sym).include?(i.to_s.sub(/^on_/, "CB_").upcase.to_sym) || self.class.constants.map(&:to_sym).include?("CB_#{i}".upcase.to_sym)}
     end 
 
-    def setup_ruboto_callbacks 
-      ruboto_callback_methods.each do |i| 
+    def setup_ruboto_callbacks
+      ruboto_callback_methods.each do |i|
         begin
-          setCallbackProc((self.class.constants.include?(i.to_s.sub(/^on_/, "CB_").upcase) && self.class.const_get(i.to_s.sub(/^on_/, "CB_").upcase)) || (self.class.constants.include?("CB_#{i}".upcase) && self.class.const_get("CB_#{i}".upcase)), method(i))
+          # FIXME(uwe): Remove to_sym conversion when we stop supporting Ruby 1.8 mode
+          setCallbackProc((self.class.constants.map(&:to_sym).include?(i.to_s.sub(/^on_/, "CB_").upcase.to_sym) && self.class.const_get(i.to_s.sub(/^on_/, "CB_").upcase)) || (self.class.constants.map(&:to_sym).include?("CB_#{i}".upcase.to_sym) && self.class.const_get("CB_#{i}".upcase)), method(i))
         rescue
         end
       end 

@@ -113,11 +113,6 @@ THE_CONSTANTS
                           System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                         }
                     }
-                    try {
-                        throw new RuntimeException("Stack depth: " + Thread.currentThread().getStackTrace().length);
-                    } catch (RuntimeException e) {
-                        e.printStackTrace();
-                    }
                     JRubyAdapter.setScriptFilename(scriptName);
                     JRubyAdapter.runScriptlet(script);
                     rubyClass = JRubyAdapter.get(rubyClassName);

@@ -44,13 +44,11 @@ module RubotoTest
   def self.version_from_device
     puts "Reading OS version from device/emulator"
     system "adb wait-for-device"
-    start = Time.now
     IO.popen('adb bugreport').each_line do |line|
       if line =~ /sdk-eng (.*?) .*? .*? test-keys/
         version = $1
         api_level = VERSION_TO_API_LEVEL[version]
         raise "Unknown version: #{version}" if api_level.nil?
-        puts "Getting version from device/emulator took #{(Time.now - start).to_i}s"
         return api_level
       end
       if line =~ /\[ro\.build\.version\.sdk\]: \[(\d+)\]/
