@@ -19,7 +19,7 @@ public class JRubyAdapter {
     private static boolean isDebugBuild = false;
     private static PrintStream output = null;
     private static boolean initialized = false;
-    private static String localContextScope = "SINGLETON";
+    private static String localContextScope = "CONCURRENT";
     private static String localVariableBehavior = "TRANSIENT";
     private static String RUBOTO_CORE_VERSION_NAME;
 
