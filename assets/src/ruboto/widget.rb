@@ -41,6 +41,10 @@ View.class_eval do
       if height = params.delete(:height)
         getLayoutParams.height = View.convert_constant(height)
       end
+      
+      if margins = params.delete(:margins)
+        getLayoutParams.set_margins(*margins)
+      end
 
       if layout = params.delete(:layout)
         lp = getLayoutParams
