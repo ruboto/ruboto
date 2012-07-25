@@ -1,9 +1,9 @@
 require 'ruboto/activity'
+require 'ruboto/widget'
 
 ruboto_import_widgets :LinearLayout, :TextView
 
 class MarginsActivity
-  include Ruboto::Activity
   def on_create(bundle)
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
