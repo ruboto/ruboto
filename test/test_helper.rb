@@ -128,9 +128,9 @@ class Test::Unit::TestCase
   alias old_run run
 
   def run(*args, &block)
-    mark_test_start("#{self.class.name}\##{method_name}")
+    mark_test_start("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __name__}")
     old_run(*args, &block)
-    mark_test_end("#{self.class.name}\##{method_name}")
+    mark_test_end("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __name__}")
   end
 
   def mark_test_start(test_name)

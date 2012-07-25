@@ -93,7 +93,7 @@ end
 desc "Run the tests"
 task :test do
   FileUtils.rm_rf Dir['tmp/RubotoTestApp_template*']
-  Dir['test/*_test.rb'].each do |f|
+  Dir['./test/*_test.rb'].each do |f|
     require f.chomp('.rb')
   end
 end

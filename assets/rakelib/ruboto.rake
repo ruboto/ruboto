@@ -209,6 +209,12 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
   gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
 
+  gem_paths = Dir["#{BUNDLE_PATH}/*ruby/*/gems"]
+  raise "Gem path not found" if gem_paths.empty?
+  raise "Found multiple gem paths: #{gem_paths}" if gem_paths.size > 1
+  gem_path = gem_paths[0]
+  puts "Found gems in #{gem_path}"
+
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
       Dir['{activerecord-jdbc-adapter, jruby-openssl}-*'].each do |g|
