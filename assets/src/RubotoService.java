@@ -115,7 +115,7 @@ THE_CONSTANTS
     }
 
     private boolean isJRubyPreOneSeven() {
-        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
     }
 
     private boolean isJRubyOneSeven() {

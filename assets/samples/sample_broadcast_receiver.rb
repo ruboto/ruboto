@@ -1,9 +1,6 @@
-require 'ruboto/broadcast_receiver'
-
 import android.util.Log
 
 class SampleBroadcastReceiver
-
   # will get called whenever the BroadcastReceiver receives an intent (whenever onReceive is called)
   def on_receive(context, intent)
     Log.v "SampleBroadcastReceiver", 'Broadcast received!'

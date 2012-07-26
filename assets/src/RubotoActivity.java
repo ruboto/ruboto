@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+    private String rubyClassName;
     private String scriptName;
     private String remoteVariable = null;
     private Object[] args;
@@ -30,6 +31,10 @@ THE_CONSTANTS
         return (remoteVariable == null ? "" : (remoteVariable + ".")) + call;
     }
 
+    public void setRubyClassName(String name) {
+        rubyClassName = name;
+    }
+
     public void setScriptName(String name) {
         scriptName = name;
     }
@@ -50,6 +55,13 @@ THE_CONSTANTS
             if (configBundle.containsKey("Theme")) {
                 setTheme(configBundle.getInt("Theme"));
             }
+            if (configBundle.containsKey("ClassName")) {
+                if (this.getClass().getName() == RubotoActivity.class.getName()) {
+                    setRubyClassName(configBundle.getString("ClassName"));
+                } else {
+                    throw new IllegalArgumentException("Only local Intents may set class name.");
+                }
+            }
             if (configBundle.containsKey("Script")) {
                 if (this.getClass().getName() == RubotoActivity.class.getName()) {
                     setScriptName(configBundle.getString("Script"));
@@ -57,6 +69,13 @@ THE_CONSTANTS
                     throw new IllegalArgumentException("Only local Intents may set script name.");
                 }
             }
+        }
+
+        if (rubyClassName == null && scriptName != null) {
+            rubyClassName = Script.toCamelCase(scriptName);
+        }
+        if (scriptName == null && rubyClassName != null) {
+            setScriptName(Script.toSnakeCase(rubyClassName) + ".rb");
         }
 
         super.onCreate(bundle);
@@ -80,7 +99,6 @@ THE_CONSTANTS
     protected void loadScript() {
         try {
             if (scriptName != null) {
-                String rubyClassName = Script.toCamelCase(scriptName);
                 System.out.println("Looking for Ruby class: " + rubyClassName);
                 Object rubyClass = null;
                 String script = new Script(scriptName).getContents();
@@ -160,7 +178,7 @@ THE_CONSTANTS
     }
 
     private boolean isJRubyPreOneSeven() {
-        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
     }
 
     private boolean isJRubyOneSeven() {

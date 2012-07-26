@@ -1,4 +1,4 @@
-activity Java::org.ruboto.test_app.NavigationActivity
+activity Java::org.ruboto.test_app.NavigationByClassNameActivity
 
 setup do |activity|
   start = Time.now

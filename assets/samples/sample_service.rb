@@ -1,4 +1,3 @@
-require 'ruboto/service'
 require 'ruboto/util/toast'
 
 # Services are complicated and don't really make sense unless you

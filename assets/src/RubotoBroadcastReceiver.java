@@ -112,7 +112,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     }
 
     private boolean isJRubyPreOneSeven() {
-        return true; // ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
     }
 
     private boolean isJRubyOneSeven() {
