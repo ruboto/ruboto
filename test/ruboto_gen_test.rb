@@ -47,7 +47,7 @@ class RubotoGenTest < Test::Unit::TestCase
       upper_limit = {
           7 => 62.0,
           10 => 63.0,
-          15 => 63.0,
+          15 => 66.0,
       }[ANDROID_TARGET] || 64.0
     end
     lower_limit = upper_limit * 0.9

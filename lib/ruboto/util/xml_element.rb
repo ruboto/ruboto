@@ -177,17 +177,23 @@ module Ruboto
 
         if on_ruby_instance
           method_name = camelize ? attribute("name") : snake_case_attribute
-          args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
+          global_args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
           params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
-          [
-              'JRubyAdapter.put("$ruby_instance", this);',
-              "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{args})\")#{').intValue()' if return_int};",
-          ]
-
-          # FIXME(uwe):  This gives exception:  NoMethodError: undefined method `on_start_command' for main:Object
-          # ["#{return_cast}JRubyAdapter.callMethod(this, \"#{method_name}\" #{args}#{convert_return});"]
+              ["// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7"] +
+              if_else(
+                  "isJRubyPreOneSeven()",
+                  [
+                      'JRubyAdapter.put("$ruby_instance", this);',
+                      "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{global_args})\")#{').intValue()' if return_int};",
+                  ],
+                  if_else(
+                      "isJRubyOneSeven()",
+                      ["#{return_cast}JRubyAdapter.runRubyMethod(this, \"#{method_name}\"#{args}#{convert_return});"],
+                      ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
+                  )
+              )
         else
-          ["#{return_cast}JRubyAdapter.callMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
+          ["#{return_cast}JRubyAdapter.runRubyMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
         end
       end
 

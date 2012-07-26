@@ -42,11 +42,11 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
 
                     Log.i(getClass().getName(), "calling setup");
                     JRubyAdapter.setScriptFilename(filename);
-                    JRubyAdapter.callMethod(setup, "call", activity);
+                    JRubyAdapter.runRubyMethod(setup, "call", activity);
                     Log.i(getClass().getName(), "setup ok");
                     
                     JRubyAdapter.setScriptFilename(filename);
-                    JRubyAdapter.callMethod(block, "call", activity);
+                    JRubyAdapter.runRubyMethod(block, "call", activity);
                     JRubyAdapter.setScriptFilename(oldFile);
                 }
             };

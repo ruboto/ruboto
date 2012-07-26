@@ -110,7 +110,7 @@ THE_CONSTANTS
                             JRubyAdapter.put("$java_instance", this);
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
                         } else if (isJRubyOneSeven() && isRubyOneNine()) {
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.callMethod(this, "singleton_class", Object.class));
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class", Object.class));
                         } else {
                             throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
                         }
@@ -142,7 +142,7 @@ THE_CONSTANTS
                         JRubyAdapter.put("$ruby_instance", this);
                         JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
                     } else if (isJRubyOneSeven()) {
-                        JRubyAdapter.callMethod(this, "on_create", args[0]);
+                        JRubyAdapter.runRubyMethod(this, "on_create", args[0]);
                     } else {
                         throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
                     }
@@ -153,8 +153,8 @@ THE_CONSTANTS
             	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
             	    JRubyAdapter.runScriptlet("$activity.on_create($bundle)");
                 } else if (isJRubyOneSeven()) {
-            	    JRubyAdapter.callMethod(this, "initialize_ruboto");
-                    JRubyAdapter.callMethod(this, "on_create", args[0]);
+            	    JRubyAdapter.runRubyMethod(this, "initialize_ruboto");
+                    JRubyAdapter.runRubyMethod(this, "on_create", args[0]);
                 } else {
                     throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
             	}

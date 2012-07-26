@@ -23,73 +23,49 @@ public class JRubyAdapter {
     private static String localVariableBehavior = "TRANSIENT";
     private static String RUBOTO_CORE_VERSION_NAME;
 
-    public static void callMethod(Object receiver, String methodName, Object[] args) {
-        try {
-            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class);
-            callMethodMethod.invoke(ruby, receiver, methodName, args);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-            if (isDebugBuild) {
-                throw new RuntimeException(ite);
-            }
-        }
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object[] args)}
+     */
+    @Deprecated public static void callMethod(Object receiver, String methodName, Object[] args) {
+        runRubyMethod(receiver, methodName, args);
     }
 
-    public static void callMethod(Object object, String methodName, Object arg) {
-        callMethod(object, methodName, new Object[] { arg });
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object object, String methodName, Object arg)}
+     */
+    @Deprecated public static void callMethod(Object object, String methodName, Object arg) {
+        runRubyMethod(object, methodName, new Object[] { arg });
     }
 
-    public static void callMethod(Object object, String methodName) {
-        callMethod(object, methodName, new Object[] {});
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object object, String methodName)}
+     */
+    @Deprecated public static void callMethod(Object object, String methodName) {
+        runRubyMethod(object, methodName, new Object[] {});
     }
 
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object[] args, Class<T> returnType)}
+     */
     @SuppressWarnings("unchecked")
-    public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
-        try {
-            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
-            return (T) callMethodMethod.invoke(ruby, receiver, methodName, args, returnType);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-        }
-        return null;
+    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
+        return runRubyMethod(receiver, methodName, args, returnType);
     }
 
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object arg, Class<T> returnType)}
+     */
     @SuppressWarnings("unchecked")
-    public static <T> T callMethod(Object receiver, String methodName, Object arg, Class<T> returnType) {
-        try {
-            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object.class, Class.class);
-            return (T) callMethodMethod.invoke(ruby, receiver, methodName, arg, returnType);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-        }
-        return null;
+    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object arg, Class<T> returnType) {
+        return runRubyMethod(receiver, methodName, arg, returnType);
     }
 
+    /**
+     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Class<T> returnType)}
+     */
     @SuppressWarnings("unchecked")
-    public static <T> T callMethod(Object receiver, String methodName, Class<T> returnType) {
-        try {
-            Method callMethodMethod = ruby.getClass().getMethod("callMethod", Object.class, String.class, Class.class);
-            return (T) callMethodMethod.invoke(ruby, receiver, methodName, returnType);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-        }
-        return null;
+    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Class<T> returnType) {
+        return runRubyMethod(receiver, methodName, returnType);
     }
 
     /**
@@ -130,10 +106,7 @@ public class JRubyAdapter {
      * @deprecated  As of Ruboto 0.7.0, replaced by {@link #runScriptlet(String code)}
      */
     @Deprecated public static String execute(String code) {
-        Object result = exec(code);
-        return result != null ? result.toString() : "nil";
-        // TODO: Why is callMethod returning "main"?
-        // return result != null ? callMethod(result, "inspect", String.class) : "null";
+        return runRubyMethod(exec(code), "inspect", String.class);
     }
 
     public static Object get(String name) {
@@ -155,6 +128,75 @@ public class JRubyAdapter {
 
     public static String getScriptFilename() {
         return callScriptingContainerMethod(String.class, "getScriptFilename");
+    }
+
+    public static void runRubyMethod(Object receiver, String methodName, Object[] args) {
+        try {
+            Method m = ruby.getClass().getMethod(runRubyMethodName(), Object.class, String.class, Object[].class);
+            m.invoke(ruby, receiver, methodName, args);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            printStackTrace(ite);
+            if (isDebugBuild) {
+                throw new RuntimeException(ite);
+            }
+        }
+    }
+
+    public static void runRubyMethod(Object object, String methodName, Object arg) {
+        runRubyMethod(object, methodName, new Object[] { arg });
+    }
+
+    public static void runRubyMethod(Object object, String methodName) {
+        runRubyMethod(object, methodName, new Object[] {});
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T runRubyMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
+        try {
+            Method m = ruby.getClass().getMethod(runRubyMethodName(), Object.class, String.class, Object[].class, Class.class);
+            return (T) m.invoke(ruby, receiver, methodName, args, returnType);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            printStackTrace(ite);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T runRubyMethod(Object receiver, String methodName, Object arg, Class<T> returnType) {
+        try {
+            Method m = ruby.getClass().getMethod(runRubyMethodName(), Object.class, String.class, Object.class, Class.class);
+            return (T) m.invoke(ruby, receiver, methodName, arg, returnType);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            printStackTrace(ite);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T runRubyMethod(Object receiver, String methodName, Class<T> returnType) {
+        try {
+            Method m = ruby.getClass().getMethod(runRubyMethodName(), Object.class, String.class, Class.class);
+            return (T) m.invoke(ruby, receiver, methodName, returnType);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (java.lang.reflect.InvocationTargetException ite) {
+            printStackTrace(ite);
+        }
+        return null;
     }
 
     public static boolean isDebugBuild() {
@@ -373,6 +415,14 @@ public class JRubyAdapter {
         Log.e(e.getMessage() != null ? e.getMessage() : e.getClass().getName());
         e.printStackTrace();
         ruby = null;
+    }
+
+    private static String runRubyMethodName() {
+        return isJRubyPreOneSeven() ? "callMethod" : "runRubyMethod";
+    }
+
+    private static boolean isJRubyPreOneSeven() {
+        return ((String)get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)get("JRUBY_VERSION")).equals("1.6.7");
     }
 
     static void printStackTrace(Throwable t) {
