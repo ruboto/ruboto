@@ -110,7 +110,7 @@ THE_CONSTANTS
                             JRubyAdapter.put("$java_instance", this);
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
                         } else if (isJRubyOneSeven() && isRubyOneNine()) {
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class", Object.class));
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
                         } else {
                             throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
                         }
@@ -126,10 +126,8 @@ THE_CONSTANTS
                             System.out.println("Script has separate Java class");
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                         }
-                        // FIXME(uwe):  Why does this fail when running the navigation test with older JRuby?
-                        if (!isJRubyPreOneSeven()) {
-                          System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
-                        }
+                        // FIXME(uwe):  Why does this fail when running the navigation by class name test? (uses singleton class)
+                        // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                     }
                     JRubyAdapter.setScriptFilename(scriptName);
                     JRubyAdapter.runScriptlet(script);

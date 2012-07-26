@@ -51,7 +51,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                             JRubyAdapter.put("$java_instance", this);
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
                         } else if (isJRubyOneSeven() && isRubyOneNine()) {
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class", Object.class));
+                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
                         } else {
                             throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
                         }

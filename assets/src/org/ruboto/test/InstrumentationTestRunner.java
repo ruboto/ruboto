@@ -166,7 +166,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         JRubyAdapter.setScriptFilename(f);
         JRubyAdapter.put("$script_code", source.toString());
         JRubyAdapter.setScriptFilename(f);
-        JRubyAdapter.execute("$test.instance_eval($script_code)");
+        JRubyAdapter.runScriptlet("$test.instance_eval($script_code)");
         JRubyAdapter.setScriptFilename(oldFilename);
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }

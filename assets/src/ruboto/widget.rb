@@ -1,3 +1,4 @@
+require 'ruboto/base'
 require 'ruboto/activity'
 
 #######################################################

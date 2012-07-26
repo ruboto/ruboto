@@ -43,5 +43,5 @@ if [ "$RUBY_IMPL" != "" ] ; then
 fi
 
 export NOEXEC=0
-rake platform:clean
+rake clean
 rake test --trace

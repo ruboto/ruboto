@@ -15,7 +15,7 @@ test('stack depth') do |activity|
   if org.ruboto.JRubyAdapter.uses_platform_apk?
     jruby_offset = {
         '0.4.7' => [0, 0, 0, 0],
-        '0.4.8.dev' => [0, 0, 0, 0],
+        '0.4.8.dev' => [0, 0, -4, -4],
     }[org.ruboto.JRubyAdapter.platform_version_name] || [0, 0, 0, 0]
   else # STANDALONE
     jruby_offset = {
@@ -25,8 +25,11 @@ test('stack depth') do |activity|
     }[org.jruby.runtime.Constants::VERSION] || [0, 0, 0, 0]
   end
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
-  assert_equal 43 + os_offset + jruby_offset[0], activity.find_view_by_id(42).text.to_i, version_message
-  assert_equal 48 + os_offset + jruby_offset[1], activity.find_view_by_id(43).text.to_i, version_message
-  assert_equal 49 + os_offset + jruby_offset[2], activity.find_view_by_id(44).text.to_i, version_message
-  assert_equal 66 + os_offset + jruby_offset[3], activity.find_view_by_id(45).text.to_i, version_message
+  assert_equal [43 + os_offset + jruby_offset[0],
+                48 + os_offset + jruby_offset[1],
+                49 + os_offset + jruby_offset[2],
+                66 + os_offset + jruby_offset[3]], [activity.find_view_by_id(42).text.to_i, version_message,
+                                                    activity.find_view_by_id(43).text.to_i, version_message,
+                                                    activity.find_view_by_id(44).text.to_i, version_message,
+                                                    activity.find_view_by_id(45).text.to_i, version_message]
 end

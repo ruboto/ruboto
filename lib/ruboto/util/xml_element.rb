@@ -172,7 +172,7 @@ module Ruboto
             return_class = attribute("return").capitalize
           end
           return_cast = "return (#{return_class.gsub("&lt;", "<").gsub("&gt;", ">")}) " if return_class
-          convert_return = ", #{return_class}.class"
+          convert_return = "#{return_class}.class, "
         end
 
         if on_ruby_instance
@@ -188,12 +188,12 @@ module Ruboto
                   ],
                   if_else(
                       "isJRubyOneSeven()",
-                      ["#{return_cast}JRubyAdapter.runRubyMethod(this, \"#{method_name}\"#{args}#{convert_return});"],
+                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}this, \"#{method_name}\"#{args});"],
                       ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
                   )
               )
         else
-          ["#{return_cast}JRubyAdapter.runRubyMethod(callbackProcs[#{constant_string}], \"call\" #{args}#{convert_return});"]
+          ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}callbackProcs[#{constant_string}], \"call\" #{args});"]
         end
       end
 
