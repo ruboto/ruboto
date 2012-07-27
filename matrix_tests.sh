@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
-for platform in "CURRENT MASTER STANDALONE" ; do
+for platform in "CURRENT FROM_GEM STANDALONE" ; do
   for target in "15 10" ; do
     if [ "$platform" == "STANDALONE" ] ; then
       $jruby_versions = "1.7.0.preview2.dev 1.6.7"
-    elif [ "$platform" == "MASTER" ] ; then
+    elif [ "$platform" == "FROM_GEM" ] ; then
       $jruby_versions = "1.7.0.preview2.dev"
     elif [ "$platform" == "CURRENT" ] ; then
       $jruby_versions = "1.7.0.dev"

@@ -87,11 +87,16 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
             Log.d("onReceive: " + this);
+
+            // FIXME(uwe):  Only needed for older broadcast receiver using callbacks
+            // FIXME(uwe):  Remove if we stop suppporting callbacks (to avoid global variables).
+            JRubyAdapter.put("$context", context);
+            JRubyAdapter.put("$intent", intent);
+            JRubyAdapter.put("$broadcast_receiver", this);
+            // FIXME end
+
             // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
             if (isJRubyPreOneSeven()) {
-                JRubyAdapter.put("$context", context);
-                JRubyAdapter.put("$intent", intent);
-                JRubyAdapter.put("$broadcast_receiver", this);
                 JRubyAdapter.runScriptlet("$broadcast_receiver.on_receive($context, $intent)");
             } else if (isJRubyOneSeven()) {
         	    JRubyAdapter.runRubyMethod(this, "on_receive", new Object[]{context, intent});

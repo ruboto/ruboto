@@ -255,7 +255,7 @@ class Test::Unit::TestCase
     else
       if RUBOTO_PLATFORM == 'CURRENT'
         system "rake platform:current platform:install"
-      elsif RUBOTO_PLATFORM == 'MASTER'
+      elsif RUBOTO_PLATFORM == 'FROM_GEM'
         system "rake platform:debug platform:install"
       end
     end
