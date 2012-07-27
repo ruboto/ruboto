@@ -26,7 +26,7 @@ test('button starts inline activity', :ui => false) do |activity|
   assert current_activity
   start = Time.now
   loop do
-    @text_view = activity.find_view_by_id(42)
+    @text_view = current_activity.find_view_by_id(42)
     break if @text_view || (Time.now - start > 60)
     sleep 1
   end

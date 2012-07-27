@@ -1,6 +1,6 @@
 require 'ruboto/widget'
 
-ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
+ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class NavigationByClassNameActivity
   def on_create(bundle)
