@@ -10,8 +10,8 @@ class NavigationByClassNameActivity
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
           text_view :text => 'What hath Matz wrought?', :id => 42, :width => :match_parent,
                     :gravity => :center, :text_size => 48.0
-          button :text => 'Next', :width => :wrap_content, :id => 43, :on_click_listener => proc { start_next_activity }
-          button :text => 'Inline', :width => :wrap_content, :id => 44, :on_click_listener => proc { start_inline_activity }
+          button :text => 'Next', :width => :match_parent, :id => 43, :on_click_listener => proc { start_next_activity }
+          button :text => 'Inline', :width => :match_parent, :id => 44, :on_click_listener => proc { start_inline_activity }
         end
   end
 
