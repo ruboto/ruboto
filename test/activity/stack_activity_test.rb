@@ -28,8 +28,8 @@ test('stack depth') do |activity|
   assert_equal [43 + os_offset + jruby_offset[0],
                 48 + os_offset + jruby_offset[1],
                 49 + os_offset + jruby_offset[2],
-                66 + os_offset + jruby_offset[3]], [activity.find_view_by_id(42).text.to_i, version_message,
-                                                    activity.find_view_by_id(43).text.to_i, version_message,
-                                                    activity.find_view_by_id(44).text.to_i, version_message,
-                                                    activity.find_view_by_id(45).text.to_i, version_message]
+                66 + os_offset + jruby_offset[3]], [activity.find_view_by_id(42).text.to_i,
+                                                    activity.find_view_by_id(43).text.to_i,
+                                                    activity.find_view_by_id(44).text.to_i,
+                                                    activity.find_view_by_id(45).text.to_i], version_message
 end
