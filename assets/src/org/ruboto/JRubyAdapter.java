@@ -195,8 +195,17 @@ public class JRubyAdapter {
 
     public static Object runScriptlet(String code) {
         try {
-            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-            return runScriptletMethod.invoke(ruby, code);
+            try {
+                Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+                return runScriptletMethod.invoke(ruby, code);
+            } catch (java.lang.ArrayIndexOutOfBoundsException aioobex) {
+                // FIXME(uwe):  Remove special handling when we stop supporting JRuby pre 1.7.0
+                if (isJRubyPreOneSeven()) {
+                    Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+                    return runScriptletMethod.invoke(ruby, code);
+                }
+                throw aioobex;
+            }
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         } catch (IllegalAccessException iae) {
