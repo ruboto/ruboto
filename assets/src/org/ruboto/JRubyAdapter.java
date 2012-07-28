@@ -199,14 +199,11 @@ public class JRubyAdapter {
                 Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
                 return runScriptletMethod.invoke(ruby, code);
             } catch (java.lang.ArrayIndexOutOfBoundsException aioobex) {
-                // FIXME(uwe):  Remove special handling when we stop supporting JRuby pre 1.7.0
-                if (isJRubyPreOneSeven()) {
-                    Log.e("Got exception: " + aioobex);
-                    Log.e("Retrying once.");
-                    Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-                    return runScriptletMethod.invoke(ruby, code);
-                }
-                throw aioobex;
+                // FIXME(uwe):  Remove special handling when JRUBY-6792 is fixed
+                Log.e("Got exception: " + aioobex);
+                Log.e("Retrying once.");
+                Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+                return runScriptletMethod.invoke(ruby, code);
             }
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
