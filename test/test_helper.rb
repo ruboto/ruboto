@@ -19,7 +19,7 @@ module RubotoTest
   Gem.paths = GEM_PATH
   Gem.refresh
   `gem query -i -n bundler`
-  system 'gem install bundler' unless $? == 0
+  system 'gem install bundler --no-ri --no-rdoc' unless $? == 0
   `bundle check`
   system 'bundle --system' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
@@ -62,7 +62,7 @@ module RubotoTest
     jars_version_from_env = ENV['JRUBY_JARS_VERSION']
     version_requirement = "-v #{jars_version_from_env}" if jars_version_from_env
     `gem query -i -n jruby-jars #{version_requirement}`
-    system "gem install #{jars_version_from_env.nil? || !File.exists?("jruby-jars-#{jars_version_from_env}.gem") ? '-r' : '-l'} jruby-jars #{version_requirement}" unless $? == 0
+    system "gem install #{jars_version_from_env.nil? || !File.exists?("jruby-jars-#{jars_version_from_env}.gem") ? '-r' : '-l'} jruby-jars #{version_requirement} --no-ri --no-rdoc" unless $? == 0
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
     if jars_version_from_env
       exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
@@ -88,7 +88,7 @@ module RubotoTest
   def install_ruboto_gem(version)
     version_requirement = "-v #{version}"
     `gem query -i -n ^ruboto$ #{version_requirement}`
-    system "gem install ruboto #{version_requirement}" unless $? == 0
+    system "gem install ruboto #{version_requirement} --no-ri --no-rdoc" unless $? == 0
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
 

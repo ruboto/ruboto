@@ -37,6 +37,7 @@ if [ "$RUBY_IMPL" != "" ] ; then
     exit 2
   fi
   rvm --version
+  unset JRUBY_HOME
   rvm install $RUBY_IMPL
   rvm use $RUBY_IMPL
   echo -n
