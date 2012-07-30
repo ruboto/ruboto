@@ -14,7 +14,7 @@ class NavigationByClassNameActivity
           button :text => 'Next by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { start_next_java_activity }
           button :text => 'Next by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { start_next_ruby_activity }
           button :text => 'Inline block', :width => :match_parent, :id => 45, :on_click_listener => proc { start_inline_activity }
-          button :text => 'Infile class', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
+          button :text => 'Infile class', :width => :match_parent, :id => 46, :on_click_listener => proc { start_infile_activity }
         end
   end
 

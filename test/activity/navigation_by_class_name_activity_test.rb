@@ -76,5 +76,8 @@ end
 #    sleep 1
 #  end
 #  assert @text_view
-#  assert_equal 'This is an inline activity.', @text_view.text
+#  assert_equal 'This is an infile activity.', @text_view.text
+#  current_activity.run_on_ui_thread { current_activity.finish }
+#  # FIXME(uwe):  Replace sleep with proper monitor
+#  sleep 3
 #end
