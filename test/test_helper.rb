@@ -151,7 +151,7 @@ class Test::Unit::TestCase
 
   def log(message = '')
     puts message
-    system "adb shell log -t 'RUBOTO TEST' '#{message}'"
+    `adb shell log -t 'RUBOTO TEST' '#{message}'`
   end
 
   def generate_app(options = {})

@@ -178,17 +178,17 @@ module Ruboto
         if on_ruby_instance
           method_name = camelize ? attribute("name") : snake_case_attribute
           global_args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
-          params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
               ["// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7"] +
               if_else(
                   "isJRubyPreOneSeven()",
+                  params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
                   [
-                      'JRubyAdapter.put("$ruby_instance", this);',
+                      'JRubyAdapter.put("$ruby_instance", rubyInstance);',
                       "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{global_args})\")#{').intValue()' if return_int};",
                   ],
                   if_else(
                       "isJRubyOneSeven()",
-                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}this, \"#{method_name}\"#{args});"],
+                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}rubyInstance, \"#{method_name}\"#{args});"],
                       ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
                   )
               )

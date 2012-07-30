@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String scriptName = null;
+    private Object rubyInstance;
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
@@ -31,6 +32,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     }
 
     protected void loadScript() {
+        rubyInstance = this;
 
         // TODO(uwe):  Only needed for non-class-based definitions
         // Can be removed if we stop supporting non-class-based definitions

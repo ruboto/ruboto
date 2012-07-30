@@ -403,7 +403,10 @@ def install_apk
   when false
     puts "Package #{package} already installed, but of different size.  Replacing package."
     output = `adb install -r #{APK_FILE} 2>&1`
-    return if $? == 0 && output !~ failure_pattern && output =~ success_pattern
+    if $? == 0 && output !~ failure_pattern && output =~ success_pattern
+      clear_update
+      return
+    end
     case $1
     when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
       puts "Found package signed with different certificate.  Uninstalling it and retrying install."
