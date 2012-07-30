@@ -198,12 +198,15 @@ public class JRubyAdapter {
             try {
                 Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
                 return runScriptletMethod.invoke(ruby, code);
-            } catch (java.lang.ArrayIndexOutOfBoundsException aioobex) {
+            } catch (java.lang.reflect.InvocationTargetException ite) {
                 // FIXME(uwe):  Remove special handling when JRUBY-6792 is fixed
-                Log.e("Got exception: " + aioobex);
-                Log.e("Retrying once.");
-                Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-                return runScriptletMethod.invoke(ruby, code);
+                if (ite.getCause() instanceof java.lang.ArrayIndexOutOfBoundsException) {
+                    Log.e("Got exception: " + ite.getCause());
+                    Log.e("Retrying once.");
+                    Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+                    return runScriptletMethod.invoke(ruby, code);
+                }
+                throw ite;
             }
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);

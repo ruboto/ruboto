@@ -46,6 +46,7 @@ THE_CONSTANTS
 	
     @Override
     public void onCreate(Bundle bundle) {
+        System.out.println("RubotoActivity onCreate(): " + getClass().getName());
         args = new Object[1];
         args[0] = bundle;
 
