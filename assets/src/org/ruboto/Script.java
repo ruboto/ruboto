@@ -106,6 +106,28 @@ public class Script {
         return JRubyAdapter.execute(getContents());
     }
 
+    boolean exists() {
+        for (String dir : scriptsDir) {
+            System.out.println("Checking file: " + dir + "/" + name);
+            if (new File(scriptsDir + "/" + name).exists()) {
+                return true;
+            }
+        }
+        try {
+            java.io.InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+            System.out.println("Classpath resource: " + is);
+            if (is != null) {
+                is.close();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException ioex) {
+            System.out.println("Classpath resource exception: " + ioex);
+            return false;
+        }
+    }
+
     public String getContents() throws IOException {
         InputStream is = null;
         BufferedReader buffer = null;
@@ -115,7 +137,7 @@ public class Script {
             } else {
                 is = getClass().getClassLoader().getResourceAsStream(name);
             }
-                buffer = new BufferedReader(new java.io.InputStreamReader(is), 8192);
+            buffer = new BufferedReader(new java.io.InputStreamReader(is), 8192);
             StringBuilder source = new StringBuilder();
             while (true) {
                 String line = buffer.readLine();

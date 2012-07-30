@@ -10,6 +10,7 @@ import android.os.Bundle;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private String rubyClassName;
     private String scriptName;
+    private Object rubyInstance;
     private String remoteVariable = null;
     private Object[] args;
     private Bundle configBundle = null;
@@ -101,48 +102,56 @@ THE_CONSTANTS
         try {
             if (scriptName != null) {
                 System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = null;
-                String script = new Script(scriptName).getContents();
-                if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                    if (!rubyClassName.equals(getClass().getSimpleName())) {
-                        System.out.println("Script defines methods on meta class");
-                        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                        if (true || isJRubyPreOneSeven() || isRubyOneEight()) {
-                            JRubyAdapter.put("$java_instance", this);
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                        } else if (isJRubyOneSeven() && isRubyOneNine()) {
-                            // FIXME(uwe): Why does not singleton_class method use work?
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
-                        } else {
-                            throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
-                        }
-                    }
-                } else {
-                    rubyClass = JRubyAdapter.get(rubyClassName);
-                }
-                if (rubyClass == null) {
-                    System.out.println("Loading script: " + scriptName);
+                Object rubyClass = JRubyAdapter.get(rubyClassName);
+                Script rubyScript = new Script(scriptName);
+                if (rubyScript.exists()) {
+                    String script = rubyScript.getContents();
                     if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                        System.out.println("Script contains class definition");
-                        if (rubyClassName.equals(getClass().getSimpleName())) {
-                            System.out.println("Script has separate Java class");
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
+                        if (!rubyClassName.equals(getClass().getSimpleName())) {
+                            System.out.println("Script defines methods on meta class");
+                            // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+                            if (true || isJRubyPreOneSeven() || isRubyOneEight()) {
+                                JRubyAdapter.put("$java_instance", this);
+                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
+                            } else if (isJRubyOneSeven() && isRubyOneNine()) {
+                                // FIXME(uwe): Why does not singleton_class method use work?
+                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
+                            } else {
+                                throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
+                            }
                         }
-                        // FIXME(uwe):  Why does this fail when running the navigation by class name test? (uses singleton class)
-                        // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                     }
-                    JRubyAdapter.setScriptFilename(scriptName);
-                    JRubyAdapter.runScriptlet(script);
-                    rubyClass = JRubyAdapter.get(rubyClassName);
+                    if (rubyClass == null) {
+                        System.out.println("Loading script: " + scriptName);
+                        if (script.matches("(?s).*class " + rubyClassName + ".*")) {
+                            System.out.println("Script contains class definition");
+                            if (rubyClassName.equals(getClass().getSimpleName())) {
+                                System.out.println("Script has separate Java class");
+                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
+                            }
+                            // FIXME(uwe):  Why does this fail when running the navigation by class name test? (uses singleton class)
+                            // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                        }
+                        JRubyAdapter.setScriptFilename(scriptName);
+                        JRubyAdapter.runScriptlet(script);
+                        rubyClass = JRubyAdapter.get(rubyClassName);
+                    }
+                    rubyInstance = this;
+                } else if (rubyClass != null) {
+                    // We have a predefined Ruby class without corresponding Ruby source file.
+                    rubyInstance = JRubyAdapter.runRubyMethod(rubyClass, "new");
+                } else {
+                    // Neither script file nor predefined class
+                    throw new RuntimeException("Either script or predefined class must be present.");
                 }
                 if (rubyClass != null) {
-                    System.out.println("Call on_create on: " + this + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+                    System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
                     // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
                     if (isJRubyPreOneSeven()) {
-                        JRubyAdapter.put("$ruby_instance", this);
+                        JRubyAdapter.put("$ruby_instance", rubyInstance);
                         JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
                     } else if (isJRubyOneSeven()) {
-                        JRubyAdapter.runRubyMethod(this, "on_create", args[0]);
+                        JRubyAdapter.runRubyMethod(rubyInstance, "on_create", args[0]);
                     } else {
                         throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
                     }
