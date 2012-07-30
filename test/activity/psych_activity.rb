@@ -8,13 +8,13 @@ if RUBY_VERSION < '1.9'
 end
 # TODO end
 
-require 'ruboto/activity'
-require 'ruboto/widget'
 require 'ruboto/util/stack'
 with_large_stack { require 'psych.rb' }
 
 Psych::Parser
 Psych::Handler
+
+require 'ruboto/widget'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
