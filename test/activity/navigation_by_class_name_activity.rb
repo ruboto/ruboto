@@ -62,6 +62,8 @@ class NavigationByClassNameActivity
 end
 
 class InfileActivity
+  include Ruboto::Activity
+
   def on_create(bundle)
     set_title 'Infile Activity'
 

@@ -139,7 +139,8 @@ THE_CONSTANTS
                     rubyInstance = this;
                 } else if (rubyClass != null) {
                     // We have a predefined Ruby class without corresponding Ruby source file.
-                    rubyInstance = JRubyAdapter.runRubyMethod(rubyClass, "new");
+                    System.out.println("Create separate Ruby instance for class: " + rubyClass);
+                    rubyInstance = JRubyAdapter.runRubyMethod(rubyClass, "new", this);
                 } else {
                     // Neither script file nor predefined class
                     throw new RuntimeException("Either script or predefined class must be present.");

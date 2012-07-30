@@ -137,7 +137,7 @@ public class JRubyAdapter {
                 return m.invoke(ruby, receiver, methodName, args, null);
             } else {
                 Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
-                return m.invoke(ruby, null, receiver, methodName, args);
+                return m.invoke(ruby, Object.class, receiver, methodName, args);
             }
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);

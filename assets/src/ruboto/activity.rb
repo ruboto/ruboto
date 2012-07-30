@@ -66,9 +66,17 @@ end
 
 module Ruboto
   module Activity
+    def initialize(ruboto_java_instance)
+      @ruboto_java_instance = ruboto_java_instance
+    end
+
+    def method_missing(method, *args, &block)
+      return @ruboto_java_instance.send(method, *args, &block) if @ruboto_java_instance.respond_to?(method)
+      super
+    end
   end
 end
-  
+
 def ruboto_configure_activity(klass)
   klass.class_eval do
     include Ruboto::Activity
