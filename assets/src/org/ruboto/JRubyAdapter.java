@@ -203,19 +203,8 @@ public class JRubyAdapter {
 
     public static Object runScriptlet(String code) {
         try {
-            try {
-                Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-                return runScriptletMethod.invoke(ruby, code);
-            } catch (java.lang.reflect.InvocationTargetException ite) {
-                // FIXME(uwe):  Remove special handling when JRUBY-6792 is fixed
-                if (ite.getCause() instanceof java.lang.ArrayIndexOutOfBoundsException) {
-                    Log.e("Got exception: " + ite.getCause());
-                    Log.e("Retrying once.");
-                    Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-                    return runScriptletMethod.invoke(ruby, code);
-                }
-                throw ite;
-            }
+            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
+            return runScriptletMethod.invoke(ruby, code);
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         } catch (IllegalAccessException iae) {
