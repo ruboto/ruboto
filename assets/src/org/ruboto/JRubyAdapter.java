@@ -132,9 +132,17 @@ public class JRubyAdapter {
 
     public static Object runRubyMethod(Object receiver, String methodName, Object... args) {
         try {
+            // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
             if (isJRubyPreOneSeven()) {
-                Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
-                return m.invoke(ruby, receiver, methodName, args, null);
+                if (args.length == 0) {
+                    Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Class.class);
+                    // System.out.println("Calling callMethod(" + receiver + ", " + methodName + ", " + Object.class + ")");
+                    return m.invoke(ruby, receiver, methodName, Object.class);
+                } else {
+                    Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
+                    // System.out.println("Calling callMethod(" + receiver + ", " + methodName + ", " + args + ", " + Object.class + ")");
+                    return m.invoke(ruby, receiver, methodName, args, Object.class);
+                }
             } else {
                 Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
                 return m.invoke(ruby, Object.class, receiver, methodName, args);
