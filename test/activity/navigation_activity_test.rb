@@ -1,4 +1,4 @@
-activity Java::org.ruboto.test_app.NavigationByClassNameActivity
+activity Java::org.ruboto.test_app.NavigationActivity
 
 setup do |activity|
   start = Time.now
@@ -12,7 +12,7 @@ end
 
 test('button starts Java activity', :ui => false) do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
-  monitor = add_monitor('org.ruboto.test_app.NavigationByClassNameActivity', nil, false)
+  monitor = add_monitor('org.ruboto.test_app.NavigationActivity', nil, false)
   begin
     activity.run_on_ui_thread { activity.find_view_by_id(43).perform_click }
     current_activity = wait_for_monitor_with_timeout(monitor, 5000)
@@ -42,9 +42,25 @@ test('button starts Ruby activity', :ui => false) do |activity|
   end
 end
 
+test('button starts activity by script name', :ui => false) do |activity|
+  assert_equal "What hath Matz wrought?", @text_view.text
+  monitor = add_monitor('org.ruboto.RubotoActivity', nil, false)
+  begin
+    activity.run_on_ui_thread { activity.find_view_by_id(45).perform_click }
+    current_activity = wait_for_monitor_with_timeout(monitor, 5000)
+    assert current_activity
+    current_activity.run_on_ui_thread { current_activity.finish }
+    # FIXME(uwe):  Replace sleep with proper monitor
+    sleep 3
+  ensure
+    puts "Removing monitor"
+    removeMonitor(monitor)
+  end
+end
+
 test('button starts inline activity', :ui => false) do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
-  activity.run_on_ui_thread { activity.find_view_by_id(45).perform_click }
+  activity.run_on_ui_thread { activity.find_view_by_id(46).perform_click }
   start = Time.now
   loop do
     @text_view = activity.find_view_by_id(42)
@@ -60,7 +76,7 @@ test('button starts infile class activity', :ui => false) do |activity|
   assert_equal "What hath Matz wrought?", @text_view.text
   monitor = add_monitor('org.ruboto.RubotoActivity', nil, false)
   begin
-    activity.run_on_ui_thread { activity.find_view_by_id(46).perform_click }
+    activity.run_on_ui_thread { activity.find_view_by_id(47).perform_click }
     current_activity = wait_for_monitor_with_timeout(monitor, 5000)
   ensure
     removeMonitor(monitor)

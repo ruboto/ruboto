@@ -3,7 +3,7 @@ require 'ruboto/widget'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
-class NavigationByClassNameActivity
+class NavigationActivity
   def on_create(bundle)
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
@@ -13,8 +13,9 @@ class NavigationByClassNameActivity
                     :gravity => :center, :text_size => 48.0
           button :text => 'Next by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { start_next_java_activity }
           button :text => 'Next by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { start_next_ruby_activity }
-          button :text => 'Inline block', :width => :match_parent, :id => 45, :on_click_listener => proc { start_inline_activity }
-          button :text => 'Infile class', :width => :match_parent, :id => 46, :on_click_listener => proc { start_infile_activity }
+          button :text => 'Next by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { start_activity_by_script_name }
+          button :text => 'Inline block', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
+          button :text => 'Infile class', :width => :match_parent, :id => 47, :on_click_listener => proc { start_infile_activity }
         end
   end
 
@@ -22,7 +23,7 @@ class NavigationByClassNameActivity
 
   def start_next_java_activity
     i = android.content.Intent.new
-    i.setClassName($package_name, 'org.ruboto.test_app.NavigationByClassNameActivity')
+    i.setClassName($package_name, 'org.ruboto.test_app.NavigationActivity')
     startActivity(i)
   end
 
@@ -30,7 +31,16 @@ class NavigationByClassNameActivity
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
-    configBundle.put_string('ClassName', 'NavigationByClassNameActivity')
+    configBundle.put_string('ClassName', 'NavigationActivity')
+    i.putExtra('RubotoActivity Config', configBundle)
+    startActivity(i)
+  end
+
+  def start_activity_by_script_name
+    i = android.content.Intent.new
+    i.setClassName($package_name, 'org.ruboto.RubotoActivity')
+    configBundle = android.os.Bundle.new
+    configBundle.put_string('Script', 'navigation_activity.rb')
     i.putExtra('RubotoActivity Config', configBundle)
     startActivity(i)
   end
