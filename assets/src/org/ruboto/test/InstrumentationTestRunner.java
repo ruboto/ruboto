@@ -58,26 +58,6 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             // TODO end
 
             if (JRubyLoadedOk.get()) {
-                loadStep = "Setup global variables";
-
-                // TODO(uwe):  Running with large stack is currently only needed when running with JRuby 1.7.0 and android-10
-                // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0 or android-10
-                Thread t2 = new Thread(null, new Runnable() {
-                    public void run() {
-                        JRubyAdapter.put("$runner", InstrumentationTestRunner.this);
-                        JRubyAdapter.put("$test", InstrumentationTestRunner.this);
-                        JRubyAdapter.put("$suite", suite);
-                    }
-                }, "Setup JRuby from instrumentation test runner", 64 * 1024);
-                try {
-                    t2.start();
-                    t2.join();
-                } catch(InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Interrupted starting JRuby", ie);
-                }
-                // TODO end
-
                 loadStep = "Load test helper";
                 loadScript("test_helper.rb");
 
@@ -162,13 +142,21 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         }
         buffer.close();
 
-        String oldFilename = JRubyAdapter.getScriptFilename();
-        JRubyAdapter.setScriptFilename(f);
-        JRubyAdapter.put("$script_code", source.toString());
-        JRubyAdapter.setScriptFilename(f);
-        JRubyAdapter.runScriptlet("$test.instance_eval($script_code)");
-        JRubyAdapter.setScriptFilename(oldFilename);
+        // FIXME(uwe):  Simplify when we stop supporintg JRuby < 1.7.0
+        if (isJRubyPreOneSeven()) {
+            JRubyAdapter.put("$test", InstrumentationTestRunner.this);
+            JRubyAdapter.put("$script_code", source.toString());
+            JRubyAdapter.runScriptlet("$test.instance_eval($script_code)");
+        } else {
+            String oldFilename = JRubyAdapter.getScriptFilename();
+            JRubyAdapter.setScriptFilename(f);
+            JRubyAdapter.runRubyMethod(this, "instance_eval", source.toString());
+            JRubyAdapter.setScriptFilename(oldFilename);
+        }
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }
 
+    private boolean isJRubyPreOneSeven() {
+        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
+    }
 }
