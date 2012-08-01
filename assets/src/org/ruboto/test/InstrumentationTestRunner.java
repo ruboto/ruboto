@@ -142,7 +142,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         }
         buffer.close();
 
-        // FIXME(uwe):  Simplify when we stop supporintg JRuby < 1.7.0
+        // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
         if (isJRubyPreOneSeven()) {
             JRubyAdapter.put("$test", InstrumentationTestRunner.this);
             JRubyAdapter.put("$script_code", source.toString());
