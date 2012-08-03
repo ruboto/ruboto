@@ -26,15 +26,14 @@ class RakeTest < Test::Unit::TestCase
         File.open(test_filename, 'w') { |f| f << s2 }
 
         apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
-        system 'rake test:quick'
-        assert_equal 0, $?
-
-        # FIXME(uwe): Uncomment this when we can build the test package without building the main package
-        # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
-        # FIXME end
-
-        assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
       end
+      run_app_tests
+
+      # FIXME(uwe): Uncomment this when we can build the test package without building the main package
+      # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
+      # FIXME end
+
+      assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
     end
   end
 
