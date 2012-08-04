@@ -130,7 +130,7 @@ THE_CONSTANTS
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                             }
                             // FIXME(uwe):  Why does this fail when running the navigation by class name test? (uses singleton class)
-                            // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                            System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                         }
                         JRubyAdapter.setScriptFilename(scriptName);
                         JRubyAdapter.runScriptlet(script);
