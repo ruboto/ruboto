@@ -1,5 +1,7 @@
 require 'java'
 
+puts "test_helper self: #{self.inspect}"
+
 def assert(value, message = nil)
   raise "#{"#{message}\n" if message}#{value.inspect} expected to be true" unless value
 end
