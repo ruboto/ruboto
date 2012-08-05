@@ -127,7 +127,8 @@ THE_CONSTANTS
                             System.out.println("Script contains class definition");
                             if (rubyClassName.equals(getClass().getSimpleName())) {
                                 System.out.println("Script has separate Java class");
-                                if (isJRubyOneSeven()) {
+                                // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
+                                if (!isJRubyPreOneSeven()) {
                                     JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
                                 }
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
