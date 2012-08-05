@@ -47,7 +47,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                 public void run() {
                     JRubyLoadedOk.set(JRubyAdapter.setUpJRuby(getTargetContext()));
                     if (!isJRubyPreOneSeven()) {
-                        JRubyAdapter.runScriptlet("Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
+                        JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
                     }
                 }
             }, "Setup JRuby from instrumentation test runner", 64 * 1024);
