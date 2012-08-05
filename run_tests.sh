@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -el
 
 # BEGIN TIMEOUT #
 TIMEOUT=7200
