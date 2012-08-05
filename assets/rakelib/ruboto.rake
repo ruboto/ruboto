@@ -356,6 +356,17 @@ def package_installed? test = false
         return false
       end
     end
+
+    sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
+    o = `adb shell ls -l #{sdcard_path}`.chomp
+    if o =~ /^-r-xr-xr-x system\s+root\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
+      apk_file = test ? TEST_APK_FILE : APK_FILE
+      if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+        return true
+      else
+        return false
+      end
+    end
   end
   return nil
 end
