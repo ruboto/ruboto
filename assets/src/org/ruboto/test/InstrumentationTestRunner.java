@@ -153,7 +153,11 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         } else {
             String oldFilename = JRubyAdapter.getScriptFilename();
             JRubyAdapter.setScriptFilename(f);
-            JRubyAdapter.runRubyMethod(this, "instance_eval", source.toString());
+            if (f.equals("test_helper.rb")) {
+                JRubyAdapter.runScriptlet(source.toString());
+            } else {
+                JRubyAdapter.runRubyMethod(this, "instance_eval", source.toString());
+            }
             JRubyAdapter.setScriptFilename(oldFilename);
         }
         Log.d(getClass().getName(), "Test script " + f + " loaded");
