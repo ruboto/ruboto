@@ -46,7 +46,9 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             Thread t = new Thread(null, new Runnable() {
                 public void run() {
                     JRubyLoadedOk.set(JRubyAdapter.setUpJRuby(getTargetContext()));
-                    JRubyAdapter.runScriptlet("require 'java' ; Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
+                    if (!isJRubyPreOneSeven()) {
+                        JRubyAdapter.runScriptlet("Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
+                    }
                 }
             }, "Setup JRuby from instrumentation test runner", 64 * 1024);
             try {

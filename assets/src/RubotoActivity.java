@@ -110,11 +110,11 @@ THE_CONSTANTS
                         if (!rubyClassName.equals(getClass().getSimpleName())) {
                             System.out.println("Script defines methods on meta class");
                             // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                            if (true || isJRubyPreOneSeven() || isRubyOneEight()) {
+                            if (isJRubyPreOneSeven() || isRubyOneEight()) {
                                 JRubyAdapter.put("$java_instance", this);
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
                             } else if (isJRubyOneSeven() && isRubyOneNine()) {
-                                // FIXME(uwe): Why does not singleton_class method use work?
+                                JRubyAdapter.runRubyMethod(getClass(), "__persistent__", true);
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
                             } else {
                                 throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
@@ -127,9 +127,11 @@ THE_CONSTANTS
                             System.out.println("Script contains class definition");
                             if (rubyClassName.equals(getClass().getSimpleName())) {
                                 System.out.println("Script has separate Java class");
+                                if (isJRubyOneSeven()) {
+                                    JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
+                                }
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                             }
-                            // FIXME(uwe):  Why does this fail when running the navigation by class name test? (uses singleton class)
                             System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
                         }
                         JRubyAdapter.setScriptFilename(scriptName);
