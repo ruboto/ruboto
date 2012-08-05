@@ -209,7 +209,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
   gem_path = Dir["#{BUNDLE_PATH}/*ruby/1.8/gems"][0]
 
-  gem_paths = Dir["#{BUNDLE_PATH}/*ruby/*/gems"]
+  gem_paths = Dir["#{BUNDLE_PATH}/{{,j}ruby,rbx}/{1.8,1.9,shared}/gems"]
   raise "Gem path not found" if gem_paths.empty?
   raise "Found multiple gem paths: #{gem_paths}" if gem_paths.size > 1
   gem_path = gem_paths[0]

@@ -16,9 +16,7 @@ echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 trap "echo killing timer ; kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
-if which ant ; then
-  echo -n
-else
+if [ ! $(command -v ant) ] ; then
   if [ -e /etc/profile.d/ant.sh ] ; then
     . /etc/profile.d/ant.sh
   else
@@ -32,7 +30,7 @@ if [ "$RUBY_IMPL" != "" ] ; then
   if [ -e /etc/profile.d/rvm.sh ] ; then
     . /etc/profile.d/rvm.sh
   fi
-  if !(which rvm) ; then
+  if [ ! $(command -v rvm) ] ; then
     echo RVM is missing!
     exit 2
   fi
