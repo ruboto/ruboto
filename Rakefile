@@ -76,6 +76,49 @@ file EXAMPLE_FILE => :install do
   end
 end
 
+desc 'Generate release docs for a given milestone'
+task :release_docs do
+  # require 'rubygems'
+  # require 'highline/import'
+  print 'user name: ' ; user = STDIN.gets.chomp # ask('login   : ') { |q| q.echo = true }
+  print 'password : ' ; pass = STDIN.gets.chomp # ask('password: ') { |q| q.echo = '*' }
+  print 'milestone: ' ; milestone = STDIN.gets.chomp # ask('milestone: ', Integer) { |q| q.echo = true }
+  require 'uri'
+  require 'net/http'
+  require 'net/https'
+  require 'openssl'
+  require 'yaml'
+  uri = URI(%Q{https://api.github.com/repos/ruboto/ruboto/issues?milestone=#{milestone}&state=closed&per_page=1000})
+  https = Net::HTTP.new(uri.host, uri.port)
+  https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  req = Net::HTTP::Get.new(uri.request_uri)
+  req.basic_auth(user, pass)
+  res = https.start { |http| http.request(req) }
+  issues = YAML.load(res.body).sort_by { |i| i['number'] }
+  milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
+  categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Other' => nil}
+  grouped_issues = issues.group_by do |i|
+    labels = i['labels'].map { |l| l['name']}
+    cat = nil
+    categories.each do |k,v|
+      if labels.include? v
+        cat = k
+        break
+      end
+    end
+    cat || 'Other'
+  end
+  puts "\nNew in version #{milestone_name}:\n\n"
+  (categories.keys & grouped_issues.keys).each do |cat|
+    puts "#{cat}:\n\n"
+    grouped_issues[cat].each { |i| puts %Q{* Issue ##{i['number']} #{i['title']}} }
+    puts
+  end
+  puts "You can find a complete list of issues here:\n\n"
+  puts "* https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}\n\n"
+end
+
 desc "Push the gem to RubyGems"
 task :release => [:clean, :gem] do
   output = `git status --porcelain`
