@@ -24,9 +24,20 @@ THE_CONSTANTS
      *
      *  Service Lifecycle: onCreate
      */
-	
+
     @Override
     public void onCreate() {
+        // Return if we are called from JRuby to avoid infinite recursion.
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for(StackTraceElement e : stackTraceElements){
+            if (e.getClassName().equals("java.lang.reflect.Method") && e.getMethodName().equals("invokeNative")) {
+                return;
+            }
+            if (e.getClassName().equals("android.app.ActivityThread") && e.getMethodName().equals("handleCreateService")) {
+                break;
+            }
+        }
+
 	    System.out.println("RubotoService.onCreate()");
         args = new Object[0];
 
@@ -105,7 +116,7 @@ THE_CONSTANTS
                 e.printStackTrace();
             }
         } else {
-            // FIXME(uwe):  What to do if the Ruboto Core plarform cannot be found?
+            // FIXME(uwe):  What to do if the Ruboto Core platform cannot be found?
         }
     }
 
