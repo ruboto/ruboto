@@ -264,13 +264,12 @@ module Ruboto
               script_content = File.read(script_file)
               if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/ &&
                   script_content !~ /RubotoBroadcastReceiver.new_with_callbacks/ &&
-                  script_content !~ /class \w+\s+include Ruboto::BroadcastReceiver/
+                  script_content !~ /class \w+\s+include Ruboto::BroadcastReceiver/ &&
+                  script_content !~ /^\s*class #{subclass_name}\s/
                 puts "Putting receiver script in a block in #{script_file}"
                 script_content.gsub! '$broadcast_context', 'context'
                 File.open(script_file, 'w') do |of|
                   of.puts "class #{subclass_name}
-  include Ruboto::BroadcastReceiver
-
   def on_receive(context, intent)"
                   of << script_content
                   of.puts '  end\nend'
