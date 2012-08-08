@@ -3,9 +3,9 @@
 for platform in "CURRENT FROM_GEM STANDALONE" ; do
   for target in "15 10" ; do
     if [ "$platform" == "STANDALONE" ] ; then
-      $jruby_versions = "1.7.0.preview2.dev 1.6.7"
+      $jruby_versions = "1.7.0.preview2 1.6.7"
     elif [ "$platform" == "FROM_GEM" ] ; then
-      $jruby_versions = "1.7.0.preview2.dev"
+      $jruby_versions = "1.7.0.preview2"
     elif [ "$platform" == "CURRENT" ] ; then
       $jruby_versions = "1.7.0.dev"
     fi
