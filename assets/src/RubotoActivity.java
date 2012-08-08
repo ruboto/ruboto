@@ -8,16 +8,15 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+THE_CONSTANTS
+
     private String rubyClassName;
     private String scriptName;
     private Object rubyInstance;
+    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
     private String remoteVariable = null;
     private Object[] args;
     private Bundle configBundle = null;
-
-THE_CONSTANTS
-
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
     public void setCallbackProc(int id, Object obj) {
         callbackProcs[id] = obj;
@@ -110,10 +109,10 @@ THE_CONSTANTS
                         if (!rubyClassName.equals(getClass().getSimpleName())) {
                             System.out.println("Script defines methods on meta class");
                             // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                            if (isJRubyPreOneSeven() || isRubyOneEight()) {
+                            if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
                                 JRubyAdapter.put("$java_instance", this);
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                            } else if (isJRubyOneSeven() && isRubyOneNine()) {
+                            } else if (JRubyAdapter.isJRubyOneSeven() && JRubyAdapter.isRubyOneNine()) {
                                 JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
                             } else {
@@ -128,7 +127,7 @@ THE_CONSTANTS
                             if (rubyClassName.equals(getClass().getSimpleName())) {
                                 System.out.println("Script has separate Java class");
                                 // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
-                                if (!isJRubyPreOneSeven()) {
+                                if (!JRubyAdapter.isJRubyPreOneSeven()) {
                                     JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
                                 }
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
@@ -152,10 +151,10 @@ THE_CONSTANTS
                 if (rubyClass != null) {
                     System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
                     // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                    if (isJRubyPreOneSeven()) {
+                    if (JRubyAdapter.isJRubyPreOneSeven()) {
                         JRubyAdapter.put("$ruby_instance", rubyInstance);
                         JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
-                    } else if (isJRubyOneSeven()) {
+                    } else if (JRubyAdapter.isJRubyOneSeven()) {
                         JRubyAdapter.runRubyMethod(rubyInstance, "on_create", args[0]);
                     } else {
                         throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
@@ -163,10 +162,10 @@ THE_CONSTANTS
                 }
             } else if (configBundle != null) {
                 // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (isJRubyPreOneSeven()) {
+                if (JRubyAdapter.isJRubyPreOneSeven()) {
             	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
             	    JRubyAdapter.runScriptlet("$activity.on_create($bundle)");
-                } else if (isJRubyOneSeven()) {
+                } else if (JRubyAdapter.isJRubyOneSeven()) {
             	    JRubyAdapter.runRubyMethod(this, "initialize_ruboto");
                     JRubyAdapter.runRubyMethod(this, "on_create", args[0]);
                 } else {
@@ -181,22 +180,6 @@ THE_CONSTANTS
 
     public boolean rubotoAttachable() {
       return true;
-    }
-
-    private boolean isRubyOneEight() {
-        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.");
-    }
-
-    private boolean isRubyOneNine() {
-        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.");
-    }
-
-    private boolean isJRubyPreOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
-    }
-
-    private boolean isJRubyOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.");
     }
 
   /****************************************************************************************

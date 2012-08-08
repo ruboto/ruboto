@@ -398,9 +398,24 @@ public class JRubyAdapter {
         ruby = null;
     }
 
-    // FIXME(uwe):  Remove when we stop supporting pre JRuby 1.7.0
-    private static boolean isJRubyPreOneSeven() {
+    // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
+    @Deprecated public static boolean isJRubyPreOneSeven() {
         return ((String)get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)get("JRUBY_VERSION")).equals("1.6.7");
+    }
+
+    // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
+    @Deprecated public static boolean isJRubyOneSeven() {
+        return ((String)get("JRUBY_VERSION")).startsWith("1.7.");
+    }
+
+    // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
+    @Deprecated public static boolean isRubyOneEight() {
+        return ((String)get("RUBY_VERSION")).startsWith("1.8.");
+    }
+
+    // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
+    @Deprecated public static boolean isRubyOneNine() {
+        return ((String)get("RUBY_VERSION")).startsWith("1.9.");
     }
 
     static void printStackTrace(Throwable t) {
@@ -417,7 +432,7 @@ public class JRubyAdapter {
 
     private static String scriptsDirName(Context context) {
         File storageDir = null;
-        if (JRubyAdapter.isDebugBuild()) {
+        if (isDebugBuild()) {
 
             // FIXME(uwe): Simplify this as soon as we drop support for android-7
             if (android.os.Build.VERSION.SDK_INT >= 8) {
@@ -425,15 +440,15 @@ public class JRubyAdapter {
                     Method method = context.getClass().getMethod("getExternalFilesDir", String.class);
                     storageDir = (File) method.invoke(context, (Object) null);
                 } catch (SecurityException e) {
-                    JRubyAdapter.printStackTrace(e);
+                    printStackTrace(e);
                 } catch (NoSuchMethodException e) {
-                    JRubyAdapter.printStackTrace(e);
+                    printStackTrace(e);
                 } catch (IllegalArgumentException e) {
-                    JRubyAdapter.printStackTrace(e);
+                    printStackTrace(e);
                 } catch (IllegalAccessException e) {
-                    JRubyAdapter.printStackTrace(e);
+                    printStackTrace(e);
                 } catch (InvocationTargetException e) {
-                    JRubyAdapter.printStackTrace(e);
+                    printStackTrace(e);
                 }
             } else {
                 storageDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");

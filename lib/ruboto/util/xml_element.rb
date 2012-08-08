@@ -66,7 +66,7 @@ module Ruboto
         all_methods = get_elements("method")
 
         # establish the base set of methods
-        working_methods = case method_base
+        working_methods = case method_base.to_s
         when "all" then
           all_methods
         when "none" then
@@ -180,14 +180,14 @@ module Ruboto
           global_args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
               ["// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7"] +
               if_else(
-                  "isJRubyPreOneSeven()",
+                  "JRubyAdapter.isJRubyPreOneSeven()",
                   params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
                   [
                       'JRubyAdapter.put("$ruby_instance", rubyInstance);',
                       "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{global_args})\")#{').intValue()' if return_int};",
                   ],
                   if_else(
-                      "isJRubyOneSeven()",
+                      "JRubyAdapter.isJRubyOneSeven()",
                       ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}rubyInstance, \"#{method_name}\"#{args});"],
                       ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
                   )
@@ -232,7 +232,7 @@ module Ruboto
       end
 
       def constructor_definition(class_name)
-        method_call("", class_name, parameters, [super_string]).indent.join("\n")
+        method_call(nil, class_name, parameters, [super_string]).indent.join("\n")
       end
     end
   end

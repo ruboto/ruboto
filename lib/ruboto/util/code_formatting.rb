@@ -6,7 +6,7 @@ module Ruboto
       # Methods for formatting code
       #
       def method_call(return_type=nil, method_name="", parameters=[], body_clause=[])
-        ["public #{return_type || ""} #{method_name}(" + parameters.map{|i| "#{i[1]} #{i[0]}"}.join(", ") + ") {",
+        ["public #{"#{return_type} " unless return_type.nil? || return_type.empty?}#{method_name}(" + parameters.map{|i| "#{i[1]} #{i[0]}"}.join(", ") + ") {",
         body_clause.indent, "}"]
       end
 

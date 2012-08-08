@@ -3,8 +3,10 @@ package THE_PACKAGE;
 import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-    private String scriptName = null;
+    private String rubyClassName;
+    private String scriptName;
     private Object rubyInstance;
+    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
@@ -49,10 +51,10 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                     if (!rubyClassName.equals(getClass().getSimpleName())) {
                         System.out.println("Script defines methods on meta class");
                         // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                        if (isJRubyPreOneSeven() || isRubyOneEight()) {
+                        if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
                             JRubyAdapter.put("$java_instance", this);
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                        } else if (isJRubyOneSeven() && isRubyOneNine()) {
+                        } else if (JRubyAdapter.isJRubyOneSeven() && JRubyAdapter.isRubyOneNine()) {
                             JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
                         } else {
                             throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
@@ -98,9 +100,9 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
             // FIXME end
 
             // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
-            if (isJRubyPreOneSeven()) {
+            if (JRubyAdapter.isJRubyPreOneSeven()) {
                 JRubyAdapter.runScriptlet("$broadcast_receiver.on_receive($context, $intent)");
-            } else if (isJRubyOneSeven()) {
+            } else if (JRubyAdapter.isJRubyOneSeven()) {
         	    JRubyAdapter.runRubyMethod(this, "on_receive", new Object[]{context, intent});
             } else {
                 throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
@@ -108,22 +110,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         } catch(Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private boolean isRubyOneEight() {
-        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.8.");
-    }
-
-    private boolean isRubyOneNine() {
-        return ((String)JRubyAdapter.get("RUBY_VERSION")).startsWith("1.9.");
-    }
-
-    private boolean isJRubyPreOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
-    }
-
-    private boolean isJRubyOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).startsWith("1.7.");
     }
 
 }

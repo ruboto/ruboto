@@ -62,4 +62,20 @@ module UpdateTestMethods
     # FIXME end
   end
 
+  def test_subclass_is_updated
+    Dir.chdir APP_DIR do
+      puts "Adding a subclass"
+      install_ruboto_gem @old_ruboto_version
+      system "ruboto _#{@old_ruboto_version}_ gen subclass android.database.sqlite.SQLiteOpenHelper --name MyDatabaseHelper --method_base on"
+      fail "Creation of subclass failed" if $? != 0
+      assert File.exists? 'src/org/ruboto/test_app/MyDatabaseHelper.java'
+      # assert File.exists? 'src/my_database_helper.rb'
+      # assert File.exists? 'test/src/my_database_helper_test.rb'
+
+      update_app
+      system 'rake debug'
+      assert_equal 0, $?
+    end
+  end
+
 end

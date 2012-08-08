@@ -55,4 +55,17 @@ class RubotoGenTest < Test::Unit::TestCase
     assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}KB: #{'%.1f' % apk_size.floor(1)}KB.  You should lower the limit.#{version}"
   end
 
+  def test_gen_subclass
+    Dir.chdir APP_DIR do
+      system "#{RUBOTO_CMD} gen subclass android.database.sqlite.SQLiteOpenHelper --name MyDatabaseHelper --method_base on"
+      assert_equal 0, $?.exitstatus
+      assert File.exists?('src/org/ruboto/test_app/MyDatabaseHelper.java')
+      # FIXME(uwe):  Add tests and definition script?
+      # assert File.exists?('src/my_database_helper.rb')
+      # assert File.exists?('test/src/my_database_helper_test.rb')
+      system 'rake debug'
+      assert_equal 0, $?
+    end
+  end
+
 end

@@ -252,10 +252,13 @@ module Ruboto
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         log_action("Ruboto java classes") { copier.copy "src/org/ruboto/*.java" }
         log_action("Ruboto java test classes") { copier.copy "src/org/ruboto/test/*.java", "test" }
-        Dir["src/#{verify_package.gsub('.', '/')}/*.java"].each do |f|
-          if File.read(f) =~ /public class (.*?) extends org.ruboto.Ruboto(Activity|BroadcastReceiver|Service) \{/
+        Dir["src/**/*.java"].each do |f|
+          source_code = File.read(f)
+          if source_code =~ /^\s*package\s+org.ruboto\s*;/
+            next
+          elsif source_code =~ /public class (.*?) extends org.ruboto.(?:EntryPoint|Ruboto)(Activity|BroadcastReceiver|Service) \{/
             subclass_name, class_name = $1, $2
-            puts "Regenerating #{subclass_name}"
+            puts "Regenerating #{class_name} #{subclass_name}"
             generate_inheriting_file(class_name, subclass_name, verify_package)
 
             # FIXME(uwe): Remove when we stop supporting upgrading from ruboto-core 0.3.3 and older
@@ -277,7 +280,18 @@ module Ruboto
               end
             end
             # FIXME end
-
+          elsif source_code =~ /^\/\/ Generated Ruboto subclass with method base "(.*?)".*^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{/m
+            method_base, package, subclass_name, class_name = $1, $2, $3, $4
+            puts "Regenerating subclass #{package}.#{subclass_name}"
+            generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
+                                           :name => subclass_name, :method_base => method_base, :force => force)
+          # FIXME(uwe): Remove when we stop updating from Ruboto 0.7.0 and older
+          elsif source_code =~ /^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{.*^\s*private Object\[\] callbackProcs = new Object\[\d+\];/m
+            package, subclass_name, class_name = $1, $2, $3
+            puts "Regenerating subclass #{package}.#{subclass_name}"
+            generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
+                                           :name => subclass_name, :method_base => 'on', :force => force)
+          # FIXME end
           end
         end
       end
