@@ -68,4 +68,41 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
+  def test_gen_interface
+    Dir.chdir APP_DIR do
+      system "#{RUBOTO_CMD} gen interface java.lang.Runnable --name MyRunnable"
+      assert_equal 0, $?.exitstatus
+      java_source_file = 'src/org/ruboto/test_app/MyRunnable.java'
+      assert File.exists?(java_source_file)
+      # FIXME(uwe):  Add tests and definition script?
+      # assert File.exists?('src/my_runnable.rb')
+      # assert File.exists?('test/src/my_runnable_test.rb')
+
+      java_source = File.read(java_source_file)
+      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^\}\n/, "    public static void main(String[] args){new MyRunnable().run();}\n}\n")}
+
+      system 'rake debug'
+      assert_equal 0, $?
+
+      File.open('src/org/ruboto/JRubyAdapter.java', 'w'){|f| f << <<EOF}
+package org.ruboto;
+public class JRubyAdapter {
+    public static Object get(String varName){return null;}
+    public static boolean isInitialized(){return true;}
+    public static boolean isJRubyOneSeven(){return true;}
+    public static boolean isJRubyPreOneSeven(){return false;}
+    public static void put(String varName, Object value){}
+    public static void runRubyMethod(Object receiver, String method){}
+    public static boolean runScriptlet(String scriptlet){return false;}
+}
+EOF
+      system 'javac -cp bin/classes -d bin/classes src/org/ruboto/JRubyAdapter.java'
+      assert_equal 0, $?
+      system 'javac -cp bin/classes -d bin/classes src/org/ruboto/test_app/MyRunnable.java'
+      assert_equal 0, $?
+      system 'java -cp bin/classes org.ruboto.test_app.MyRunnable'
+      assert_equal 0, $?
+    end
+  end
+
 end
