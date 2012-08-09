@@ -400,12 +400,12 @@ public class JRubyAdapter {
 
     // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
     @Deprecated public static boolean isJRubyPreOneSeven() {
-        return ((String)get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)get("JRUBY_VERSION")).equals("1.6.7");
+        return ((String)get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)get("JRUBY_VERSION")).startsWith("1.6.");
     }
 
     // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
     @Deprecated public static boolean isJRubyOneSeven() {
-        return ((String)get("JRUBY_VERSION")).startsWith("1.7.");
+        return !isJRubyPreOneSeven() && ((String)get("JRUBY_VERSION")).startsWith("1.7.");
     }
 
     // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
