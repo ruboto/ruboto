@@ -70,7 +70,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                         try {
                             loadScript("test_helper.rb");
                         } catch (IOException e) {
-                            ioex[0] = e
+                            ioex[0] = e;
                         }
                     }
                 }, "Setup JRuby from instrumentation test runner", 64 * 1024);
