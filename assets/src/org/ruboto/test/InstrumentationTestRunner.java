@@ -46,7 +46,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             Thread t = new Thread(null, new Runnable() {
                 public void run() {
                     JRubyLoadedOk.set(JRubyAdapter.setUpJRuby(getTargetContext()));
-                    if (!isJRubyPreOneSeven()) {
+                    if (!JRubyAdapter.isJRubyPreOneSeven()) {
                         JRubyAdapter.runScriptlet("Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
                     }
                 }
@@ -62,7 +62,29 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
 
             if (JRubyLoadedOk.get()) {
                 loadStep = "Load test helper";
-                loadScript("test_helper.rb");
+                // TODO(uwe):  Running with large stack is currently only needed when running with JRuby 1.7.0.dev and android-10
+                // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0.dev or android-10
+                IOException[] ioex = new IOException[]{null}
+                Thread t2 = new Thread(null, new Runnable() {
+                    public void run() {
+                        try {
+                            loadScript("test_helper.rb");
+                        } catch (IOException e) {
+                            ioex[0] = e
+                        }
+                    }
+                }, "Setup JRuby from instrumentation test runner", 64 * 1024);
+                try {
+                    t2.start();
+                    t2.join();
+                } catch(InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted starting JRuby", ie);
+                }
+                if (ioex[0] != null) {
+                    throw ioex[0];
+                }
+                // TODO end
 
                 loadStep = "Get app test source dir";
                 String test_apk_path = getContext().getPackageManager().getApplicationInfo(getContext().getPackageName(), 0).sourceDir;
@@ -146,7 +168,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         buffer.close();
 
         // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
-        if (isJRubyPreOneSeven()) {
+        if (JRubyAdapter.isJRubyPreOneSeven()) {
             JRubyAdapter.put("$test", this);
             JRubyAdapter.put("$script_code", source.toString());
             JRubyAdapter.runScriptlet("$test.instance_eval($script_code)");
@@ -163,7 +185,4 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }
 
-    private boolean isJRubyPreOneSeven() {
-        return ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)JRubyAdapter.get("JRUBY_VERSION")).equals("1.6.7");
-    }
 }

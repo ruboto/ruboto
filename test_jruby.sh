@@ -22,10 +22,24 @@ if [ ! -e "LICENSE.RUBY" ] ; then
   exit 1
 fi
 
-ant clean dist-clean dist
-if [ $? -eq 0 ] ; then
+ant clean-all dist-gem
+build_status=$?
+
+# Only needed to bisect source older than JRuby 1.7.0.rc1
+if [ $build_status -ne 0 ] ; then
+  echo Build failed.  Trying older ANT target.
+  ant clean-all dist-jar-complete
+  if [ $? -eq 0 ] ; then
+    bin/rake gem
+  fi
+  build_status=$?
+fi
+
+rm lib/native/Darwin/libjruby-cext.jnilib
+git checkout .
+git checkout lib/native/Darwin/libjruby-cext.jnilib
+if [ $build_status -eq 0 ] ; then
   echo Build OK.
-  rm lib/native/Darwin/libjruby-cext.jnilib
 else
   echo "Build failed, skipping revision"
   exit 125
@@ -37,12 +51,25 @@ cd $RUBOTO_HOME
 
 export GEM_HOME=$RUBOTO_HOME/tmp/gems
 export GEM_PATH=$GEM_HOME
+unset JRUBY_JARS_VERSION        # The version may vary across revisions
+export RUBOTO_PLATFORM=FROM_GEM # Avoid the CURRENT setting since it ignores our GEM
 bundle install
 gem uninstall jruby-jars --all
 gem install -l $JRUBY_HOME/dist/jruby-jars-*.gem
 
 rm -rf tmp/Ruboto*
 
+set +e
+
 # ruby test/broadcast_receiver_test.rb -n test_generated_broadcast_receiver
 ruby test/ruboto_gen_test.rb -n test_activity_tests
 # ruby test/ruboto_gen_test.rb -n test_block_def_activity_tests
+
+test_status=$?
+if [ $test_status -eq 0 ] ; then
+  echo Bisect GOOD.
+else
+  echo Bisect BAD.
+fi
+
+exit $test_status

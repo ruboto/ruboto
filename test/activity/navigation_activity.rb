@@ -57,7 +57,6 @@ class NavigationActivity
             end
       end
     end
-    nil
   end
 
   def start_infile_activity

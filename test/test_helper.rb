@@ -244,8 +244,19 @@ class Test::Unit::TestCase
     end
     check_platform_installation(Dir['libs/jruby-core-*.jar'].any?)
     Dir.chdir APP_DIR do
-      system 'rake test:quick'
-      assert_equal 0, $?, "tests failed with return code #$?"
+      # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0
+      if JRUBY_JARS_VERSION =~ /^1\.(6\.|7\.0\.(dev|preview))/
+        loop do
+          output = `rake test:quick`
+          puts output
+          break if $? == 0 || output !~ /INSTRUMENTATION_RESULT: longMsg=java.lang.ArrayIndexOutOfBoundsException/
+          puts 'Known ArrayIndexOutOfBoundsException failure detected.  Retrying.'
+        end
+        assert_equal 0, $?, "tests failed with return code #$?"
+      else
+        system 'rake test:quick'
+        assert_equal 0, $?, "tests failed with return code #$?"
+      end
     end
   end
 
