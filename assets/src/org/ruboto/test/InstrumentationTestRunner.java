@@ -64,7 +64,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
                 loadStep = "Load test helper";
                 // TODO(uwe):  Running with large stack is currently only needed when running with JRuby 1.7.0.dev and android-10
                 // TODO(uwe):  Simplify when we stop support for JRuby 1.7.0.dev or android-10
-                IOException[] ioex = new IOException[]{null};
+                final IOException[] ioex = new IOException[]{null};
                 Thread t2 = new Thread(null, new Runnable() {
                     public void run() {
                         try {
