@@ -1,3 +1,3 @@
 module Ruboto
-  VERSION = '0.7.1.rc.3'
+  VERSION = '0.8.0.rc.0'
 end
