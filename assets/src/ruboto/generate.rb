@@ -360,7 +360,7 @@ def ruboto_generate_class(dex_maker, interface_or_class_name, package_class_name
       call_super(class_type_id, m.name, ret, *parameter_array) unless interface
 
       # Prepare to call Script to call the method
-      script_class_type_id = TypeId.convert_type("org.ruboto.Script")
+      script_class_type_id = TypeId.convert_type("org.ruboto.JRubyAdapter")
       loadConstant(call_string, "call")
       parameter_types = [ret ? TypeId::OBJECT : TypeId::VOID, "runRubyMethod", TypeId::OBJECT, TypeId::STRING]
       method_parameters = [retObject, block, call_string]
