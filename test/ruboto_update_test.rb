@@ -1,4 +1,6 @@
-unless ENV['SKIP_RUBOTO_UPDATE_TEST']
+if ENV['SKIP_RUBOTO_UPDATE_TEST']
+  puts 'Detected SKIP_RUBOTO_UPDATE_TEST environment variable.  Skipping Ruboto update test.'
+else
   require File.expand_path('updated_example_test_methods', File.dirname(__FILE__))
   require File.expand_path('update_test_methods', File.dirname(__FILE__))
 
