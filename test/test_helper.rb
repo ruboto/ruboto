@@ -245,7 +245,7 @@ class Test::Unit::TestCase
     check_platform_installation(Dir['libs/jruby-core-*.jar'].any?)
     Dir.chdir APP_DIR do
       # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0
-      if RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION =~ /^1\.(6\.|7\.0\.(dev|preview))/
+      if RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0')
         puts "Ruboto platform #{RUBOTO_PLATFORM} and JRuby #{JRUBY_JARS_VERSION} detected.  Running test with retries for ArrayIndexOutOfBoundsException"
         loop do
           output = `rake test:quick`
