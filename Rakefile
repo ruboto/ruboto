@@ -78,6 +78,7 @@ end
 
 desc 'Generate release docs for a given milestone'
 task :release_docs do
+  raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
   # require 'rubygems'
   # require 'highline/import'
   print 'user name: ' ; user = STDIN.gets.chomp # ask('login   : ') { |q| q.echo = true }
