@@ -129,7 +129,7 @@ task :release => [:clean, :gem] do
 
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
-  sh "git rm #{EXAMPLE_FILE.slice(/^\d+\.\d+\.\d+/)}.*"
+  sh "git rm #{EXAMPLE_FILE.slice(/^.*?\d+\.\d+\.\d+/)}.*"
   sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' #{EXAMPLE_FILE}"
   sh "git push"
 end
