@@ -116,9 +116,7 @@ module Ruboto
               include Ruboto::Util::Verify
 
               def run
-                Dir.chdir root do
-                  update_jruby true
-                end
+                update_jruby true
               end
             end
 
