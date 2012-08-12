@@ -244,20 +244,31 @@ class Test::Unit::TestCase
     end
     check_platform_installation(Dir['libs/jruby-core-*.jar'].any?)
     Dir.chdir APP_DIR do
-      # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0
-      if RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0')
-        puts "Ruboto platform #{RUBOTO_PLATFORM} and JRuby #{JRUBY_JARS_VERSION} detected.  Running test with retries for ArrayIndexOutOfBoundsException"
-        loop do
-          output = `rake test:quick`
-          puts output
-          break if $? == 0 || output !~ /INSTRUMENTATION_RESULT: longMsg=java.lang.ArrayIndexOutOfBoundsException/
-          puts 'Known ArrayIndexOutOfBoundsException failure detected.  Retrying.'
+      # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0 which causes the ArrayIndexOutOfBoundsException
+      # FIXME(uwe): Simplify if we find a cause for the system crashes.
+      # system 'rake test:quick' # This line should replace all those below.
+
+      retries = 0
+      loop do
+        output = `rake test:quick`
+        puts output
+        break if $? == 0
+        retries += 1
+        # FIXME(uwe):  The cause of the system crash is unnown.  We should investigate.
+        if output =~ /INSTRUMENTATION_ABORTED: System has crashed./
+          puts "System crash detected."
+        elsif (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0')) &&
+            output =~ /INSTRUMENTATION_RESULT: longMsg=java.lang.ArrayIndexOutOfBoundsException/
+          puts "Known ArrayIndexOutOfBoundsException failure detected.  Retrying (#{retries})."
+        else
+          break
         end
-        assert_equal 0, $?, "tests failed with return code #$?"
-      else
-        system 'rake test:quick'
-        assert_equal 0, $?, "tests failed with return code #$?"
+        break if retries >= 3
+        puts "Retrying (#{retries})."
       end
+      # FIXME end
+
+      assert_equal 0, $?, "tests failed with return code #$?"
     end
   end
 
