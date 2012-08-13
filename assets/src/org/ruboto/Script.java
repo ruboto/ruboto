@@ -31,6 +31,7 @@ public class Script {
     public static String toCamelCase(String s) {
         String[] parts = s.replace(".rb", "").split("_");
         for (int i = 0 ; i < parts.length ; i++) {
+            if (parts[i].length() == 0) continue;
             parts[i] = parts[i].substring(0,1).toUpperCase() + parts[i].substring(1);
         }
         return java.util.Arrays.toString(parts).replace(", ", "").replaceAll("[\\[\\]]", "");
@@ -44,7 +45,7 @@ public class Script {
                 "(?<=[A-Za-z])(?=[^A-Za-z])"
             ),
             "_"
-        ).toLowerCase();
+        ).replace("__", "_").toLowerCase();
     }
 
     // Private static methods

@@ -32,27 +32,43 @@ module Ruboto
       start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
     end
   
-    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, &block)
-      $context_init_block = block
-      $new_context_global = global_variable_name
-  
-      if @initialized or (self == $activity && !$activity.rubotoAttachable)
-        b = Java::android.os.Bundle.new
-        b.putInt("Theme", theme) if theme
-  
-        i = Java::android.content.Intent.new
-        i.setClass self, klass.java_class
-        i.putExtra("RubotoActivity Config", b)
-  
-        self.startActivity i
-      else
-        initialize_ruboto
-        on_create nil
+    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, options = nil, &block)
+      if options.nil?
+        if global_variable_name.is_a?(Hash)
+          options = global_variable_name
+        else
+          options = {}
+        end
+        global_variable_name = nil
       end
-  
+      b = Java::android.os.Bundle.new
+      b.putInt("Theme", theme) if theme
+      if block
+        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[1]}"
+        b.putString("ClassName", class_name)
+        if !Object.const_defined?(class_name)
+          new_class = Class.new(&block)
+          Object.const_set(class_name, new_class)
+        end
+      end
+      i = android.content.Intent.new
+      i.setClass self, klass.java_class
+      i.putExtra("RubotoActivity Config", b)
+      startActivity i
       self
     end
+
+    private
+
+    def source_descriptor(proc)
+      if md = /^#<Proc:0x[0-9A-Fa-f]+@(.+):(\d+)(?: \(lambda\))?>$/.match(proc.inspect)
+        filename, line = md.captures
+        return filename, line.to_i
+      end
+    end
+
   end
+
 end
 
 java_import "android.content.Context"
