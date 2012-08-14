@@ -105,6 +105,7 @@ THE_CONSTANTS
                 System.out.println("Found: " + rubyClass);
                 Script rubyScript = new Script(scriptName);
                 if (rubyScript.exists()) {
+                    rubyInstance = this;
                     final String script = rubyScript.getContents();
                     if (script.matches("(?s).*class " + rubyClassName + ".*")) {
                         if (!rubyClassName.equals(getClass().getSimpleName())) {
@@ -134,7 +135,12 @@ THE_CONSTANTS
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                             }
                             System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                        } else {
+                            // FIXME(uwe): Only needed for initial block-based activity definition
+                            System.out.println("Script contains block based activity definition");
+                            JRubyAdapter.runRubyMethod(rubyInstance, "instance_variable_set", "@ruboto_java_class", rubyClassName);
                         }
+
                         Thread t = new Thread(new Runnable(){
                             public void run() {
                                 JRubyAdapter.setScriptFilename(scriptName);
@@ -150,7 +156,6 @@ THE_CONSTANTS
                         }
                         rubyClass = JRubyAdapter.get(rubyClassName);
                     }
-                    rubyInstance = this;
                 } else if (rubyClass != null) {
                     // We have a predefined Ruby class without corresponding Ruby source file.
                     System.out.println("Create separate Ruby instance for class: " + rubyClass);

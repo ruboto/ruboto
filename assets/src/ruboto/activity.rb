@@ -33,6 +33,8 @@ module Ruboto
     end
   
     def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, options = nil, &block)
+      # FIXME(uwe): Translate old positional signature to new options-based signature.
+      # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
       if options.nil?
         if global_variable_name.is_a?(Hash)
           options = global_variable_name
@@ -41,20 +43,30 @@ module Ruboto
         end
         global_variable_name = nil
       end
-      b = Java::android.os.Bundle.new
-      b.putInt("Theme", theme) if theme
-      if block
-        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[1]}"
-        b.putString("ClassName", class_name)
+
+      # FIXME(uwe): Used for block-based definition of main activity.
+      # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
+      puts "start_ruboto_activity self: #{self.inspect}"
+      if @ruboto_java_class
+        puts "Block based main activity definition"
+        instance_eval &block if block
+        setup_ruboto_callbacks
+        on_create nil
+      else
+        puts "Class based main activity definition"
+        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].gsub(/[\/.]+/, '_')}_#{source_descriptor(block)[1]}"
         if !Object.const_defined?(class_name)
           new_class = Class.new(&block)
           Object.const_set(class_name, new_class)
         end
+        b = Java::android.os.Bundle.new
+        b.putInt("Theme", theme) if theme
+        b.putString("ClassName", class_name)
+        i = android.content.Intent.new
+        i.setClass self, klass.java_class
+        i.putExtra("RubotoActivity Config", b)
+        startActivity i
       end
-      i = android.content.Intent.new
-      i.setClass self, klass.java_class
-      i.putExtra("RubotoActivity Config", b)
-      startActivity i
       self
     end
 
