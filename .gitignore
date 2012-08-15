@@ -6,3 +6,4 @@ tmp
 .idea
 *~
 /.rbx
+/exportToHTML
