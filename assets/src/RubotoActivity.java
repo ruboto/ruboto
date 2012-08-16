@@ -102,9 +102,11 @@ THE_CONSTANTS
             if (scriptName != null) {
                 System.out.println("Looking for Ruby class: " + rubyClassName);
                 Object rubyClass = JRubyAdapter.get(rubyClassName);
+                System.out.println("Found: " + rubyClass);
                 Script rubyScript = new Script(scriptName);
                 if (rubyScript.exists()) {
-                    String script = rubyScript.getContents();
+                    rubyInstance = this;
+                    final String script = rubyScript.getContents();
                     if (script.matches("(?s).*class " + rubyClassName + ".*")) {
                         if (!rubyClassName.equals(getClass().getSimpleName())) {
                             System.out.println("Script defines methods on meta class");
@@ -133,12 +135,27 @@ THE_CONSTANTS
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                             }
                             System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                        } else {
+                            // FIXME(uwe): Only needed for initial block-based activity definition
+                            System.out.println("Script contains block based activity definition");
+                            JRubyAdapter.runRubyMethod(rubyInstance, "instance_variable_set", "@ruboto_java_class", rubyClassName);
                         }
-                        JRubyAdapter.setScriptFilename(scriptName);
-                        JRubyAdapter.runScriptlet(script);
+
+                        Thread t = new Thread(new Runnable(){
+                            public void run() {
+                                JRubyAdapter.setScriptFilename(scriptName);
+                                JRubyAdapter.runScriptlet(script);
+                            }
+                        });
+                        try {
+                            t.start();
+                            t.join();
+                        } catch(InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException("Interrupted loading script.", ie);
+                        }
                         rubyClass = JRubyAdapter.get(rubyClassName);
                     }
-                    rubyInstance = this;
                 } else if (rubyClass != null) {
                     // We have a predefined Ruby class without corresponding Ruby source file.
                     System.out.println("Create separate Ruby instance for class: " + rubyClass);

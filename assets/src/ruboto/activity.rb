@@ -32,27 +32,55 @@ module Ruboto
       start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
     end
   
-    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, &block)
-      $context_init_block = block
-      $new_context_global = global_variable_name
-  
-      if @initialized or (self == $activity && !$activity.rubotoAttachable)
+    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, options = nil, &block)
+      # FIXME(uwe): Translate old positional signature to new options-based signature.
+      # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
+      if options.nil?
+        if global_variable_name.is_a?(Hash)
+          options = global_variable_name
+        else
+          options = {}
+        end
+        global_variable_name = nil
+      end
+
+      # FIXME(uwe): Used for block-based definition of main activity.
+      # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
+      puts "start_ruboto_activity self: #{self.inspect}"
+      if @ruboto_java_class
+        puts "Block based main activity definition"
+        instance_eval &block if block
+        setup_ruboto_callbacks
+        on_create nil
+      else
+        puts "Class based main activity definition"
+        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].gsub(/[\/.]+/, '_')}_#{source_descriptor(block)[1]}"
+        if !Object.const_defined?(class_name)
+          new_class = Class.new(&block)
+          Object.const_set(class_name, new_class)
+        end
         b = Java::android.os.Bundle.new
         b.putInt("Theme", theme) if theme
-  
-        i = Java::android.content.Intent.new
+        b.putString("ClassName", class_name)
+        i = android.content.Intent.new
         i.setClass self, klass.java_class
         i.putExtra("RubotoActivity Config", b)
-  
-        self.startActivity i
-      else
-        initialize_ruboto
-        on_create nil
+        startActivity i
       end
-  
       self
     end
+
+    private
+
+    def source_descriptor(proc)
+      if md = /^#<Proc:0x[0-9A-Fa-f]+@(.+):(\d+)(?: \(lambda\))?>$/.match(proc.inspect)
+        filename, line = md.captures
+        return filename, line.to_i
+      end
+    end
+
   end
+
 end
 
 java_import "android.content.Context"
