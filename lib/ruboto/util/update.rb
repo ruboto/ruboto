@@ -366,15 +366,8 @@ module Ruboto
           FileUtils.cp from, to
         end
         log_action("Copying additional ruboto script components") do
-          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/*.rb").each do |i|
-            from = File.expand_path(i)
-            to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/#{File.basename(i)}")
-            FileUtils.mkdir_p File.dirname(to)
-            FileUtils.cp from, to
-          end
-          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/util/*.rb").each do |i|
-            from = File.expand_path(i)
-            to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/util/#{File.basename(i)}")
+          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/**/*.rb").each do |from|
+            to = File.expand_path("./#{from.slice /#{SCRIPTS_DIR}\/ruboto\/.*\.rb/}")
             FileUtils.mkdir_p File.dirname(to)
             FileUtils.cp from, to
           end
