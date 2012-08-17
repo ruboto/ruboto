@@ -417,16 +417,17 @@ module Ruboto
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
 
-                    # 'org/jruby/ir', # FIXME(uwe):  Try to modify JRuby to allow this to be removed
-                    'org/jruby/ir/dataflow',
+                    # FIXME(uwe):  IR is the future.  We should try using it.
+                    # 'org/jruby/ir',
+                    # 'org/jruby/ir/dataflow',
                     # 'org/jruby/ir/instructions',
                     # 'org/jruby/ir/interpreter',
                     # 'org/jruby/ir/operands',
                     # 'org/jruby/ir/passes',
-                    'org/jruby/ir/representations',
+                    # 'org/jruby/ir/representations',
                     # 'org/jruby/ir/targets',
-                    'org/jruby/ir/transformations',
-                    'org/jruby/ir/util',
+                    # 'org/jruby/ir/transformations',
+                    # 'org/jruby/ir/util',
 
                     'org/jruby/javasupport/bsf',
                     'org/jruby/runtime/invokedynamic',

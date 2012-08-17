@@ -135,26 +135,31 @@ THE_CONSTANTS
                                 JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
                             }
                             System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
+                            Thread t = new Thread(new Runnable(){
+                                public void run() {
+                                    JRubyAdapter.setScriptFilename(scriptName);
+                                    JRubyAdapter.runScriptlet(script);
+                                }
+                            });
+                            try {
+                                t.start();
+                                t.join();
+                            } catch(InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                throw new RuntimeException("Interrupted loading script.", ie);
+                            }
+                            rubyClass = JRubyAdapter.get(rubyClassName);
                         } else {
                             // FIXME(uwe): Only needed for initial block-based activity definition
                             System.out.println("Script contains block based activity definition");
-                            JRubyAdapter.runRubyMethod(rubyInstance, "instance_variable_set", "@ruboto_java_class", rubyClassName);
-                        }
-
-                        Thread t = new Thread(new Runnable(){
-                            public void run() {
-                                JRubyAdapter.setScriptFilename(scriptName);
-                                JRubyAdapter.runScriptlet(script);
+                            if (!JRubyAdapter.isJRubyPreOneSeven()) {
+                                JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
                             }
-                        });
-                        try {
-                            t.start();
-                            t.join();
-                        } catch(InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException("Interrupted loading script.", ie);
+                            JRubyAdapter.runScriptlet("$activity.instance_variable_set '@ruboto_java_class', '" + rubyClassName + "'");
+                            JRubyAdapter.runScriptlet("puts %Q{$activity: #$activity}");
+                            JRubyAdapter.setScriptFilename(scriptName);
+                            JRubyAdapter.runScriptlet(script);
                         }
-                        rubyClass = JRubyAdapter.get(rubyClassName);
                     }
                 } else if (rubyClass != null) {
                     // We have a predefined Ruby class without corresponding Ruby source file.
