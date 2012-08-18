@@ -128,10 +128,12 @@ task :emulator do
   sh 'emulator -partition-size 1024 -avd Android_3.0'
 end
 
+desc 'Start the application on the device/emulator.'
 task :start do
   start_app
 end
 
+desc 'Stop the application on the device/emulator (requires emulator or rooted device).'
 task :stop do
   raise "Unable to stop app.  Only available on emulator." unless stop_app
 end
