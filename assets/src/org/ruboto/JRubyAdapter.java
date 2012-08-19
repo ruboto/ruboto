@@ -232,18 +232,20 @@ public class JRubyAdapter {
             // END Ruboto HeapAlloc
             setDebugBuild(appContext);
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
+            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR
             System.setProperty("jruby.bytecode.version", "1.6");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
             System.setProperty("jruby.objectspace.enabled", "false");
             System.setProperty("jruby.thread.pooling", "true");
             System.setProperty("jruby.native.enabled", "false");
-            // System.setProperty("jruby.compat.version", "RUBY1_8"); // RUBY1_9 is the default
+            // System.setProperty("jruby.compat.version", "RUBY1_8"); // RUBY1_9 is the default in JRuby 1.7
+            System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination"); // RUBY1_9 is the default
+            System.setProperty("jruby.backtrace.style", "raw"); // normal raw full mri
 
             // Uncomment these to debug Ruby source loading
             // System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
-
 
             ClassLoader classLoader;
             Class<?> scriptingContainerClass;
@@ -290,14 +292,6 @@ public class JRubyAdapter {
                          .getConstructor(scopeClass, behaviorClass)
                          .newInstance(Enum.valueOf(scopeClass, localContextScope), 
                                       Enum.valueOf(behaviorClass, localVariableBehavior));
-
-                Class compileModeClass = Class.forName("org.jruby.RubyInstanceConfig$CompileMode", true, classLoader);
-                callScriptingContainerMethod(Void.class, "setCompileMode", Enum.valueOf(compileModeClass, "OFF"));
-
-                // Class traceTypeClass = Class.forName("org.jruby.runtime.backtrace.TraceType", true, classLoader);
-                // Method traceTypeForMethod = traceTypeClass.getMethod("traceTypeFor", String.class);
-                // Object traceTypeRaw = traceTypeForMethod.invoke(null, "raw");
-                // callScriptingContainerMethod(Void.class, "setTraceType", traceTypeRaw);
 
                 // FIXME(uwe): Write tutorial on profiling.
                 // container.getProvider().getRubyInstanceConfig().setProfilingMode(mode);
