@@ -240,7 +240,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.thread.pooling", "true");
             System.setProperty("jruby.native.enabled", "false");
             // System.setProperty("jruby.compat.version", "RUBY1_8"); // RUBY1_9 is the default in JRuby 1.7
-            System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination"); // RUBY1_9 is the default
+            System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
             System.setProperty("jruby.backtrace.style", "raw"); // normal raw full mri
 
             // Uncomment these to debug Ruby source loading
