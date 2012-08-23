@@ -17,14 +17,16 @@ import org.ruboto.JRubyAdapter;
 
 public class ActivityTest extends ActivityInstrumentationTestCase2 {
     private final Object setup;
+    private final Object teardown;
     private final Object block;
     private final String filename;
     private final boolean onUiThread;
 
-    public ActivityTest(Class activityClass, String filename, Object setup, String name, boolean onUiThread, Object block) {
+    public ActivityTest(Class activityClass, String filename, Object setup, Object teardown, String name, boolean onUiThread, Object block) {
         super(activityClass.getPackage().getName(), activityClass);
         this.filename = filename;
         this.setup = setup;
+        this.teardown = teardown;
         setName(filename + "#" + name);
         this.onUiThread = onUiThread;
         this.block = block;
@@ -38,16 +40,21 @@ public class ActivityTest extends ActivityInstrumentationTestCase2 {
             Log.i(getClass().getName(), "Activity OK");
             Runnable testRunnable = new Runnable() {
                 public void run() {
-                    String oldFile = JRubyAdapter.getScriptFilename();
+                    if (setup != null) {
+                        Log.i(getClass().getName(), "calling setup");
+                        JRubyAdapter.setScriptFilename(filename);
+                        JRubyAdapter.runRubyMethod(setup, "call", activity);
+                        Log.i(getClass().getName(), "setup ok");
+                    }
 
-                    Log.i(getClass().getName(), "calling setup");
-                    JRubyAdapter.setScriptFilename(filename);
-                    JRubyAdapter.runRubyMethod(setup, "call", activity);
-                    Log.i(getClass().getName(), "setup ok");
-                    
                     JRubyAdapter.setScriptFilename(filename);
                     JRubyAdapter.runRubyMethod(block, "call", activity);
-                    JRubyAdapter.setScriptFilename(oldFile);
+
+                    if (teardown != null) {
+                        Log.i(getClass().getName(), "calling teardown");
+                        JRubyAdapter.runRubyMethod(teardown, "call", activity);
+                        Log.i(getClass().getName(), "teardown ok");
+                    }
                 }
             };
             if (onUiThread) {
