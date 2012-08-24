@@ -86,6 +86,8 @@ THE_CONSTANTS
         if (JRubyAdapter.isInitialized()) {
             prepareJRuby();
     	    loadScript();
+        } else {
+            super.onCreate(bundle);
         }
     }
 
