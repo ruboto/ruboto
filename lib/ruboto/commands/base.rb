@@ -328,6 +328,7 @@ module Ruboto
 
             argument("what") {
               required
+              # FIXME(uwe): Deprecated "ruboto update ruboto" in Ruboto 0.8.1.  Remove september 2013.
               validate {|i| %w(jruby app ruboto).include?(i)}
               description "What do you want to update: 'app', 'jruby', or 'ruboto'"
             }
@@ -352,7 +353,9 @@ module Ruboto
                 update_bundle
               when "jruby" then
                 update_jruby(params['force'].value) || abort
+              # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
               when "ruboto" then
+                puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"
                 update_ruboto(params['force'].value) || abort
               end
             end
