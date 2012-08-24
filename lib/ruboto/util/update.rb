@@ -248,7 +248,7 @@ module Ruboto
         end
       end
 
-      def update_classes(force = nil)
+      def update_classes(old_version, force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         log_action("Ruboto java classes") { copier.copy "src/org/ruboto/*.java" }
         log_action("Ruboto java test classes") { copier.copy "src/org/ruboto/test/*.java", "test" }
@@ -280,6 +280,18 @@ module Ruboto
               end
             end
             # FIXME end
+
+            # FIXME(uwe): Remove when we stop supporting upgrading from ruboto 0.7.0 and ruboto 0.8.0
+            if (old_version == '0.7.0' || old_version == '0.8.0')
+              puts "Ruboto version #{old_version.inspect} detected."
+              script_file = File.expand_path("#{SCRIPTS_DIR}/#{underscore(subclass_name)}.rb")
+              puts "Adding explicit super call in #{script_file}"
+              script_content = File.read(script_file)
+              script_content.gsub! /^(\s*)(def on_(?:create\(bundle\)|start|resume|pause|destroy)\n)/, "\\1\\2\\1  super\n"
+              File.open(script_file, 'w'){|of| of << script_content}
+            end
+            # FIXME end
+
           elsif source_code =~ /^\/\/ Generated Ruboto subclass with method base "(.*?)".*^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{/m
             method_base, package, subclass_name, class_name = $1, $2, $3, $4
             puts "Regenerating subclass #{package}.#{subclass_name}"
@@ -359,10 +371,16 @@ module Ruboto
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
           FileUtils.cp from, to
         end
+        old_version = nil
         log_action("Copying ruboto/version.rb") do
           from = File.expand_path(Ruboto::GEM_ROOT + "/lib/ruboto/version.rb")
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
-          FileUtils.mkdir_p File.dirname(to)
+          if File.exists?(to)
+            old_version = File.read(to).slice(/VERSION = '(.*?)'/, 1)
+          else
+            FileUtils.mkdir_p File.dirname(to)
+            old_version = nil
+          end
           FileUtils.cp from, to
         end
         log_action("Copying additional ruboto script components") do
@@ -372,6 +390,7 @@ module Ruboto
             FileUtils.cp from, to
           end
         end
+        old_version
       end
 
       def reconfigure_jruby_libs(jruby_core_version)

@@ -5,6 +5,7 @@ ruboto_import_widgets :ImageButton, :LinearLayout, :TextView
 
 class ImageButtonActivity
   def on_create(bundle)
+    super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
     click_handler = proc do |view|
