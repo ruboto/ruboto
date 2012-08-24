@@ -11,6 +11,7 @@ class StackActivity
   STACK_DEPTH_CLASS = java.lang.Thread.current_thread.stack_trace.length.to_s
   def on_create(bundle)
     stack_depth_on_create = java.lang.Thread.current_thread.stack_trace.length.to_s
+    super
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
     self.content_view =

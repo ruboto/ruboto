@@ -5,6 +5,7 @@ ruboto_import_widgets :LinearLayout, :TextView
 
 class MarginsActivity
   def on_create(bundle)
+    super
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
     self.content_view =

@@ -93,9 +93,9 @@ module Ruboto
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_test true
                   update_assets
-                  update_ruboto true
+                  old_version = update_ruboto true
                   update_icons true
-                  update_classes true
+                  update_classes old_version, true
                   update_jruby true if params['with-jruby'].value
 #                  update_build_xml
                   update_core_classes "exclude"
@@ -343,8 +343,8 @@ module Ruboto
                 update_android
                 update_test force
                 update_assets
-                update_ruboto force
-                update_classes force
+                old_version = update_ruboto force
+                update_classes old_version, force
                 update_jruby force
                 update_manifest nil, nil, force
                 update_icons force

@@ -104,10 +104,6 @@ end
 def ruboto_configure_activity(klass)
   klass.class_eval do
     include Ruboto::Activity
-    
-    # Can't be moved into the module
-    def on_create(bundle)
-    end
   end
 end
 
