@@ -1,3 +1,5 @@
+require 'ruboto/version'
+
 module Ruboto
   module Util
     module Update
@@ -365,22 +367,21 @@ module Ruboto
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
       end
 
+      def read_ruboto_version
+        version_file = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
+        File.read(version_file).slice(/^\s*VERSION = '(.*?)'/, 1) if File.exists?(version_file)
+      end
+
       def update_ruboto(force=nil)
         log_action("Copying ruboto.rb") do
           from = File.expand_path(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto.rb")
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
           FileUtils.cp from, to
         end
-        old_version = nil
         log_action("Copying ruboto/version.rb") do
           from = File.expand_path(Ruboto::GEM_ROOT + "/lib/ruboto/version.rb")
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
-          if File.exists?(to)
-            old_version = File.read(to).slice(/VERSION = '(.*?)'/, 1)
-          else
-            FileUtils.mkdir_p File.dirname(to)
-            old_version = nil
-          end
+          FileUtils.mkdir_p File.dirname(to)
           FileUtils.cp from, to
         end
         log_action("Copying additional ruboto script components") do
@@ -390,7 +391,6 @@ module Ruboto
             FileUtils.cp from, to
           end
         end
-        old_version
       end
 
       def reconfigure_jruby_libs(jruby_core_version)

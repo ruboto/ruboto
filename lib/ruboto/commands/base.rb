@@ -93,11 +93,10 @@ module Ruboto
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_test true
                   update_assets
-                  old_version = update_ruboto true
+                  update_ruboto true
                   update_icons true
-                  update_classes old_version, true
+                  update_classes nil, true
                   update_jruby true if params['with-jruby'].value
-#                  update_build_xml
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
@@ -341,10 +340,18 @@ module Ruboto
               case params['what'].value
               when "app" then
                 force = params['force'].value
+                old_version = read_ruboto_version
+                if Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
+                  puts "Detected old Ruboto version: #{old_version}"
+                  puts "Will use Ruboto #{Ruboto::UPDATE_VERSION_LIMIT} to update it first."
+                  `gem query -i -n ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}`
+                  system "gem install ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}" unless $? == 0
+                  system "ruboto _#{Ruboto::UPDATE_VERSION_LIMIT}_ update app"
+                end
                 update_android
                 update_test force
                 update_assets
-                old_version = update_ruboto force
+                update_ruboto force
                 update_classes old_version, force
                 update_jruby force
                 update_manifest nil, nil, force
