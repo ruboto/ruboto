@@ -163,9 +163,15 @@ public class JRubyAdapter {
     @SuppressWarnings("unchecked")
     public static <T> T runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args) {
         try {
+            // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
             if (isJRubyPreOneSeven()) {
-                Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
-                return (T) m.invoke(ruby, receiver, methodName, args, returnType);
+                if (args.length == 0) {
+                  Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Class.class);
+                  return (T) m.invoke(ruby, receiver, methodName, returnType);
+                } else {
+                  Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
+                  return (T) m.invoke(ruby, receiver, methodName, args, returnType);
+                }
             } else {
                 Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
                 return (T) m.invoke(ruby, returnType, receiver, methodName, args);
@@ -265,10 +271,10 @@ public class JRubyAdapter {
                     apkName = pkgInfo.applicationInfo.sourceDir;
                     RUBOTO_CORE_VERSION_NAME = pkgInfo.versionName;
                 } catch (PackageManager.NameNotFoundException e2) {
-                    out.println("JRuby not found in local APK:");
-                    e1.printStackTrace(out);
-                    out.println("JRuby not found in platform APK:");
-                    e2.printStackTrace(out);
+                    System.out.println("JRuby not found in local APK:");
+                    e1.printStackTrace();
+                    System.out.println("JRuby not found in platform APK:");
+                    e2.printStackTrace();
                     return false;
                 }
 
