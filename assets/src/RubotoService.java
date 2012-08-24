@@ -1,6 +1,7 @@
 package THE_PACKAGE;
 
 import org.ruboto.Script;
+import org.ruboto.ScriptLoader;
 import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
@@ -27,21 +28,12 @@ THE_CONSTANTS
 
     @Override
     public void onCreate() {
-        // Return if we are called from JRuby to avoid infinite recursion.
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        for(StackTraceElement e : stackTraceElements){
-            if (e.getClassName().equals("java.lang.reflect.Method") && e.getMethodName().equals("invokeNative")) {
-                return;
-            }
-            if (e.getClassName().equals("android.app.ActivityThread") && e.getMethodName().equals("handleCreateService")) {
-                break;
-            }
+        if (ScriptLoader.isCalledFromJRuby()) {
+            super.onCreate();
+            return;
         }
-
 	    System.out.println("RubotoService.onCreate()");
         args = new Object[0];
-
-        super.onCreate();
 
         if (JRubyAdapter.setUpJRuby(this)) {
             rubyInstance = this;

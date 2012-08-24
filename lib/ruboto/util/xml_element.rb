@@ -147,7 +147,7 @@ module Ruboto
 
       def super_return
         rv = super_string
-        return rv unless attribute("return")
+        return "{#{rv} return;}" unless attribute("return")
         rv ? "return #{rv}" : default_return
       end
 
@@ -205,6 +205,7 @@ module Ruboto
         method_call(
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
+            ["if (ScriptLoader.isCalledFromJRuby()) #{super_return}",
             if_else(
                 "JRubyAdapter.isInitialized()",
                 if_else(
@@ -214,11 +215,11 @@ module Ruboto
                         if_else(
                             # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
                             "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                            [super_string] + ruby_call(true),
+                            ruby_call(true),
                             if_else(
                                 # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
                                 "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                                [super_string] + ruby_call(true, true),
+                                ruby_call(true, true),
                                 [super_return]
                             )
                         )
@@ -228,6 +229,7 @@ module Ruboto
                     super_return,
                 ]
             )
+            ]
         ).indent.join("\n")
       end
 

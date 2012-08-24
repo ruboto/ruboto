@@ -15,7 +15,7 @@ THE_CONSTANTS
     private Object rubyInstance;
     private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
     private String remoteVariable = null;
-    private Object[] args;
+    private Bundle[] args;
     private Bundle configBundle = null;
 
     public void setCallbackProc(int id, Object obj) {
@@ -47,7 +47,11 @@ THE_CONSTANTS
     @Override
     public void onCreate(Bundle bundle) {
         System.out.println("RubotoActivity onCreate(): " + getClass().getName());
-        args = new Object[1];
+        if (ScriptLoader.isCalledFromJRuby()) {
+            super.onCreate(bundle);
+            return;
+        }
+        args = new Bundle[1];
         args[0] = bundle;
 
         configBundle = getIntent().getBundleExtra("RubotoActivity Config");
@@ -79,11 +83,11 @@ THE_CONSTANTS
             setScriptName(Script.toSnakeCase(rubyClassName) + ".rb");
         }
 
-        super.onCreate(bundle);
-
         if (JRubyAdapter.isInitialized()) {
             prepareJRuby();
     	    loadScript();
+        } else {
+            super.onCreate(bundle);
         }
     }
 
@@ -181,6 +185,9 @@ THE_CONSTANTS
                     } else {
                         throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
                     }
+                } else {
+                    // FIXME(uwe): Remove when we stop supporting block based main activities.
+                    super.onCreate(args[0]);
                 }
             } else if (configBundle != null) {
                 // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
