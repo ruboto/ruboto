@@ -49,7 +49,7 @@ public class JRubyAdapter {
      */
     @SuppressWarnings("unchecked")
     @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
-        return runRubyMethod(returnType, receiver, methodName, args);
+        return (T) runRubyMethod(returnType, receiver, methodName, args);
     }
 
     /**
@@ -57,7 +57,7 @@ public class JRubyAdapter {
      */
     @SuppressWarnings("unchecked")
     @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object arg, Class<T> returnType) {
-        return runRubyMethod(returnType, receiver, methodName, arg);
+        return (T) runRubyMethod(returnType, receiver, methodName, arg);
     }
 
     /**
@@ -65,7 +65,7 @@ public class JRubyAdapter {
      */
     @SuppressWarnings("unchecked")
     @Deprecated public static <T> T callMethod(Object receiver, String methodName, Class<T> returnType) {
-        return runRubyMethod(returnType, receiver, methodName);
+        return (T) runRubyMethod(returnType, receiver, methodName);
     }
 
     /**
@@ -106,7 +106,7 @@ public class JRubyAdapter {
      * @deprecated  As of Ruboto 0.7.0, replaced by {@link #runScriptlet(String code)}
      */
     @Deprecated public static String execute(String code) {
-        return runRubyMethod(String.class, exec(code), "inspect");
+        return (String) runRubyMethod(String.class, exec(code), "inspect");
     }
 
     public static Object get(String name) {
@@ -127,7 +127,7 @@ public class JRubyAdapter {
     }
 
     public static String getScriptFilename() {
-        return callScriptingContainerMethod(String.class, "getScriptFilename");
+        return (String) callScriptingContainerMethod(String.class, "getScriptFilename");
     }
 
     public static Object runRubyMethod(Object receiver, String methodName, Object... args) {
