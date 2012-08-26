@@ -20,6 +20,7 @@ ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class PsychActivity
   def on_create(bundle)
+    super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL, :gravity => android.view.Gravity::CENTER do

@@ -25,9 +25,8 @@ require 'ruboto/widget'
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class RubotoTestAppActivity
-  include Ruboto::Activity
-
   def on_create(bundle)
+    super
     $ruboto_test_app_activity = self
     set_title 'Domo arigato, Mr Ruboto!'
 
