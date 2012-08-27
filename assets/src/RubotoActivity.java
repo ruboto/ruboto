@@ -7,7 +7,7 @@ import org.ruboto.Script;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
-public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
 THE_CONSTANTS
 
     private String rubyClassName;
@@ -31,8 +31,24 @@ THE_CONSTANTS
         return (remoteVariable == null ? "" : (remoteVariable + ".")) + call;
     }
 
+    public android.content.Context getContext() {
+        return this;
+    }
+
+    public String getRubyClassName() {
+        return rubyClassName;
+    }
+
     public void setRubyClassName(String name) {
         rubyClassName = name;
+    }
+
+    public void setRubyInstance(Object instance) {
+        rubyInstance = instance;
+    }
+
+    public String getScriptName() {
+        return scriptName;
     }
 
     public void setScriptName(String name) {
@@ -43,7 +59,12 @@ THE_CONSTANTS
      *
      *  Activity Lifecycle: onCreate
      */
-	
+
+    // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
+	public void onCreate(Object... args) {
+	    super.onCreate((Bundle) args[0]);
+	}
+
     @Override
     public void onCreate(Bundle bundle) {
         System.out.println("RubotoActivity onCreate(): " + getClass().getName());
@@ -85,7 +106,7 @@ THE_CONSTANTS
 
         if (JRubyAdapter.isInitialized()) {
             prepareJRuby();
-    	    loadScript();
+    	    ScriptLoader.loadScript(this, (Object[]) args);
         } else {
             super.onCreate(bundle);
         }
@@ -100,112 +121,6 @@ THE_CONSTANTS
     	JRubyAdapter.put("$bundle", args[0]);
     }
     // TODO end
-
-    protected void loadScript() {
-        try {
-            if (scriptName != null) {
-                System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = JRubyAdapter.get(rubyClassName);
-                System.out.println("Found: " + rubyClass);
-                Script rubyScript = new Script(scriptName);
-                if (rubyScript.exists()) {
-                    rubyInstance = this;
-                    final String script = rubyScript.getContents();
-                    if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                        if (!rubyClassName.equals(getClass().getSimpleName())) {
-                            System.out.println("Script defines methods on meta class");
-                            // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                            if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
-                                JRubyAdapter.put("$java_instance", this);
-                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                            } else if (JRubyAdapter.isJRubyOneSeven() && JRubyAdapter.isRubyOneNine()) {
-                                JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
-                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
-                            } else {
-                                throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
-                            }
-                        }
-                    }
-                    if (rubyClass == null) {
-                        System.out.println("Loading script: " + scriptName);
-                        if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                            System.out.println("Script contains class definition");
-                            if (rubyClassName.equals(getClass().getSimpleName())) {
-                                System.out.println("Script has separate Java class");
-                                // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
-                                if (!JRubyAdapter.isJRubyPreOneSeven()) {
-                                    JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
-                                }
-                                JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
-                            }
-                            System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
-                            Thread t = new Thread(new Runnable(){
-                                public void run() {
-                                    JRubyAdapter.setScriptFilename(scriptName);
-                                    JRubyAdapter.runScriptlet(script);
-                                }
-                            });
-                            try {
-                                t.start();
-                                t.join();
-                            } catch(InterruptedException ie) {
-                                Thread.currentThread().interrupt();
-                                throw new RuntimeException("Interrupted loading script.", ie);
-                            }
-                            rubyClass = JRubyAdapter.get(rubyClassName);
-                        } else {
-                            // FIXME(uwe): Only needed for initial block-based activity definition
-                            System.out.println("Script contains block based activity definition");
-                            if (!JRubyAdapter.isJRubyPreOneSeven()) {
-                                JRubyAdapter.runScriptlet("Java::" + getClass().getName() + ".__persistent__ = true");
-                            }
-                            JRubyAdapter.runScriptlet("$activity.instance_variable_set '@ruboto_java_class', '" + rubyClassName + "'");
-                            JRubyAdapter.runScriptlet("puts %Q{$activity: #$activity}");
-                            JRubyAdapter.setScriptFilename(scriptName);
-                            JRubyAdapter.runScriptlet(script);
-                        }
-                    }
-                } else if (rubyClass != null) {
-                    // We have a predefined Ruby class without corresponding Ruby source file.
-                    System.out.println("Create separate Ruby instance for class: " + rubyClass);
-                    rubyInstance = JRubyAdapter.runRubyMethod(rubyClass, "new");
-                    JRubyAdapter.runRubyMethod(rubyInstance, "instance_variable_set", "@ruboto_java_instance", this);
-                } else {
-                    // Neither script file nor predefined class
-                    throw new RuntimeException("Either script or predefined class must be present.");
-                }
-                if (rubyClass != null) {
-                    System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
-                    // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                    if (JRubyAdapter.isJRubyPreOneSeven()) {
-                        JRubyAdapter.put("$ruby_instance", rubyInstance);
-                        JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
-                    } else if (JRubyAdapter.isJRubyOneSeven()) {
-                        JRubyAdapter.runRubyMethod(rubyInstance, "on_create", args[0]);
-                    } else {
-                        throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-                    }
-                } else {
-                    // FIXME(uwe): Remove when we stop supporting block based main activities.
-                    super.onCreate(args[0]);
-                }
-            } else if (configBundle != null) {
-                // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (JRubyAdapter.isJRubyPreOneSeven()) {
-            	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
-            	    JRubyAdapter.runScriptlet("$activity.on_create($bundle)");
-                } else if (JRubyAdapter.isJRubyOneSeven()) {
-            	    JRubyAdapter.runRubyMethod(this, "initialize_ruboto");
-                    JRubyAdapter.runRubyMethod(this, "on_create", args[0]);
-                } else {
-                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-            	}
-            }
-        } catch(IOException e){
-            e.printStackTrace();
-            ProgressDialog.show(this, "Script failed", "Something bad happened", true, true);
-        }
-    }
 
     public boolean rubotoAttachable() {
       return true;
