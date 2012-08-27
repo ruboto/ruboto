@@ -95,16 +95,7 @@ public class ScriptLoader {
                     throw new RuntimeException("Either script or predefined class must be present.");
                 }
                 if (rubyClass != null) {
-                    System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
-                    // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                    if (JRubyAdapter.isJRubyPreOneSeven()) {
-                        JRubyAdapter.put("$ruby_instance", rubyInstance);
-                        JRubyAdapter.runScriptlet("$ruby_instance.on_create($bundle)");
-                    } else if (JRubyAdapter.isJRubyOneSeven()) {
-                        JRubyAdapter.runRubyMethod(rubyInstance, "on_create", (Object[]) args);
-                    } else {
-                        throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-                    }
+                    callOnCreate(rubyInstance, args);
                 } else {
                     // FIXME(uwe): Remove when we stop supporting block based main activities.
                     component.onCreate((Object[]) args);
@@ -114,19 +105,34 @@ public class ScriptLoader {
                 // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
                 if (JRubyAdapter.isJRubyPreOneSeven()) {
             	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
-            	    JRubyAdapter.runScriptlet("$activity.on_create($bundle)");
                 } else if (JRubyAdapter.isJRubyOneSeven()) {
             	    JRubyAdapter.runRubyMethod(component, "initialize_ruboto");
-                    JRubyAdapter.runRubyMethod(component, "on_create", (Object[]) args);
                 } else {
                     throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
             	}
+                callOnCreate(component, args);
             }
         } catch(IOException e){
             e.printStackTrace();
             if (component.getContext() != null) {
                 ProgressDialog.show(component.getContext(), "Script failed", "Something bad happened", true, true);
             }
+        }
+    }
+
+    private static void callOnCreate(Object rubyInstance, Object[] args) {
+        System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+        if (JRubyAdapter.isJRubyPreOneSeven()) {
+            if (args.length > 0) {
+                JRubyAdapter.put("$bundle", args[0]);
+            }
+            JRubyAdapter.put("$ruby_instance", rubyInstance);
+            JRubyAdapter.runScriptlet("$ruby_instance.on_create(" + (args.length > 0 ? "$bundle" : "") + ")");
+        } else if (JRubyAdapter.isJRubyOneSeven()) {
+            JRubyAdapter.runRubyMethod(rubyInstance, "on_create", (Object[]) args);
+        } else {
+            throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
         }
     }
 
