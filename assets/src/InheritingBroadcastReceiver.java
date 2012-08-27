@@ -1,6 +1,7 @@
 package THE_PACKAGE;
 
 import org.ruboto.JRubyAdapter;
+import org.ruboto.ScriptLoader;
 
 public class InheritingBroadcastReceiver extends org.ruboto.RubotoBroadcastReceiver {
     private boolean scriptLoaded = false;
@@ -15,7 +16,7 @@ public class InheritingBroadcastReceiver extends org.ruboto.RubotoBroadcastRecei
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         if (!scriptLoaded) {
             if (JRubyAdapter.setUpJRuby(context)) {
-                loadScript();
+                ScriptLoader.loadScript(this);
                 scriptLoaded = true;
             } else {
                 // FIXME(uwe): What to do if the Ruboto Core platform is missing?

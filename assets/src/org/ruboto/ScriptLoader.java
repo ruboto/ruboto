@@ -20,7 +20,7 @@ public class ScriptLoader {
         return false;
     }
 
-    static void loadScript(final RubotoComponent component, Object... args) {
+    public static void loadScript(final RubotoComponent component, Object... args) {
         try {
             if (component.getScriptName() != null) {
                 System.out.println("Looking for Ruby class: " + component.getRubyClassName());
@@ -120,7 +120,7 @@ public class ScriptLoader {
         }
     }
 
-    private static void callOnCreate(Object rubyInstance, Object[] args) {
+    private static final void callOnCreate(Object rubyInstance, Object[] args) {
         System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
         // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
         if (JRubyAdapter.isJRubyPreOneSeven()) {
