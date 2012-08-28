@@ -17,7 +17,7 @@ module Ruboto
   module Callbacks
     def method_missing(name, *args, &block)
       if name.to_s =~ /^handle_(.*)/ && self.class.respond_to?(:const_get) && (const = self.class.const_get("CB_#{$1.upcase}"))
-        setCallbackProc(const, block)
+        scriptInfo.setCallbackProc(const, block)
         self
       else
         super

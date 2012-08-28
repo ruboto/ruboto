@@ -183,17 +183,17 @@ module Ruboto
                   "JRubyAdapter.isJRubyPreOneSeven()",
                   params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
                   [
-                      'JRubyAdapter.put("$ruby_instance", rubyInstance);',
+                      'JRubyAdapter.put("$ruby_instance", scriptInfo.getRubyInstance());',
                       "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{global_args})\")#{').intValue()' if return_int};",
                   ],
                   if_else(
                       "JRubyAdapter.isJRubyOneSeven()",
-                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}rubyInstance, \"#{method_name}\"#{args});"],
+                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}scriptInfo.getRubyInstance(), \"#{method_name}\"#{args});"],
                       ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
                   )
               )
         else
-          ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}callbackProcs[#{constant_string}], \"call\" #{args});"]
+          ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}scriptInfo.getCallbackProcs()[#{constant_string}], \"call\" #{args});"]
         end
       end
 
@@ -209,9 +209,9 @@ module Ruboto
             if_else(
                 "JRubyAdapter.isInitialized()",
                 if_else(
-                    "callbackProcs != null && callbackProcs[#{constant_string}] != null",
+                    "scriptInfo.getCallbackProcs() != null && scriptInfo.getCallbackProcs()[#{constant_string}] != null",
                     [super_string] + ruby_call,
-                    ['String rubyClassName = Script.toCamelCase(scriptName);'] +
+                    ['String rubyClassName = Script.toCamelCase(scriptInfo.getScriptName());'] +
                         if_else(
                             # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
                             "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",

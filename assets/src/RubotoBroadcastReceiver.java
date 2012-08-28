@@ -2,19 +2,18 @@ package THE_PACKAGE;
 
 import java.io.IOException;
 
-public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-    private String rubyClassName;
-    private String scriptName;
-    private Object rubyInstance;
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
+import org.ruboto.ScriptLoader;
+
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
+    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
         throw new RuntimeException("RubotoBroadcastReceiver does not accept callbacks");
     }
 	
-    public void setScriptName(String name){
-        scriptName = name;
+    public ScriptInfo getScriptInfo() {
+        return scriptInfo;
     }
 
     public THE_RUBOTO_CLASS() {
@@ -25,68 +24,23 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         super();
 
         if (name != null) {
-            setScriptName(name);
+            scriptInfo.setScriptName(name);
         
             if (JRubyAdapter.isInitialized()) {
-                loadScript();
+                // TODO(uwe):  Only needed for non-class-based definitions
+                // Can be removed if we stop supporting non-class-based definitions
+    	        JRubyAdapter.put("$broadcast_receiver", this);
+    	        // TODO end
+
+                ScriptLoader.loadScript(this);
             }
         }
     }
 
-    protected void loadScript() {
-        rubyInstance = this;
-
-        // TODO(uwe):  Only needed for non-class-based definitions
-        // Can be removed if we stop supporting non-class-based definitions
-    	JRubyAdapter.put("$broadcast_receiver", this);
-    	// TODO end
-
-        try {
-            if (scriptName != null) {
-                String rubyClassName = Script.toCamelCase(scriptName);
-                System.out.println("Looking for Ruby class: " + rubyClassName);
-                Object rubyClass = null;
-                String script = new Script(scriptName).getContents();
-                if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                    if (!rubyClassName.equals(getClass().getSimpleName())) {
-                        System.out.println("Script defines methods on meta class");
-                        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                        if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
-                            JRubyAdapter.put("$java_instance", this);
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("class << $java_instance; self; end"));
-                        } else if (JRubyAdapter.isJRubyOneSeven() && JRubyAdapter.isRubyOneNine()) {
-                            JRubyAdapter.put(rubyClassName, JRubyAdapter.runRubyMethod(this, "singleton_class"));
-                        } else {
-                            throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
-                        }
-                    }
-                } else {
-                    rubyClass = JRubyAdapter.get(rubyClassName);
-                }
-                if (rubyClass == null) {
-                    System.out.println("Loading script: " + scriptName);
-                    if (script.matches("(?s).*class " + rubyClassName + ".*")) {
-                        System.out.println("Script contains class definition");
-                        if (rubyClassName.equals(getClass().getSimpleName())) {
-                            System.out.println("Script has separate Java class");
-
-                            // TODO(uwe):  Why doesnt this work?
-                            // JRubyAdapter.put(rubyClassName, JRubyAdapter.runScriptlet("Java::" + getClass().getName()));
-
-                            // TODO(uwe):  Workaround...
-                            JRubyAdapter.runScriptlet(rubyClassName + " = Java::" + getClass().getName());
-                        }
-                        // System.out.println("Set class: " + JRubyAdapter.get(rubyClassName));
-                    }
-                    JRubyAdapter.setScriptFilename(scriptName);
-                    JRubyAdapter.runScriptlet(script);
-                    rubyClass = JRubyAdapter.get(rubyClassName);
-                }
-            }
-        } catch(IOException e) {
-            throw new RuntimeException("IOException loading broadcast receiver script", e);
-        }
-    }
+    // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
+	public void onCreateSuper() {
+	    // Do nothing
+	}
 
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {

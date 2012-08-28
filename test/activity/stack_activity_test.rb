@@ -10,6 +10,8 @@ setup do |activity|
   assert @text_view
 end
 
+# ANDROID: 10, PLATFORM: 0.4.7, JRuby: 1.7.0.dev '28334966' expected, but got '28335067'
+
 test('stack depth') do |activity|
   os_offset = {
       13 => [1]*4,
@@ -30,8 +32,8 @@ test('stack depth') do |activity|
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
   assert_equal [28 + os_offset[0] + jruby_offset[0],
                 33 + os_offset[1] + jruby_offset[1],
-                49 + os_offset[2] + jruby_offset[2],
-                66 + os_offset[3] + jruby_offset[3]], [activity.find_view_by_id(42).text.to_i,
+                50 + os_offset[2] + jruby_offset[2],
+                67 + os_offset[3] + jruby_offset[3]], [activity.find_view_by_id(42).text.to_i,
                                                     activity.find_view_by_id(43).text.to_i,
                                                     activity.find_view_by_id(44).text.to_i,
                                                     activity.find_view_by_id(45).text.to_i], version_message
