@@ -7,38 +7,10 @@ import java.io.IOException;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
 THE_CONSTANTS
 
-    private String rubyClassName;
-    private String scriptName;
-    private Object rubyInstance;
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
-    public Object[] args;
+    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
 
-    public void setCallbackProc(int id, Object obj) {
-      callbackProcs[id] = obj;
-    }
-	
-    public android.content.Context getContext() {
-        return this;
-    }
-
-    public String getRubyClassName() {
-        return rubyClassName;
-    }
-
-    public void setRubyClassName(String name) {
-        rubyClassName = name;
-    }
-
-    public void setRubyInstance(Object instance) {
-        rubyInstance = instance;
-    }
-
-    public String getScriptName() {
-        return scriptName;
-    }
-
-    public void setScriptName(String name){
-        scriptName = name;
+    public ScriptInfo getScriptInfo() {
+        return scriptInfo;
     }
 
     /****************************************************************************************
@@ -47,7 +19,7 @@ THE_CONSTANTS
      */
 
     // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
-	public void onCreate(Object... args) {
+	public void onCreateSuper() {
 	    super.onCreate();
 	}
 
@@ -58,7 +30,6 @@ THE_CONSTANTS
             return;
         }
 	    System.out.println("RubotoService.onCreate()");
-        args = new Object[0];
 
         if (JRubyAdapter.setUpJRuby(this)) {
             // TODO(uwe):  Only needed for non-class-based definitions
@@ -66,13 +37,6 @@ THE_CONSTANTS
     	    JRubyAdapter.defineGlobalVariable("$context", this);
     	    JRubyAdapter.defineGlobalVariable("$service", this);
     	    // TODO end
-
-            if (rubyClassName == null && scriptName != null) {
-                rubyClassName = Script.toCamelCase(scriptName);
-            }
-            if (scriptName == null && rubyClassName != null) {
-                setScriptName(Script.toSnakeCase(rubyClassName) + ".rb");
-            }
 
             ScriptLoader.loadScript(this);
         } else {

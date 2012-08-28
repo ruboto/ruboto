@@ -10,18 +10,11 @@ import android.os.Bundle;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
 THE_CONSTANTS
 
-    private String rubyClassName;
-    private String scriptName;
-    private Object rubyInstance;
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
+    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
     private String remoteVariable = null;
-    private Bundle[] args;
+    Bundle[] args;
     private Bundle configBundle = null;
 
-    public void setCallbackProc(int id, Object obj) {
-        callbackProcs[id] = obj;
-    }
-	
     public THE_RUBOTO_CLASS setRemoteVariable(String var) {
         remoteVariable = var;
         return this;
@@ -31,28 +24,8 @@ THE_CONSTANTS
         return (remoteVariable == null ? "" : (remoteVariable + ".")) + call;
     }
 
-    public android.content.Context getContext() {
-        return this;
-    }
-
-    public String getRubyClassName() {
-        return rubyClassName;
-    }
-
-    public void setRubyClassName(String name) {
-        rubyClassName = name;
-    }
-
-    public void setRubyInstance(Object instance) {
-        rubyInstance = instance;
-    }
-
-    public String getScriptName() {
-        return scriptName;
-    }
-
-    public void setScriptName(String name) {
-        scriptName = name;
+    public ScriptInfo getScriptInfo() {
+        return scriptInfo;
     }
 
     /****************************************************************************************
@@ -61,7 +34,7 @@ THE_CONSTANTS
      */
 
     // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
-	public void onCreate(Object... args) {
+	public void onCreateSuper() {
 	    super.onCreate((Bundle) args[0]);
 	}
 
@@ -83,25 +56,18 @@ THE_CONSTANTS
             }
             if (configBundle.containsKey("ClassName")) {
                 if (this.getClass().getName() == RubotoActivity.class.getName()) {
-                    setRubyClassName(configBundle.getString("ClassName"));
+                    scriptInfo.setRubyClassName(configBundle.getString("ClassName"));
                 } else {
                     throw new IllegalArgumentException("Only local Intents may set class name.");
                 }
             }
             if (configBundle.containsKey("Script")) {
                 if (this.getClass().getName() == RubotoActivity.class.getName()) {
-                    setScriptName(configBundle.getString("Script"));
+                    scriptInfo.setScriptName(configBundle.getString("Script"));
                 } else {
                     throw new IllegalArgumentException("Only local Intents may set script name.");
                 }
             }
-        }
-
-        if (rubyClassName == null && scriptName != null) {
-            rubyClassName = Script.toCamelCase(scriptName);
-        }
-        if (scriptName == null && rubyClassName != null) {
-            setScriptName(Script.toSnakeCase(rubyClassName) + ".rb");
         }
 
         if (JRubyAdapter.isInitialized()) {

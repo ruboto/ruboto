@@ -60,7 +60,7 @@ module Ruboto
       ruboto_callback_methods.each do |i|
         begin
           # FIXME(uwe): Remove to_sym conversion when we stop supporting Ruby 1.8 mode
-          setCallbackProc((self.class.constants.map(&:to_sym).include?(i.to_s.sub(/^on_/, "CB_").upcase.to_sym) && self.class.const_get(i.to_s.sub(/^on_/, "CB_").upcase)) || (self.class.constants.map(&:to_sym).include?("CB_#{i}".upcase.to_sym) && self.class.const_get("CB_#{i}".upcase)), method(i))
+          scriptInfo.setCallbackProc((self.class.constants.map(&:to_sym).include?(i.to_s.sub(/^on_/, "CB_").upcase.to_sym) && self.class.const_get(i.to_s.sub(/^on_/, "CB_").upcase)) || (self.class.constants.map(&:to_sym).include?("CB_#{i}".upcase.to_sym) && self.class.const_get("CB_#{i}".upcase)), method(i))
         rescue
         end
       end 

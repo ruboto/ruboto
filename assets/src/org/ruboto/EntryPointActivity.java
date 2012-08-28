@@ -150,7 +150,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         if(appStarted) return;
         appStarted = true;
         Log.i("Starting activity");
-        ScriptLoader.loadScript(this);
+        ScriptLoader.loadScript(this, args[0]);
         onStart();
         super.onResume();
         hideProgress();

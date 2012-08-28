@@ -5,34 +5,15 @@ import java.io.IOException;
 import org.ruboto.ScriptLoader;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
-    private String rubyClassName;
-    private String scriptName;
-    private Object rubyInstance;
-    private Object[] callbackProcs = new Object[CONSTANTS_COUNT];
+    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
 
     public void setCallbackProc(int id, Object obj) {
         // Error: no callbacks
         throw new RuntimeException("RubotoBroadcastReceiver does not accept callbacks");
     }
 	
-    public android.content.Context getContext() {
-        return null;
-    }
-
-    public String getRubyClassName() {
-        return rubyClassName;
-    }
-
-    public void setRubyInstance(Object instance) {
-        rubyInstance = instance;
-    }
-
-    public String getScriptName() {
-        return scriptName;
-    }
-
-    public void setScriptName(String name){
-        scriptName = name;
+    public ScriptInfo getScriptInfo() {
+        return scriptInfo;
     }
 
     public THE_RUBOTO_CLASS() {
@@ -43,7 +24,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComp
         super();
 
         if (name != null) {
-            setScriptName(name);
+            scriptInfo.setScriptName(name);
         
             if (JRubyAdapter.isInitialized()) {
                 // TODO(uwe):  Only needed for non-class-based definitions
@@ -51,20 +32,13 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComp
     	        JRubyAdapter.put("$broadcast_receiver", this);
     	        // TODO end
 
-                if (rubyClassName == null && scriptName != null) {
-                    rubyClassName = Script.toCamelCase(scriptName);
-                }
-                if (scriptName == null && rubyClassName != null) {
-                    setScriptName(Script.toSnakeCase(rubyClassName) + ".rb");
-                }
-
                 ScriptLoader.loadScript(this);
             }
         }
     }
 
     // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
-	public void onCreate(Object... args) {
+	public void onCreateSuper() {
 	    // Do nothing
 	}
 

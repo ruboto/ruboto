@@ -93,6 +93,7 @@ public class JRubyAdapter {
     public static boolean isJRubyPreOneSeven(){return false;}
     public static void put(String varName, Object value){}
     public static void runRubyMethod(Object receiver, String method){}
+    public static void runRubyMethod(Object receiver, String method, Object[] args){}
     public static boolean runScriptlet(String scriptlet){return false;}
 }
 EOF
