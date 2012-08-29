@@ -30,7 +30,7 @@ module Ruboto
         @menu = args[0]
         instance_eval { block.call(*args) } if block
       end
-      setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
+      scriptInfo.setCallbackProc(self.class.const_get("CB_CREATE_OPTIONS_MENU"), p)
 
       p = Proc.new do |num, menu_item|
         # handles a problem where this is called for context items
@@ -43,7 +43,7 @@ module Ruboto
           false
         end
       end
-      setCallbackProc(self.class.const_get("CB_MENU_ITEM_SELECTED"), p)
+      scriptInfo.setCallbackProc(self.class.const_get("CB_MENU_ITEM_SELECTED"), p)
     end
 
     #
@@ -65,7 +65,7 @@ module Ruboto
         @context_menu = args[0]
         instance_eval { block.call(*args) } if block
       end
-      setCallbackProc(self.class.const_get("CB_CREATE_CONTEXT_MENU"), p)
+      scriptInfo.setCallbackProc(self.class.const_get("CB_CREATE_CONTEXT_MENU"), p)
 
       p = Proc.new do |menu_item|
         if menu_item.on_click
@@ -81,7 +81,7 @@ module Ruboto
           false
         end
       end
-      setCallbackProc(self.class.const_get("CB_CONTEXT_ITEM_SELECTED"), p)
+      scriptInfo.setCallbackProc(self.class.const_get("CB_CONTEXT_ITEM_SELECTED"), p)
     end
   end
 end

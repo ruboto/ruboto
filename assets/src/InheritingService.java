@@ -2,7 +2,7 @@ package THE_PACKAGE;
 
 public class InheritingService extends org.ruboto.RubotoService {
 	public void onCreate() {
-		setScriptName("sample_service.rb");
+		getScriptInfo().setRubyClassName(getClass().getSimpleName());
 		super.onCreate();
 	}
 
