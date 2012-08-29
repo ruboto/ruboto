@@ -157,19 +157,12 @@ end
 
 def setup_list_view
   Java::android.widget.ListView.class_eval do
-    attr_reader :adapter, :adapter_list
-
     def configure(context, params = {})
-      if params.has_key? :list
-        @adapter_list = Java::java.util.ArrayList.new
-        @adapter_list.addAll(params[:list])
+      if list = params.delete(:list)
+        adapter_list = Java::java.util.ArrayList.new
+        adapter_list.addAll(list)
         item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
-        @adapter    = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
-        setAdapter @adapter
-        params.delete :list
-      end
-      if params.has_key? :adapter
-        @adapter = params[:adapter]
+        params[:adapter] = Java::android.widget.ArrayAdapter.new(context, item_layout, adapter_list)
       end
       super(context, params)
     end

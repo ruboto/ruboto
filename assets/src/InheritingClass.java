@@ -13,8 +13,8 @@ THE_CONSTANTS
 
     private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
     {
-        scriptInfo.setRubyInstance(this);
 		scriptInfo.setRubyClassName(getClass().getSimpleName());
+		ScriptLoader.loadScript(this);
     }
 
 THE_CONSTRUCTORS
@@ -22,6 +22,11 @@ THE_CONSTRUCTORS
     public ScriptInfo getScriptInfo() {
         return scriptInfo;
     }
+
+    // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
+	public void onCreateSuper() {
+	    // Do nothing
+	}
 
 THE_METHODS
 

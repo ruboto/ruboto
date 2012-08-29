@@ -63,7 +63,7 @@ module Ruboto
 
       def all_methods(method_base="all", method_include="", method_exclude="", implements="")
         # get all the methogs
-        all_methods = get_elements("method")
+        all_methods = get_elements('method').select{|m| m.attribute('static') != 'true'}
 
         # establish the base set of methods
         working_methods = case method_base.to_s
@@ -172,7 +172,7 @@ module Ruboto
             return_class = attribute("return").capitalize
           end
           return_cast = "return (#{return_class.gsub("&lt;", "<").gsub("&gt;", ">")}) " if return_class
-          convert_return = "#{return_class}.class, "
+          convert_return = "#{return_class.sub(/<.*>$/, '')}.class, "
         end
 
         if on_ruby_instance
@@ -205,6 +205,7 @@ module Ruboto
         method_call(
             (attribute("return") ? attribute("return") : "void"),
             attribute("name"), parameters,
+            get_elements('exception').map{|m| m.attribute('type')},
             ["if (ScriptLoader.isCalledFromJRuby()) #{super_return}",
             if_else(
                 "JRubyAdapter.isInitialized()",
@@ -234,7 +235,7 @@ module Ruboto
       end
 
       def constructor_definition(class_name)
-        method_call(nil, class_name, parameters, [super_string]).indent.join("\n")
+        method_call(nil, class_name, parameters, nil, [super_string]).indent.join("\n")
       end
     end
   end
