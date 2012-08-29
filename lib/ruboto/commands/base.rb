@@ -214,6 +214,7 @@ module Ruboto
               }
 
               def run
+                generate_inheriting_file 'Class', params['name'].value
                 generate_subclass_or_interface(
                 %w(class name package method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
               end
@@ -245,6 +246,7 @@ module Ruboto
               }
 
               def run
+                generate_inheriting_file 'Class', params['name'].value
                 generate_subclass_or_interface %w(interface name package force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
               end
             end

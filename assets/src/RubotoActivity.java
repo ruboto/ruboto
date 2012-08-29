@@ -7,7 +7,7 @@ import org.ruboto.Script;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
-public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 THE_CONSTANTS
 
     private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);

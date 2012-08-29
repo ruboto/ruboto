@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.ruboto.ScriptLoader;
 
-public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS implements RubotoComponent {
+public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
 
     public void setCallbackProc(int id, Object obj) {
