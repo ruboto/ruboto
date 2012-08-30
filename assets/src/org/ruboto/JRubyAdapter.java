@@ -224,7 +224,7 @@ public class JRubyAdapter {
         }
     }
 
-    public static synchronized boolean setUpJRuby(Context appContext) {
+    public static boolean setUpJRuby(Context appContext) {
         return setUpJRuby(appContext, output == null ? System.out : output);
     }
 
