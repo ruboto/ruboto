@@ -246,6 +246,8 @@ module Ruboto
               }
 
               def run
+                # FIXME(uwe):  DEPRECATED!  Remove before Ruboto version 1.0.0.
+                puts "\nThe use of \"ruboto gen interface\" has been deprecated.  Please use\n\n    ruboto gen subclass\n\ninstead.\n\n"
                 generate_inheriting_file 'Class', params['name'].value
                 generate_subclass_or_interface %w(interface name package force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
               end
