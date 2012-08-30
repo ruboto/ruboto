@@ -115,12 +115,15 @@ module Ruboto
         # Remove any duplicate constants (use *args handle multiple parameter lists)
         constants = methods.map(&:constant_string).uniq
 
+        params[:implements] = params[:implements].split(",").push('org.ruboto.RubotoComponent').join(",")
+
+        action = class_desc.name == "class" ? "extends" : "implements"
         build_file params[:template], params[:package], params[:name], {
             "THE_METHOD_BASE" => params[:method_base].to_s,
             "THE_PACKAGE" => params[:package],
-            "THE_ACTION" => class_desc.name == "class" ? "extends" : "implements",
+            "THE_ACTION" => action,
             "THE_ANDROID_CLASS" => (params[:class] || params[:interface]) +
-                (params[:implements] == "" ? "" : (" implements " + params[:implements].split(",").join(", "))),
+                (params[:implements] == "" ? "" : ((action != 'implements' ? " implements " : ', ') + params[:implements].split(",").join(", "))),
             "THE_RUBOTO_CLASS" => params[:name],
             "THE_CONSTANTS" => constants.map { |i| "public static final int #{i} = #{constants.index(i)};" }.indent.join("\n"),
             "CONSTANTS_COUNT" => methods.count.to_s,
@@ -160,7 +163,7 @@ module Ruboto
       # generate_inheriting_file:
       #   Builds a script based subclass of Activity, Service, or BroadcastReceiver
       #
-      def generate_inheriting_file(klass, name, package, script_name = "#{underscore(name)}.rb")
+      def generate_inheriting_file(klass, name, package = verify_package, script_name = "#{underscore(name)}.rb")
         dest = '.'
         file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{name}.java")
         text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))

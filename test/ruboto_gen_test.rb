@@ -68,42 +68,161 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
-  def test_gen_interface
+  def test_gen_subclass_of_array_adapter
     Dir.chdir APP_DIR do
-      system "#{RUBOTO_CMD} gen interface java.lang.Runnable --name MyRunnable"
+      system "#{RUBOTO_CMD} gen subclass android.widget.ArrayAdapter --name RubotoArrayAdapter --method_base all"
       assert_equal 0, $?.exitstatus
-      java_source_file = 'src/org/ruboto/test_app/MyRunnable.java'
+      java_source_file = 'src/org/ruboto/test_app/RubotoArrayAdapter.java'
       assert File.exists?(java_source_file)
-      # FIXME(uwe):  Add tests and definition script?
-      # assert File.exists?('src/my_runnable.rb')
-      # assert File.exists?('test/src/my_runnable_test.rb')
 
+      # FIXME(uwe):  Workaround for Ruboto Issue #246
       java_source = File.read(java_source_file)
-      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^\}\n/, "    public static void main(String[] args){new MyRunnable().run();}\n}\n")}
+      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T>\2<T>').gsub(/T.class/, 'Object.class')}
+      # EMXIF
 
-      system 'rake debug'
-      assert_equal 0, $?
+      assert File.exists?('src/ruboto_array_adapter.rb')
+      assert File.exists?('test/src/ruboto_array_adapter_test.rb')
 
-      File.open('src/org/ruboto/JRubyAdapter.java', 'w'){|f| f << <<EOF}
-package org.ruboto;
-public class JRubyAdapter {
-    public static Object get(String varName){return null;}
-    public static boolean isInitialized(){return true;}
-    public static boolean isJRubyOneSeven(){return true;}
-    public static boolean isJRubyPreOneSeven(){return false;}
-    public static void put(String varName, Object value){}
-    public static void runRubyMethod(Object receiver, String method){}
-    public static void runRubyMethod(Object receiver, String method, Object[] args){}
-    public static boolean runScriptlet(String scriptlet){return false;}
-}
+      File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
+require 'ruboto/activity'
+require 'ruboto/util/stack'
+require 'ruboto/widget'
+
+ruboto_import_widgets :LinearLayout, :ListView, :TextView
+
+class RubotoTestAppActivity
+  def on_create(bundle)
+    super
+    set_title 'ListView Example'
+
+    records = [{:text1 => 'First row'}, {:image => resources.get_drawable($package.R::drawable::get_ruboto_core), :text1 => 'Second row'}, 'Third row']
+    adapter = $package.RubotoArrayAdapter.new(self, $package.R::layout::list_item, AndroidIds::text1, records)
+puts "adapter: \#{adapter.inspect}"
+    self.content_view =
+        linear_layout :orientation => :vertical do
+          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42, :width => :match_parent,
+                    :gravity => :center, :text_size => 48.0
+          list_view :adapter => adapter, :id => 43,
+                    :on_item_click_listener => proc{|parent, view, position, id| @text_view.text = 'List item clicked!'}
+        end
+  end
+end
 EOF
-      system 'javac -cp bin/classes -d bin/classes src/org/ruboto/JRubyAdapter.java'
-      assert_equal 0, $?
-      system 'javac -cp bin/classes -d bin/classes src/org/ruboto/test_app/MyRunnable.java'
-      assert_equal 0, $?
-      system 'java -cp bin/classes org.ruboto.test_app.MyRunnable'
-      assert_equal 0, $?
+
+      File.open('test/src/ruboto_test_app_activity_test.rb', 'w'){|f| f << <<EOF}
+activity Java::org.ruboto.test_app.RubotoTestAppActivity
+
+setup do |activity|
+  start = Time.now
+  loop do
+    @text_view = activity.findViewById(42)
+    @list_view = activity.findViewById(43)
+    break if (@text_view && @list_view && @list_view.adapter) || (Time.now - start > 60)
+puts "Waiting for adapter: \#{@list_view && @list_view.adapter.inspect}"
+    sleep 1
+  end
+  assert @text_view
+  assert @list_view
+  assert @list_view.adapter
+end
+
+test('Item click changes text') do |activity|
+  text_view = activity.findViewById(42)
+  list_view = activity.findViewById(43)
+  list_view.perform_item_click(list_view.adapter.get_view(1, nil, nil), 1, 1)
+  assert_equal 'List item clicked!', text_view.text
+end
+EOF
+
+      File.open('src/ruboto_array_adapter.rb', 'w'){|f| f << <<EOF}
+class Java::AndroidWidget::ArrayAdapter
+   field_reader :mResource, :mFieldId
+end
+
+class RubotoArrayAdapter
+  import android.content.Context
+
+  def get_view(position, convert_view, parent)
+    puts "IN get_view!!!"
+    @inflater = context.getSystemService(Context::LAYOUT_INFLATER_SERVICE) unless @inflater
+    if convert_view
+      row = convert_view
+      row.findViewById(Ruboto::Id.image).image_drawable = nil
+      row.findViewById(AndroidIds.text1).text = nil
+    else
+      row = @inflater.inflate(mResource, nil)
     end
+
+    model = get_item position
+    case model
+    when Hash
+      model.each do |field, value|
+        begin
+          field_id = Ruboto::Id.respond_to?(field) && Ruboto::Id.send(field) ||
+              AndroidIds.respond_to?(field) && AndroidIds.send(field)
+          field_view = row.findViewById(field_id)
+          case value
+          when String
+            field_view.text = value
+          when android.graphics.drawable.Drawable
+            field_view.image_drawable = value
+          else
+            raise "Unknown View type: \#{value.inspect}"
+          end
+        rescue Exception
+          puts "Exception setting list item value: \#$!"
+          puts $!.backtrace.join("\n")
+        end
+      end
+    else
+      row.findViewById(mFieldId).text = model.to_s
+    end
+
+    row
+  rescue Exception
+    puts "Exception getting list item view: \#$!"
+    puts $!.backtrace.join("\n")
+    convert_view
+  end
+
+  def getView(position, convert_view, parent)
+    puts "IN get_view!!!"
+    get_view(position, convert_view, parent)
+  end
+
+end
+EOF
+
+      File.open('res/layout/list_item.xml', 'w'){|f| f << <<EOF}
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+>
+  <TextView
+          android:id="@android:id/text1"
+          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:gravity="left"
+          android:layout_weight="1"
+          android:layout_width="wrap_content"
+          android:layout_height="?android:attr/listPreferredItemHeight"
+          android:textColor="#000000"
+  />
+  <ImageView
+          android:id="@+id/image"
+          android:gravity="right"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+  />
+</LinearLayout>
+EOF
+
+    end
+
+    run_app_tests
   end
 
   def test_gen_jruby
