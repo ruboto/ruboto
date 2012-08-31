@@ -47,14 +47,15 @@ module Ruboto
       # FIXME(uwe): Used for block-based definition of main activity.
       # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
       puts "start_ruboto_activity self: #{self.inspect}"
-      if @ruboto_java_class
+      if @ruboto_java_class and not @ruboto_java_class_initialized
+        @ruboto_java_class_initialized = true
         puts "Block based main activity definition"
         instance_eval &block if block
         setup_ruboto_callbacks
         on_create nil
       else
         puts "Class based main activity definition"
-        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].gsub(/[\/.]+/, '_')}_#{source_descriptor(block)[1]}"
+        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].split("/").last.gsub(/[.]+/, '_')}_#{source_descriptor(block)[1]}"
         if !Object.const_defined?(class_name)
           new_class = Class.new(&block)
           Object.const_set(class_name, new_class)
