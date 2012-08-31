@@ -207,9 +207,10 @@ module Ruboto
         log_action("Removing #{jar_file}") { File.delete *Dir.glob("libs/dexmaker*.jar") } if jar_file
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        if verify_target_sdk < 15
+        # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
+        # if verify_target_sdk < 15
           log_action("Copying dexmaker.jar to libs") { copier.copy 'libs/dexmaker*.jar' }
-        end
+        # end
         # EMXIF
       end
 
