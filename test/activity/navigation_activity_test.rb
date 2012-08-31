@@ -119,8 +119,9 @@ test('button starts infile class activity', :ui => false) do |activity|
   ensure
     removeMonitor(monitor)
   end
+  puts "new activity: #{current_activity.inspect}"
   assert current_activity
-  puts "new activity: #{current_activity}"
+  assert current_activity.is_a? Java::OrgRuboto::RubotoActivity
   start = Time.now
   loop do
     @text_view = current_activity.find_view_by_id(42)
