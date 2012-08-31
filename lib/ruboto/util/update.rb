@@ -201,7 +201,8 @@ module Ruboto
       def update_dexmaker(force=nil)
         jar_file = Dir.glob("libs/dexmaker*.jar")[0]
 
-        return false if !jar_file && !force
+        # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
+        # return false if !jar_file && !force
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
         log_action("Removing #{jar_file}") { File.delete *Dir.glob("libs/dexmaker*.jar") } if jar_file
