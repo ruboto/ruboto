@@ -31,7 +31,7 @@ class RakeTest < Test::Unit::TestCase
 
       # FIXME(uwe): Uncomment this when we can build the test package without building the main package
       # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
-      # FIXME end
+      # EMXIF
 
       assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
     end

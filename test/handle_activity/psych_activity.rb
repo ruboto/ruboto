@@ -6,7 +6,7 @@ if RUBY_VERSION < '1.9'
   $LOADED_FEATURES << 'psych.so'
   $LOAD_PATH << File.join(Config::CONFIG['libdir'], 'ruby/1.9')
 end
-# TODO end
+# ODOT
 
 with_large_stack { require 'psych.rb' }
 

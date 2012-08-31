@@ -111,7 +111,7 @@ module RubotoTest
   else
     gem_spec = Gem.searcher.find('jruby-jars')
   end
-  # FIXME end
+  # EMXIF
 
   raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
   JRUBY_JARS_VERSION = gem_spec.version
@@ -215,7 +215,7 @@ class Test::Unit::TestCase
           FileUtils.rm(Dir['libs/dexmaker*.jar'])
         end
       end
-      # FIXME end
+      # EMXIF
 
       unless example && !update
         Dir.chdir APP_DIR do
@@ -266,7 +266,7 @@ class Test::Unit::TestCase
         break if retries >= 3
         puts "Retrying (#{retries})."
       end
-      # FIXME end
+      # EMXIF
 
       assert_equal 0, $?, "tests failed with return code #$?"
     end

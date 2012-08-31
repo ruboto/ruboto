@@ -25,7 +25,7 @@ module Ruboto
           puts "Forcing generation of new build.xml since upgrading a project generated with Android SDK 13 or older."
           FileUtils.rm_f build_xml_file
         end
-        # FIXME end
+        # EMXIF
 
         # FIXME(uwe):  Simplify when we stop supporting upgrading apps from Android SDK <= 13
         prop_file = File.exists?(new_prop_file) ? new_prop_file : old_prop_file
@@ -36,7 +36,7 @@ module Ruboto
             File.open(prop_file, 'w') { |f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}") }
           end
         end
-        # FIXME end
+        # EMXIF
 
         system "android update project -p #{root} -n #{name}"
         raise "android update project failed with return code #{$?}" unless $? == 0
@@ -54,7 +54,7 @@ module Ruboto
           # FIXME(uwe): Remove build.xml file to force regeneration.
           # FIXME(uwe): Needed when updating apps from Android SDK <= 13 to 14
           FileUtils.rm_f "#{root}/test/build.xml"
-          # FIXME end
+        # EMXIF
 
           puts "\nUpdating Android test project #{name} in #{root}/test..."
           system "android update test-project -m #{root} -p #{root}/test"
@@ -87,7 +87,7 @@ module Ruboto
           prop_file = %w{ant.properties build.properties}.find { |f| File.exists?(f) }
           prop_lines = File.readlines(prop_file)
           File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
-          # FIXME end
+          # EMXIF
 
           ant_setup_line = /^(\s*<\/project>)/
           run_tests_override = <<-EOF
@@ -136,22 +136,18 @@ module Ruboto
 
           EOF
           ant_script = File.read('build.xml')
-          # TODO(uwe): Old patches without delimiter.  Remove when we stop supporting upgrading from ruboto-core 0.2.0 and older.
-          ant_script.gsub!(/\s*<macrodef name="run-tests-helper">.*?<\/macrodef>\s*/m, '')
-          ant_script.gsub!(/\s*<target name="run-tests-quick".*?<\/target>\s*/m, '')
-          # TODO end
           ant_script.gsub!(/\s*<!-- BEGIN added by ruboto(?:-core)? -->.*?<!-- END added by ruboto(?:-core)? -->\s*/m, '')
           raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w') { |f| f << ant_script }
 
-          # FIXME(uwe): Remove when we stop supporting update from Ruboto <= 0.5.2
+          # FIXME(uwe): Remove when we stop supporting update from Ruboto < 0.5.3
           if File.directory? 'assets/scripts'
             log_action 'Moving test scripts to the "src" directory.' do
               FileUtils.mv Dir['assets/scripts/*'], 'src'
               FileUtils.rm_rf 'assets/scripts'
             end
           end
-          # FIXME end
+          # EMXIF
         end
       end
 
@@ -202,14 +198,29 @@ module Ruboto
         true
       end
 
+      def update_dexmaker(force=nil)
+        jar_file = Dir.glob("libs/dexmaker*.jar")[0]
+
+        return false if !jar_file && !force
+
+        copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
+        log_action("Removing #{jar_file}") { File.delete *Dir.glob("libs/dexmaker*.jar") } if jar_file
+
+        # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
+        if verify_target_sdk < 15
+          log_action("Copying dexmaker.jar to libs") { copier.copy 'libs/dexmaker*.jar' }
+        end
+        # EMXIF
+      end
+
       def update_assets
         puts "\nCopying files:"
 
-        # FIXME(uwe):  Remove when we stop supporting updating from Ruboto <= 0.5.4
+        # FIXME(uwe):  Remove when we stop supporting updating from Ruboto < 0.6.0
         if File.exists?('Rakefile') && !File.exists?('rakelib/ruboto.rake')
           FileUtils.rm 'Rakefile'
         end
-        # FIXME end
+        # EMXIF
 
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
         %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
@@ -218,15 +229,6 @@ module Ruboto
         %w{assets rakelib res/layout test}.each do |f|
           log_action(f) { copier.copy f }
         end
-
-        # FIXME(uwe):  Remove when we stop supporting upgrades from ruboto-core 0.3.3 and older
-        old_scripts_dir = 'assets/scripts'
-        if File.exists? old_scripts_dir
-          FileUtils.mv Dir["#{old_scripts_dir}/*"], SCRIPTS_DIR
-          FileUtils.rm_rf old_scripts_dir
-        end
-        # FIXME end
-
       end
 
       def update_icons(force = nil)
@@ -263,26 +265,6 @@ module Ruboto
             puts "Regenerating #{class_name} #{subclass_name}"
             generate_inheriting_file(class_name, subclass_name, verify_package)
 
-            # FIXME(uwe): Remove when we stop supporting upgrading from ruboto-core 0.3.3 and older
-            if class_name == 'BroadcastReceiver'
-              script_file = File.expand_path("#{SCRIPTS_DIR}/#{underscore(subclass_name)}.rb")
-              script_content = File.read(script_file)
-              if script_content !~ /\$broadcast_receiver.handle_receive do \|context, intent\|/ &&
-                  script_content !~ /RubotoBroadcastReceiver.new_with_callbacks/ &&
-                  script_content !~ /class \w+\s+include Ruboto::BroadcastReceiver/ &&
-                  script_content !~ /^\s*class #{subclass_name}\s/
-                puts "Putting receiver script in a block in #{script_file}"
-                script_content.gsub! '$broadcast_context', 'context'
-                File.open(script_file, 'w') do |of|
-                  of.puts "class #{subclass_name}
-  def on_receive(context, intent)"
-                  of << script_content
-                  of.puts '  end\nend'
-                end
-              end
-            end
-            # FIXME end
-
             # FIXME(uwe): Remove when we stop supporting upgrading from ruboto 0.7.0 and ruboto 0.8.0
             if (old_version == '0.7.0' || old_version == '0.8.0')
               puts "Ruboto version #{old_version.inspect} detected."
@@ -292,7 +274,7 @@ module Ruboto
               script_content.gsub! /^(\s*)(def on_(?:create\(bundle\)|start|resume|pause|destroy)\n)/, "\\1\\2\\1  super\n"
               File.open(script_file, 'w'){|of| of << script_content}
             end
-            # FIXME end
+            # EMXIF
 
           elsif source_code =~ /^\/\/ Generated Ruboto subclass with method base "(.*?)".*^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{/m
             method_base, package, subclass_name, class_name = $1, $2, $3, $4
@@ -305,7 +287,7 @@ module Ruboto
             puts "Regenerating subclass #{package}.#{subclass_name}"
             generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
                                            :name => subclass_name, :method_base => 'on', :force => force)
-          # FIXME end
+          # EMXIF
           end
         end
       end
@@ -362,7 +344,7 @@ module Ruboto
         # FIXME(uwe): Remove when we stop supporting updating from Ruboto 0.5.5 and older.
         FileUtils.rm_rf 'src/org/ruboto/callbacks'
         FileUtils.rm_f 'src/org/ruboto/RubotoView.java'
-        # FIXME end
+        # EMXIF
 
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
       end
@@ -471,7 +453,7 @@ module Ruboto
                     'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
                     'org/jruby/runtime/invokedynamic',
                 ]
-                # TODO end
+                # ODOT
               end
 
               excluded_core_packages.each do |i|
