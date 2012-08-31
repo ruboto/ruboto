@@ -212,7 +212,7 @@ module Ruboto
                 if_else(
                     "scriptInfo.getCallbackProcs() != null && scriptInfo.getCallbackProcs()[#{constant_string}] != null",
                     [super_string] + ruby_call,
-                    ['String rubyClassName = Script.toCamelCase(scriptInfo.getScriptName());'] +
+                    ['String rubyClassName = scriptInfo.getRubyClassName();'] +
                         if_else(
                             # TODO(uwe):  Remove defined?(rubyClassName) if we remove non-class-based class definitions
                             "(Boolean)JRubyAdapter.runScriptlet(\"defined?(\" + rubyClassName + \") == 'constant' && \" + rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
