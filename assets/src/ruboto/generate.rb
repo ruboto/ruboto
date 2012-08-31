@@ -43,11 +43,15 @@ class TypeId
   end
 
   def self.convert_type(type)
-    # TODO: Handling arrays
     rv = @@convert_hash[type]
     unless rv
       rv = type.split("[")
-      rv[-1] = "L#{rv[-1].gsub('.', '/')};" unless rv[-1].length == 1
+      unless rv[-1].length == 1
+        rv[-1] = rv[-1].gsub('.', '/')
+        unless rv[-1] =~ /^L.*;$/
+          rv[-1] = "L#{rv[-1]};"
+        end
+      end
       rv = get(rv.join("["))
     end
     rv
