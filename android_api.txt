@@ -1,0 +1,3 @@
+https://raw.github.com/android/platform_frameworks_base/master/api/7.xml
+https://raw.github.com/android/platform_frameworks_base/master/api/8.xml
+https://raw.github.com/android/platform_frameworks_base/master/api/13.xml
