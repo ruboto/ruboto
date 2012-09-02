@@ -20,7 +20,7 @@ class GenerateActivity
         row.findViewById(mFieldId).text = get_item(position)
         row
       rescue Exception
-        puts "Exception getting list item view: \#$!"
+        puts "Exception getting list item view: #$!"
         puts $!.backtrace.join("\n")
         convert_view
       end
@@ -33,4 +33,3 @@ class GenerateActivity
         end
   end
 end
-

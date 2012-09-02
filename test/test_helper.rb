@@ -159,6 +159,7 @@ class Test::Unit::TestCase
     update = options.delete(:update) || false
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     standalone = options.delete(:standalone) || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
+    bundle = options.delete(:bundle)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
@@ -198,10 +199,11 @@ class Test::Unit::TestCase
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"
         end
-        if standalone
-          Dir.chdir APP_DIR do
+        Dir.chdir APP_DIR do
+          write_gemfile(bundle) if bundle
+          if standalone
             exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
-            system "#{RUBOTO_CMD} update jruby --force"
+            system "#{RUBOTO_CMD} gen jruby"
             raise "update jruby failed with return code #$?" if $? != 0
           end
         end
@@ -291,6 +293,11 @@ class Test::Unit::TestCase
   def exclude_stdlibs(excluded_stdlibs)
     puts "Adding ruboto.yml: #{excluded_stdlibs.join(' ')}"
     File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:excluded_stdlibs => excluded_stdlibs}) }
+  end
+
+  def write_gemfile(bundle)
+    puts "Adding Gemfile.apk: #{[*bundle].join(' ')}"
+    File.open('Gemfile.apk', 'w') { |f| f << "source :rubygems\n\ngem 'sqldroid'\n" }
   end
 
 end

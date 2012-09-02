@@ -17,8 +17,8 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
       upper_limit = {
           '1.6.7' => 3.2,
-          '1.7.0.preview1' => ANDROID_TARGET < 15 ? 4.4 : 4.6, # Without dexmaker for Android < 4.0.3
-          '1.7.0.preview2' => ANDROID_TARGET < 15 ? 4.4 : 4.6, # Without dexmaker for Android < 4.0.3
+          '1.7.0.preview1' => 4.6,
+          '1.7.0.preview2' => 4.6,
       }[JRUBY_JARS_VERSION.to_s] || 3.2
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"

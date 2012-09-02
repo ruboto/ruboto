@@ -249,7 +249,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
 
-            // Uncomment these to debug Ruby source loading
+            // Uncomment these to debug/profile Ruby source loading
             // System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
 
