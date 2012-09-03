@@ -79,26 +79,46 @@ end
 desc 'Generate release docs for a given milestone'
 task :release_docs do
   raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
-  # require 'rubygems'
-  # require 'highline/import'
-  print 'user name: ' ; user = STDIN.gets.chomp # ask('login   : ') { |q| q.echo = true }
-  print 'password : ' ; pass = STDIN.gets.chomp # ask('password: ') { |q| q.echo = '*' }
-  print 'milestone: ' ; milestone = STDIN.gets.chomp # ask('milestone: ', Integer) { |q| q.echo = true }
+  begin
+    require 'rubygems'
+    require 'highline/import'
+    user = ask('login   : ') { |q| q.echo = true }
+    pass = ask('password: ') { |q| q.echo = '*' }
+  rescue
+    print 'user name: ' ; user = STDIN.gets.chomp
+    print 'password : ' ; pass = STDIN.gets.chomp
+  end
   require 'uri'
   require 'net/http'
   require 'net/https'
   require 'openssl'
   require 'yaml'
-  uri = URI(%Q{https://api.github.com/repos/ruboto/ruboto/issues?milestone=#{milestone}&state=closed&per_page=1000})
-  https = Net::HTTP.new(uri.host, uri.port)
+  host = 'api.github.com'
+  base_uri = "https://#{host}/repos/ruboto/ruboto"
+  https = Net::HTTP.new(host, 443)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+  milestone_uri = URI("#{base_uri}/milestones")
+  req = Net::HTTP::Get.new(milestone_uri.request_uri)
+  req.basic_auth(user, pass)
+  res = https.start { |http| http.request(req) }
+  milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
+  puts milestones.map{|m| "#{'%2d' % m['number']} #{m['title']}"}.join("\n")
+
+  if defined? ask
+    milestone = ask('milestone: ', Integer) { |q| q.echo = true }
+  else
+    print 'milestone: ' ; milestone = STDIN.gets.chomp
+  end
+
+  uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
   milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
-  categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Other' => nil}
+  categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Pull requests' => nil, 'Other' => nil}
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name']}
     cat = nil
@@ -108,7 +128,9 @@ task :release_docs do
         break
       end
     end
-    cat || 'Other'
+    cat ||= i['pull_request'] && 'Pull requests'
+    cat ||= 'Other'
+    cat
   end
   puts "\nNew in version #{milestone_name}:\n\n"
   (categories.keys & grouped_issues.keys).each do |cat|
