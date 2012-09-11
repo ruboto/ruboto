@@ -253,6 +253,9 @@ public class JRubyAdapter {
             // System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
 
+            // Used to enable JRuby to generate proxy classes
+            System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
+
             ClassLoader classLoader;
             Class<?> scriptingContainerClass;
             String apkName = null;

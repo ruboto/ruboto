@@ -142,6 +142,80 @@ task :release_docs do
   puts "* https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}\n\n"
 end
 
+desc 'Fetch download stats form rubygems.org'
+task :stats do
+  require 'rubygems'
+  require 'uri'
+  require 'net/http'
+  require 'net/https'
+  require 'openssl'
+  require 'yaml'
+  host = 'rubygems.org'
+  base_uri = "https://#{host}/api/v1"
+  https = Net::HTTP.new(host, 443)
+  https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+  counts_per_month = Hash.new{|h, k| h[k] = Hash.new{|mh,mk| mh[mk] = 0 }}
+  total = 0
+
+  %w{ruboto-core ruboto}.each do |gem|
+    versions_uri = URI("#{base_uri}/versions/#{gem}.yaml")
+    req = Net::HTTP::Get.new(versions_uri.request_uri)
+    res = https.start { |http| http.request(req) }
+    versions = YAML.load(res.body).sort_by { |v| Gem::Version.new(v['number']) }
+    puts "\n#{gem}:\n#{versions.map { |v| "#{'%10s' % v['number']} #{v['downloads_count']}" }.join("\n")}"
+
+    versions.each do |v|
+      downloads_uri = URI("#{base_uri}/versions/#{gem}-#{v['number']}/downloads/search.yaml?from=2010-08-01&to=#{Date.today}")
+      req = Net::HTTP::Get.new(downloads_uri.request_uri)
+      res = https.start { |http| http.request(req) }
+      counts = YAML.load(res.body)
+      counts.each do |date_str, count|
+        date = Date.parse(date_str)
+        counts_per_month[date.year][date.month] += count
+        total += count
+      end
+      print '.' ; STDOUT.flush
+    end
+    puts
+  end
+
+  puts "\nDownloads statistics per month:"
+  years = counts_per_month.keys
+  puts "\n    #{years.map{|year| '%6s:' % year}.join(' ')}"
+  (1..12).each do |month|
+    print "#{'%2d' % month}:"
+    years.each do |year|
+      count = counts_per_month[year][month]
+      print count > 0 ? '%8d' % count : ' ' * 8
+    end
+    puts
+  end
+
+  puts "\nTotal: #{total}\n\n"
+
+  puts "\nRubyGems download statistics per month:"
+  years = counts_per_month.keys
+  puts '    ' + years.map{|year| '%-12s' % year}.join
+  (0..20).each do |l|
+    print (l % 10 == 0) ? '%4d' % ((20-l) * 100) : '    '
+    years.each do |year|
+      (1..12).each do |month|
+        count = counts_per_month[year][month]
+        if [year, month] == [Date.today.year, Date.today.month]
+          count *= (Date.new(Date.today.year, Date.today.month, -1).day.to_f / Date.today.day).to_i
+        end
+        print count > ((20-l) * 100) ? '*' : ' '
+      end
+    end
+    puts
+  end
+  puts '    ' + years.map{|year| '%-12s' % year}.join
+
+  puts "\nTotal: #{total}\n\n"
+end
+
 desc "Push the gem to RubyGems"
 task :release => [:clean, :gem] do
   output = `git status --porcelain`

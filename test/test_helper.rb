@@ -1,4 +1,5 @@
-$:.unshift('lib') unless $:.include?('lib')
+lib = File.dirname(File.dirname(__FILE__)) + '/lib'
+$:.unshift(lib) unless $:.include?(lib)
 require 'test/unit'
 require 'rubygems'
 require 'fileutils'

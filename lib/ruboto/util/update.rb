@@ -400,7 +400,8 @@ module Ruboto
               if jruby_core_version >= '1.7.0'
                 excluded_core_packages = [
                     'META-INF', 'cext',
-                    'com/headius',
+                    # 'com/headius', included since we are trying to use DexClient
+                    'com/headius/invokebinder',
                     'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
                     'jline', 'jni',
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
