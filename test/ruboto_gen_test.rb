@@ -21,6 +21,17 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
+  def test_activity_with_number_in_name
+    Dir.chdir APP_DIR do
+      system "#{RUBOTO_CMD} gen class Activity --name App1Activity"
+      assert_equal 0, $?.exitstatus
+      assert File.exists?('src/org/ruboto/test_app/App1Activity.java')
+      assert File.exists?('src/app1_activity.rb')
+      assert File.exists?('test/src/app1_activity_test.rb')
+    end
+    run_app_tests
+  end
+
   def test_gen_class_activity_with_lowercase_should_fail
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class activity --name VeryNewActivity"
