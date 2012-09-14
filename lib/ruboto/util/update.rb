@@ -482,6 +482,10 @@ module Ruboto
               #  FileUtils.rm_rf dir
               #end
 
+              # Add our proxy class factory
+              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar:#{Ruboto::ASSETS}/libs/dexmaker20120305.jar:#{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
+              raise "Compile failed" unless $? == 0
+
               `jar -cf ../#{jruby_core} .`
             end
             FileUtils.remove_dir "tmp", true
