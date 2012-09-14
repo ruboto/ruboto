@@ -39,6 +39,7 @@ module AppTestMethods
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*_test.rb", File.dirname(__FILE__))].each do |test_src|
       snake_name    = test_src.chomp('_test.rb')
+      next if snake_name =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0.preview2'))
       activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join
       Dir.chdir APP_DIR do
         system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}"
