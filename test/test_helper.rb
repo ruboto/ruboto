@@ -212,12 +212,12 @@ class Test::Unit::TestCase
 
       # FIXME(uwe): Installation with dexmaker fails on Android < 4.0.3 due to complex interface structure
       # Fixme(uwe): Remove when solved
-      #if standalone && ANDROID_OS < 15
-      #  Dir.chdir APP_DIR do
-      #    puts "Removing dexmaker jar for android-#{ANDROID_OS}"
-      #    FileUtils.rm(Dir['libs/dexmaker*.jar'])
-      #  end
-      #end
+      if standalone && ANDROID_OS < 15
+        Dir.chdir APP_DIR do
+          puts "Removing dexmaker jar for android-#{ANDROID_OS}"
+          FileUtils.rm(Dir['libs/dexmaker*.jar'])
+        end
+      end
       # EMXIF
 
       unless example && !update

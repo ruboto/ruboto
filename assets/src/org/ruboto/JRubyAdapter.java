@@ -238,7 +238,8 @@ public class JRubyAdapter {
             // END Ruboto HeapAlloc
             setDebugBuild(appContext);
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
-            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR
+            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCEIR
+            // System.setProperty("jruby.compile.backend", "DALVIK");
             System.setProperty("jruby.bytecode.version", "1.6");
             System.setProperty("jruby.interfaces.useProxy", "true");
             System.setProperty("jruby.management.enabled", "false");
