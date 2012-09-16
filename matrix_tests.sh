@@ -52,7 +52,8 @@ for target in 15 10 ; do
       export JRUBY_JARS_VERSION=$jruby_version
 
       # ./run_tests.sh
-      ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
+      ruby test/minimal_app_test.rb
+      # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ruby test/ruboto_gen_test.rb -n test_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
     done
