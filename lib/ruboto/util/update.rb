@@ -189,7 +189,7 @@ module Ruboto
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
         unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
-          log_action("Copying dexmaker.jar to libs") { copier.copy 'libs' }
+          log_action("Copying dx.jar to libs") { copier.copy 'libs' }
         end
 
         reconfigure_jruby_libs(new_jruby_version)
@@ -211,7 +211,7 @@ module Ruboto
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
         # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
         if verify_target_sdk < 15
-          log_action("Copying dexmaker.jar to libs") { copier.copy 'libs/dexmaker*.jar' }
+          log_action("Copying dx.jar to libs") { copier.copy 'libs' }
         end
         # EMXIF
       end
