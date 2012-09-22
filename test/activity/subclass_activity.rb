@@ -1,6 +1,5 @@
 require 'ruboto/activity'
 require 'ruboto/widget'
-require 'ruboto/generate'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
