@@ -250,7 +250,7 @@ class Test::Unit::TestCase
       puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
       return
     end
-    check_platform_installation(Dir['libs/jruby-core-*.jar'].any?)
+    check_platform_installation
     Dir.chdir APP_DIR do
       # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0 which causes the ArrayIndexOutOfBoundsException
       # FIXME(uwe): Simplify if we find a cause for the system crashes.
@@ -280,8 +280,8 @@ class Test::Unit::TestCase
     end
   end
 
-  def check_platform_installation(standalone)
-    if standalone
+  def check_platform_installation
+    if RUBOTO_PLATFORM == 'STANDALONE'
       system 'rake platform:uninstall'
     elsif RUBOTO_PLATFORM == 'CURRENT'
       system "rake platform:current platform:install"

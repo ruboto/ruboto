@@ -3,11 +3,14 @@
 MASTER=1.7.0.preview2
 
 export ANDROID_TARGET RUBOTO_PLATFORM JRUBY_JARS_VERSION
+export SKIP_RUBOTO_UPDATE_TEST=1
 
 for ANDROID_TARGET in 10 15 ; do
   set +e
   killall emulator-arm
   sleep 5
+  killall -9 emulator-arm
+  sleep 1
   set -e
   if [ "$ANDROID_TARGET" == "15" ] ; then
     avd="Android_4.0.3"
@@ -17,7 +20,7 @@ for ANDROID_TARGET in 10 15 ; do
 
   emulator -avd $avd -no-snapshot-load -no-snapshot-save &
   adb wait-for-device
-  adb logcat > tmp/adb_logcat.txt &
+  adb logcat > adb_logcat.log &
 
   (
     set +e
@@ -35,7 +38,7 @@ for ANDROID_TARGET in 10 15 ; do
     exit 1
   ) &
 
-  for RUBOTO_PLATFORM in FROM_GEM STANDALONE CURRENT ; do  # CURRENT FROM_GEM STANDALONE
+  for RUBOTO_PLATFORM in CURRENT FROM_GEM STANDALONE ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions="$MASTER 1.6.8 1.6.7.2"
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then

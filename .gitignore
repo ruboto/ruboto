@@ -6,4 +6,5 @@ tmp
 .idea
 *~
 /.rbx
+/adb_logcat.log
 /exportToHTML
