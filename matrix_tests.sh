@@ -2,8 +2,7 @@
 
 MASTER=1.7.0.preview2
 
-for target in 15 10 ; do
-  echo "target: $target"
+for target in 10 15 ; do
   set +e
   killall emulator-arm
   sleep 5
@@ -36,7 +35,6 @@ for target in 15 10 ; do
   ) &
 
   for platform in CURRENT FROM_GEM STANDALONE ; do  # CURRENT FROM_GEM STANDALONE
-    echo "platform: $platform"
     if [ "$platform" == "STANDALONE" ] ; then
       jruby_versions="$MASTER"  # THIS IS STUPID!
       # jruby_versions="$MASTER 1.6.7.2"
@@ -46,13 +44,18 @@ for target in 15 10 ; do
       jruby_versions="$MASTER"  # THIS IS STUPID!
     fi
     for jruby_version in $jruby_versions ; do
+      echo ""
+      echo "********************************************************************************"
+      echo "target: $target"
+      echo "platform: $platform"
       echo "jruby version: $jruby_version"
+      echo ""
       export RUBOTO_PLATFORM=$platform
       export ANDROID_TARGET=$target
       export JRUBY_JARS_VERSION=$jruby_version
 
-      # ./run_tests.sh
-      ruby test/minimal_app_test.rb
+      ./run_tests.sh
+      # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ruby test/ruboto_gen_test.rb -n test_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
