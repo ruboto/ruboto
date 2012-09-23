@@ -16,9 +16,8 @@ for ANDROID_TARGET in 10 15 ; do
   fi
 
   emulator -avd $avd -no-snapshot-load -no-snapshot-save &
-  sleep 5
+  adb wait-for-device
   adb logcat > tmp/adb_logcat.txt &
-  sleep 5
 
   (
     set +e
@@ -36,7 +35,7 @@ for ANDROID_TARGET in 10 15 ; do
     exit 1
   ) &
 
-  for RUBOTO_PLATFORM in CURRENT FROM_GEM STANDALONE ; do  # CURRENT FROM_GEM STANDALONE
+  for RUBOTO_PLATFORM in FROM_GEM STANDALONE CURRENT ; do  # CURRENT FROM_GEM STANDALONE
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions="$MASTER 1.6.8 1.6.7.2"
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then

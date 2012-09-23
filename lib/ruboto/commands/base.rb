@@ -97,7 +97,7 @@ module Ruboto
                   update_icons true
                   update_classes nil, true
                   update_jruby true if params['with-jruby'].value
-                  update_dexmaker true unless params['with-jruby'].value
+                  update_dx_jar true unless params['with-jruby'].value
                   update_core_classes "exclude"
 
                   log_action("Generating the default Activity and script") do
@@ -358,7 +358,7 @@ module Ruboto
                 update_assets
                 update_ruboto force
                 update_classes old_version, force
-                update_dexmaker force
+                update_dx_jar force
                 update_jruby force
                 update_manifest nil, nil, force
                 update_icons force

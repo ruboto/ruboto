@@ -242,12 +242,14 @@ EOF
     run_app_tests
   end
 
-  def test_gen_jruby
-    Dir.chdir APP_DIR do
-      system "#{RUBOTO_CMD} gen jruby"
-      assert_equal 0, $?.exitstatus
-      assert File.exists?("libs/jruby-core-#{JRUBY_JARS_VERSION}.jar")
-      assert File.exists?("libs/jruby-stdlib-#{JRUBY_JARS_VERSION}.jar")
+  if RUBOTO_PLATFORM == 'FROM_GEM'
+    def test_gen_jruby
+      Dir.chdir APP_DIR do
+        system "#{RUBOTO_CMD} gen jruby"
+        assert_equal 0, $?.exitstatus
+        assert File.exists?("libs/jruby-core-#{JRUBY_JARS_VERSION}.jar")
+        assert File.exists?("libs/jruby-stdlib-#{JRUBY_JARS_VERSION}.jar")
+      end
     end
   end
 

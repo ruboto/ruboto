@@ -198,21 +198,21 @@ module Ruboto
         true
       end
 
-      def update_dexmaker(force=nil)
-        jar_file = Dir.glob("libs/dexmaker*.jar")[0]
+      def update_dx_jar(force=nil)
+        jar_file = Dir.glob("libs/dx.jar")[0]
 
-        # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
-        return false if !jar_file && !force
+        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
+        return if !jar_file && !force
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
-        log_action("Removing #{jar_file}") { File.delete *Dir.glob("libs/dexmaker*.jar") } if jar_file
+        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
+        log_action("Removing #{jar_file}") { File.delete jar_file } if jar_file
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        # FIXME(uwe):  Skip copying dexmaker to apps using RubotoCore when we include dexmaker.jar in RubotoCore
-        if verify_target_sdk < 15
-          log_action("Copying dx.jar to libs") { copier.copy 'libs' }
-        end
+        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
+        #if verify_target_sdk < 15
+        #  log_action("Copying dx.jar to libs") { copier.copy 'libs' }
+        #end
         # EMXIF
       end
 
@@ -483,7 +483,7 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar:#{Ruboto::ASSETS}/libs/dexmaker20120305.jar:#{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
+              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar:#{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
               raise "Compile failed" unless $? == 0
 
               `jar -cf ../#{jruby_core} .`

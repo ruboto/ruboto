@@ -193,7 +193,7 @@ class Test::Unit::TestCase
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
           else
-            FileUtils.rm(Dir['libs/{jruby-*.jar,dexmaker*.jar}'])
+            FileUtils.rm(Dir['libs/{jruby-*.jar,dx.jar}'])
           end
           update_app if update
         end
@@ -215,14 +215,14 @@ class Test::Unit::TestCase
         end
       end
 
-      # FIXME(uwe): Installation with dexmaker fails on Android < 4.0.3 due to complex interface structure
+      # FIXME(uwe): Installation with dx.jar fails on Android < 4.0.3 due to complex interface structure
       # Fixme(uwe): Remove when solved
-      if standalone && ANDROID_OS < 15
-        Dir.chdir APP_DIR do
-          puts "Removing dexmaker jar for android-#{ANDROID_OS}"
-          FileUtils.rm(Dir['libs/dexmaker*.jar'])
-        end
-      end
+      #if standalone && ANDROID_OS < 15
+      #  Dir.chdir APP_DIR do
+      #    puts "Removing dx.jar for android-#{ANDROID_OS}"
+      #    FileUtils.rm(Dir['libs/dx.jar'])
+      #  end
+      #end
       # EMXIF
 
       unless example && !update
