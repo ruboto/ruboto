@@ -188,9 +188,9 @@ module Ruboto
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
+        # unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
           log_action("Copying dx.jar to libs") { copier.copy 'libs' }
-        end
+        # end
 
         reconfigure_jruby_libs(new_jruby_version)
 
