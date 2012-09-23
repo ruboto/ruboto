@@ -60,10 +60,10 @@ module RubotoTest
   end
 
   def self.install_jruby_jars_gem
-    jars_version_from_env = ENV['JRUBY_JARS_VERSION']
-    version_requirement = "-v #{jars_version_from_env}" if jars_version_from_env
-    `gem query -i -n jruby-jars #{version_requirement}`
-    system "gem install #{jars_version_from_env.nil? || !File.exists?("jruby-jars-#{jars_version_from_env}.gem") ? '-r' : '-l'} jruby-jars #{version_requirement} --no-ri --no-rdoc" unless $? == 0
+    jars_version_from_env = ENV['JRUBY_JARS_VERSION'] unless RUBOTO_PLATFORM == 'CURRENT'
+    version_requirement = "-#{jars_version_from_env}" if jars_version_from_env
+    `gem query -i -n jruby-jars#{version_requirement}`
+    system "gem install jruby-jars#{version_requirement} --no-ri --no-rdoc" unless $? == 0
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
     if jars_version_from_env
       exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
@@ -104,22 +104,27 @@ module RubotoTest
   puts "ANDROID_HOME: #{ANDROID_HOME}"
   puts "ANDROID_SDK_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
 
-  install_jruby_jars_gem
-
-  # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
-  if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
-    gem_spec = Gem::Specification.find_by_path 'jruby-jars'
-  else
-    gem_spec = Gem.searcher.find('jruby-jars')
-  end
-  # EMXIF
-
-  raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
-  JRUBY_JARS_VERSION = gem_spec.version
-  puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
-
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
+
+  install_jruby_jars_gem
+
+  if RUBOTO_PLATFORM == 'CURRENT'
+    JRUBY_JARS_VERSION = Gem::Version.new('1.7.0.dev')
+  else
+    # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
+      gem_spec = Gem::Specification.find_by_path 'jruby-jars'
+    else
+      gem_spec = Gem.searcher.find('jruby-jars')
+    end
+    # EMXIF
+
+    raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
+    JRUBY_JARS_VERSION = gem_spec.version
+  end
+
+  puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
 end
 
 class Test::Unit::TestCase
@@ -278,12 +283,12 @@ class Test::Unit::TestCase
   def check_platform_installation(standalone)
     if standalone
       system 'rake platform:uninstall'
+    elsif RUBOTO_PLATFORM == 'CURRENT'
+      system "rake platform:current platform:install"
+    elsif RUBOTO_PLATFORM == 'FROM_GEM'
+      system "rake platform:debug platform:install"
     else
-      if RUBOTO_PLATFORM == 'CURRENT'
-        system "rake platform:current platform:install"
-      elsif RUBOTO_PLATFORM == 'FROM_GEM'
-        system "rake platform:debug platform:install"
-      end
+      fail "Unknown Ruboto platform: #{RUBOTO_PLATFORM.inspect}"
     end
     if $? != 0
       FileUtils.rm_rf 'tmp/RubotoCore'

@@ -2,14 +2,16 @@
 
 MASTER=1.7.0.preview2
 
-for target in 10 15 ; do
+export ANDROID_TARGET RUBOTO_PLATFORM JRUBY_JARS_VERSION
+
+for ANDROID_TARGET in 10 15 ; do
   set +e
   killall emulator-arm
   sleep 5
   set -e
-  if [ "$target" == "15" ] ; then
+  if [ "$ANDROID_TARGET" == "15" ] ; then
     avd="Android_4.0.3"
-  elif [ "$target" == "10" ] ; then
+  elif [ "$ANDROID_TARGET" == "10" ] ; then
     avd="Android_2.3.3"
   fi
 
@@ -34,25 +36,24 @@ for target in 10 15 ; do
     exit 1
   ) &
 
-  for platform in CURRENT FROM_GEM STANDALONE ; do  # CURRENT FROM_GEM STANDALONE
-    if [ "$platform" == "STANDALONE" ] ; then
-      jruby_versions="$MASTER"  # THIS IS STUPID!
-      # jruby_versions="$MASTER 1.6.7.2"
-    elif [ "$platform" == "FROM_GEM" ] ; then
+  for RUBOTO_PLATFORM in CURRENT FROM_GEM STANDALONE ; do  # CURRENT FROM_GEM STANDALONE
+    if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
+      jruby_versions="$MASTER 1.6.8 1.6.7.2"
+    elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then
       jruby_versions="$MASTER"
-    elif [ "$platform" == "CURRENT" ] ; then
-      jruby_versions="$MASTER"  # THIS IS STUPID!
+    elif [ "$RUBOTO_PLATFORM" == "CURRENT" ] ; then
+      jruby_versions="CURRENT"
     fi
-    for jruby_version in $jruby_versions ; do
+    for JRUBY_JARS_VERSION in $jruby_versions ; do
+      if [ $RUBOTO_PLATFORM == "CURRENT" ] ; then
+        unset JRUBY_JARS_VERSION
+      fi
       echo ""
       echo "********************************************************************************"
-      echo "target: $target"
-      echo "platform: $platform"
-      echo "jruby version: $jruby_version"
+      echo "ANDROID_TARGET: $ANDROID_TARGET"
+      echo "RUBOTO_PLATFORM: $RUBOTO_PLATFORM"
+      echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
       echo ""
-      export RUBOTO_PLATFORM=$platform
-      export ANDROID_TARGET=$target
-      export JRUBY_JARS_VERSION=$jruby_version
 
       ./run_tests.sh
       # ruby test/minimal_app_test.rb
