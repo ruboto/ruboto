@@ -61,9 +61,15 @@ module RubotoTest
 
   def self.install_jruby_jars_gem
     jars_version_from_env = ENV['JRUBY_JARS_VERSION'] unless RUBOTO_PLATFORM == 'CURRENT'
-    version_requirement = "-#{jars_version_from_env}" if jars_version_from_env
+    version_requirement = " -v #{jars_version_from_env}" if jars_version_from_env
     `gem query -i -n jruby-jars#{version_requirement}`
-    system "gem install jruby-jars#{version_requirement} --no-ri --no-rdoc" unless $? == 0
+    unless $? == 0
+      if File.exists?("jruby-jars-#{jars_version_from_env}.gem")
+        system "gem install -l jruby-jars-#{jars_version_from_env}.gem --no-ri --no-rdoc"
+      else
+        system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
+      end
+    end
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
     if jars_version_from_env
       exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
