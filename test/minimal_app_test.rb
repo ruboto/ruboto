@@ -13,6 +13,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       cleanup_app
     end
 
+    # APK was larger than 3.2MB: 3.3MB.  JRuby: 1.6.7.2,        ANDROID_TARGET: 10.
     # APK was larger than 4.4MB: 4.7MB.  JRuby: 1.7.0.preview2, ANDROID_TARGET: 10.
     # APK was larger than 3.2MB: 3.5MB.  JRuby: 1.6.7,          ANDROID_TARGET: 15.
     # APK was larger than 4.6MB: 4.9MB.  JRuby: 1.7.0.preview2, ANDROID_TARGET: 15.
@@ -21,6 +22,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
       upper_limit = {
           '1.6.7' => 3.5,
+          '1.6.7.2' => 3.5,
           '1.6.8' => 3.5,
           '1.7.0.preview1' => 4.6,
           '1.7.0.preview2' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
