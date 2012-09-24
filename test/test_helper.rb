@@ -64,8 +64,9 @@ module RubotoTest
     version_requirement = " -v #{jars_version_from_env}" if jars_version_from_env
     `gem query -i -n jruby-jars#{version_requirement}`
     unless $? == 0
-      if File.exists?("jruby-jars-#{jars_version_from_env}.gem")
-        system "gem install -l jruby-jars-#{jars_version_from_env}.gem --no-ri --no-rdoc"
+      local_gem_file = "jruby-jars-#{jars_version_from_env}.gem"
+      if File.exists?(local_gem_file)
+        system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
       else
         system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
       end
