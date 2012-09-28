@@ -25,7 +25,7 @@ module Ruboto
           end
         end
 
-        system "android update project -p #{root} -n #{name}"
+        system "android update project -p #{root} -n #{name} --subprojects"
         raise "android update project failed with return code #{$?}" unless $? == 0
       end
 
@@ -38,9 +38,11 @@ module Ruboto
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
-          puts "\nUpdating Android test project #{name} in #{root}/test..."
-          system "android update test-project -m #{root} -p #{root}/test"
-          raise "android update test-project failed with return code #{$?}" unless $? == 0
+          test_ant_properties_file = 'test/ant.properties'
+          test_ant_properties = File.read(test_ant_properties_file)
+          if test_ant_properties.gsub!(/^tested.project.dir=.*$/, 'tested.project.dir=../')
+            File.open(test_ant_properties_file, 'w') { |f| f << test_ant_properties }
+          end
         end
 
         Dir.chdir File.join(root, 'test') do
@@ -65,11 +67,9 @@ module Ruboto
           File.open("AndroidManifest.xml", 'w') { |f| test_manifest.document.write(f, 4) }
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
 
-          # FIXME(uwe): Cleanup when we stop supporting updating apps generated with Android SDK <= 13
-          prop_file = %w{ant.properties build.properties}.find { |f| File.exists?(f) }
+          prop_file = 'ant.properties'
           prop_lines = File.readlines(prop_file)
           File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
-          # EMXIF
 
           run_tests_override = <<-EOF
 <!-- BEGIN added by Ruboto -->
@@ -174,7 +174,7 @@ module Ruboto
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
         # unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
-          log_action("Copying dx.jar to libs") { copier.copy 'libs' }
+        log_action("Copying dx.jar to libs") { copier.copy 'libs' }
         # end
 
         reconfigure_jruby_libs(new_jruby_version)
@@ -260,7 +260,7 @@ module Ruboto
               puts "Adding explicit super call in #{script_file}"
               script_content = File.read(script_file)
               script_content.gsub! /^(\s*)(def on_(?:create\(bundle\)|start|resume|pause|destroy)\n)/, "\\1\\2\\1  super\n"
-              File.open(script_file, 'w'){|of| of << script_content}
+              File.open(script_file, 'w') { |of| of << script_content }
             end
             # EMXIF
 
@@ -270,14 +270,14 @@ module Ruboto
             generate_inheriting_file 'Class', subclass_name
             generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
                                            :name => subclass_name, :method_base => method_base, :force => force)
-          # FIXME(uwe): Remove when we stop updating from Ruboto 0.7.0 and older
+            # FIXME(uwe): Remove when we stop updating from Ruboto 0.7.0 and older
           elsif source_code =~ /^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{.*^\s*private Object\[\] callbackProcs = new Object\[\d+\];/m
             package, subclass_name, class_name = $1, $2, $3
             puts "Regenerating subclass #{package}.#{subclass_name}"
             generate_inheriting_file 'Class', subclass_name
             generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
                                            :name => subclass_name, :method_base => 'on', :force => force)
-          # EMXIF
+            # EMXIF
           end
         end
       end
@@ -454,7 +454,7 @@ module Ruboto
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
               # Reduces the installation footprint, but also reduces performance and stack usage
               # FIXME(uwe):  Measure the performance change
-              if false && jruby_core_version =~ /^1.7.0/ && Dir.chdir('../..'){verify_target_sdk < 15}
+              if false && jruby_core_version =~ /^1.7.0/ && Dir.chdir('../..') { verify_target_sdk < 15 }
                 invokers = Dir['**/*${INVOKER$*,POPULATOR}.class']
                 log_action("Removing invokers & populators(#{invokers.size})") do
                   FileUtils.rm invokers
