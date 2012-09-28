@@ -14,21 +14,9 @@ module Ruboto
       def update_android
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
-        new_prop_file = "#{root}/project.properties"
-        old_prop_file = "#{root}/default.properties"
         name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
 
-        # FIXME(uwe): Remove build.xml file to force regeneration.
-        # FIXME(uwe): Needed when updating apps from Android SDK <= 13 to 14
-        # FIXME(uwe): Remove when we stop supporting upgrading apps from Android SDK <= 13
-        if File.read(build_xml_file) !~ /<!-- version-tag: 1 -->/
-          puts "Forcing generation of new build.xml since upgrading a project generated with Android SDK 13 or older."
-          FileUtils.rm_f build_xml_file
-        end
-        # EMXIF
-
-        # FIXME(uwe):  Simplify when we stop supporting upgrading apps from Android SDK <= 13
-        prop_file = File.exists?(new_prop_file) ? new_prop_file : old_prop_file
+        prop_file = "#{root}/project.properties"
         version_regexp = /^(target=android-)(\d+)$/
         if (project_property_file = File.read(prop_file)) =~ version_regexp
           if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
@@ -36,7 +24,6 @@ module Ruboto
             File.open(prop_file, 'w') { |f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}") }
           end
         end
-        # EMXIF
 
         system "android update project -p #{root} -n #{name}"
         raise "android update project failed with return code #{$?}" unless $? == 0
@@ -51,11 +38,6 @@ module Ruboto
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
         else
-          # FIXME(uwe): Remove build.xml file to force regeneration.
-          # FIXME(uwe): Needed when updating apps from Android SDK <= 13 to 14
-          FileUtils.rm_f "#{root}/test/build.xml"
-        # EMXIF
-
           puts "\nUpdating Android test project #{name} in #{root}/test..."
           system "android update test-project -m #{root} -p #{root}/test"
           raise "android update test-project failed with return code #{$?}" unless $? == 0
@@ -89,9 +71,8 @@ module Ruboto
           File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
           # EMXIF
 
-          ant_setup_line = /^(\s*<\/project>)/
           run_tests_override = <<-EOF
-<!-- BEGIN added by ruboto -->
+<!-- BEGIN added by Ruboto -->
 
     <macrodef name="run-tests-helper">
       <attribute name="emma.enabled" default="false"/>
@@ -132,12 +113,16 @@ module Ruboto
     <target name="run-tests-quick" description="Runs tests with previously installed packages">
       <run-tests-helper />
     </target>
-<!-- END added by ruboto -->
-
+<!-- END added by Ruboto -->
           EOF
           ant_script = File.read('build.xml')
+
+          # FIXME(uwe): Remove when we stop support for updating from Ruboto 0.8.1 and older
           ant_script.gsub!(/\s*<!-- BEGIN added by ruboto(?:-core)? -->.*?<!-- END added by ruboto(?:-core)? -->\s*/m, '')
-          raise "Bad ANT script" unless ant_script.gsub!(ant_setup_line, "#{run_tests_override}\n\n\\1")
+          # EMXIF
+
+          ant_script.gsub!(/\s*<!-- BEGIN added by Ruboto -->.*?<!-- END added by Ruboto -->\s*/m, '')
+          raise "Bad ANT script" unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w') { |f| f << ant_script }
 
           # FIXME(uwe): Remove when we stop supporting update from Ruboto < 0.5.3
@@ -520,7 +505,7 @@ module Ruboto
                 else
                   lib_dirs = ['1.8', '1.9', 'shared']
                 end
-                # TODO end
+                # ODOT
 
                 lib_dirs.each do |ld|
                   excluded_stdlibs.each do |d|

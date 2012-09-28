@@ -58,7 +58,7 @@ class RubotoGenTest < Test::Unit::TestCase
           '1.6.7' => ANDROID_TARGET < 15 ? 5800.0 : 5900.0,
           '1.7.0.preview1' => ANDROID_TARGET < 15 ? 7400.0 : 7308.0,
           '1.7.0.preview2' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
-          '1.7.0.preview3' => ANDROID_TARGET < 15 ? 7100.0 : 7600.0,
+          '1.7.0.rc1' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
       }[JRUBY_JARS_VERSION.to_s] || 4200.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else

@@ -20,12 +20,23 @@ class SqldroidTest < Test::Unit::TestCase
       File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
 require 'ruboto/activity'
 require 'ruboto/widget'
-require 'ruboto/generate'
 require 'sqldroid'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
-ruboto_generate("android.widget.ArrayAdapter" => $package_name + ".MyArrayAdapter")
+class MyArrayAdapter < android.widget.ArrayAdapter
+  def get_view(position, convert_view, parent)
+    puts "IN get_view!!!"
+    @inflater ||= context.getSystemService(Context::LAYOUT_INFLATER_SERVICE)
+    row = convert_view ? convert_view : @inflater.inflate(mResource, nil)
+    row.findViewById(mFieldId).text = get_item(position)
+    row
+  rescue Exception
+    puts "Exception getting list item view: \#$!"
+    puts $!.backtrace.join("\n")
+    convert_view
+  end
+end
 
 class RubotoTestAppActivity
   def on_create(bundle)
@@ -33,19 +44,6 @@ class RubotoTestAppActivity
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "\#{s[0..0].upcase}\#{s[1..-1]}" }.join(' ')
 
     adapter = MyArrayAdapter.new(self, android.R.layout.simple_list_item_1 , AndroidIds::text1, ['Record one', 'Record two'])
-    adapter.initialize_ruboto_callbacks do
-      def get_view(position, convert_view, parent)
-        puts "IN get_view!!!"
-        @inflater ||= context.getSystemService(Context::LAYOUT_INFLATER_SERVICE)
-        row = convert_view ? convert_view : @inflater.inflate(mResource, nil)
-        row.findViewById(mFieldId).text = get_item(position)
-        row
-      rescue Exception
-        puts "Exception getting list item view: \#$!"
-        puts $!.backtrace.join("\n")
-        convert_view
-      end
-    end
 
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do
