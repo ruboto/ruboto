@@ -254,7 +254,7 @@ namespace :platform do
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
       manifest.root.attributes['android:versionCode'] = '408'
-      manifest.root.attributes['android:versionName'] = '0.4.8.dev'
+      manifest.root.attributes['android:versionName'] = '0.4.8'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}
