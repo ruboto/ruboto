@@ -365,7 +365,7 @@ module Ruboto
                 update_core_classes "exclude"
                 update_bundle
               when "jruby" then
-                update_jruby(params['force'].value) || abort
+                update_jruby(params['force'].value, true) || abort
               # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
               when "ruboto" then
                 puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"

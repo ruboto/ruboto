@@ -136,13 +136,13 @@ module Ruboto
         end
       end
 
-      def update_jruby(force=nil)
+      def update_jruby(force=nil, explicit = false)
         jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
         jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
 
         unless force
           if !jruby_core || !jruby_stdlib
-            puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app."
+            puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app." if explicit
             return false
           end
         end
