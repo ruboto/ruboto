@@ -253,8 +253,8 @@ namespace :platform do
     sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} bin/ruboto gen app --package org.ruboto.core --name RubotoCore --with-jruby --path #{PLATFORM_PROJECT} --min-sdk #{Ruboto::SdkVersions::MINIMUM_SUPPORTED_SDK} --target #{Ruboto::SdkVersions::DEFAULT_TARGET_SDK}"
     Dir.chdir(PLATFORM_PROJECT) do
       manifest = REXML::Document.new(File.read(MANIFEST_FILE))
-      manifest.root.attributes['android:versionCode'] = '408'
-      manifest.root.attributes['android:versionName'] = '0.4.8'
+      manifest.root.attributes['android:versionCode'] = '409'
+      manifest.root.attributes['android:versionName'] = '0.4.9'
       manifest.root.attributes['android:installLocation'] = 'auto' # or 'preferExternal' ?
       File.open(MANIFEST_FILE, 'w') { |f| manifest.document.write(f, 4) }
       File.open('Gemfile.apk', 'w'){|f| f << "source :rubygems\n\ngem 'activerecord-jdbc-adapter'\n"}

@@ -524,9 +524,11 @@ module Ruboto
 
               Dir.chdir "new" do
                 # Uncomment this part to split the stdlib into one jar per directory
-                # Dir['*'].select{|f| File.directory? f}.each do |d|
-                #    `jar -cf ../jruby-stdlib-#{d}-#{JRubyJars::VERSION}.jar #{d}`
-                #    FileUtils.rm_rf d
+                # Dir['lib/ruby/*/*'].select { |f| File.directory? f }.each do |d|
+                #   file = "#{d}.rb"
+                #   `jar -cf ../../jruby-stdlib-#{d.gsub('/', '-')}-#{JRubyJars::VERSION}.jar #{d} #{file if File.exists?(file)}`
+                #   FileUtils.rm_rf d
+                #   FileUtils.rm_rf file if File.exists?(file)
                 # end
 
                 `jar -cf ../../#{jruby_stdlib} .`
