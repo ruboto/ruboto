@@ -184,6 +184,10 @@ module Ruboto
       end
 
       def update_dx_jar(force=nil)
+        # FIXME(uwe): Remove when we stop updating from Ruboto 0.8.1 and older.
+        FileUtils.rm(Dir['libs/dexmaker*.jar'])
+        # EMXIF
+
         jar_file = Dir.glob("libs/dx.jar")[0]
 
         # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore

@@ -29,4 +29,12 @@ module UpdatedExampleTestMethods
     end
   end
 
+  # FIXME(uwe): Remove when we stop updating from Ruboto 0.8.1 and older.
+  def test_dexmaker_jar_is_removed
+    Dir.chdir APP_DIR do
+      assert_equal [], Dir['libs/dexmaker*.jar']
+    end
+  end
+  # EMXIF
+
 end
