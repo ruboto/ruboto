@@ -24,6 +24,7 @@ test('stack depth') do |activity|
         '0.4.7' => [0, 0, 0, 0],
         '0.4.8.dev' => [0, 0, -4, -4],
         '0.4.8' => [0, 0, -4, -4],
+        '0.4.9' => [0, 0, -4, -4],
     }[org.ruboto.JRubyAdapter.platform_version_name] || [0, 0, 0, 0]
   else # STANDALONE
     jruby_offset = {

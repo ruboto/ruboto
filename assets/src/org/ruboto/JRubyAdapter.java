@@ -251,7 +251,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
 
             // Uncomment these to debug/profile Ruby source loading
-            // System.setProperty("jruby.debug.loadService", "true");
+            System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
 
             // Used to enable JRuby to generate proxy classes
