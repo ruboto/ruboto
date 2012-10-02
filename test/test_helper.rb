@@ -179,6 +179,7 @@ class Test::Unit::TestCase
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_example_#{example}" if example
+    template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
