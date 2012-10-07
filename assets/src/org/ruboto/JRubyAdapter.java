@@ -325,6 +325,15 @@ public class JRubyAdapter {
                 }
 
                 String jrubyHome = "file:" + apkName + "!/jruby.home";
+
+                // FIXME(uwe): Remove when we stop supporting RubotoCore 0.4.7
+                Log.i("RUBOTO_CORE_VERSION_NAME: " + RUBOTO_CORE_VERSION_NAME);
+                if (RUBOTO_CORE_VERSION_NAME != null &&
+                        (RUBOTO_CORE_VERSION_NAME.equals("0.4.7") || RUBOTO_CORE_VERSION_NAME.equals("0.4.8"))) {
+                    jrubyHome = "file:" + apkName + "!";
+                }
+                // EMXIF
+
                 Log.i("Setting JRUBY_HOME: " + jrubyHome);
                 System.setProperty("jruby.home", jrubyHome);
 
