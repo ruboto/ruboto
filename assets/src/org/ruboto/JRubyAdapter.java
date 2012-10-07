@@ -324,7 +324,7 @@ public class JRubyAdapter {
                   setOutputStream(output);
                 }
 
-                String jrubyHome = "file:" + apkName + "!";
+                String jrubyHome = "file:" + apkName + "!/jruby.home";
                 Log.i("Setting JRUBY_HOME: " + jrubyHome);
                 System.setProperty("jruby.home", jrubyHome);
 

@@ -491,13 +491,12 @@ module Ruboto
             FileUtils.mkdir_p 'tmp'
             Dir.chdir 'tmp' do
               FileUtils.mkdir_p 'old'
-              FileUtils.mkdir_p 'new'
+              FileUtils.mkdir_p 'new/jruby.home'
               Dir.chdir 'old' do
                 `jar -xf ../../#{jruby_stdlib}`
               end
-              FileUtils.move 'old/META-INF/jruby.home/lib', 'new'
-
-              FileUtils.rm_rf 'new/lib/ruby/gems'
+              FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
+              FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
               if excluded_stdlibs.any?
 
@@ -513,7 +512,7 @@ module Ruboto
 
                 lib_dirs.each do |ld|
                   excluded_stdlibs.each do |d|
-                    dir = "new/lib/ruby/#{ld}/#{d}"
+                    dir = "new/jruby.home/lib/ruby/#{ld}/#{d}"
                     FileUtils.rm_rf dir if File.exists? dir
                     file = "#{dir}.rb"
                     FileUtils.rm_rf file if File.exists? file
@@ -524,7 +523,7 @@ module Ruboto
 
               Dir.chdir "new" do
                 # Uncomment this part to split the stdlib into one jar per directory
-                # Dir['lib/ruby/*/*'].select { |f| File.directory? f }.each do |d|
+                # Dir['jruby.home/lib/ruby/*/*'].select { |f| File.directory? f }.each do |d|
                 #   file = "#{d}.rb"
                 #   `jar -cf ../../jruby-stdlib-#{d.gsub('/', '-')}-#{JRubyJars::VERSION}.jar #{d} #{file if File.exists?(file)}`
                 #   FileUtils.rm_rf d
