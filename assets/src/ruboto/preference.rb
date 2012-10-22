@@ -25,16 +25,6 @@ RubotoPreferenceActivity.class_eval do
       end
       rv
     end
-
-    def setup_preference_screen &block
-      @preference_screen_block = block
-    end
-
-    def on_create(bundle)
-      @parent = nil
-      setPreferenceScreen(instance_eval &@preference_screen_block) if @preference_screen_block
-      instance_eval { @finish_create_block.call } if @finish_create_block
-    end
 end
 
 Preference.class_eval do
