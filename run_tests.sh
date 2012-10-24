@@ -43,4 +43,4 @@ fi
 
 export NOEXEC=0
 rake clean
-rake test --trace $*
+rake test $*

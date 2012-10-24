@@ -37,15 +37,19 @@ module Ruboto
           system %Q{android create test-project -m "#{root.gsub('"', '\"')}" -n "#{name}Test" -p "#{root.gsub('"', '\"')}/test"}
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
           puts "Done"
-        else
-          test_ant_properties_file = 'test/ant.properties'
-          test_ant_properties = File.read(test_ant_properties_file)
-          if test_ant_properties.gsub!(/^tested.project.dir=.*$/, 'tested.project.dir=../')
-            File.open(test_ant_properties_file, 'w') { |f| f << test_ant_properties }
-          end
         end
 
         Dir.chdir File.join(root, 'test') do
+
+          instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
+          prop_file = 'ant.properties'
+          prop_lines = (prop_lines_org = File.read(prop_file)).dup
+          prop_lines.gsub!(/^tested.project.dir=.*$/, 'tested.project.dir=../')
+          prop_lines << instrumentation_property unless prop_lines.include? instrumentation_property
+          if prop_lines != prop_lines_org
+            File.open(prop_file, 'w') { |f| f << prop_lines }
+          end
+
           test_manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
           test_manifest.elements['application'].attributes['android:icon'] ||= '@drawable/ic_launcher'
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
@@ -65,11 +69,6 @@ module Ruboto
           # end
 
           File.open("AndroidManifest.xml", 'w') { |f| test_manifest.document.write(f, 4) }
-          instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
-
-          prop_file = 'ant.properties'
-          prop_lines = File.readlines(prop_file)
-          File.open(prop_file, 'a') { |f| f << instrumentation_property } unless prop_lines.include?(instrumentation_property)
 
           run_tests_override = <<-EOF
 <!-- BEGIN added by Ruboto -->

@@ -13,6 +13,19 @@ module UpdateTestMethods
     cleanup_app
   end
 
+  def test_an_unchanged_app_succeeds_loading_stdlib
+    # FIXME(uwe): Remove when we stop supporting legacy Ruboto 0.9.0.rc.1 apps and older
+    if Gem::Version.new(@old_ruboto_version) <= Gem::Version.new('0.9.0.rc.1')
+      Dir.chdir "#{APP_DIR}/test" do
+        test_props = File.read('ant.properties')
+        test_props.gsub! /^tested.project.dir=.*$/, 'tested.project.dir=../'
+        File.open('ant.properties', 'w') { |f| f << test_props }
+      end
+    end
+    assert_code "require 'base64'", @old_ruboto_version
+    run_app_tests
+  end
+
   def test_broadcast_receiver
     Dir.chdir APP_DIR do
       puts "Adding a broadcast receiver"
@@ -60,6 +73,17 @@ module UpdateTestMethods
       assert File.exists? 'test/src/my_database_helper_test.rb'
       system 'rake debug'
       assert_equal 0, $?
+    end
+  end
+
+  private
+
+  def assert_code(code, ruboto_version)
+    filename   = "src/ruboto_test_app_activity.rb"
+    Dir.chdir APP_DIR do
+      s = File.read(filename)
+      raise "Code injection failed!" unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
+      File.open(filename, 'w') { |f| f << s }
     end
   end
 

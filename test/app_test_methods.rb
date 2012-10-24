@@ -31,7 +31,7 @@ module AppTestMethods
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}Activity"
       s = File.read(filename)
-      s.gsub!(/(require 'ruboto')/, "\\1\n#{code}")
+      raise "Code injection failed!" unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
       File.open(filename, 'w') { |f| f << s }
     end
   end
