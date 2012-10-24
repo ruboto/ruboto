@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
-MASTER=1.7.0.rc1
+MASTER=1.7.0
 
 export ANDROID_TARGET RUBOTO_PLATFORM JRUBY_JARS_VERSION
 export SKIP_RUBOTO_UPDATE_TEST=1
 
 for ANDROID_TARGET in 10 15 ; do
   set +e
-  killall emulator-arm
+  killall emulator64-arm
   sleep 5
-  killall -9 emulator-arm
+  killall -9 emulator64-arm
   sleep 1
   set -e
   if [ "$ANDROID_TARGET" == "15" ] ; then
@@ -18,7 +18,7 @@ for ANDROID_TARGET in 10 15 ; do
     avd="Android_2.3.3"
   fi
 
-  emulator -avd $avd -no-snapshot-load -no-snapshot-save &
+  emulator -avd $avd &
   adb wait-for-device
   adb logcat > adb_logcat.log &
 
