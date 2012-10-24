@@ -40,7 +40,7 @@ THE_CONSTANTS
 
     @Override
     public void onCreate(Bundle bundle) {
-        System.out.println("RubotoActivity onCreate(): " + getClass().getName());
+        System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName());
         if (ScriptLoader.isCalledFromJRuby()) {
             super.onCreate(bundle);
             return;
@@ -55,14 +55,14 @@ THE_CONSTANTS
                 setTheme(configBundle.getInt("Theme"));
             }
             if (configBundle.containsKey("ClassName")) {
-                if (this.getClass().getName() == RubotoActivity.class.getName()) {
+                if (this.getClass().getName() == THE_RUBOTO_CLASS.class.getName()) {
                     scriptInfo.setRubyClassName(configBundle.getString("ClassName"));
                 } else {
                     throw new IllegalArgumentException("Only local Intents may set class name.");
                 }
             }
             if (configBundle.containsKey("Script")) {
-                if (this.getClass().getName() == RubotoActivity.class.getName()) {
+                if (this.getClass().getName() == THE_RUBOTO_CLASS.class.getName()) {
                     scriptInfo.setScriptName(configBundle.getString("Script"));
                 } else {
                     throw new IllegalArgumentException("Only local Intents may set script name.");
