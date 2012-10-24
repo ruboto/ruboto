@@ -10,6 +10,7 @@ setup do |activity|
   assert @text_view
 end
 
+# ANDROID: 15, PLATFORM: STANDALONE, JRuby: 1.7.0 '[44, 72, 62, 79]' expected, but got '[44, 71, 62, 79]'
 test('stack depth') do |activity|
   os_offset = {13 => 1, 15 => 1, 16 => 1}[android.os.Build::VERSION::SDK_INT].to_i
   if org.ruboto.JRubyAdapter.uses_platform_apk?
@@ -23,7 +24,7 @@ test('stack depth') do |activity|
     jruby_offset = {
         '1.7.0.preview1' => [0, -1, -1, -1],
         '1.7.0.preview2' => [0, -1, 0, 0],
-        '1.7.0.RC1' => [0, -1, 0, 0],
+        '1.7.0' => [0, -1, 0, 0],
     }[org.jruby.runtime.Constants::VERSION] || [0, 0, 0, 0]
   end
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"

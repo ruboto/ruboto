@@ -11,8 +11,8 @@ setup do |activity|
 end
 
 # ANDROID: 10, PLATFORM: 0.4.7,     JRuby: 1.7.0.dev      '28334966'         expected, but got '28335067'
+# ANDROID: 15, PLATFORM: STANDALONE, JRuby: 1.7.0         '[28, 33, 51, 68]' expected, but got '[28, 33, 47, 64]'
 # ANDROID: 16, PLATFORM: 0.4.8.dev, JRuby: 1.7.0.preview2 '[29, 34, 47, 64]' expected, but got '[28, 33, 47, 64]'
-
 test('stack depth') do |activity|
   os_offset = {
       13 => [1]*4,
@@ -29,8 +29,7 @@ test('stack depth') do |activity|
   else # STANDALONE
     jruby_offset = {
         '1.7.0.dev' => [1, 1, 1, 1],
-        '1.7.0.preview2' => [0, 0, -4, -4],
-        '1.7.0.RC1' => [0, 0, -4, -4],
+        '1.7.0' => [0, 0, -4, -4],
     }[org.jruby.runtime.Constants::VERSION] || [0, 0, 0, 0]
   end
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"
