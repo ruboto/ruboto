@@ -31,7 +31,7 @@ module Ruboto
 
       def update_test(force = nil)
         root = Dir.getwd
-        if !File.exists?("#{root}/test")
+        if !File.exists?("#{root}/test") || !File.exists?("#{root}/test/AndroidManifest.xml") || !File.exists?("#{root}/test/ant.properties")
           name = verify_strings.root.elements['string'].text.gsub(' ', '')
           puts "\nGenerating Android test project #{name} in #{root}..."
           system %Q{android create test-project -m "#{root.gsub('"', '\"')}" -n "#{name}Test" -p "#{root.gsub('"', '\"')}/test"}
@@ -40,7 +40,6 @@ module Ruboto
         end
 
         Dir.chdir File.join(root, 'test') do
-
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
           prop_file = 'ant.properties'
           prop_lines = (prop_lines_org = File.read(prop_file)).dup

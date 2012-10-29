@@ -58,6 +58,10 @@ module Ruboto
                 description "Generate the JRuby jars jar"
                 cast :boolean
               }
+              option('force') {
+                description 'Force creation of project even if the path exists'
+                cast :boolean
+              }
 
               def run
                 package = params['package'].value
@@ -66,8 +70,10 @@ module Ruboto
                 path = params['path'].value || package.split('.').last
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
+                with_jruby = params['with-jruby'].value
+                force = params['force'].value
 
-                abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if File.exists?(path)
+                abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if !force && File.exists?(path)
                 abort "Target must match android-<number>: got #{target}" unless target =~ /^android-(\d+)$/
                 abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
 
@@ -96,7 +102,7 @@ module Ruboto
                   update_ruboto true
                   update_icons true
                   update_classes nil, true
-                  update_jruby true if params['with-jruby'].value
+                  update_jruby true if with_jruby
                   update_dx_jar true unless params['with-jruby'].value
                   update_core_classes "exclude"
 
@@ -346,12 +352,14 @@ module Ruboto
               when "app" then
                 force = params['force'].value
                 old_version = read_ruboto_version
-                if Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
+                if old_version && Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
                   puts "Detected old Ruboto version: #{old_version}"
                   puts "Will use Ruboto #{Ruboto::UPDATE_VERSION_LIMIT} to update it first."
                   `gem query -i -n ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}`
                   system "gem install ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}" unless $? == 0
+                  raise "Install of Ruboto #{Ruboto::UPDATE_VERSION_LIMIT} failed!" unless $? == 0
                   system "ruboto _#{Ruboto::UPDATE_VERSION_LIMIT}_ update app"
+                  raise "Ruboto update app to #{Ruboto::UPDATE_VERSION_LIMIT} failed!" unless $? == 0
                 end
                 update_android
                 update_test force
