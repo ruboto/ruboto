@@ -26,7 +26,7 @@ public class ScriptLoader {
                 System.out.println("Looking for Ruby class: " + component.getScriptInfo().getRubyClassName());
                 Object rubyClass = JRubyAdapter.get(component.getScriptInfo().getRubyClassName());
                 System.out.println("Found: " + rubyClass);
-                Script rubyScript = new Script(component.getScriptInfo().getScriptName());
+                final Script rubyScript = new Script(component.getScriptInfo().getScriptName());
                 Object rubyInstance;
                 if (rubyScript.exists()) {
                     rubyInstance = component;
@@ -61,7 +61,7 @@ public class ScriptLoader {
                             System.out.println("Set class: " + JRubyAdapter.get(component.getScriptInfo().getRubyClassName()));
                             Thread t = new Thread(new Runnable(){
                                 public void run() {
-                                    JRubyAdapter.setScriptFilename(component.getScriptInfo().getScriptName());
+                                    JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
                                     JRubyAdapter.runScriptlet(script);
                                 }
                             });
@@ -81,7 +81,7 @@ public class ScriptLoader {
                             }
                             JRubyAdapter.runScriptlet("$activity.instance_variable_set '@ruboto_java_class', '" + component.getScriptInfo().getRubyClassName() + "'");
                             JRubyAdapter.runScriptlet("puts %Q{$activity: #$activity}");
-                            JRubyAdapter.setScriptFilename(component.getScriptInfo().getScriptName());
+                            JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
                             JRubyAdapter.runScriptlet(script);
                         }
                     }

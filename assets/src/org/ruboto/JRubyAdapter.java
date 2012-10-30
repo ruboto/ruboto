@@ -217,7 +217,11 @@ public class JRubyAdapter {
             throw new RuntimeException(iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {
             if (isDebugBuild) {
-                throw ((RuntimeException) ite.getCause());
+                if (ite.getCause() instanceof RuntimeException) {
+                    throw ((RuntimeException) ite.getCause());
+                } else {
+                    throw ((Error) ite.getCause());
+                }
             } else {
                 return null;
             }

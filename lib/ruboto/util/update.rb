@@ -424,7 +424,7 @@ module Ruboto
                     # 'org/jruby/ir/util',
 
                     'org/jruby/javasupport/bsf',
-                    'org/jruby/runtime/invokedynamic',
+                    # 'org/jruby/runtime/invokedynamic', # Should be excluded
                 ]
 
                 # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0

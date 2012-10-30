@@ -7,7 +7,7 @@ module AppTestMethods
     assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
     assert_code 'ReadSourceFile', 'File.read(__FILE__)'
     assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
-    assert_code 'RepeatRubotoImport', 'ruboto_import :TextView ; ruboto_import :TextView'
+    assert_code 'RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView'
     run_activity_tests('activity')
   end
 

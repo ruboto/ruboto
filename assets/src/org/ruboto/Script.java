@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -108,41 +109,30 @@ public class Script {
     }
 
     boolean exists() {
+        return getAbsolutePath() != null;
+    }
+
+    String getAbsolutePath() {
         for (String dir : scriptsDir) {
-            System.out.println("Checking file: " + dir + "/" + name);
-            if (new File(dir + "/" + name).exists()) {
-                return true;
+            String path = dir + "/" + name;
+            Log.d("Checking path: " + path);
+            if (new File(path).exists()) {
+                return "file:" + path;
             }
         }
-        try {
-            java.io.InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-            System.out.println("Classpath resource: " + is);
-            if (is != null) {
-                is.close();
-                return true;
-            } else {
-                return false;
-            }
-        } catch (IOException ioex) {
-            System.out.println("Classpath resource exception: " + ioex);
-            return false;
+        URL url = getClass().getClassLoader().getResource(name);
+        Log.d("Classpath resource: " + url);
+        if (url != null) {
+            return url.toString();
         }
+        return null;
     }
 
     public String getContents() throws IOException {
         InputStream is = null;
         BufferedReader buffer = null;
         try {
-            for (String dir : scriptsDir) {
-                System.out.println("Checking file: " + dir + "/" + name);
-                if (new File(dir + "/" + name).exists()) {
-                    is = new java.io.FileInputStream(dir + "/" + name);
-                }
-            }
-            if (is == null) {
-                is = getClass().getClassLoader().getResourceAsStream(name);
-            }
-            buffer = new BufferedReader(new java.io.InputStreamReader(is), 8192);
+            buffer = new BufferedReader(new java.io.InputStreamReader(new URL(getAbsolutePath()).openStream()), 8192);
             StringBuilder source = new StringBuilder();
             while (true) {
                 String line = buffer.readLine();
