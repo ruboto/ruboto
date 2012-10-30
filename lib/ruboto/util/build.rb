@@ -37,7 +37,7 @@ module Ruboto
         unless force == "include"
           abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use '--force include' to create it" if
             element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
-          abort "#{klass} deprecated for targetSdkVersion, deprecatrd in #{element.attribute('deprecated')}; use '--force include' to create it" if
+          abort "#{klass} deprecated for targetSdkVersion, deprecated in #{element.attribute('deprecated')}; use '--force include' to create it" if
             element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
         end
 
@@ -55,9 +55,9 @@ module Ruboto
         target_api = verify_target_sdk.to_i
 
         # Remove methods changed outside of the scope of the sdk versions
-        methods = methods.select{|i| not i.attribute('api_added') or i.attribute('api_added').to_i <= target_api}
-        methods = methods.select{|i| not i.attribute('deprecated') or i.attribute('deprecated').to_i > min_api}
-        methods = methods.select{|i| not i.attribute('api_removed') or i.attribute('api_removed').to_i > min_api}
+        methods = methods.select{|i| !i.attribute('api_added') || (i.attribute('api_added').to_i <= target_api)}
+        methods = methods.select{|i| !i.attribute('deprecated') || (i.attribute('deprecated').to_i > min_api)}
+        methods = methods.select{|i| !i.attribute('api_removed') || (i.attribute('api_removed').to_i > min_api)}
 
         # Inform and remove methods that do not exist in one of the sdk versions
         methods = methods.select do |i|
