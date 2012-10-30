@@ -11,7 +11,7 @@ public class ScriptLoader {
     */
     public static boolean isCalledFromJRuby() {
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        int maxLookBack = Math.min(10, stackTraceElements.length);
+        int maxLookBack = Math.min(9, stackTraceElements.length);
         for(int i = 0; i < maxLookBack ; i++){
             if (stackTraceElements[i].getClassName().startsWith("org.jruby.javasupport.JavaMethod")) {
                 return true;

@@ -387,7 +387,7 @@ module Ruboto
               if jruby_core_version >= '1.7.0'
                 excluded_core_packages = [
                     'META-INF', 'cext',
-                    # 'com/headius', included since we are trying to use DexClient
+                    'com/headius', # included since we are trying to use DexClient
                     'com/headius/invokebinder',
                     'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
                     'jline', 'jni',
@@ -413,18 +413,20 @@ module Ruboto
 
                     # FIXME(uwe):  IR is the future.  We should try using it.
                     # 'org/jruby/ir',
-                    # 'org/jruby/ir/dataflow',
+                    'org/jruby/ir/dataflow',
                     # 'org/jruby/ir/instructions',
                     # 'org/jruby/ir/interpreter',
                     # 'org/jruby/ir/operands',
                     # 'org/jruby/ir/passes',
-                    # 'org/jruby/ir/representations',
-                    # 'org/jruby/ir/targets',
-                    # 'org/jruby/ir/transformations',
-                    # 'org/jruby/ir/util',
+                    'org/jruby/ir/representations',
+                    'org/jruby/ir/targets',
+                    'org/jruby/ir/transformations',
+                    'org/jruby/ir/util',
 
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
+
+                    # 'org/jruby/management', # should be excluded
                 ]
 
                 # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
