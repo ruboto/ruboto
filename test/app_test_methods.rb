@@ -27,7 +27,7 @@ module AppTestMethods
   private
 
   def assert_code(activity_name, code)
-    snake_name = activity_name.scan(/[A-Z]+[a-z]+/).map { |s| s.downcase }.join('_')
+    snake_name = activity_name.scan(/[A-Z]+[a-z0-9]+/).map { |s| s.downcase }.join('_')
     filename   = "src/#{snake_name}_activity.rb"
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}Activity"
