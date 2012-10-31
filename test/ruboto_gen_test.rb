@@ -248,7 +248,7 @@ EOF
         system "#{RUBOTO_CMD} gen jruby"
         assert_equal 0, $?.exitstatus
         assert_equal ["libs/jruby-core-#{JRUBY_JARS_VERSION.to_s.downcase}.jar"], Dir["libs/jruby-core-*.jar"].map(&:downcase)
-        assert_equal ["libs/jruby-stdlib-#{JRUBY_JARS_VERSION.to_s.upcase}.jar"], Dir["libs/jruby-stdlib-*.jar"].map(&:downcase)
+        assert_equal ["libs/jruby-stdlib-#{JRUBY_JARS_VERSION.to_s.downcase}.jar"], Dir["libs/jruby-stdlib-*.jar"].map(&:downcase)
       end
     end
   end
