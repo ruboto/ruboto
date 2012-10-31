@@ -26,6 +26,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.6.7.2' => 3.5,
           '1.6.8' => 3.5,
           '1.7.0' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
+          '1.7.1.dev' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
       }[JRUBY_JARS_VERSION.to_s] || 4.9
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"

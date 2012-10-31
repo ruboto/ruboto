@@ -58,6 +58,7 @@ class RubotoGenTest < Test::Unit::TestCase
       upper_limit = {
           '1.6.7' => ANDROID_TARGET < 15 ? 5800.0 : 5900.0,
           '1.7.0' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
+          '1.7.1.dev' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
       }[JRUBY_JARS_VERSION.to_s] || 7600.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
@@ -246,8 +247,8 @@ EOF
       Dir.chdir APP_DIR do
         system "#{RUBOTO_CMD} gen jruby"
         assert_equal 0, $?.exitstatus
-        assert File.exists?("libs/jruby-core-#{JRUBY_JARS_VERSION.to_s.upcase}.jar")
-        assert File.exists?("libs/jruby-stdlib-#{JRUBY_JARS_VERSION.to_s.upcase}.jar")
+        assert_equal ["libs/jruby-core-#{JRUBY_JARS_VERSION.to_s.downcase}.jar"], Dir["libs/jruby-core-*.jar"].map(&:downcase)
+        assert_equal ["libs/jruby-stdlib-#{JRUBY_JARS_VERSION.to_s.upcase}.jar"], Dir["libs/jruby-stdlib-*.jar"].map(&:downcase)
       end
     end
   end
