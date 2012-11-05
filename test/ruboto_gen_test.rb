@@ -250,7 +250,6 @@ EOF
       assert File.exists?('src/app_activity.rb')
       assert File.exists?('test/src/app_activity_test.rb')
     end
-    run_app_tests
   end
 
   if RUBOTO_PLATFORM == 'FROM_GEM'

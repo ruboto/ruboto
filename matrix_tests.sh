@@ -2,10 +2,11 @@
 
 MASTER=1.7.1.dev
 
-export ANDROID_TARGET RUBOTO_PLATFORM JRUBY_JARS_VERSION
+export ANDROID_TARGET ANDROID_OS JRUBY_JARS_VERSION RUBOTO_PLATFORM
 export SKIP_RUBOTO_UPDATE_TEST=1
 
 for ANDROID_TARGET in 10 15 ; do
+  ANDROID_OS=$ANDROID_TARGET
   set +e
   killall emulator64-arm
   sleep 5
@@ -57,11 +58,12 @@ for ANDROID_TARGET in 10 15 ; do
       echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
       echo ""
 
-      ./run_tests.sh
+      # ./run_tests.sh
       # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ruby test/ruboto_gen_test.rb -n test_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
+      ruby test/ruboto_gen_test.rb -n test_activity_with_first_letter_lower_case_in_name
     done
   done
 done
