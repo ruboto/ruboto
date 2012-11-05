@@ -58,12 +58,12 @@ for ANDROID_TARGET in 10 15 ; do
       echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
       echo ""
 
-      # ./run_tests.sh
+      ./run_tests.sh
       # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ruby test/ruboto_gen_test.rb -n test_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
-      ruby test/ruboto_gen_test.rb -n test_activity_with_first_letter_lower_case_in_name
+      # ruby test/ruboto_gen_test.rb -n test_activity_with_first_letter_lower_case_in_name
     done
   done
 done
