@@ -242,6 +242,17 @@ EOF
     run_app_tests
   end
 
+  def test_activity_with_first_letter_lower_case_in_name
+    Dir.chdir APP_DIR do
+      system "#{RUBOTO_CMD} gen class Activity --name appActivity"
+      assert_equal 0, $?.exitstatus
+      assert File.exists?('src/org/ruboto/test_app/AppActivity.java')
+      assert File.exists?('src/app_activity.rb')
+      assert File.exists?('test/src/app_activity_test.rb')
+    end
+    run_app_tests
+  end
+
   if RUBOTO_PLATFORM == 'FROM_GEM'
     def test_gen_jruby
       Dir.chdir APP_DIR do
