@@ -66,6 +66,7 @@ module Ruboto
               def run
                 package = params['package'].value
                 name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
+                name[0..0] = name[0..0].upcase
                 activity = params['activity'].value || "#{name}Activity"
                 path = params['path'].value || package.split('.').last
                 target = params['target'].value
