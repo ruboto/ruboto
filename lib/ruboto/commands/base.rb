@@ -151,6 +151,7 @@ module Ruboto
 
               def run
                 name = params['name'].value
+                name[0..0] = name[0..0].upcase
                 script_name = params['script_name'].value || "#{underscore(name)}.rb"
                 klass = params['class'].value
 
