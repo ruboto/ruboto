@@ -79,6 +79,7 @@ end
 desc 'Generate release docs for a given milestone'
 task :release_docs do
   raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
+  puts 'GitHub login:'
   begin
     require 'rubygems'
     require 'highline/import'
@@ -86,7 +87,7 @@ task :release_docs do
     pass = ask('password: ') { |q| q.echo = '*' }
   rescue
     print 'user name: ' ; user = STDIN.gets.chomp
-    print 'password : ' ; pass = STDIN.gets.chomp
+    print ' password: ' ; pass = STDIN.gets.chomp
   end
   require 'uri'
   require 'net/http'
@@ -118,6 +119,7 @@ task :release_docs do
   res = https.start { |http| http.request(req) }
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
   milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
+  milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
   categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Pull requests' => nil, 'Other' => nil}
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name']}
@@ -132,7 +134,17 @@ task :release_docs do
     cat ||= 'Other'
     cat
   end
-  puts "\nNew in version #{milestone_name}:\n\n"
+  puts
+  puts "Subject: [ANN] Ruboto #{milestone_name} released!"
+  puts
+  puts "The Ruboto team is proud to announce the release of Ruboto #{milestone_name}."
+  puts
+  puts Ruboto::DESCRIPTION
+  puts
+  puts "New in version #{milestone_name}:\n"
+  puts
+  puts milestone_description
+  puts
   (categories.keys & grouped_issues.keys).each do |cat|
     puts "#{cat}:\n\n"
     grouped_issues[cat].each { |i| puts %Q{* Issue ##{i['number']} #{i['title']}} }
@@ -140,10 +152,39 @@ task :release_docs do
   end
   puts "You can find a complete list of issues here:\n\n"
   puts "* https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}\n\n"
+  puts
+  puts <<EOF
+Installation:
+
+To use Ruboto, you need to install a Java JDK, the Android SDK, Apache ANT, and a Ruby implementation.  Then do (possibly as root)
+
+    gem install ruboto
+
+
+To create a project do
+
+    ruboto gen app --package <your.package.name>
+
+
+You can find an introductory tutorial at https://github.com/ruboto/ruboto/wiki/Getting-started-with-Ruboto
+
+If you have any problems or questions, come see us at http://ruboto.org/
+
+Enjoy!
+
+
+--
+The Ruboto Team
+http://ruboto.org/
+
+EOF
+
 end
 
 desc 'Fetch download stats form rubygems.org'
 task :stats do
+  require 'time'
+  require 'date'
   require 'rubygems'
   require 'uri'
   require 'net/http'
@@ -164,13 +205,14 @@ task :stats do
     req = Net::HTTP::Get.new(versions_uri.request_uri)
     res = https.start { |http| http.request(req) }
     versions = YAML.load(res.body).sort_by { |v| Gem::Version.new(v['number']) }
-    puts "\n#{gem}:\n#{versions.map { |v| "#{'%10s' % v['number']} #{v['downloads_count']}" }.join("\n")}"
+    puts "\n#{gem}:\n#{versions.map { |v| "#{Time.parse(v['built_at']).strftime('%Y-%m-%d')} #{'%10s' % v['number']} #{v['downloads_count']}" }.join("\n")}"
 
     versions.each do |v|
-      downloads_uri = URI("#{base_uri}/versions/#{gem}-#{v['number']}/downloads/search.yaml?from=2010-08-01&to=#{Date.today}")
+      downloads_uri = URI("#{base_uri}/versions/#{gem}-#{v['number']}/downloads/search.yaml?from=#{Time.parse(v['built_at']).strftime('%Y-%m-%d')}&to=#{Date.today}")
       req = Net::HTTP::Get.new(downloads_uri.request_uri)
       res = https.start { |http| http.request(req) }
       counts = YAML.load(res.body)
+      counts.delete_if{|date_str,count| count == 0}
       counts.each do |date_str, count|
         date = Date.parse(date_str)
         counts_per_month[date.year][date.month] += count

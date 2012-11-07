@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email = %q{ruboto@googlegroups.com}
   s.summary = %q{A platform for developing apps using JRuby on Android.}
   s.homepage = %q{http://ruboto.org/}
-  s.description = %Q{Ruboto - JRuby on Android\nA generator and framework for developing full stand-alone apps for Android using the Ruby language and libraries.}
+  s.description = Ruboto::DESCRIPTION
   s.rubyforge_project = "ruboto/ruboto"
   s.files = FileList['[A-Z]*', "assets/**/*", "bin/*", 'lib/**/*', 'test/**/*'].to_a
   s.executables = ['ruboto']
