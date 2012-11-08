@@ -383,6 +383,7 @@ module Ruboto
             Dir.chdir 'tmp' do
               FileUtils.move "../#{jruby_core}", "."
               `jar -xf #{jruby_core}`
+              raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               if jruby_core_version >= '1.7.0'
                 excluded_core_packages = [
@@ -472,10 +473,11 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar:#{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
+              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar -bootclasspath #{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
               raise "Compile failed" unless $? == 0
 
               `jar -cf ../#{jruby_core} .`
+              raise "Creating repackaged jruby-core jar failed: #$?" unless $? == 0
             end
             FileUtils.remove_dir "tmp", true
           end
@@ -494,6 +496,7 @@ module Ruboto
               FileUtils.mkdir_p 'new/jruby.home'
               Dir.chdir 'old' do
                 `jar -xf ../../#{jruby_stdlib}`
+                raise "Unpacking jruby-stdlib jar failed: #$?" unless $? == 0
               end
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
               FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
@@ -531,6 +534,7 @@ module Ruboto
                 # end
 
                 `jar -cf ../../#{jruby_stdlib} .`
+                raise "Creating repackaged jruby-stdlib jar failed: #$?" unless $? == 0
               end
             end
           end
