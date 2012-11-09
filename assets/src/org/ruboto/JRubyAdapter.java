@@ -242,7 +242,7 @@ public class JRubyAdapter {
             // END Ruboto HeapAlloc
             setDebugBuild(appContext);
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
-            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCEIR
+            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCE FORCEIR
             // System.setProperty("jruby.compile.backend", "DALVIK");
             System.setProperty("jruby.bytecode.version", "1.6");
             System.setProperty("jruby.interfaces.useProxy", "true");
@@ -255,7 +255,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
 
             // Uncomment these to debug/profile Ruby source loading
-            System.setProperty("jruby.debug.loadService", "true");
+            // System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
 
             // Used to enable JRuby to generate proxy classes
