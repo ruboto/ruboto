@@ -12,6 +12,7 @@ setup do |activity|
   assert @list_view
 end
 
-test("activity starts") do |activity|
-  assert true
+test('item click sets text') do |activity|
+  activity.run_on_ui_thread { @list_view.performItemClick(@list_view, 1, 1) }
+  assert_equal '[Record one]', @text_view.text
 end

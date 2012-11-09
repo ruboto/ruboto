@@ -5,7 +5,7 @@ module AppTestMethods
 
   def test_activity_tests
     assert_code 'Base64Loads', "require 'base64'"
-    assert_code 'YamlLoads', "with_large_stack{require 'yaml'}"
+    assert_code 'YamlLoads', "require 'ruboto/util/stack' ; with_large_stack{require 'yaml'}"
     assert_code 'ReadSourceFile', 'File.read(__FILE__)'
     assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
     assert_code 'RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView'
