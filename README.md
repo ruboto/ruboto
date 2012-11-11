@@ -16,7 +16,7 @@ Before you use Ruboto, you should do the following things:
 * Install the JDK if it's not on your system already
 * Install [jruby](http://jruby.org/) if you don't already have it. JRuby has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
-* Add the sdk's `tools/` directory to your `$PATH`
+* Add the sdk's `tools/` and `platform-tools/` directory to your `$PATH`
 * Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html) image unless you want to develop using your phone.
 
 General Information
@@ -24,7 +24,7 @@ General Information
 
 The Rakefile assumes that you are in the root directory of your app, as do all commands of the `ruboto` command line utility, other than `ruboto gen app`.
 
-The Rakefile requires you to run it through JRuby's rake. 
+The Rakefile requires you to run it through JRuby's rake.
 
 Command-line Tools
 -------
@@ -46,7 +46,7 @@ Version values must be specified using'android-' and the sdk level number (e.g.,
 <a name="class_generator"></a>
 ### Class generator
 
-Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.  The generator also generates a corrsponding test script.
+Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.  The generator also generates a corresponding test script.
 
     $ ruboto gen class ClassName --name YourObjectName
 Ex:
@@ -77,7 +77,7 @@ When you're ready to post your app to the Market, you need to do a few things.
 
 First, you'll need to generate a key to sign the app with using `keytool` if you do not already have one. If you're ok with accepting some sane defaults, you can use
     $ ruboto gen key --alias alias_for_your_key
-with an optional flag `--keystore /path/to/keystore.keystore`, which defaults to `~/.android/production.keystore`. It will ask for a password for the keystore and one for the key itself. Make sure that you remember those two passwords, as well as the alias for the key. 
+with an optional flag `--keystore /path/to/keystore.keystore`, which defaults to `~/.android/production.keystore`. It will ask for a password for the keystore and one for the key itself. Make sure that you remember those two passwords, as well as the alias for the key.
 
 Also make sure to keep your key backed up (if you lose it, you won't be able to release updates to your app that can install right over the old versions), but secure.
 
@@ -113,16 +113,16 @@ Also, you need root access to your device for this to work, as it needs to write
 You can update various portions of your generated Ruboto app through the ruboto command:
 
 * JRuby:
- 
+
 1) If a new version of JRuby is released, you should update your gem (e.g., sudo gem update jruby-jars).
 
-2) From the root directory of your app: 
+2) From the root directory of your app:
 
     $ ruboto update jruby
 
 * The ruboto.rb script:
 
-1) From the root directory of your app: 
+1) From the root directory of your app:
 
     $ ruboto update ruboto
 
@@ -136,12 +136,12 @@ You can update various portions of your generated Ruboto app through the ruboto 
 
     $ ruboto gen core Activity --method_base all-on-or-none --method_include specific-methods-to-include --method_include specific-methods-to-exclude
 
-4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either use method_exclude to remove methods individually or add '--force exclude' to remove the all. You can also us '--force include' to create them anyway (added methods are created without calling super to avoid crashin on legacy hardware).
+4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either use method_exclude to remove methods individually or add '--force exclude' to remove the all. You can also us '--force include' to create them anyway (added methods are created without calling super to avoid crashing on legacy hardware).
 
 Scripts
 -------
 
-The main thing Ruboto offers you is the ability to write Ruby scripts to define the behavior of Activites, BroadcastReceievers, and Services. (Eventually it'll be every class. It's setup such that adding in more classes should be trivial.)
+The main thing Ruboto offers you is the ability to write Ruby scripts to define the behavior of Activities, BroadcastReceievers, and Services. (Eventually it'll be every class. It's setup such that adding in more classes should be trivial.)
 
 Here's how it works:
 
@@ -212,14 +212,14 @@ Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the proj
 * As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto/wiki/)
 * When you gain enough wisdom, reconsider whether you could fork the project.
 
-If contributing code to the project, please run the exising tests and add tests for your changes.  You run the tests using rake
+If contributing code to the project, please run the existing tests and add tests for your changes.  You run the tests using rake
 
     $ jruby -S rake test
 
 Getting Help
 ------------
 
-* You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful. 
+* You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful.
 * There is further documentation at the [wiki](http://github.com/ruboto/ruboto/wiki)
 * If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto/issues)
 * You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
@@ -241,9 +241,9 @@ If you have an "eclair" emulator that runs Android 2.1 and a "froyo" one that ru
 Alternatives
 ------------
 
-If Ruboto's performance is a problem for you, or you want something that gives you total access to the android API (as Ruboto does not yet do), check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett). 
+If Ruboto's performance is a problem for you, or you want something that gives you total access to the android API (as Ruboto does not yet do), check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
 
-Mirah, formerly known as Duby, is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration. 
+Mirah, formerly known as Duby, is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration.
 
 Garrett is a "playground for Mirah exploration on Android."
 
