@@ -55,11 +55,11 @@ module Ruboto
         on_create nil
       else
         puts "Class based main activity definition"
-        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].split("/").last.gsub(/[.]+/, '_')}_#{source_descriptor(block)[1]}"
+        class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].split("/").last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
         if !Object.const_defined?(class_name)
           Object.const_set(class_name, Class.new(&block))
         else
-          Object.const_get(class_name).class_eval(&block)
+          Object.const_get(class_name).class_eval(&block) if block_given?
         end
         b = Java::android.os.Bundle.new
         b.putInt("Theme", theme) if theme
