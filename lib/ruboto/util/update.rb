@@ -431,6 +431,8 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
 
                     # 'org/jruby/management', # should be excluded
+
+                    'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                 ]
 
                 # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
