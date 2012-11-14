@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script can be run with "git bisect run" to determine which JRuby commit broke the tests
+# This script can be run with "git bisect run" to determine which JRuby commit broke the tests.
 # Change the test run at the bottom to narrow down the test and make it faster.
 # cd ../jruby
 # git bisect start
@@ -21,6 +21,8 @@ if [ ! -e "LICENSE.RUBY" ] ; then
   echo "You must cd to the jruby working copy before running this script."
   exit 1
 fi
+
+echo Remaining suspects: `git bisect view | grep "Date:" | wc -l`
 
 ant clean-all dist-gem
 build_status=$?
@@ -61,15 +63,21 @@ rm -rf tmp/Ruboto*
 
 set +e
 
+./matrix_tests.sh
+# ./run_tests.sh
 # ruby test/broadcast_receiver_test.rb -n test_generated_broadcast_receiver
-ruby test/ruboto_gen_test.rb -n test_activity_tests
+# ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
 # ruby test/ruboto_gen_test.rb -n test_block_def_activity_tests
 
 test_status=$?
+echo
+echo "********************************************************************************"
 if [ $test_status -eq 0 ] ; then
   echo Bisect GOOD.
 else
   echo Bisect BAD.
 fi
+echo "********************************************************************************"
+echo
 
 exit $test_status

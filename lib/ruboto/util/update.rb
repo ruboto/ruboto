@@ -172,7 +172,10 @@ module Ruboto
 
         # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
         # unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
-        log_action("Copying dx.jar to libs") { copier.copy 'libs' }
+        log_action("Copying dx.jar to libs") do
+          copier.copy 'libs'
+          # File.open('project.properties', 'a'){|f| f << "dex.force.jumbo=true\n"}
+        end
         # end
 
         reconfigure_jruby_libs(new_jruby_version)
