@@ -371,9 +371,7 @@ public class JRubyAdapter {
         return RUBOTO_CORE_VERSION_NAME != null;
     }
 
-    // Private methods
-
-    private static Boolean addLoadPath(String scriptsDir) {
+    public static Boolean addLoadPath(String scriptsDir) {
         if (new File(scriptsDir).exists()) {
             Log.i("Added directory to load path: " + scriptsDir);
             Script.addDir(scriptsDir);
@@ -386,6 +384,8 @@ public class JRubyAdapter {
             return false;
         }
     }
+
+    // Private methods
 
     @SuppressWarnings("unchecked")
     private static <T> T callScriptingContainerMethod(Class<T> returnType, String methodName, Object... args) {
@@ -495,15 +495,15 @@ public class JRubyAdapter {
         }
     }
 
-    private static void setLocalContextScope(String val) {
+    public static void setLocalContextScope(String val) {
         localContextScope = val;
     }
 
-    private static void setLocalVariableBehavior(String val) {
+    public static void setLocalVariableBehavior(String val) {
         localVariableBehavior = val;
     }
 
-    private static void setOutputStream(PrintStream out) {
+    public static void setOutputStream(PrintStream out) {
       if (ruby == null) {
         output = out;
       } else {
