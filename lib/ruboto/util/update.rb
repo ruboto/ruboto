@@ -373,6 +373,7 @@ module Ruboto
       def reconfigure_jruby_libs(jruby_core_version)
         reconfigure_jruby_core(jruby_core_version)
         reconfigure_jruby_stdlib
+        reconfigure_dx_jar
       end
 
       # - Removes unneeded code from jruby-core
@@ -390,6 +391,10 @@ module Ruboto
               File.delete jruby_core
               if jruby_core_version >= '1.7.0'
                 excluded_core_packages = [
+                    '*Darwin*',
+                    '*Solaris*',
+                    '*windows*',
+                    '*Windows*',
                     'META-INF', 'cext',
                     'com/headius', # included since we are trying to use DexClient
                     'com/headius/invokebinder',
@@ -401,6 +406,7 @@ module Ruboto
                     'jnr/ffi/posix/util',
                     'org/apache',
                     'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
+                    'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
@@ -458,7 +464,11 @@ module Ruboto
               end
 
               excluded_core_packages.each do |i|
-                FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
+                if File.directory? i
+                  FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
+                elsif Dir[i].each { |f| FileUtils.rm f }.empty?
+                  puts "Exclude pattern #{i.inspect} found no files."
+                end
               end
 
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
@@ -545,6 +555,32 @@ module Ruboto
           end
 
           FileUtils.remove_dir "tmp", true
+        end
+      end
+
+      # - Removes unneeded code from dx.jar
+      def reconfigure_dx_jar
+        dx_jar = 'dx.jar'
+        Dir.chdir 'libs' do
+          log_action("Removing unneeded classes from #{dx_jar}") do
+            FileUtils.rm_rf 'tmp'
+            Dir.mkdir 'tmp'
+            Dir.chdir 'tmp' do
+              FileUtils.move "../#{dx_jar}", "."
+              `jar -xf #{dx_jar}`
+              raise "Unpacking dx.jar jar failed: #$?" unless $? == 0
+              File.delete dx_jar
+                excluded_core_packages = [
+                    'junit',
+                ]
+              excluded_core_packages.each do |i|
+                FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
+              end
+              `jar -cf ../#{dx_jar} .`
+              raise "Creating repackaged dx.jar failed: #$?" unless $? == 0
+            end
+            FileUtils.remove_dir "tmp", true
+          end
         end
       end
 

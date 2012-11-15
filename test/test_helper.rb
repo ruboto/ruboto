@@ -68,7 +68,9 @@ module RubotoTest
       if File.exists?(local_gem_file)
         system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
       else
-        system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
+        Dir.chdir('tmp') do
+          system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
+        end
       end
     end
     raise "install of jruby-jars failed with return code #$?" unless $? == 0
