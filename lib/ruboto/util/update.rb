@@ -391,10 +391,10 @@ module Ruboto
               File.delete jruby_core
               if jruby_core_version >= '1.7.0'
                 excluded_core_packages = [
-                    '*Darwin*',
-                    '*Solaris*',
-                    '*windows*',
-                    '*Windows*',
+                    '**/*Darwin*',
+                    '**/*Solaris*',
+                    '**/*windows*',
+                    '**/*Windows*',
                     'META-INF', 'cext',
                     'com/headius', # included since we are trying to use DexClient
                     'com/headius/invokebinder',
@@ -466,7 +466,7 @@ module Ruboto
               excluded_core_packages.each do |i|
                 if File.directory? i
                   FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
-                elsif Dir[i].each { |f| FileUtils.rm f }.empty?
+                elsif Dir[i].each { |f| FileUtils.rm_rf f }.empty?
                   puts "Exclude pattern #{i.inspect} found no files."
                 end
               end
