@@ -270,11 +270,19 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     Dir['*'].each do |gem_lib|
       Dir.chdir "#{gem_lib}/lib" do
         Dir['**/*.jar'].each do |jar|
+          unless jar =~ /sqlite-jdbc/
+            puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
+            `jar xf #{jar}`
+          end
           if jar == 'arjdbc/jdbc/adapter_java.jar'
             jar_load_code = <<-END_CODE
 require 'jruby'
 Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
             END_CODE
+            classes = Dir['arjdbc/**/*']
+            dbs = /db2|derby|firebird|h2|hsqldb|informix|mimer|mssql|mysql|oracle|postgres|sybase/i
+            files = classes.grep(dbs)
+            FileUtils.rm_f(files)
           elsif jar =~ /shared\/jopenssl.jar$/
             jar_load_code = <<-END_CODE
 require 'jruby'
@@ -284,10 +292,6 @@ Java::JopensslService.new.basicLoad(JRuby.runtime)
             END_CODE
           else
             jar_load_code = ''
-          end
-          unless jar =~ /sqlite-jdbc/
-            puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
-            `jar xf #{jar}`
           end
           puts "Writing dummy JAR file #{jar + '.rb'}"
           File.open(jar + '.rb', 'w') { |f| f << jar_load_code }

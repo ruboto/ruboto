@@ -398,12 +398,19 @@ module Ruboto
                     'META-INF', 'cext',
                     'com/headius', # included since we are trying to use DexClient
                     'com/headius/invokebinder',
-                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
+                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
+                    'ext',
+                    'java',
                     'jline', 'jni',
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
-                    'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
+                    'jnr/ffi/annotations', 'jnr/ffi/byref',
+                    'jnr/ffi/provider', 'jnr/ffi/util',
                     'jnr/ffi/posix/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    'jnr/posix/MacOS*',
+                    'jnr/posix/OpenBSD*',
                     'org/apache',
                     'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/fusesource',
@@ -434,11 +441,12 @@ module Ruboto
                     'org/jruby/ir/util',
 
                     'org/jruby/javasupport/bsf',
-                    # 'org/jruby/runtime/invokedynamic', # Should be excluded
 
                     # 'org/jruby/management', # should be excluded
 
                     'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
+
+                    # 'org/jruby/runtime/invokedynamic', # Should be excluded
                 ]
 
                 # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
@@ -472,12 +480,16 @@ module Ruboto
               end
 
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
-              # Reduces the installation footprint, but also reduces performance and stack usage
+              # Reduces the installation footprint, but also reduces performance and increases stack
               # FIXME(uwe):  Measure the performance change
-              if false && jruby_core_version =~ /^1.7.0/ && Dir.chdir('../..') { verify_target_sdk < 15 }
-                invokers = Dir['**/*${INVOKER$*,POPULATOR}.class']
-                log_action("Removing invokers & populators(#{invokers.size})") do
+              if false && jruby_core_version =~ /^1.7./ && Dir.chdir('../..') { verify_min_sdk < 15 }
+                invokers = Dir['**/*$INVOKER$*.class']
+                log_action("Removing invokers(#{invokers.size})") do
                   FileUtils.rm invokers
+                end
+                populators = Dir['**/*$POPULATOR.class']
+                log_action("Removing populators(#{populators.size})") do
+                  FileUtils.rm populators
                 end
               end
 

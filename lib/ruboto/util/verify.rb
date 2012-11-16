@@ -48,16 +48,17 @@ module Ruboto
       end
 
       def verify_min_sdk
+        return @min_sdk if @min_sdk
         verify_sdk_versions
-        @min_sdk ||= @uses_sdk.attribute('android:minSdkVersion').value
-        abort "you must specify a minimum sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @min_sdk
-        @min_sdk
+        min_sdk_attr = @uses_sdk.attribute('android:minSdkVersion').value
+        abort "you must specify a minimum sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless min_sdk_attr
+        @min_sdk = min_sdk_attr.to_i
       end
 
       def verify_target_sdk
         return @target_sdk if @target_sdk
         verify_sdk_versions
-        target_sdk_attr ||= @uses_sdk.attribute('android:targetSdkVersion').value
+        target_sdk_attr = @uses_sdk.attribute('android:targetSdkVersion').value
         abort "you must specify a target sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless target_sdk_attr
         @target_sdk = target_sdk_attr.to_i
       end
