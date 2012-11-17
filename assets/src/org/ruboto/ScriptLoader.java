@@ -55,7 +55,7 @@ public class ScriptLoader {
                         System.out.println("Loading script: " + component.getScriptInfo().getScriptName());
                         if (scriptContainsClass) {
                             System.out.println("Script contains class definition");
-                            if (hasBackingJavaClass) {
+                            if (rubyClass == null && hasBackingJavaClass) {
                                 System.out.println("Script has separate Java class");
 
                                 // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
