@@ -72,7 +72,8 @@ for ANDROID_TARGET in 10 15 ; do
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" == "0" ] ; then
       echo "Emulator started."
-      for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 ; do
+      for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 \
+               31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 ; do
         sleep 1
         if [ `adb get-state` == "device" ] ; then
           break
@@ -132,6 +133,7 @@ for ANDROID_TARGET in 10 15 ; do
       # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
+      # ACTIVITY_TEST_PATTERN=mytest ruby test/ruboto_gen_test.rb -n test_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
       # ruby test/ruboto_gen_test.rb -n test_activity_with_first_letter_lower_case_in_name
     done
