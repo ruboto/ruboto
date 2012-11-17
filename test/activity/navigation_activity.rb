@@ -3,7 +3,7 @@ require 'ruboto/widget'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
-class NavigationActivity < Java::OrgRuboto::EntryPointActivity
+class NavigationActivity
   def on_create(bundle)
     super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
