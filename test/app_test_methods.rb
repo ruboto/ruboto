@@ -48,18 +48,24 @@ module AppTestMethods
   end
 
   def run_activity_tests(activity_dir)
-    Dir[File.expand_path("#{activity_dir}/*_test.rb", File.dirname(__FILE__))].each do |test_src|
-      snake_name = test_src.chomp('_test.rb')
-      next unless snake_name =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
-
+    Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.0.rc1
-      next if snake_name =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0.rc1'))
+      next if file =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0.rc1'))
 
-      activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join
-      Dir.chdir APP_DIR do
-        system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}"
-        FileUtils.cp "#{snake_name}.rb", "src/"
-        FileUtils.cp test_src, "test/src/"
+      if file =~ /_test.rb$/
+        next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
+        snake_name = file.chomp('_test.rb')
+
+        activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join
+        Dir.chdir APP_DIR do
+          system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}"
+          FileUtils.cp "#{snake_name}.rb", "src/"
+          FileUtils.cp file, "test/src/"
+        end
+      elsif !File.exists? "#{file.chomp('.rb')}'_test.rb'"
+        Dir.chdir APP_DIR do
+          FileUtils.cp file, "src/"
+        end
       end
     end
     run_app_tests
