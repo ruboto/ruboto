@@ -22,18 +22,6 @@ module AppTestMethods
     run_activity_tests('activity')
   end
 
-  def test_block_def_activity_tests
-    run_activity_tests('block_def_activity')
-  end
-
-  def test_handle_activity_tests
-    Dir.chdir APP_DIR do
-      FileUtils.rm "src/ruboto_test_app_activity.rb"
-      FileUtils.rm "test/src/ruboto_test_app_activity_test.rb"
-    end
-    run_activity_tests('handle_activity')
-  end
-
   private
 
   def assert_code(activity_name, code)

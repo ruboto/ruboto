@@ -10,7 +10,7 @@ require 'ruboto/activity'
 
 java_import "android.preference.PreferenceScreen"
 java_import "android.preference.Preference"
-ruboto_import "org.ruboto.RubotoPreferenceActivity"
+java_import "org.ruboto.RubotoPreferenceActivity"
 ruboto_configure_activity(RubotoPreferenceActivity)
 
 RubotoPreferenceActivity.class_eval do
