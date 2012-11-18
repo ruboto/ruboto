@@ -207,10 +207,10 @@ module Ruboto
                 "JRubyAdapter.isInitialized()",
                     ['String rubyClassName = scriptInfo.getRubyClassName();'] +
                         if_else(
-                            "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                            "rubyClassName != null && (Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
                             ruby_call,
                             if_else(
-                                "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                                "rubyClassName != null && (Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
                                 ruby_call(true),
                                 [super_return]
                             )
