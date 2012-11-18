@@ -8,9 +8,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-THE_CONSTANTS
-
-    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
+    private final ScriptInfo scriptInfo = new ScriptInfo();
     private String remoteVariable = null;
     Bundle[] args;
     private Bundle configBundle = null;
@@ -32,12 +30,6 @@ THE_CONSTANTS
      *
      *  Activity Lifecycle: onCreate
      */
-
-    // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
-	public void onCreateSuper() {
-	    super.onCreate((Bundle) args[0]);
-	}
-
     @Override
     public void onCreate(Bundle bundle) {
         System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName());

@@ -112,9 +112,6 @@ module Ruboto
         methods = check_methods(methods, params[:force])
         puts "Done. Methods created: #{methods.count}"
 
-        # Remove any duplicate constants (use *args handle multiple parameter lists)
-        constants = methods.map(&:constant_string).uniq
-
         params[:implements] = params[:implements].split(",").push('org.ruboto.RubotoComponent').join(",")
 
         action = class_desc.name == "class" ? "extends" : "implements"
@@ -125,8 +122,6 @@ module Ruboto
             "THE_ANDROID_CLASS" => (params[:class] || params[:interface]) +
                 (params[:implements] == "" ? "" : ((action != 'implements' ? " implements " : ', ') + params[:implements].split(",").join(", "))),
             "THE_RUBOTO_CLASS" => params[:name],
-            "THE_CONSTANTS" => constants.map { |i| "public static final int #{i} = #{constants.index(i)};" }.indent.join("\n"),
-            "CONSTANTS_COUNT" => methods.count.to_s,
             "THE_CONSTRUCTORS" => class_desc.name == "class" ?
                 class_desc.get_elements("constructor").map { |i| i.constructor_definition(params[:name]) }.join("\n\n") : "",
             "THE_METHODS" => methods.map { |i| i.method_definition(params[:name]) }.join("\n\n")

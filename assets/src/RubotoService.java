@@ -5,9 +5,7 @@ import org.ruboto.ScriptLoader;
 import java.io.IOException;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-THE_CONSTANTS
-
-    private final ScriptInfo scriptInfo = new ScriptInfo(CONSTANTS_COUNT);
+    private final ScriptInfo scriptInfo = new ScriptInfo();
 
     public ScriptInfo getScriptInfo() {
         return scriptInfo;
@@ -17,12 +15,6 @@ THE_CONSTANTS
      *
      *  Service Lifecycle: onCreate
      */
-
-    // FIXME(uwe):  Only used for block based primary activities.  Remove if we remove support for such.
-	public void onCreateSuper() {
-	    super.onCreate();
-	}
-
     @Override
     public void onCreate() {
         if (ScriptLoader.isCalledFromJRuby()) {

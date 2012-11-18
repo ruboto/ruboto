@@ -106,23 +106,8 @@ public class ScriptLoader {
                     if (component instanceof android.content.Context) {
                         callOnCreate(rubyInstance, args);
                     }
-                } else {
-                    // FIXME(uwe): Remove when we stop supporting block based main activities.
-                    component.onCreateSuper();
                 }
                 component.getScriptInfo().setRubyInstance(rubyInstance);
-            } else { // if (configBundle != null) {
-                // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                if (JRubyAdapter.isJRubyPreOneSeven()) {
-            	    JRubyAdapter.runScriptlet("$activity.initialize_ruboto");
-                } else if (JRubyAdapter.isJRubyOneSeven()) {
-            	    JRubyAdapter.runRubyMethod(component, "initialize_ruboto");
-                } else {
-                    throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-            	}
-                if (component instanceof android.content.Context) {
-                    callOnCreate(component, args);
-                }
             }
         } catch(IOException e){
             e.printStackTrace();
