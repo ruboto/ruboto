@@ -90,10 +90,10 @@ end
 
 def ruboto_import_widget(class_name, package_name="android.widget")
   if class_name.is_a?(String) or class_name.is_a?(Symbol)
-    klass = ruboto_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
+    klass = java_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
   else
     klass = class_name
-    ruboto_import klass
+    java_import klass
     class_name = klass.java_class.name.split('.')[-1]
   end
   

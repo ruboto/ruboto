@@ -2,10 +2,10 @@
 
 MASTER=1.7.1.dev
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
-STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.0 1.6.8"
+STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.0"
+SKIP_RUBOTO_UPDATE_TEST=1
 
-export ANDROID_TARGET ANDROID_OS JRUBY_JARS_VERSION RUBOTO_PLATFORM
-export SKIP_RUBOTO_UPDATE_TEST=1
+export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM SKIP_RUBOTO_UPDATE_TEST
 
 EMULATOR_CMD=emulator64-arm
 
@@ -71,15 +71,16 @@ for ANDROID_TARGET in 10 15 ; do
 
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" == "0" ] ; then
-      echo "Emulator started."
+      echo -n "Emulator started: "
       for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 \
                31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 ; do
         sleep 1
         if [ `adb get-state` == "device" ] ; then
           break
         fi
-        echo Waiting for device: $i
+        echo -n .
       done
+      echo
       if [ `adb get-state` == "device" ] ; then
         break
       fi
@@ -119,8 +120,11 @@ for ANDROID_TARGET in 10 15 ; do
     for JRUBY_JARS_VERSION in $jruby_versions ; do
       if [ $RUBOTO_PLATFORM == "CURRENT" ] ; then
         unset JRUBY_JARS_VERSION
-      elif [ $RUBOTO_PLATFORM == "FROM_GEM" ] ; then
-        rake platform:clean
+      else
+        export JRUBY_JARS_VERSION
+        if [ $RUBOTO_PLATFORM == "FROM_GEM" ] ; then
+          rake platform:clean
+        fi
       fi
       echo ""
       echo "********************************************************************************"
@@ -132,10 +136,7 @@ for ANDROID_TARGET in 10 15 ; do
       ./run_tests.sh
       # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
-      # ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
-      # ACTIVITY_TEST_PATTERN=mytest ruby test/ruboto_gen_test.rb -n test_activity_tests
-      # ruby test/ruboto_gen_test.rb -n test_handle_activity_tests
-      # ruby test/ruboto_gen_test.rb -n test_activity_with_first_letter_lower_case_in_name
+      # ACTIVITY_TEST_PATTERN=navigation ruby test/ruboto_gen_test.rb -n test_activity_tests
     done
   done
 done

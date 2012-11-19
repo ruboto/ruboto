@@ -2,33 +2,13 @@
 #
 # ruboto/broadcast_receiver.rb
 #
-# Basic broadcast_receiver set up and callback configuration.
+# Basic broadcast_receiver set up.
 #
 #######################################################
 
 require 'ruboto/base'
 
-ruboto_import "org.ruboto.RubotoBroadcastReceiver"
-RubotoBroadcastReceiver.class_eval do
-    def self.new_with_callbacks &block
-      (($broadcast_receiver.nil? || $broadcast_receiver.initialized) ? new : $broadcast_receiver).initialize_ruboto_callbacks &block
-    end
-
-    def initialized
-      @initialized ||= false
-    end
-
-    def initialize_ruboto_callbacks &block
-      instance_eval &block
-      setup_ruboto_callbacks
-      @initialized = true
-      self
-    end
-
-    def on_receive(context, intent)
-    end
-end
-
+java_import "org.ruboto.RubotoBroadcastReceiver"
 module Ruboto
   module BroadcastReceiver
   end

@@ -5,71 +5,34 @@ require 'ruboto/package'
 #
 # ruboto/service.rb
 #
-# Basic service set up and callback configuration.
+# Basic service set up.
 #
 #######################################################
 
-#
-# Context
-#
+java_import "android.content.Context"
+java_import "org.ruboto.RubotoService"
 
 module Ruboto
   module Context
-    def initialize_ruboto()
-      eval("#{$new_context_global} = self")
-      $new_context_global = nil
-
-      instance_eval &$context_init_block if $context_init_block
-      $context_init_block = nil
-      setup_ruboto_callbacks 
-
-      @initialized = true
-      self
-    end
-  
     def start_ruboto_service(global_variable_name = '$service', klass=RubotoService, &block)
-      $context_init_block = block
-      $new_context_global = global_variable_name
-  
-      if @initialized or (self == $service) or ($service == nil) # FIx mix between activity and service
-        self.startService Java::android.content.Intent.new(self, klass.java_class)
+      class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].split("/").last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
+      if !Object.const_defined?(class_name)
+        Object.const_set(class_name, Class.new(&block))
       else
-        initialize_ruboto
-        on_create
+        Object.const_get(class_name).class_eval(&block) if block_given?
       end
-  
+      b = Java::android.os.Bundle.new
+      b.putInt("Theme", theme) if theme
+      b.putString("ClassName", class_name)
+      i = android.content.Intent.new
+      i.setClass self, klass.java_class
+      i.putExtra("RubotoActivity Config", b)
+      self.startService Java::android.content.Intent.new(self, klass.java_class)
       self
     end
   end
 end
 
-java_import "android.content.Context"
 Context.class_eval do
   include Ruboto::Context
 end
-
-#
-# Leave for legacy Service Subclass Setup
-#
-
-module Ruboto
-  module Service
-  end
-end
-
-#
-# Basic Service Setup
-#
-
-def ruboto_configure_service(klass)
-  klass.class_eval do
-    include Ruboto::Service
-    
-    def on_create
-    end
-  end
-end
-
-ruboto_import "org.ruboto.RubotoService"
-ruboto_configure_service(RubotoService)
-

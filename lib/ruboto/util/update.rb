@@ -10,7 +10,6 @@ module Ruboto
       #
       # Updating components
       #
-
       def update_android
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
@@ -122,15 +121,6 @@ module Ruboto
           ant_script.gsub!(/\s*<!-- BEGIN added by Ruboto -->.*?<!-- END added by Ruboto -->\s*/m, '')
           raise "Bad ANT script" unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w') { |f| f << ant_script }
-
-          # FIXME(uwe): Remove when we stop supporting update from Ruboto < 0.5.3
-          if File.directory? 'assets/scripts'
-            log_action 'Moving test scripts to the "src" directory.' do
-              FileUtils.mv Dir['assets/scripts/*'], 'src'
-              FileUtils.rm_rf 'assets/scripts'
-            end
-          end
-          # EMXIF
         end
       end
 
@@ -208,13 +198,6 @@ module Ruboto
 
       def update_assets
         puts "\nCopying files:"
-
-        # FIXME(uwe):  Remove when we stop supporting updating from Ruboto < 0.6.0
-        if File.exists?('Rakefile') && !File.exists?('rakelib/ruboto.rake')
-          FileUtils.rm 'Rakefile'
-        end
-        # EMXIF
-
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
         %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
 
@@ -336,11 +319,6 @@ module Ruboto
       end
 
       def update_core_classes(force = nil)
-        # FIXME(uwe): Remove when we stop supporting updating from Ruboto 0.5.5 and older.
-        FileUtils.rm_rf 'src/org/ruboto/callbacks'
-        FileUtils.rm_f 'src/org/ruboto/RubotoView.java'
-        # EMXIF
-
         generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
       end
 
@@ -350,11 +328,6 @@ module Ruboto
       end
 
       def update_ruboto(force=nil)
-        log_action("Copying ruboto.rb") do
-          from = File.expand_path(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto.rb")
-          to = File.expand_path("./#{SCRIPTS_DIR}/ruboto.rb")
-          FileUtils.cp from, to
-        end
         log_action("Copying ruboto/version.rb") do
           from = File.expand_path(Ruboto::GEM_ROOT + "/lib/ruboto/version.rb")
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
