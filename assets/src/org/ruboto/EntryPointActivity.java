@@ -100,7 +100,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                 final boolean jrubyOk = JRubyAdapter.setUpJRuby(EntryPointActivity.this);
                 if (jrubyOk) {
                     Log.d("onResume: JRuby OK");
-                    prepareJRuby();
                     runOnUiThread(new Runnable() {
                         public void run() {
                             fireRubotoActivity();
