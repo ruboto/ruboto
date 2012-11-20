@@ -24,12 +24,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 	    System.out.println("RubotoService.onCreate()");
 
         if (JRubyAdapter.setUpJRuby(this)) {
-            // TODO(uwe):  Only needed for non-class-based definitions
-            // Can be removed if we stop supporting non-class-based definitions
-    	    JRubyAdapter.defineGlobalVariable("$context", this);
-    	    JRubyAdapter.defineGlobalVariable("$service", this);
-    	    // TODO end
-
             ScriptLoader.loadScript(this);
         } else {
             // FIXME(uwe):  What to do if the Ruboto Core platform cannot be found?

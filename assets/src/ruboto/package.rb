@@ -1,4 +1,3 @@
-$package_name = ($activity || $service).package_name
 $package      = eval("Java::#{$package_name}")
 
 module Ruboto

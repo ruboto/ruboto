@@ -342,6 +342,7 @@ public class JRubyAdapter {
                 System.setProperty("jruby.home", jrubyHome);
 
                 addLoadPath(scriptsDirName(appContext));
+    	        put("$package_name", appContext.getPackageName());
 
                 initialized = true;
             } catch (ClassNotFoundException e) {

@@ -63,22 +63,11 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         }
 
         if (JRubyAdapter.isInitialized()) {
-            prepareJRuby();
     	    ScriptLoader.loadScript(this, (Object[]) args);
         } else {
             super.onCreate(bundle);
         }
     }
-
-    // TODO(uwe):  Only needed for non-class-based definitions
-    // Can be removed if we stop supporting non-class-based definitions
-    // This causes JRuby to initialize and takes a while.
-    protected void prepareJRuby() {
-    	JRubyAdapter.put("$context", this);
-    	JRubyAdapter.put("$activity", this);
-    	JRubyAdapter.put("$bundle", args[0]);
-    }
-    // TODO end
 
     public boolean rubotoAttachable() {
       return true;
