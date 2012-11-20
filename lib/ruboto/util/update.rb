@@ -400,19 +400,6 @@ module Ruboto
                     'org/jruby/ext/ffi/io',
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
-
-                    # FIXME(uwe):  IR is the future.  We should try using it.
-                    # 'org/jruby/ir',
-                    'org/jruby/ir/dataflow',
-                    # 'org/jruby/ir/instructions',
-                    # 'org/jruby/ir/interpreter',
-                    # 'org/jruby/ir/operands',
-                    # 'org/jruby/ir/passes',
-                    'org/jruby/ir/representations',
-                    'org/jruby/ir/targets',
-                    'org/jruby/ir/transformations',
-                    'org/jruby/ir/util',
-
                     'org/jruby/javasupport/bsf',
 
                     # 'org/jruby/management', # should be excluded
@@ -556,6 +543,8 @@ module Ruboto
               raise "Unpacking dx.jar jar failed: #$?" unless $? == 0
               File.delete dx_jar
                 excluded_core_packages = [
+                    'com/android/dx/command',
+                    'com/android/dx/ssa',
                     'junit',
                 ]
               excluded_core_packages.each do |i|
