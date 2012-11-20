@@ -19,7 +19,7 @@ module Ruboto
       start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
     end
 
-    def start_ruboto_activity(global_variable_name = '$activity', klass=RubotoActivity, theme=nil, options = nil, &block)
+    def start_ruboto_activity(global_variable_name = '$block_based_activity', klass=RubotoActivity, theme=nil, options = nil, &block)
       # FIXME(uwe): Translate old positional signature to new options-based signature.
       # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
       if options.nil?

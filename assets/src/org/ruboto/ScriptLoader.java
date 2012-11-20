@@ -82,15 +82,10 @@ public class ScriptLoader {
                                 throw new RuntimeException("Interrupted loading script.", ie);
                             }
                         } else {
-                            // FIXME(uwe): Only needed for initial block-based activity definition
-                            System.out.println("Script contains block based activity definition");
-                            if (!JRubyAdapter.isJRubyPreOneSeven()) {
-                                JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
-                            }
-                            JRubyAdapter.runScriptlet("$activity.instance_variable_set '@ruboto_java_class', '" + component.getScriptInfo().getRubyClassName() + "'");
-                            JRubyAdapter.runScriptlet("puts %Q{$activity: #$activity}");
-                            JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
-                            JRubyAdapter.runScriptlet(script);
+                            throw new RuntimeException("Expected file "
+                                    + component.getScriptInfo().getScriptName()
+                                    + " to define class "
+                                    + component.getScriptInfo().getRubyClassName());
                         }
                     }
                 } else if (rubyClass != null) {

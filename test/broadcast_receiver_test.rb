@@ -21,6 +21,8 @@ class BroadcastReceiverTest < Test::Unit::TestCase
 
       assert activity_content.sub!(/  def on_create\(bundle\)\n/, <<EOF)
   def on_create(bundle)
+    super
+    $broadcast_test_activity = self
     @receiver = $package.ClickReceiver.new
     filter = android.content.IntentFilter.new('#{action_name}')
     Thread.start do
@@ -53,7 +55,7 @@ EOF
       assert receiver_content.sub!(/  def on_receive\(context, intent\)\n.*?^  end\n/m, <<EOF)
   def on_receive(context, intent)
     Log.d "RUBOTO TEST", "Changing UI text"
-    context.run_on_ui_thread{$activity.find_view_by_id(42).text = '#{message}'}
+    context.run_on_ui_thread{$broadcast_test_activity.find_view_by_id(42).text = '#{message}'}
     Log.d "RUBOTO TEST", "UI text changed OK!"
   rescue
     Log.e "RUBOTO TEST", "Exception changing UI text: \#{$!.message}"

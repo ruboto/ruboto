@@ -10,7 +10,7 @@ module Ruboto
         body_clause.indent, "}"]
       end
 
-      def if_else(condition, if_clause, else_clause)
+      def if_else(condition, if_clause, else_clause = [])
         ["if (#{condition}) {", if_clause.indent, else_clause.compact.empty? ? nil : "} else {", else_clause.indent, "}"]
       end
 
