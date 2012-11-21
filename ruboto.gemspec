@@ -1,5 +1,8 @@
 require 'rake'
-require File.join(File.dirname(__FILE__), 'lib', 'ruboto', 'version')
+lib_path = File.expand_path('lib', File.dirname(__FILE__))
+$:.unshift(lib_path) unless $:.include?(lib_path)
+require 'ruboto/version'
+require 'ruboto/description'
 
 Gem::Specification.new do |s|
   s.name = %q{ruboto}

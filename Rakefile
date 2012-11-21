@@ -2,6 +2,7 @@ $:.unshift('lib') unless $:.include?('lib')
 require 'rake/clean'
 require 'rexml/document'
 require 'ruboto/version'
+require 'ruboto/description'
 require 'ruboto/sdk_versions'
 require 'uri'
 require 'net/http'
