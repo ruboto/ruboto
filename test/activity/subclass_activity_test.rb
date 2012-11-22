@@ -24,9 +24,30 @@ class MyObject < java.lang.Object
     super()
     @my_param = my_param
   end
+
+  def equals(x)
+    !super
+  end
 end
 
 test('add constructor with parameter') do
   o = MyObject.new('It works!')
   assert_equal 'It works!', o.my_param
+end
+
+#test('call instance method super') do
+#  o = MyObject.new('It works!')
+#  assert !o.equals(o)
+#end
+
+class MyJRubyAdapter < org.ruboto.JRubyAdapter
+  def self.isDebugBuild
+    !super
+  end
+end
+
+test('call super from static subclass method') do
+  a = org.ruboto.JRubyAdapter
+  b = MyJRubyAdapter
+  assert a.isDebugBuild != b.isDebugBuild
 end

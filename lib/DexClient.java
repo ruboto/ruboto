@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 
 import com.android.dx.cf.iface.ParseException;
-// import com.android.dx.dex.DexFormat;
-// import com.android.dx.dex.DexOptions;
+import com.android.dx.dex.DexFormat;
+import com.android.dx.dex.DexOptions;
 import com.android.dx.dex.cf.CfOptions;
 import com.android.dx.dex.cf.CfTranslator;
 import com.android.dx.dex.code.PositionList;
@@ -15,15 +15,14 @@ import com.android.dx.dex.file.DexFile;
 public class DexClient {
     /** {@code non-null;} output file in-progress */
     private static DexFile outputDex;
-    // private static DexOptions dexOptions = new DexOptions();
-    // static {
-    //     dexOptions.targetApiLevel = DexFormat.API_NO_EXTENDED_OPCODES;
-    // }
+    private static DexOptions dexOptions = new DexOptions();
+    static {
+        dexOptions.targetApiLevel = DexFormat.API_NO_EXTENDED_OPCODES;
+    }
     private final CfOptions cfOptions;
 
     public DexClient() {
-        outputDex = new DexFile();
-        // outputDex = new DexFile(dexOptions);
+        outputDex = new DexFile(dexOptions);
         cfOptions = new CfOptions();
 
         cfOptions.positionInfo = PositionList.LINES;
@@ -58,8 +57,7 @@ public class DexClient {
     private boolean processClass(String name, byte[] bytes) {
         try {
             ClassDefItem clazz;
-            clazz = CfTranslator.translate(name, bytes, cfOptions);
-            // clazz = CfTranslator.translate(name, bytes, cfOptions, dexOptions);
+            clazz = CfTranslator.translate(name, bytes, cfOptions, dexOptions);
             outputDex.add(clazz);
             return true;
         } catch (ParseException ex) {

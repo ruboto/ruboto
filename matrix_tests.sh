@@ -3,41 +3,53 @@
 MASTER=1.7.1.dev
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.0"
+ANDROID_TARGETS="10 15"
 SKIP_RUBOTO_UPDATE_TEST=1
 
 export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM SKIP_RUBOTO_UPDATE_TEST
 
 EMULATOR_CMD=emulator64-arm
 
-for ANDROID_TARGET in 10 15 ; do
+for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
   while :; do
-  set +e
-  killall -0 $EMULATOR_CMD 2> /dev/null
-  if [ "$?" == "0" ] ; then
-    killall $EMULATOR_CMD
-    sleep 2
-    for i in 1 2 3 4 5 6 7 8 9 10 ; do
-      killall -0 $EMULATOR_CMD 2> /dev/null
-      if [ "$?" != "0" ] ; then
-        break
-      fi
-      echo "Waiting for emulator to die"
-      sleep 1
-    done
+    set +e
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" == "0" ] ; then
-      echo "Emulator still running."
-      killall -9 $EMULATOR_CMD
-      sleep 1
+      killall $EMULATOR_CMD
+      sleep 2
+      for i in 1 2 3 4 5 6 7 8 9 10 ; do
+        killall -0 $EMULATOR_CMD 2> /dev/null
+        if [ "$?" != "0" ] ; then
+          break
+        fi
+        echo "Waiting for emulator to die"
+        sleep 1
+      done
+      killall -0 $EMULATOR_CMD 2> /dev/null
+      if [ "$?" == "0" ] ; then
+        echo "Emulator still running."
+        killall -9 $EMULATOR_CMD
+        sleep 1
+      fi
     fi
-  fi
 
-  if [ "$ANDROID_TARGET" == "15" ] ; then
-    avd="Android_4.0.3"
-  elif [ "$ANDROID_TARGET" == "10" ] ; then
-    avd="Android_2.3.3"
-  fi
+    if [ "$ANDROID_TARGET" == "17" ] ; then
+      avd="Android_4.2"
+    elif [ "$ANDROID_TARGET" == "16" ] ; then
+      avd="Android_4.1.2"
+    elif [ "$ANDROID_TARGET" == "15" ] ; then
+      avd="Android_4.0.3"
+    elif [ "$ANDROID_TARGET" == "13" ] ; then
+      avd="Android_3.2"
+    elif [ "$ANDROID_TARGET" == "11" ] ; then
+      avd="Android_3.0"
+    elif [ "$ANDROID_TARGET" == "10" ] ; then
+      avd="Android_2.3.3"
+    else
+      echo Unknown api level: $ANDROID_TARGET
+      exit 2
+    fi
 
     set -e
     echo Start emulator
@@ -75,7 +87,7 @@ for ANDROID_TARGET in 10 15 ; do
       for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 \
                31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 ; do
         sleep 1
-        if [ `adb get-state` == "device" ] ; then
+        if [ "`adb get-state`" == "device" ] ; then
           break
         fi
         echo -n .
@@ -136,7 +148,7 @@ for ANDROID_TARGET in 10 15 ; do
       ./run_tests.sh
       # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
-      # ACTIVITY_TEST_PATTERN=navigation ruby test/ruboto_gen_test.rb -n test_activity_tests
+      # ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
     done
   done
 done
