@@ -17,15 +17,19 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" == "0" ] ; then
       killall $EMULATOR_CMD
-      sleep 2
       for i in 1 2 3 4 5 6 7 8 9 10 ; do
         killall -0 $EMULATOR_CMD 2> /dev/null
         if [ "$?" != "0" ] ; then
           break
         fi
-        echo "Waiting for emulator to die"
+        if [ $i == 3 ] ; then
+          echo -n "Waiting for emulator to die: ..."
+        elif [ $i -gt 3 ] ; then
+          echo -n .
+        fi
         sleep 1
       done
+      echo
       killall -0 $EMULATOR_CMD 2> /dev/null
       if [ "$?" == "0" ] ; then
         echo "Emulator still running."
@@ -57,14 +61,18 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
     set +e
     for i in 1 2 3 ; do
-      sleep 1
       killall -0 $EMULATOR_CMD 2> /dev/null
       if [ "$?" == "0" ] ; then
         break
       fi
-      echo "Waiting for emulator"
+      if [ $i == 3 ] ; then
+        echo -n "Waiting for emulator: ..."
+      elif [ $i -gt 3 ] ; then
+          echo -n .
+      fi
+      sleep 1
     done
-
+    echo
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" != "0" ] ; then
       echo "Unable to start the emulator.  Retrying without loading snapshot."
@@ -72,12 +80,16 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       emulator -no-snapshot-load -avd $avd &
       set +e
       for i in 1 2 3 4 5 6 7 8 9 10 ; do
-        sleep 1
         killall -0 $EMULATOR_CMD 2> /dev/null
         if [ "$?" == "0" ] ; then
           break
         fi
-        echo "Waiting for emulator"
+        if [ $i == 3 ] ; then
+          echo -n "Waiting for emulator: ..."
+        elif [ $i -gt 3 ] ; then
+            echo -n .
+        fi
+        sleep 1
       done
     fi
 
@@ -86,11 +98,11 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo -n "Emulator started: "
       for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 \
                31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 ; do
-        sleep 1
         if [ "`adb get-state`" == "device" ] ; then
           break
         fi
         echo -n .
+        sleep 1
       done
       echo
       if [ `adb get-state` == "device" ] ; then

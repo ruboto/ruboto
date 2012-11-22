@@ -362,30 +362,26 @@ module Ruboto
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
-              if jruby_core_version >= '1.7.0'
+              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1.dev')
                 excluded_core_packages = [
                     '**/*Darwin*',
+                    '**/*Ruby20*',
                     '**/*Solaris*',
                     '**/*windows*',
                     '**/*Windows*',
-                    'META-INF', 'cext',
-                    'com/headius', # included since we are trying to use DexClient
-                    'com/headius/invokebinder',
+                    'META-INF',
+                    'com/headius',
                     'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
-                    'ext',
-                    'java',
                     'jline', 'jni',
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
+                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
                     'jnr/ffi/annotations', 'jnr/ffi/byref',
                     'jnr/ffi/provider', 'jnr/ffi/util',
-                    'jnr/ffi/posix/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
                     'org/apache',
-                    'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
@@ -408,10 +404,44 @@ module Ruboto
 
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                 ]
-
-                # TODO(uwe): Remove when we stop supporting jruby-jars < 1.7.0
-              else
-                print 'Retaining com.kenai.constantine and removing jnr for JRuby < 1.7.0...'
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.0')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.0
+                excluded_core_packages = [
+                    '**/*Darwin*',
+                    '**/*Solaris*',
+                    '**/*windows*',
+                    '**/*Windows*',
+                    'META-INF',
+                    'com/headius',
+                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
+                    'jline', 'jni',
+                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
+                    'jnr/ffi/annotations', 'jnr/ffi/byref',
+                    'jnr/ffi/provider', 'jnr/ffi/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    'jnr/posix/MacOS*',
+                    'jnr/posix/OpenBSD*',
+                    'org/apache',
+                    'org/bouncycastle',
+                    'org/fusesource',
+                    'org/jruby/ant',
+                    'org/jruby/cext',
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo',
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/io',
+                    'org/jruby/ext/ffi/jffi',
+                    'org/jruby/ext/openssl',
+                    'org/jruby/javasupport/bsf',
+                ]
+                # ODOT
+              elsif Gem::Version.new(jruby_core_version) =~ Gem::Version.new('~>1.6.0')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.6.x
+                print 'Retaining com.kenai.constantine and removing jnr for JRuby 1.6.x...'
                 excluded_core_packages = [
                     'META-INF', 'cext',
                     'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
@@ -429,6 +459,8 @@ module Ruboto
                     'org/jruby/runtime/invokedynamic',
                 ]
                 # ODOT
+              else
+                raise "Unsupported JRuby version: #{jruby_core_version.inspect}."
               end
 
               excluded_core_packages.each do |i|
@@ -544,7 +576,7 @@ module Ruboto
               File.delete dx_jar
                 excluded_core_packages = [
                     'com/android/dx/command',
-                    'com/android/dx/ssa',
+                    # 'com/android/dx/ssa', # Tests run OK without this package, but we may loose some optimizations.
                     'junit',
                 ]
               excluded_core_packages.each do |i|
