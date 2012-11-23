@@ -13,6 +13,12 @@ class RubotoGenTest < Test::Unit::TestCase
     cleanup_app
   end
 
+  def test_gitignore_is_included_in_new_project
+    Dir.chdir APP_DIR do
+      assert File.exists? '.gitignore'
+    end
+  end
+
   def test_icons_are_updated
     Dir.chdir APP_DIR do
       assert_equal 4032, File.size('res/drawable-hdpi/ic_launcher.png')
