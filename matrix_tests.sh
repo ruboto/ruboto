@@ -61,6 +61,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
     set +e
     for i in 1 2 3 ; do
+      sleep 1
       killall -0 $EMULATOR_CMD 2> /dev/null
       if [ "$?" == "0" ] ; then
         break
@@ -70,7 +71,6 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       elif [ $i -gt 3 ] ; then
           echo -n .
       fi
-      sleep 1
     done
     echo
     killall -0 $EMULATOR_CMD 2> /dev/null
