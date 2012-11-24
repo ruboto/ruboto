@@ -35,10 +35,10 @@ test('add constructor with parameter') do
   assert_equal 'It works!', o.my_param
 end
 
-#test('call instance method super') do
-#  o = MyObject.new('It works!')
-#  assert !o.equals(o)
-#end
+test('call instance method super') do
+  o = MyObject.new('It works!')
+  assert !o.equals(o)
+end
 
 class MyJRubyAdapter < org.ruboto.JRubyAdapter
   def self.isDebugBuild
