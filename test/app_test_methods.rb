@@ -38,7 +38,7 @@ module AppTestMethods
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.0.rc1
-      next if file =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0.rc1'))
+      next if file =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.1.dev'))
 
       if file =~ /_test.rb$/
         next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
