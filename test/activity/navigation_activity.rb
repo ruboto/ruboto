@@ -10,39 +10,40 @@ class NavigationActivity
 
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-          text_view :text => 'What hath Matz wrought?', :id => 42, :width => :match_parent,
+          text_view :text => 'Navigation', :id => 42, :width => :match_parent,
                     :gravity => :center, :text_size => 48.0
-          button :text => 'Next by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { start_next_java_activity }
-          button :text => 'Next by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { start_next_ruby_activity }
-          button :text => 'Next by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { start_activity_by_script_name }
+          button :text => 'Java backed by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { java_backed_by_java_class }
+          button :text => 'Java backed by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { java_backed_by_ruby_class }
+          button :text => 'Java backed by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { java_backed_by_script_name }
           button :text => 'Inline block', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
           button :text => 'Inline block with options', :width => :match_parent, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
           button :text => 'Infile class', :width => :match_parent, :id => 48, :on_click_listener => proc { start_infile_activity }
+          button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
         end
   end
 
   private
 
-  def start_next_java_activity
+  def java_backed_by_java_class
     i = android.content.Intent.new
-    i.setClassName($package_name, 'org.ruboto.test_app.NavigationActivity')
+    i.setClassName($package_name, 'org.ruboto.test_app.NavigationTargetActivity')
     startActivity(i)
   end
 
-  def start_next_ruby_activity
+  def java_backed_by_ruby_class
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
-    configBundle.put_string('ClassName', 'NavigationActivity')
+    configBundle.put_string('ClassName', 'NavigationTargetActivity')
     i.putExtra('RubotoActivity Config', configBundle)
     startActivity(i)
   end
 
-  def start_activity_by_script_name
+  def java_backed_by_script_name
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
-    configBundle.put_string('Script', 'navigation_activity.rb')
+    configBundle.put_string('Script', 'navigation_target_activity.rb')
     i.putExtra('RubotoActivity Config', configBundle)
     startActivity(i)
   end
@@ -84,13 +85,21 @@ class NavigationActivity
     startActivity(i)
   end
 
+  def start_ruby_file_activity
+    i = android.content.Intent.new
+    i.setClassName($package_name, 'org.ruboto.RubotoActivity')
+    configBundle = android.os.Bundle.new
+    configBundle.put_string('ClassName', 'RubyFileActivity')
+    i.putExtra('RubotoActivity Config', configBundle)
+    startActivity(i)
+  end
+
 end
 
 class InfileActivity
   def on_create(bundle)
     super
     set_title 'Infile Activity'
-
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
           text_view :text => 'This is an infile activity.', :id => 42, :width => :match_parent,

@@ -194,9 +194,7 @@ namespace :test do
   task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
-      sh "#{ANT_CMD} instrument"
-      sh "#{ANT_CMD} installi"
-      sh "#{ANT_CMD} run-tests-quick"
+      sh "#{ANT_CMD} instrument install run-tests-quick"
     end
   end
 end

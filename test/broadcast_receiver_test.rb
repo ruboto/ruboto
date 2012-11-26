@@ -13,7 +13,7 @@ class BroadcastReceiverTest < Test::Unit::TestCase
   end
 
   def test_generated_broadcast_receiver
-    action_name ='org.ruboto.example.click_broadcast'
+    action_name = 'org.ruboto.example.click_broadcast'
     message = 'Broadcast received!'
     Dir.chdir APP_DIR do
       activity_filename = 'src/ruboto_test_app_activity.rb'
