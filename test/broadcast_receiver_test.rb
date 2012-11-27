@@ -57,7 +57,7 @@ EOF
     Log.d "RUBOTO TEST", "Changing UI text"
     context.run_on_ui_thread{$broadcast_test_activity.find_view_by_id(42).text = '#{message}'}
     Log.d "RUBOTO TEST", "UI text changed OK!"
-  rescue
+  rescue Exception
     Log.e "RUBOTO TEST", "Exception changing UI text: \#{$!.message}"
     Log.e "RUBOTO TEST", $!.message
     Log.e "RUBOTO TEST", $!.backtrace.join("\\n")

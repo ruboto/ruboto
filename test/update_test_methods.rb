@@ -29,35 +29,39 @@ module UpdateTestMethods
     end
   end
 
-  def test_broadcast_receiver
-    Dir.chdir APP_DIR do
-      puts "Adding a broadcast receiver"
-      install_ruboto_gem @old_ruboto_version
-      system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
-      fail "Creation of broadcast receiver failed" if $? != 0
-      assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
-      assert File.exists? 'src/dummy_receiver.rb'
-      test_file = 'test/src/dummy_receiver_test.rb'
-      assert File.exists? test_file
-      update_app
+  # FIXME(uwe): Older projects generated code that is no longer compatible/correct
+  # FIXME(uwe): Remove check when we stop support for updating from Ruboto 0.10.0.rc.0 and older
+  unless Gem::Version.new(@old_ruboto_version) <= Gem::Version.new('0.10.0.rc.0')
+    def test_broadcast_receiver
+      Dir.chdir APP_DIR do
+        puts "Adding a broadcast receiver"
+        install_ruboto_gem @old_ruboto_version
+        system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
+        fail "Creation of broadcast receiver failed" if $? != 0
+        assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
+        assert File.exists? 'src/dummy_receiver.rb'
+        test_file = 'test/src/dummy_receiver_test.rb'
+        assert File.exists? test_file
+        update_app
+      end
+      run_app_tests
     end
-    run_app_tests
-  end
 
-  def test_broadcast_receiver_updated_twice
-    Dir.chdir APP_DIR do
-      puts "Adding a broadcast receiver"
-      install_ruboto_gem @old_ruboto_version
-      system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
-      fail "Creation of broadcast receiver failed" if $? != 0
-      assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
-      assert File.exists? 'src/dummy_receiver.rb'
-      test_file = 'test/src/dummy_receiver_test.rb'
-      assert File.exists? test_file
-      update_app
-      update_app
+    def test_broadcast_receiver_updated_twice
+      Dir.chdir APP_DIR do
+        puts "Adding a broadcast receiver"
+        install_ruboto_gem @old_ruboto_version
+        system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
+        fail "Creation of broadcast receiver failed" if $? != 0
+        assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
+        assert File.exists? 'src/dummy_receiver.rb'
+        test_file = 'test/src/dummy_receiver_test.rb'
+        assert File.exists? test_file
+        update_app
+        update_app
+      end
+      run_app_tests
     end
-    run_app_tests
   end
 
   def test_subclass_is_updated
@@ -82,7 +86,7 @@ module UpdateTestMethods
   private
 
   def assert_code(code)
-    filename   = "src/ruboto_test_app_activity.rb"
+    filename = "src/ruboto_test_app_activity.rb"
     Dir.chdir APP_DIR do
       s = File.read(filename)
       raise "Code injection failed!" unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")

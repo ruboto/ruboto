@@ -158,7 +158,6 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo ""
 
       ./run_tests.sh
-      # ruby test/minimal_app_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
     done
