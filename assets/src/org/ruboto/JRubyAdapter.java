@@ -236,9 +236,9 @@ public class JRubyAdapter {
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
             // BEGIN Ruboto HeapAlloc
-            @SuppressWarnings("unused")
-            byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
-            arrayForHeapAllocation = null;
+            // @SuppressWarnings("unused")
+            // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
+            // arrayForHeapAllocation = null;
             // END Ruboto HeapAlloc
             setDebugBuild(appContext);
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
