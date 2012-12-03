@@ -302,8 +302,7 @@ class Test::Unit::TestCase
       fail "Unknown Ruboto platform: #{RUBOTO_PLATFORM.inspect}"
     end
     if $? != 0
-      # FIXME(uwe): Delete failed RubotoCore.  Kept temporarily for debuging.
-      # FileUtils.rm_rf 'tmp/RubotoCore'
+      FileUtils.rm_rf 'tmp/RubotoCore'
       fail 'Error (un)installing RubotoCore'
     end
   end

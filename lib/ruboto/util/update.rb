@@ -1,4 +1,5 @@
 require 'ruboto/version'
+require 'ruboto/core_ext/rexml'
 
 module Ruboto
   module Util
@@ -66,7 +67,7 @@ module Ruboto
           #   puts 'Added external permission tag'
           # end
 
-          File.open("AndroidManifest.xml", 'w') { |f| test_manifest.document.write(f, 4) }
+          File.open("AndroidManifest.xml", 'w') { |f| REXML::Formatters::OrderedAttributes.new(4).write(test_manifest.document, f) }
 
           run_tests_override = <<-EOF
 <!-- BEGIN added by Ruboto -->

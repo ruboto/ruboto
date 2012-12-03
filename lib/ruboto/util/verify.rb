@@ -17,7 +17,7 @@ module Ruboto
       end
 
       def save_manifest
-        File.open("AndroidManifest.xml", 'w') {|f| verify_manifest.document.write(f, 4)}
+        File.open("AndroidManifest.xml", 'w') {|f| REXML::Formatters::OrderedAttributes.new(4).write(verify_manifest.document, f)}
       end
       
       def verify_test_manifest
