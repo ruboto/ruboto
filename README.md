@@ -241,9 +241,9 @@ If you have an "eclair" emulator that runs Android 2.1 and a "froyo" one that ru
 Alternatives
 ------------
 
-If Ruboto's performance is a problem for you, or you want something that gives you total access to the android API (as Ruboto does not yet do), check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
+If Ruboto's performance is a problem for you, check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
 
-Mirah, formerly known as Duby, is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration.
+Mirah is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration.
 
 Garrett is a "playground for Mirah exploration on Android."
 

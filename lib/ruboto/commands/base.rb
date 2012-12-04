@@ -104,7 +104,7 @@ module Ruboto
                   update_icons true
                   update_classes nil, true
                   update_jruby true if with_jruby
-                  update_dx_jar true unless params['with-jruby'].value
+                  update_dx_jar true if with_jruby
                   update_core_classes 'include'
 
                   log_action("Generating the default Activity and script") do

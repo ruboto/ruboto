@@ -161,13 +161,11 @@ module Ruboto
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
-        # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        # unless new_jruby_version =~ /^1.7.0/ && verify_target_sdk < 15
         log_action("Copying dx.jar to libs") do
           copier.copy 'libs'
+          # FIXME(uwe): We may need this for newer Android SDK versions.  Keeping as reminder.
           # File.open('project.properties', 'a'){|f| f << "dex.force.jumbo=true\n"}
         end
-        # end
 
         reconfigure_jruby_libs(new_jruby_version)
 
@@ -182,19 +180,15 @@ module Ruboto
 
         jar_file = Dir.glob("libs/dx.jar")[0]
 
-        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
+        # FIXME(uwe): Remove when we stop updating from Ruboto 0.10.0 and older.
+        jruby_present = !!Dir.glob("libs/jruby-core-*.jar")[0]
+        log_action("Removing #{jar_file}") { File.delete jar_file } if jar_file && !jruby_present
+        # EMXIF
+
         return if !jar_file && !force
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
-        log_action("Removing #{jar_file}") { File.delete jar_file } if jar_file
-
-        # FIXME(uwe):  Try keeping the class count low to enable installation on Android 2.3 devices
-        # FIXME(uwe):  Skip copying dx.jar to apps using RubotoCore when we include dx.jar in RubotoCore
-        #if verify_target_sdk < 15
-        #  log_action("Copying dx.jar to libs") { copier.copy 'libs' }
-        #end
-        # EMXIF
+        log_action("Copying dx.jar to libs") { copier.copy 'libs' }
       end
 
       def update_assets
