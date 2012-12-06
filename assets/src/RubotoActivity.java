@@ -11,7 +11,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private final ScriptInfo scriptInfo = new ScriptInfo();
     private String remoteVariable = null;
     Bundle[] args;
-    private Bundle configBundle = null;
 
     public THE_RUBOTO_CLASS setRemoteVariable(String var) {
         remoteVariable = var;
@@ -40,26 +39,12 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         args = new Bundle[1];
         args[0] = bundle;
 
-        configBundle = getIntent().getBundleExtra("RubotoActivity Config");
-
+        Bundle configBundle = getIntent().getBundleExtra("Ruboto Config");
         if (configBundle != null) {
             if (configBundle.containsKey("Theme")) {
                 setTheme(configBundle.getInt("Theme"));
             }
-            if (configBundle.containsKey("ClassName")) {
-                if (this.getClass().getName() == THE_RUBOTO_CLASS.class.getName()) {
-                    scriptInfo.setRubyClassName(configBundle.getString("ClassName"));
-                } else {
-                    throw new IllegalArgumentException("Only local Intents may set class name.");
-                }
-            }
-            if (configBundle.containsKey("Script")) {
-                if (this.getClass().getName() == THE_RUBOTO_CLASS.class.getName()) {
-                    scriptInfo.setScriptName(configBundle.getString("Script"));
-                } else {
-                    throw new IllegalArgumentException("Only local Intents may set script name.");
-                }
-            }
+            scriptInfo.setFromIntent(getIntent());
         }
 
         if (JRubyAdapter.isInitialized()) {
