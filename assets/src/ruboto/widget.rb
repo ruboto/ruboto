@@ -159,10 +159,10 @@ def setup_list_view
   Java::android.widget.ListView.class_eval do
     def configure(context, params = {})
       if list = params.delete(:list)
-        adapter_list = Java::java.util.ArrayList.new
-        adapter_list.addAll(list)
+        @adapter_list = Java::java.util.ArrayList.new
+        @adapter_list.addAll(list)
         item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
-        params[:adapter] = Java::android.widget.ArrayAdapter.new(context, item_layout, adapter_list)
+        params[:adapter] = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
       end
       super(context, params)
     end
@@ -170,7 +170,7 @@ def setup_list_view
     def reload_list(list)
       @adapter_list.clear
       @adapter_list.addAll(list)
-      @adapter.notifyDataSetChanged
+      adapter.notifyDataSetChanged
       invalidate
     end
   end
