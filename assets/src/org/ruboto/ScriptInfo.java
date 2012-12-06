@@ -5,6 +5,19 @@ public class ScriptInfo {
     private String scriptName;
     private Object rubyInstance;
 
+    public void setFromIntent(android.context.Intent intent) {
+      android.os.Bundle configBundle = intent.getBundleExtra("Ruboto Config");
+
+      if (configBundle != null) {
+        if (configBundle.containsKey("ClassName")) {
+          setRubyClassName(configBundle.getString("ClassName"));
+        }
+        if (configBundle.containsKey("Script")) {
+          setScriptName(configBundle.getString("Script"));
+        }
+      }
+    }
+
     public String getRubyClassName() {
         if (rubyClassName == null && scriptName != null) {
             return Script.toCamelCase(scriptName);
