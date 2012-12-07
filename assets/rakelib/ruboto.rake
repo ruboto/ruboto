@@ -74,9 +74,15 @@ task :install => APK_FILE do
   install_apk
 end
 
+desc 'uninstall, build, and install the application'
+task :reinstall => [:uninstall, APK_FILE, :install]
+
 namespace :install do
-  desc 'uninstall, build, and install the application'
-  task :clean => [:uninstall, APK_FILE, :install]
+  # FIXME(uwe):  Remove in 2013
+  desc 'Deprecated:  use "reinstall" instead.'
+  task :clean => :reinstall do
+    puts '"rake install:clean" is deprecated.  Use "rake reinstall" instead.'
+  end
 
   desc 'Install the application, but only if compiled files are changed.'
   task :quick => 'debug:quick' do
