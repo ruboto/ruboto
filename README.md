@@ -16,6 +16,7 @@ Before you use Ruboto, you should do the following things:
 * Install the JDK if it's not on your system already
 * Install [jruby](http://jruby.org/) if you don't already have it. JRuby has a [very easy install process](http://jruby.org/#2), or you can use [rvm](http://rvm.beginrescueend.com/)
 * Install [the Android SDK](http://developer.android.com/sdk/index.html)
+* Add the sdk to `$ANDROID_HOME` as an absolute path (Java does not expand tildes `~`)
 * Add the sdk's `tools/` and `platform-tools/` directory to your `$PATH`
 * Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html) image unless you want to develop using your phone.
 
