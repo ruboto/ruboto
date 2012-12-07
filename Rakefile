@@ -293,7 +293,7 @@ namespace :platform do
   task :project => PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
-    sh "git clone --depth 1 git@github.com:ruboto/ruboto-core.git #{PLATFORM_PROJECT}"
+    sh "git clone --depth 1 https://github.com/ruboto/ruboto-core.git #{PLATFORM_PROJECT}"
     Dir.chdir PLATFORM_PROJECT do
       sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} ../../bin/ruboto update app"
     end
