@@ -5,7 +5,7 @@ public class ScriptInfo {
     private String scriptName;
     private Object rubyInstance;
 
-    public void setFromIntent(android.context.Intent intent) {
+    public void setFromIntent(android.content.Intent intent) {
       android.os.Bundle configBundle = intent.getBundleExtra("Ruboto Config");
 
       if (configBundle != null) {
