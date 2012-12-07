@@ -122,7 +122,7 @@ task :tag => :release do
 end
 
 task :sign => :release do
-  sh "jarsigner -keystore #{ENV['RUBOTO_KEYSTORE']} -signedjar bin/#{build_project_name}.apk bin/#{build_project_name}-unsigned.apk #{ENV['RUBOTO_KEY_ALIAS']}"
+  sh "jarsigner -keystore #{ENV['RUBOTO_KEYSTORE']} -signedjar bin/#{build_project_name}.apk bin/#{build_project_name}-release-unsigned.apk #{ENV['RUBOTO_KEY_ALIAS']}"
 end
 
 task :align => :sign do
