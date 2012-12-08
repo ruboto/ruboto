@@ -5,6 +5,14 @@ public class ScriptInfo {
     private String scriptName;
     private Object rubyInstance;
 
+    public boolean isReadyToLoad() {
+      return rubyClassName != null || scriptName != null;
+    }
+
+    public boolean isLoaded() {
+      return rubyInstance != null;
+    }
+
     public void setFromIntent(android.content.Intent intent) {
       android.os.Bundle configBundle = intent.getBundleExtra("Ruboto Config");
 
