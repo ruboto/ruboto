@@ -128,6 +128,14 @@ public class Script {
         return null;
     }
 
+    public File getFile() {
+        String path = getAbsolutePath();
+        if (path != null) {
+            return new File(path);
+        }
+        return new File(scriptsDir[0], name);
+    }
+
     public String getContents() throws IOException {
         InputStream is = null;
         BufferedReader buffer = null;
@@ -151,16 +159,6 @@ public class Script {
 			}
 		}
 	}
-
-  public File getFile() {
-    for (String dir : scriptsDir) {
-      File f = new File(dir, name);
-      if (f.exists()) {
-        return f;
-      }
-    }
-    return new File(scriptsDir[0], name);
-  }
 
     public String getName() {
         return name;

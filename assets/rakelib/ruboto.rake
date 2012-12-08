@@ -121,18 +121,6 @@ task :tag => :release do
   sh "git push origin master --tags"
 end
 
-task :sign => :release do
-  sh "jarsigner -keystore #{ENV['RUBOTO_KEYSTORE']} -signedjar bin/#{build_project_name}.apk bin/#{build_project_name}-release-unsigned.apk #{ENV['RUBOTO_KEY_ALIAS']}"
-end
-
-task :align => :sign do
-  sh "zipalign 4 bin/#{build_project_name}.apk #{build_project_name}.apk"
-end
-
-task :publish => :align do
-  puts "#{build_project_name}.apk is ready for the market!"
-end
-
 desc 'Start the emulator with larger disk'
 task :emulator do
   sh 'emulator -partition-size 1024 -avd Android_3.0'

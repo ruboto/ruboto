@@ -312,25 +312,6 @@ module Ruboto
                 generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
               end
             end
-
-            mode "key" do
-              option("keystore"){
-                default "~/.android/production.keystore"
-                description "path to where the keystore will be saved. defaults to ~/.android/production.keystore"
-              }
-
-              option("alias"){
-                required
-                description "The 'alias' for the key. Identifies the key within the keystore. Required"
-              }
-
-              def run
-                keystore = params['keystore'].value
-                key_alias = params['alias'].value
-
-                `keytool -genkey -keyalg rsa -keysize 4096 -validity 1000000 -keystore #{keystore} -alias #{key_alias}`
-              end
-            end
           end
 
           mode "update" do
