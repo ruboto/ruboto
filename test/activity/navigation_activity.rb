@@ -35,7 +35,7 @@ class NavigationActivity
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
     configBundle.put_string('ClassName', 'NavigationTargetActivity')
-    i.putExtra('RubotoActivity Config', configBundle)
+    i.putExtra('Ruboto Config', configBundle)
     startActivity(i)
   end
 
@@ -44,7 +44,7 @@ class NavigationActivity
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
     configBundle.put_string('Script', 'navigation_target_activity.rb')
-    i.putExtra('RubotoActivity Config', configBundle)
+    i.putExtra('Ruboto Config', configBundle)
     startActivity(i)
   end
 
@@ -81,7 +81,7 @@ class NavigationActivity
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
     configBundle.put_string('ClassName', 'InfileActivity')
-    i.putExtra('RubotoActivity Config', configBundle)
+    i.putExtra('Ruboto Config', configBundle)
     startActivity(i)
   end
 
@@ -90,7 +90,7 @@ class NavigationActivity
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     configBundle = android.os.Bundle.new
     configBundle.put_string('ClassName', 'RubyFileActivity')
-    i.putExtra('RubotoActivity Config', configBundle)
+    i.putExtra('Ruboto Config', configBundle)
     startActivity(i)
   end
 
