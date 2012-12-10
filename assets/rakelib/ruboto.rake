@@ -1,4 +1,8 @@
 require 'rbconfig'
+require 'rubygems'
+require 'time'
+require 'rake/clean'
+require 'rexml/document'
 
 ANT_CMD = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i) ? "ant.bat" : "ant"
 
@@ -7,16 +11,18 @@ if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.
   exit 1
 end
 
-require 'time'
+adb_version_str = `adb version`
+(puts "Android SDK platform tools not in PATH (adb command not found).";exit 1) unless $? == 0
+(puts "Unrecognized adb version: #$1";exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
+(puts "adb version 1.0.31 or later required.  Version found: #$1";exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
+adb_path = `which adb`
+ENV['ANDROID_HOME'] ||= File.dirname(File.dirname(adb_path)) if $? == 0
 
 def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
 def package() manifest.root.attribute('package') end
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
 def scripts_path() @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
 def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
-
-require 'rake/clean'
-require 'rexml/document'
 
 PROJECT_DIR        = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
@@ -38,7 +44,7 @@ APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JAR
 KEYSTORE_FILE      = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS     = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 
-CLEAN.include('bin')
+CLEAN.include('bin', 'gen')
 
 task :default => :debug
 
@@ -98,6 +104,8 @@ file RELEASE_APK_FILE => [KEYSTORE_FILE] + APK_DEPENDENCIES do |t|
 end
 
 desc 'Create a keystore for signing the release APK'
+task :keystore => KEYSTORE_FILE
+
 file KEYSTORE_FILE do
   unless File.read('ant.properties') =~ /^key.store=/
     File.open('ant.properties', 'a'){|f| f << "\nkey.store=#{KEYSTORE_FILE}\n"}
