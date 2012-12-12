@@ -129,13 +129,15 @@ public class Script {
     }
 
     public File getFile() {
-        String path = getAbsolutePath();
-        if (path != null) {
-            return new File(path);
+        for (String dir : scriptsDir) {
+            File f = new File(dir, name);
+            if (f.exists()) {
+                return f;
+            }
         }
         return new File(scriptsDir[0], name);
     }
-
+		
     public String getContents() throws IOException {
         InputStream is = null;
         BufferedReader buffer = null;
