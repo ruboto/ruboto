@@ -19,6 +19,7 @@ class NavigationActivity
           button :text => 'Inline block with options', :width => :match_parent, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
           button :text => 'Infile class', :width => :match_parent, :id => 48, :on_click_listener => proc { start_infile_activity }
           button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
+          button :text => 'RubotoActivity no config', :width => :match_parent, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
         end
   end
 
@@ -91,6 +92,12 @@ class NavigationActivity
     configBundle = android.os.Bundle.new
     configBundle.put_string('ClassName', 'RubyFileActivity')
     i.putExtra('Ruboto Config', configBundle)
+    startActivity(i)
+  end
+
+  def start_ruboto_activity_no_config
+    i = android.content.Intent.new
+    i.setClassName($package_name, 'org.ruboto.RubotoActivity')
     startActivity(i)
   end
 

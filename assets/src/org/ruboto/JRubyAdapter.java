@@ -262,6 +262,11 @@ public class JRubyAdapter {
             System.setProperty("jruby.ji.proxyClassFactory", "org.ruboto.DalvikProxyClassFactory");
             System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
 
+            // Workaround for bug in Android 2.2
+            // http://code.google.com/p/android/issues/detail?id=9431
+            // System.setProperty("java.net.preferIPv4Stack", "true");
+    		// System.setProperty("java.net.preferIPv6Addresses", "false");
+
             ClassLoader classLoader;
             Class<?> scriptingContainerClass;
             String apkName = null;

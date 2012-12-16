@@ -1,4 +1,5 @@
 .bundle
+.DS_Store
 .idea
 bin
 gen
