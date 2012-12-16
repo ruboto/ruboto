@@ -47,7 +47,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
             scriptInfo.setFromIntent(getIntent());
         }
 
-        if (JRubyAdapter.isInitialized()) {
+        if (JRubyAdapter.isInitialized() && scriptInfo.isReadyToLoad()) {
     	    ScriptLoader.loadScript(this, (Object[]) args);
         } else {
             super.onCreate(bundle);
