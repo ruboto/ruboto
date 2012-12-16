@@ -89,8 +89,13 @@ def button_activity_text button_id, activity, expected_text_id, expected_text_st
   assert_equal expected_text_string, @text_view.text
 ensure
   if current_activity
-    current_activity.run_on_ui_thread { current_activity.finish }
-    # FIXME(uwe):  Replace sleep with proper monitor
-    sleep 3
+    finish_at = Time.now
+    finished = false
+    current_activity.run_on_ui_thread { current_activity.finish ; finished = true }
+    loop do
+      break if finished || (Time.now - finish_at > 10)
+      puts 'wait for finish'
+      sleep 0.1
+    end
   end
 end
