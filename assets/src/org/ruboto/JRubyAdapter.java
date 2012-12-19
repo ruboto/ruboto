@@ -444,14 +444,15 @@ public class JRubyAdapter {
 
     static void printStackTrace(Throwable t) {
         // TODO(uwe):  Simplify this when Issue #144 is resolved
-        try {
-            t.printStackTrace(output);
-        } catch (NullPointerException npe) {
+        // TODO(scott):  printStackTrace is causing too many problems
+        //try {
+        //    t.printStackTrace(output);
+        //} catch (NullPointerException npe) {
             // TODO(uwe): printStackTrace should not fail
             for (java.lang.StackTraceElement ste : t.getStackTrace()) {
                 output.append(ste.toString() + "\n");
             }
-        }
+        //}
     }
 
     private static String scriptsDirName(Context context) {
