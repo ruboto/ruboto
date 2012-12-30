@@ -18,6 +18,15 @@ adb_version_str = `adb version`
 adb_path = `which adb`
 ENV['ANDROID_HOME'] ||= File.dirname(File.dirname(adb_path)) if $? == 0
 
+dx_filename = "#{ENV['ANDROID_HOME']}/platform-tools/dx"
+old_dx_content = File.read(dx_filename)
+new_dx_content = old_dx_content.dup
+if new_dx_content =~ /^defaultMx="-Xmx(\d+)(M|G)"/ &&
+    ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2]) < 3*1024**3
+  new_dx_content.sub(/^defaultMx="-Xmx\d+(M|G)"/, 'defaultMx="-Xmx3G"')
+  File.open(dx_filename, 'w') { |f| f << new_dx_content }
+end
+
 def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
 def package() manifest.root.attribute('package') end
 def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
@@ -97,7 +106,7 @@ namespace :install do
 end
 
 desc 'Build APK for release'
-task :release => RELEASE_APK_FILE
+task :release => [:tag, RELEASE_APK_FILE]
 
 file RELEASE_APK_FILE => [KEYSTORE_FILE] + APK_DEPENDENCIES do |t|
   build_apk(t, true)
@@ -117,14 +126,15 @@ file KEYSTORE_FILE do
 end
 
 desc 'Tag this working copy with the current version'
-task :tag => :release do
+task :tag do
+  next unless File.exists?('.git') && `git --version` =~ /git version /
   unless `git branch` =~ /^\* master$/
     puts "You must be on the master branch to release!"
     exit!
   end
   # sh "git commit --allow-empty -a -m 'Release #{version}'"
   output = `git status --porcelain`
-  raise "Workspace not clean!\n#{output}" unless output.empty?
+  raise "\nWorkspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{version}"
   sh "git push origin master --tags"
 end
@@ -334,15 +344,15 @@ def strings(name)
   value.text
 end
 
-def version()
+def version
   strings :version_name
 end
 
-def app_name()
+def app_name
   strings :app_name
 end
 
-def main_activity()
+def main_activity
   manifest.root.elements['application'].elements["activity[@android:label='@string/app_name']"].attribute('android:name')
 end
 
