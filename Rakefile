@@ -5,7 +5,7 @@ require 'ruboto/version'
 require 'ruboto/description'
 require 'ruboto/sdk_versions'
 require 'uri'
-require 'net/http'
+require 'net/https'
 
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
