@@ -329,9 +329,13 @@ namespace :platform do
   desc 'Download the current RubotoCore platform release apk'
   file PLATFORM_CURRENT_RELEASE_APK do
     puts 'Downloading the current RubotoCore platform release apk'
-    url = 'https://github.com/ruboto/ruboto-core/raw/master/distRubotoCore-release.apk'
+    uri = URI('https://raw.github.com/ruboto/ruboto-core/master/dist/RubotoCore-release.apk')
     begin
-      File.open(PLATFORM_CURRENT_RELEASE_APK, 'w') { |f| f << Net::HTTP.get(URI.parse url) }
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      content = http.request(Net::HTTP::Get.new(uri.request_uri)).body
+      File.open(PLATFORM_CURRENT_RELEASE_APK, 'w') { |f| f << content }
     rescue Exception, SystemExit
       FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exists?(PLATFORM_CURRENT_RELEASE_APK)
       raise
