@@ -345,7 +345,7 @@ def strings(name)
 end
 
 def version
-  strings :version_name
+  manifest.root.attribute('versionName')
 end
 
 def app_name
