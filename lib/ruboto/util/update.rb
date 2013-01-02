@@ -476,7 +476,7 @@ module Ruboto
                     'org/jruby/javasupport/bsf',
                 ]
                 # ODOT
-              elsif Gem::Version.new(jruby_core_version) =~ Gem::Version.new('~>1.6.0')
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.6.0')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.6.x
                 print 'Retaining com.kenai.constantine and removing jnr for JRuby 1.6.x...'
                 excluded_core_packages = [
@@ -557,12 +557,18 @@ module Ruboto
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
               FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
+              if Gem::Version.new($1) >= Gem::Version.new('1.7.2.dev') &&
+                  verify_manifest.elements['uses-sdk'].attributes["android:minSdkVersion"].to_i < 15
+                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcmail-jdk15-146.jar'
+                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcprov-jdk15-146.jar'
+                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/jopenssl.jar'
+              end
+
               if excluded_stdlibs.any?
 
                 # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
                 raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
-                jruby_version = Gem::Version.new($1)
-                if Gem::Requirement.new('< 1.7.0.preview1') =~ jruby_version
+                if Gem::Version.new($1) < Gem::Version.new('1.7.0.preview1')
                   lib_dirs = ['1.8', '1.9', 'site_ruby/1.8', 'site_ruby/1.9', 'site_ruby/shared']
                 else
                   lib_dirs = ['1.8', '1.9', 'shared']
