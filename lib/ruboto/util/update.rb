@@ -377,6 +377,7 @@ module Ruboto
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
                     'org/apache',
+                    'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
@@ -542,6 +543,7 @@ module Ruboto
 
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
+        min_sdk_version = verify_manifest.elements['uses-sdk'].attributes["android:minSdkVersion"].to_i
         excluded_stdlibs = [*verify_ruboto_config[:excluded_stdlibs]].compact
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
@@ -557,18 +559,22 @@ module Ruboto
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
               FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
-              if Gem::Version.new($1) >= Gem::Version.new('1.7.2.dev') &&
-                  verify_manifest.elements['uses-sdk'].attributes["android:minSdkVersion"].to_i < 15
+              raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
+              jruby_stdlib_version = Gem::Version.new($1)
+
+              # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.2 or Android < 4.0.3
+              if jruby_stdlib_version >= Gem::Version.new('1.7.2.dev') &&
+                  min_sdk_version < 15
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcmail-jdk15-146.jar'
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcprov-jdk15-146.jar'
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/jopenssl.jar'
               end
+              # ODOT
 
               if excluded_stdlibs.any?
 
                 # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
-                raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
-                if Gem::Version.new($1) < Gem::Version.new('1.7.0.preview1')
+                if jruby_stdlib_version < Gem::Version.new('1.7.0.preview1')
                   lib_dirs = ['1.8', '1.9', 'site_ruby/1.8', 'site_ruby/1.9', 'site_ruby/shared']
                 else
                   lib_dirs = ['1.8', '1.9', 'shared']
