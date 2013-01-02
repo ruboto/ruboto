@@ -565,9 +565,13 @@ module Ruboto
               # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.2 or Android < 4.0.3
               if jruby_stdlib_version >= Gem::Version.new('1.7.2.dev') &&
                   min_sdk_version < 15
+                FileUtils.rm_rf 'new/jruby.home/lib/ruby/1.9/json/ext/generator.jar'
+                FileUtils.rm_rf 'new/jruby.home/lib/ruby/1.9/json/ext/parser.jar'
+                print 'excluded json jars...'
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcmail-jdk15-146.jar'
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcprov-jdk15-146.jar'
                 FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/jopenssl.jar'
+                print 'excluded jopenssl jars...'
               end
               # ODOT
 
