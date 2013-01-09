@@ -43,6 +43,6 @@ if [ "$RUBY_IMPL" != "" ] ; then
   echo -n
 fi
 
-export NOEXEC=0
+export NOEXEC_DISABLE=1
 rake clean
 rake test $*
