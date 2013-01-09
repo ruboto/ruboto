@@ -357,7 +357,7 @@ module Ruboto
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
-              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2.dev')
+              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3.dev')
                 excluded_core_packages = [
                     '**/*Darwin*',
                     '**/*Ruby20*',
@@ -377,7 +377,6 @@ module Ruboto
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
                     'org/apache',
-                    'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                     'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
@@ -391,16 +390,54 @@ module Ruboto
                     # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
                     'org/jruby/ext/ffi/io',
                     'org/jruby/ext/ffi/jffi',
-                    'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
                     'org/jruby/javasupport/bsf',
-
                     # 'org/jruby/management', # should be excluded
-
-                    'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
-
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                 ]
-                elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1.dev')
+                elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
+                  excluded_core_packages = [
+                      '**/*Darwin*',
+                      '**/*Ruby20*',
+                      '**/*Solaris*',
+                      '**/*windows*',
+                      '**/*Windows*',
+                      'META-INF',
+                      'com/headius',
+                      'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
+                      'jline', 'jni',
+                      'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
+                      'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
+                      'jnr/ffi/annotations', 'jnr/ffi/byref',
+                      'jnr/ffi/provider', 'jnr/ffi/util',
+                      'jnr/ffi/Struct$*',
+                      'jnr/ffi/types',
+                      'jnr/posix/MacOS*',
+                      'jnr/posix/OpenBSD*',
+                      'org/apache',
+                      'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
+                      'org/fusesource',
+                      'org/jruby/ant',
+                      'org/jruby/cext',
+                      # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
+                      # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
+                      'org/jruby/compiler/util',
+                      'org/jruby/demo',
+                      'org/jruby/embed/bsf',
+                      'org/jruby/embed/jsr223',
+                      'org/jruby/embed/osgi',
+                      # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
+                      'org/jruby/ext/ffi/io',
+                      'org/jruby/ext/ffi/jffi',
+                      'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
+                      'org/jruby/javasupport/bsf',
+
+                      # 'org/jruby/management', # should be excluded
+
+                      'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
+
+                      # 'org/jruby/runtime/invokedynamic', # Should be excluded
+                  ]
+                elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1')
                   excluded_core_packages = [
                       '**/*Darwin*',
                       '**/*Ruby20*',
@@ -423,24 +460,16 @@ module Ruboto
                       'org/fusesource',
                       'org/jruby/ant',
                       'org/jruby/cext',
-                      # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
-                      # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
                       'org/jruby/compiler/util',
                       'org/jruby/demo',
                       'org/jruby/embed/bsf',
                       'org/jruby/embed/jsr223',
                       'org/jruby/embed/osgi',
-                      # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
                       'org/jruby/ext/ffi/io',
                       'org/jruby/ext/ffi/jffi',
                       'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
                       'org/jruby/javasupport/bsf',
-
-                      # 'org/jruby/management', # should be excluded
-
                       'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
-
-                      # 'org/jruby/runtime/invokedynamic', # Should be excluded
                   ]
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.0')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.0
@@ -505,7 +534,7 @@ module Ruboto
                 if File.directory? i
                   FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
                 elsif Dir[i].each { |f| FileUtils.rm_rf f }.empty?
-                  puts "Exclude pattern #{i.inspect} found no files."
+                  print "exclude pattern #{i.inspect} found no files..."
                 end
               end
 
@@ -561,19 +590,6 @@ module Ruboto
 
               raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
               jruby_stdlib_version = Gem::Version.new($1)
-
-              # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.2 or Android < 4.0.3
-              if jruby_stdlib_version >= Gem::Version.new('1.7.2.dev') &&
-                  min_sdk_version < 15
-                FileUtils.rm_rf 'new/jruby.home/lib/ruby/1.9/json/ext/generator.jar'
-                FileUtils.rm_rf 'new/jruby.home/lib/ruby/1.9/json/ext/parser.jar'
-                print 'excluded json jars...'
-                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcmail-jdk15-146.jar'
-                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/bcprov-jdk15-146.jar'
-                FileUtils.rm_rf 'new/jruby.home/lib/ruby/shared/jopenssl.jar'
-                print 'excluded jopenssl jars...'
-              end
-              # ODOT
 
               if excluded_stdlibs.any?
 
