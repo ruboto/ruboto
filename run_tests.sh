@@ -1,5 +1,7 @@
 #!/bin/bash -el
 
+echo "Starting tests..."
+
 # BEGIN TIMEOUT #
 TIMEOUT=14400 # 4 hours
 BOSSPID=$$
