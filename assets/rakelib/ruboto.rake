@@ -19,11 +19,13 @@ adb_path = `which adb`
 ENV['ANDROID_HOME'] ||= File.dirname(File.dirname(adb_path)) if $? == 0
 
 dx_filename = "#{ENV['ANDROID_HOME']}/platform-tools/dx"
-old_dx_content = File.read(dx_filename)
-new_dx_content = old_dx_content.dup
-if new_dx_content =~ /^defaultMx="-Xmx(\d+)(M|G)"/ &&
-    ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2]) < 3*1024**3
-  new_dx_content.sub(/^defaultMx="-Xmx\d+(M|G)"/, 'defaultMx="-Xmx3G"')
+new_dx_content = File.read(dx_filename).dup
+
+xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
+if new_dx_content =~ xmx_pattern &&
+    ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 3*1024**3
+  puts "Increasing max heap space from #$1#$2 to 3G in #{dx_filename}"
+  new_dx_content.sub!(xmx_pattern, 'defaultMx="-Xmx3G"')
   File.open(dx_filename, 'w') { |f| f << new_dx_content }
 end
 

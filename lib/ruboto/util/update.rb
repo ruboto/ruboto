@@ -414,28 +414,17 @@ module Ruboto
                       'jnr/posix/MacOS*',
                       'jnr/posix/OpenBSD*',
                       'org/apache',
-                      'org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
                       'org/fusesource',
                       'org/jruby/ant',
                       'org/jruby/cext',
-                      # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
-                      # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
                       'org/jruby/compiler/util',
                       'org/jruby/demo',
                       'org/jruby/embed/bsf',
                       'org/jruby/embed/jsr223',
                       'org/jruby/embed/osgi',
-                      # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
                       'org/jruby/ext/ffi/io',
                       'org/jruby/ext/ffi/jffi',
-                      'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
                       'org/jruby/javasupport/bsf',
-
-                      # 'org/jruby/management', # should be excluded
-
-                      'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
-
-                      # 'org/jruby/runtime/invokedynamic', # Should be excluded
                   ]
                 elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1')
                   excluded_core_packages = [
