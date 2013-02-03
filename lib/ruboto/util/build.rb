@@ -56,7 +56,7 @@ module Ruboto
 
         # Remove methods changed outside of the scope of the sdk versions
         methods = methods.select{|i| !i.attribute('api_added') || (i.attribute('api_added').to_i <= target_api)}
-        methods = methods.select{|i| !i.attribute('deprecated') || (i.attribute('deprecated').to_i > min_api)}
+        # methods = methods.select{|i| !i.attribute('deprecated') || (i.attribute('deprecated').to_i > min_api)}
         methods = methods.select{|i| !i.attribute('api_removed') || (i.attribute('api_removed').to_i > min_api)}
 
         # Inform and remove methods that do not exist in one of the sdk versions
