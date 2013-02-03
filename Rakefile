@@ -275,10 +275,13 @@ task :release => [:clean, :gem] do
   sh "git push"
 end
 
-desc "Run the tests"
+desc "Run the tests.  Select which test files to load with 'rake test TEST=test_file_pattern'"
 task :test do
   FileUtils.rm_rf Dir['tmp/RubotoTestApp_template*']
-  Dir['./test/*_test.rb'].each do |f|
+  test_pattern = ARGV.grep(/^TEST=.*$/)
+  ARGV.delete_if{|a| test_pattern.include? a}
+  test_pattern.map!{|t| t[5..-1]}
+  (test_pattern.any? ? test_pattern : ['test/*_test.rb']).map{|d| Dir[d]}.flatten.each do |f|
     require f.chomp('.rb')
   end
 end
