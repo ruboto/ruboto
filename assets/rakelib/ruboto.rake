@@ -223,11 +223,20 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
 
-  FileUtils.mkdir_p BUNDLE_PATH
-  sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH}"
+  # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
+  ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
+  Object.const_set('RUBY_ENGINE', 'jruby')
 
-  gem_paths = Dir["#{BUNDLE_PATH}/{{,j}ruby,rbx}/{1.8,1.9{,.1},shared}/gems"]
-  raise "Gem path not found" if gem_paths.empty?
+  ENV['BUNDLE_GEMFILE'] = GEM_FILE
+  require 'bundler'
+  Bundler.bundle_path = Pathname.new BUNDLE_PATH
+  Bundler::Installer.install(Bundler.root, Bundler.definition)
+
+  # Restore RUBY_ENGINE (limit the scope of this hack)
+  Object.const_set('RUBY_ENGINE', ruby_engine) if ruby_engine
+
+  gem_paths = Dir["#{BUNDLE_PATH}/gems"]
+  raise 'Gem path not found' if gem_paths.empty?
   raise "Found multiple gem paths: #{gem_paths}" if gem_paths.size > 1
   gem_path = gem_paths[0]
   puts "Found gems in #{gem_path}"

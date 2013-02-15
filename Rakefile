@@ -11,7 +11,7 @@ PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_DEBUG_APK_BAK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk.bak"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
-PLATFORM_CURRENT_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk.current"
+PLATFORM_CURRENT_RELEASE_APK = File.expand_path('tmp/RubotoCore-release.apk', File.dirname(__FILE__))
 MANIFEST_FILE = "AndroidManifest.xml"
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
@@ -87,8 +87,8 @@ task :release_docs do
     user = ask('login   : ') { |q| q.echo = true }
     pass = ask('password: ') { |q| q.echo = '*' }
   rescue
-    print 'user name: ' ; user = STDIN.gets.chomp
-    print ' password: ' ; pass = STDIN.gets.chomp
+    print 'user name: '; user = STDIN.gets.chomp
+    print ' password: '; pass = STDIN.gets.chomp
   end
   require 'uri'
   require 'net/http'
@@ -106,12 +106,12 @@ task :release_docs do
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
-  puts milestones.map{|m| "#{'%2d' % m['number']} #{m['title']}"}.join("\n")
+  puts milestones.map { |m| "#{'%2d' % m['number']} #{m['title']}" }.join("\n")
 
   if defined? ask
     milestone = ask('milestone: ', Integer) { |q| q.echo = true }
   else
-    print 'milestone: ' ; milestone = STDIN.gets.chomp
+    print 'milestone: '; milestone = STDIN.gets.chomp
   end
 
   uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
@@ -123,9 +123,9 @@ task :release_docs do
   milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
   categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Pull requests' => nil, 'Other' => nil}
   grouped_issues = issues.group_by do |i|
-    labels = i['labels'].map { |l| l['name']}
+    labels = i['labels'].map { |l| l['name'] }
     cat = nil
-    categories.each do |k,v|
+    categories.each do |k, v|
       if labels.include? v
         cat = k
         break
@@ -198,7 +198,7 @@ task :stats do
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-  counts_per_month = Hash.new{|h, k| h[k] = Hash.new{|mh,mk| mh[mk] = 0 }}
+  counts_per_month = Hash.new { |h, k| h[k] = Hash.new { |mh, mk| mh[mk] = 0 } }
   total = 0
 
   %w{ruboto-core ruboto}.each do |gem|
@@ -213,20 +213,20 @@ task :stats do
       req = Net::HTTP::Get.new(downloads_uri.request_uri)
       res = https.start { |http| http.request(req) }
       counts = YAML.load(res.body)
-      counts.delete_if{|date_str,count| count == 0}
+      counts.delete_if { |date_str, count| count == 0 }
       counts.each do |date_str, count|
         date = Date.parse(date_str)
         counts_per_month[date.year][date.month] += count
         total += count
       end
-      print '.' ; STDOUT.flush
+      print '.'; STDOUT.flush
     end
     puts
   end
 
   puts "\nDownloads statistics per month:"
   years = counts_per_month.keys
-  puts "\n    #{years.map{|year| '%6s:' % year}.join(' ')}"
+  puts "\n    #{years.map { |year| '%6s:' % year }.join(' ')}"
   (1..12).each do |month|
     print "#{'%2d' % month}:"
     years.each do |year|
@@ -240,7 +240,7 @@ task :stats do
 
   puts "\nRubyGems download statistics per month:"
   years = counts_per_month.keys
-  puts '    ' + years.map{|year| '%-12s' % year}.join
+  puts '    ' + years.map { |year| '%-12s' % year }.join
   (0..20).each do |l|
     print (l % 10 == 0) ? '%4d' % ((20-l) * 100) : '    '
     years.each do |year|
@@ -254,7 +254,7 @@ task :stats do
     end
     puts
   end
-  puts '    ' + years.map{|year| '%-12s' % year}.join
+  puts '    ' + years.map { |year| '%-12s' % year }.join
 
   puts "\nTotal: #{total}\n\n"
 end
@@ -279,9 +279,9 @@ desc "Run the tests.  Select which test files to load with 'rake test TEST=test_
 task :test do
   FileUtils.rm_rf Dir['tmp/RubotoTestApp_template*']
   test_pattern = ARGV.grep(/^TEST=.*$/)
-  ARGV.delete_if{|a| test_pattern.include? a}
-  test_pattern.map!{|t| t[5..-1]}
-  (test_pattern.any? ? test_pattern : ['test/*_test.rb']).map{|d| Dir[d]}.flatten.each do |f|
+  ARGV.delete_if { |a| test_pattern.include? a }
+  test_pattern.map! { |t| t[5..-1] }
+  (test_pattern.any? ? test_pattern : ['test/*_test.rb']).map { |d| Dir[d] }.flatten.each do |f|
     require f.chomp('.rb')
   end
 end
@@ -308,13 +308,10 @@ namespace :platform do
   task PLATFORM_DEBUG_APK do
     Rake::Task[PLATFORM_PROJECT].invoke
     Dir.chdir(PLATFORM_PROJECT) do
-      if File.exists?(PLATFORM_CURRENT_RELEASE_APK) && File.exists?(PLATFORM_DEBUG_APK) &&
-          File.size(PLATFORM_CURRENT_RELEASE_APK) == File.size(PLATFORM_DEBUG_APK)
-        if File.exists?(PLATFORM_DEBUG_APK_BAK)
-          FileUtils.cp PLATFORM_DEBUG_APK_BAK, PLATFORM_DEBUG_APK
-        else
-          FileUtils.rm PLATFORM_DEBUG_APK
-        end
+      if File.exists?(PLATFORM_DEBUG_APK_BAK)
+        FileUtils.cp PLATFORM_DEBUG_APK_BAK, PLATFORM_DEBUG_APK
+      else
+        FileUtils.rm PLATFORM_DEBUG_APK
       end
       sh 'rake debug'
     end
@@ -345,14 +342,9 @@ namespace :platform do
     end
   end
 
-  desc 'Use the current RubotoCore platform release apk'
-  task :current => [:debug, PLATFORM_CURRENT_RELEASE_APK] do
-    Dir.chdir PLATFORM_PROJECT do
-      if File.size(PLATFORM_CURRENT_RELEASE_APK) != File.size(PLATFORM_DEBUG_APK)
-        FileUtils.cp PLATFORM_DEBUG_APK, PLATFORM_DEBUG_APK_BAK
-        FileUtils.cp PLATFORM_CURRENT_RELEASE_APK, PLATFORM_DEBUG_APK
-      end
-    end
+  desc 'Install the current RubotoCore platform release apk'
+  task :current => PLATFORM_CURRENT_RELEASE_APK do
+    install_apk
   end
 
   desc 'Install the Ruboto Core platform debug apk'
@@ -363,9 +355,81 @@ namespace :platform do
   end
 
   desc 'Uninstall the Ruboto Core platform debug apk'
-  task :uninstall => PLATFORM_PROJECT do
-    Dir.chdir(PLATFORM_PROJECT) do
-      sh 'rake uninstall'
+  task :uninstall do
+    uninstall_apk
+  end
+
+  private
+
+  def package
+    'org.ruboto.core'
+  end
+
+  def install_apk
+    failure_pattern = /^Failure \[(.*)\]/
+    success_pattern = /^Success/
+    case package_installed?
+    when true
+      puts "Package #{package} already installed."
+      return
+    when false
+      puts "Package #{package} already installed, but of different size.  Replacing package."
+      output = `adb install -r #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+      if $? == 0 && output !~ failure_pattern && output =~ success_pattern
+        clear_update
+        return
+      end
+      case $1
+      when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
+        puts "Found package signed with different certificate.  Uninstalling it and retrying install."
+      else
+        puts "'adb install' returned an unknown error: (#$?) #{$1 ? "[#$1}]" : output}."
+        puts "Uninstalling #{package} and retrying install."
+      end
+      uninstall_apk
+    end
+    puts "Installing package #{package}"
+    output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+    puts output
+    raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
+  end
+
+  def uninstall_apk
+    return if package_installed?.nil?
+    puts "Uninstalling package #{package}"
+    system "adb uninstall #{package}"
+    if $? != 0 && package_installed?
+      puts "Uninstall failed exit code #{$?}"
+      exit $?
     end
   end
+
+  def package_installed?
+    package_name = package
+    ['', '-0', '-1', '-2'].each do |i|
+      path = "/data/app/#{package_name}#{i}.apk"
+      o = `adb shell ls -l #{path}`.chomp
+      if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
+        apk_file = PLATFORM_CURRENT_RELEASE_APK
+        if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+          return true
+        else
+          return false
+        end
+      end
+
+      sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
+      o = `adb shell ls -l #{sdcard_path}`.chomp
+      if o =~ /^-r-xr-xr-x system\s+root\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
+        apk_file = PLATFORM_CURRENT_RELEASE_APK
+        if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+          return true
+        else
+          return false
+        end
+      end
+    end
+    return nil
+  end
+
 end

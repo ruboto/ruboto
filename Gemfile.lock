@@ -1,5 +1,5 @@
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     arrayfields (4.7.4)
     chronic (0.6.7)
