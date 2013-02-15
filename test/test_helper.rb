@@ -117,10 +117,10 @@ module RubotoTest
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
 
-  install_jruby_jars_gem
+  install_jruby_jars_gem unless RUBOTO_PLATFORM == 'CURRENT'
 
   if RUBOTO_PLATFORM == 'CURRENT'
-    JRUBY_JARS_VERSION = Gem::Version.new('1.7.1.dev')
+    JRUBY_JARS_VERSION = Gem::Version.new('1.7.1')
   else
     # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
