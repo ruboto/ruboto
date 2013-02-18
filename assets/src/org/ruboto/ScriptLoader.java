@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Bundle;
 
 public class ScriptLoader {
    /**
@@ -106,7 +107,7 @@ public class ScriptLoader {
                 }
                 if (rubyClass != null) {
                     if (component instanceof android.content.Context) {
-                        callOnCreate(rubyInstance, args);
+                        callOnCreate(rubyInstance, args, component.getScriptInfo().getRubyClassName());
                     }
                 }
                 component.getScriptInfo().setRubyInstance(rubyInstance);
@@ -119,8 +120,8 @@ public class ScriptLoader {
         }
     }
 
-    private static final void callOnCreate(Object rubyInstance, Object[] args) {
-        System.out.println("Call on_create on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+    private static final void callOnCreate(Object rubyInstance, Object[] args, String rubyClassName) {
+        System.out.println("Call onCreate on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
         // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
         if (JRubyAdapter.isJRubyPreOneSeven()) {
             if (args.length > 0) {
@@ -129,10 +130,17 @@ public class ScriptLoader {
             JRubyAdapter.put("$ruby_instance", rubyInstance);
             JRubyAdapter.runScriptlet("$ruby_instance.on_create(" + (args.length > 0 ? "$bundle" : "") + ")");
         } else if (JRubyAdapter.isJRubyOneSeven()) {
-            JRubyAdapter.runRubyMethod(rubyInstance, "on_create", (Object[]) args);
+            // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
+            if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
+                JRubyAdapter.runRubyMethod(rubyInstance, "onCreate", args);
+            } else if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
+                JRubyAdapter.runRubyMethod(rubyInstance, "on_create", args);
+            }
+            // EMXIF
         } else {
             throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
         }
+        // EMXIF
     }
 
 }

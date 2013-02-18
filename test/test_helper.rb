@@ -313,8 +313,12 @@ class Test::Unit::TestCase
   end
 
   def write_gemfile(bundle)
-    puts "Adding Gemfile.apk: #{[*bundle].join(' ')}"
-    File.open('Gemfile.apk', 'w') { |f| f << "source :rubygems\n\ngem 'sqldroid'\n" }
+    gems = [*bundle]
+    puts "Adding Gemfile.apk: #{gems.join(' ')}"
+    File.open('Gemfile.apk', 'w') do |f|
+      f << "source :rubygems\n\n"
+      gems.each{|g| f << "gem '#{g}'\n"}
+    end
   end
 
 end

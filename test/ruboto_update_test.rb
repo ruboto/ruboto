@@ -1,17 +1,23 @@
 if ENV['SKIP_RUBOTO_UPDATE_TEST']
   puts 'Detected SKIP_RUBOTO_UPDATE_TEST environment variable.  Skipping Ruboto update test.'
-else
-  require File.expand_path('updated_example_test_methods', File.dirname(__FILE__))
-  require File.expand_path('update_test_methods', File.dirname(__FILE__))
+  example_limit = 0
+elsif ENV['RUBOTO_UPDATE_EXAMPLES']
+  example_limit = ENV['RUBOTO_UPDATE_EXAMPLES'].to_i
+  puts "Detected RUBOTO_UPDATE_EXAMPLES environment variable.  Limiting to #{example_limit} examples."
+end
+require File.expand_path('updated_example_test_methods', File.dirname(__FILE__))
+require File.expand_path('update_test_methods', File.dirname(__FILE__))
 
 # TODO(uwe): Delete obsolete examples when we stop supporting updating from them.
 
-  Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
-    Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"].each do |f|
-      next unless f =~ /^#{RubotoTest::APP_NAME}_(.*)_tools_r(.*)\.tgz$/
-      ruboto_version = $1
-      tools_version = $2
-      self.class.class_eval <<EOF
+Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
+  example_archives = Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"]
+  example_archives = example_archives[0...example_limit] if example_limit
+  example_archives.each do |f|
+    next unless f =~ /^#{RubotoTest::APP_NAME}_(.*)_tools_r(.*)\.tgz$/
+    ruboto_version = $1
+    tools_version = $2
+    self.class.class_eval <<EOF
 class RubotoUpdatedExample#{ruboto_version.gsub('.', '_')}Tools#{tools_version}Test < Test::Unit::TestCase
   include UpdatedExampleTestMethods
   def setup
@@ -26,6 +32,5 @@ class RubotoUpdate#{ruboto_version.gsub('.', '_')}Tools#{tools_version}Test < Te
   end
 end
 EOF
-    end
   end
 end

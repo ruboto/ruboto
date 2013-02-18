@@ -9,14 +9,20 @@ end
 # ODOT
 
 require 'ruboto/util/stack'
-with_large_stack { require 'psych.rb' }
+with_large_stack {require 'psych'}
+
+# TODO(uwe): Remove when we stop supporting psych with Ruby 1.8 mode
+if RUBY_VERSION < '1.9'
+  $LOAD_PATH.delete File.join(Config::CONFIG['libdir'], 'ruby/1.9')
+end
+# ODOT
 
 Psych::Parser
 Psych::Handler
 
 require 'ruboto/widget'
 
-ruboto_import_widgets :Button, :LinearLayout, :TextView
+ruboto_import_widgets :LinearLayout, :TextView
 
 class PsychActivity
   def on_create(bundle)

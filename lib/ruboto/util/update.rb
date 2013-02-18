@@ -161,10 +161,10 @@ module Ruboto
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
-        log_action("Copying dx.jar to libs") do
+        log_action('Copying dx.jar to libs') do
           copier.copy 'libs'
           # FIXME(uwe): We may need this for newer Android SDK versions.  Keeping as reminder.
-          # File.open('project.properties', 'a'){|f| f << "dex.force.jumbo=true\n"}
+          File.open('project.properties', 'a'){|f| f << "dex.force.jumbo=true\n"}
         end
 
         reconfigure_jruby_libs(new_jruby_version)
@@ -601,7 +601,30 @@ module Ruboto
                 print "excluded #{excluded_stdlibs.join(' ')}..."
               end
 
-              Dir.chdir "new" do
+              Dir.chdir 'new' do
+                Dir['**/*.jar'].each do |j|
+
+                  # FIXME(uwe):  Installing bcmail-jdk15-146.jar + bcprov-jdk15-146.jar fails due to
+                  # http://code.google.com/p/android/issues/detail?id=40409
+                  # This breaks ssl and https. Remove when we stop supporting JRuby <= 1.7.2
+                  if j =~ /bcmail|bcprov/
+                    FileUtils.rm j
+                    next
+                  end
+                  # EMXIF
+
+                  # FIXME(uwe): Adding the jars triggers the "LinearAlloc exceeded capacity"
+                  # bug in Android 2.3.  Remove when we stop supporting android-10 and older
+                  if min_sdk_version <= 10
+                    FileUtils.rm j
+                    next
+                  end
+                  # EMXIF
+
+                  print "#{File.basename(j).chomp('.jar')}..."
+                  system "jar xf #{j}"
+                  FileUtils.rm j
+                end
                 # Uncomment this part to split the stdlib into one jar per directory
                 # Dir['jruby.home/lib/ruby/*/*'].select { |f| File.directory? f }.each do |d|
                 #   file = "#{d}.rb"
@@ -616,7 +639,7 @@ module Ruboto
             end
           end
 
-          FileUtils.remove_dir "tmp", true
+          FileUtils.remove_dir 'tmp', true
         end
       end
 

@@ -1,4 +1,4 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 
 module AppTestMethods
   include RubotoTest
@@ -6,8 +6,8 @@ module AppTestMethods
   def test_activity_tests
     if ENV['ACTIVITY_TEST_PATTERN']
       Dir.chdir APP_DIR do
-        FileUtils.rm "src/ruboto_test_app_activity.rb"
-        FileUtils.rm "test/src/ruboto_test_app_activity_test.rb"
+        FileUtils.rm 'src/ruboto_test_app_activity.rb'
+        FileUtils.rm 'test/src/ruboto_test_app_activity_test.rb'
       end
     else
       assert_code 'Base64Loads', "require 'base64'"
@@ -30,7 +30,7 @@ module AppTestMethods
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}Activity"
       s = File.read(filename)
-      raise "Code injection failed!" unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
+      raise 'Code injection failed!' unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
       File.open(filename, 'w') { |f| f << s }
     end
   end
@@ -39,6 +39,11 @@ module AppTestMethods
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.0.rc1
       next if file =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.1.dev'))
+      # EMXIF
+
+      # FIXME(uwe):  Remove when we stop testing RubotoCore <= 0.5.2 and android-10
+      next if file =~ /json/ && (RUBOTO_PLATFORM == 'CURRENT' || ANDROID_OS <= 10)
+      # EMXIF
 
       if file =~ /_test.rb$/
         next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
@@ -47,8 +52,8 @@ module AppTestMethods
         activity_name = File.basename(snake_name).split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join
         Dir.chdir APP_DIR do
           system "#{RUBOTO_CMD} gen class Activity --name #{activity_name}"
-          FileUtils.cp "#{snake_name}.rb", "src/"
-          FileUtils.cp file, "test/src/"
+          FileUtils.cp "#{snake_name}.rb", 'src/'
+          FileUtils.cp file, 'test/src/'
         end
       elsif !File.exists? "#{file.chomp('.rb')}'_test.rb'"
         Dir.chdir APP_DIR do

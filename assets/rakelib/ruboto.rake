@@ -4,7 +4,9 @@ require 'time'
 require 'rake/clean'
 require 'rexml/document'
 
-ANT_CMD = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i) ? "ant.bat" : "ant"
+ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
+
+ANT_CMD = ON_WINDOWS ? 'ant.bat' : 'ant'
 
 if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8)
   puts "ANT version 1.8.0 or later required.  Version found: #{$1}.#{$2}.#{$3}"
@@ -12,28 +14,41 @@ if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.
 end
 
 adb_version_str = `adb version`
-(puts "Android SDK platform tools not in PATH (adb command not found).";exit 1) unless $? == 0
+(puts 'Android SDK platform tools not in PATH (adb command not found).';exit 1) unless $? == 0
 (puts "Unrecognized adb version: #$1";exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
 (puts "adb version 1.0.31 or later required.  Version found: #$1";exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
-adb_path = `which adb`
-ENV['ANDROID_HOME'] ||= File.dirname(File.dirname(adb_path)) if $? == 0
+unless ENV['ANDROID_HOME']
+  unless ON_WINDOWS
+    begin
+      adb_path = `which adb`
+      ENV['ANDROID_HOME'] = File.dirname(File.dirname(adb_path)) if $? == 0
+    rescue Errno::ENOENT
+      puts "Unable to detect adb location: #$!"
+    end
+  end
+end
+(puts 'You need to set the ANDROID_HOME environment variable.';exit 1) unless ENV['ANDROID_HOME']
 
-dx_filename = "#{ENV['ANDROID_HOME']}/platform-tools/dx"
+# FIXME(uwe):  On windows the file is called dx.bat
+dx_filename = File.join(ENV['ANDROID_HOME'], 'platform-tools', ON_WINDOWS ? 'dx.bat' : 'dx')
+unless File.exists? dx_filename
+  puts 'You need to install the Android SDK Platform-tools!'
+  exit 1
+end
 new_dx_content = File.read(dx_filename).dup
-
 xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 3*1024**3
   puts "Increasing max heap space from #$1#$2 to 3G in #{dx_filename}"
   new_dx_content.sub!(xmx_pattern, 'defaultMx="-Xmx3G"')
-  File.open(dx_filename, 'w') { |f| f << new_dx_content }
+  File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
 end
 
-def manifest() @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
-def package() manifest.root.attribute('package') end
-def build_project_name() @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
-def scripts_path() @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
-def app_files_path() @app_files_path ||= "/data/data/#{package}/files" end
+def manifest; @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
+def package; manifest.root.attribute('package') end
+def build_project_name; @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
+def scripts_path; @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
+def app_files_path; @app_files_path ||= "/data/data/#{package}/files" end
 
 PROJECT_DIR        = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
@@ -224,16 +239,22 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   puts "Generating #{BUNDLE_JAR}"
 
   # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
+  platforms = Gem.platforms
   ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
+  Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new('universal-java')]
   Object.const_set('RUBY_ENGINE', 'jruby')
 
   ENV['BUNDLE_GEMFILE'] = GEM_FILE
   require 'bundler'
   Bundler.bundle_path = Pathname.new BUNDLE_PATH
-  Bundler::Installer.install(Bundler.root, Bundler.definition)
+
+  definition = Bundler.definition
+  definition.validate_ruby!
+  Bundler::Installer.install(Bundler.root, definition)
 
   # Restore RUBY_ENGINE (limit the scope of this hack)
   Object.const_set('RUBY_ENGINE', ruby_engine) if ruby_engine
+  Gem.platforms = platforms
 
   gem_paths = Dir["#{BUNDLE_PATH}/gems"]
   raise 'Gem path not found' if gem_paths.empty?

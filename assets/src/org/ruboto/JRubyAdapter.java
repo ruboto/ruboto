@@ -322,9 +322,13 @@ public class JRubyAdapter {
 
                 Thread.currentThread().setContextClassLoader(classLoader);
 
-                String defaultCurrentDir = appContext.getFilesDir().getPath();
-                Log.d("Setting JRuby current directory to " + defaultCurrentDir);
-                callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
+                if (appContext.getFilesDir() != null) {
+                    String defaultCurrentDir = appContext.getFilesDir().getPath();
+                    Log.d("Setting JRuby current directory to " + defaultCurrentDir);
+                    callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
+                } else {
+                    Log.e("Unable to find app files dir!");
+                }
 
                 if (out != null) {
                   output = out;
