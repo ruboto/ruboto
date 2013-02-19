@@ -44,8 +44,8 @@ module RubotoTest
   }
 
   def self.version_from_device
-    puts "Reading OS version from device/emulator"
-    system "adb wait-for-device"
+    puts 'Reading OS version from device/emulator'
+    system 'adb wait-for-device'
     IO.popen('adb bugreport').each_line do |line|
       if line =~ /sdk-eng (.*?) .*? .*? test-keys/
         version = $1
@@ -57,7 +57,7 @@ module RubotoTest
         return $1
       end
     end
-    raise "Unable to read device/emulator apilevel"
+    raise 'Unable to read device/emulator apilevel'
   end
 
   def self.install_jruby_jars_gem
@@ -263,30 +263,7 @@ class Test::Unit::TestCase
     end
     check_platform_installation
     Dir.chdir APP_DIR do
-      # FIXME(uwe): Simplify when we stop supporting JRuby < 1.7.0 which causes the ArrayIndexOutOfBoundsException
-      # FIXME(uwe): Simplify if we find a cause for the system crashes.
-      # system 'rake test:quick' # This line should replace all those below.
-
-      retries = 0
-      loop do
-        output = `rake test:quick`
-        puts output
-        break if $? == 0
-        retries += 1
-        # FIXME(uwe):  The cause of the system crash is unnown.  We should investigate.
-        if output =~ /INSTRUMENTATION_ABORTED: System has crashed./
-          puts "System crash detected."
-        elsif (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.0')) &&
-            output =~ /INSTRUMENTATION_RESULT: longMsg=java.lang.ArrayIndexOutOfBoundsException/
-          puts "Known ArrayIndexOutOfBoundsException failure detected.  Retrying (#{retries})."
-        else
-          break
-        end
-        break if retries >= 3
-        puts "Retrying (#{retries})."
-      end
-      # EMXIF
-
+      system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
     end
   end

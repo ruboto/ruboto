@@ -36,6 +36,7 @@ unless File.exists? dx_filename
   exit 1
 end
 new_dx_content = File.read(dx_filename).dup
+# set defaultXmx=-Xmx1024M
 xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 3*1024**3
@@ -101,7 +102,7 @@ namespace :debug do
   end
 end
 
-desc "build package and install it on the emulator or device"
+desc 'build package and install it on the emulator or device'
 task :install => APK_FILE do
   install_apk
 end
@@ -146,14 +147,14 @@ desc 'Tag this working copy with the current version'
 task :tag do
   next unless File.exists?('.git') && `git --version` =~ /git version /
   unless `git branch` =~ /^\* master$/
-    puts "You must be on the master branch to release!"
+    puts 'You must be on the master branch to release!'
     exit!
   end
   # sh "git commit --allow-empty -a -m 'Release #{version}'"
   output = `git status --porcelain`
   raise "\nWorkspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{version}"
-  sh "git push origin master --tags"
+  sh 'git push origin master --tags'
 end
 
 desc 'Start the emulator with larger disk'
@@ -168,7 +169,7 @@ end
 
 desc 'Stop the application on the device/emulator (requires emulator or rooted device).'
 task :stop do
-  raise "Unable to stop app.  Only available on emulator." unless stop_app
+  raise 'Unable to stop app.  Only available on emulator.' unless stop_app
 end
 
 desc 'Restart the application'
@@ -183,8 +184,8 @@ file MANIFEST_FILE => PROJECT_PROPS_FILE do
   sdk_level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
-  manifest.sub!(/(android:minSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
-  manifest.sub!(/(android:targetSdkVersion=').*?(')/){|m| "#$1#{sdk_level}#$2"}
+  manifest.sub!(/(android:minSdkVersion=').*?(')/){"#$1#{sdk_level}#$2"}
+  manifest.sub!(/(android:targetSdkVersion=').*?(')/){"#$1#{sdk_level}#$2"}
   File.open(MANIFEST_FILE, 'w'){|f| f << manifest} if manifest != old_manifest
 end
 
@@ -195,7 +196,7 @@ file APK_FILE => APK_DEPENDENCIES do |t|
 end
 
 desc 'Copy scripts to emulator or device'
-task :update_scripts => ['install:quick'] do
+task :update_scripts => %w(install:quick) do
   update_scripts
 end
 
@@ -289,9 +290,9 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   Dir.chdir gem_path do
     scanned_files = []
     source_files = RUBY_SOURCE_FILES.map { |f| f.gsub("#{PROJECT_DIR}/src/", '') }
-    Dir["*/lib/**/*"].each do |f|
+    Dir['*/lib/**/*'].each do |f|
       next if File.directory? f
-      raise "Malformed file name" unless f =~ %r{^(.*?)/lib/(.*)$}
+      raise 'Malformed file name' unless f =~ %r{^(.*?)/lib/(.*)$}
       gem_name, lib_file = $1, $2
       if existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} }
         puts "Overwriting duplicate file #{lib_file} in gem #{$1} with file in #{gem_name}"
@@ -390,13 +391,12 @@ end
 
 def device_path_exists?(path)
   path_output =`adb shell ls #{path}`
-  result = path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
-  result
+  path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
 end
 
-def package_installed? test = false
+def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
-  ['', '-0', '-1', '-2'].each do |i|
+  %w( -0 -1 -2).each do |i|
     path = "/data/app/#{package_name}#{i}.apk"
     o = `adb shell ls -l #{path}`.chomp
     if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
@@ -458,6 +458,11 @@ end
 def install_apk
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
+
+  # FIXME(uwe): Workaround for hanging "ant install"
+  `adb kill-server`
+  # EMXIF
+
   case package_installed?
   when true
     puts "Package #{package} already installed."
@@ -471,7 +476,7 @@ def install_apk
     end
     case $1
     when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
-      puts "Found package signed with different certificate.  Uninstalling it and retrying install."
+      puts 'Found package signed with different certificate.  Uninstalling it and retrying install.'
     else
       puts "'adb install' returned an unknown error: (#$?) #{$1 ? "[#$1}]" : output}."
       puts "Uninstalling #{package} and retrying install."
@@ -497,10 +502,10 @@ end
 
 def update_scripts
   `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
-  puts "Pushing files to apk public file area."
+  puts 'Pushing files to apk public file area.'
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('src') do
-    Dir["**/*.rb"].each do |script_file|
+    Dir['**/*.rb'].each do |script_file|
       next if File.directory? script_file
       next if File.mtime(script_file) < last_update
       next if script_file =~ /~$/
