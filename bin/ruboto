@@ -1,12 +1,17 @@
 #!/usr/bin/env ruby
 
-`android list`
+output = `android list 2>&1`
 if $? != 0
-  puts "Android SDK not in path"
+  puts "Android SDK not in path\n#{output}"
   exit 1
 end
 
-require 'ruboto/commands/base'
+begin
+  require 'ruboto/commands/base'
+rescue RuntimeError
+  puts $!.message
+  exit 1
+end
 
 # Run Base, which will handle actual commands
 Ruboto::Commands::Base.main

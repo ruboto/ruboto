@@ -71,7 +71,7 @@ APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JAR
 KEYSTORE_FILE      = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS     = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 
-CLEAN.include('bin', 'gen')
+CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
 task :default => :debug
 
@@ -458,11 +458,6 @@ end
 def install_apk
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
-
-  # FIXME(uwe): Workaround for hanging "ant install"
-  `adb kill-server`
-  # EMXIF
-
   case package_installed?
   when true
     puts "Package #{package} already installed."

@@ -161,10 +161,14 @@ module Ruboto
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
         log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
 
+        unless File.read('project.properties') =~ /^dex.force.jumbo=/
+          log_action('Setting JUMBO dex file format') do
+            File.open('project.properties', 'a') { |f| f << "dex.force.jumbo=true\n" }
+          end
+        end
+
         log_action('Copying dx.jar to libs') do
           copier.copy 'libs'
-          # FIXME(uwe): We may need this for newer Android SDK versions.  Keeping as reminder.
-          File.open('project.properties', 'a'){|f| f << "dex.force.jumbo=true\n"}
         end
 
         reconfigure_jruby_libs(new_jruby_version)
@@ -376,6 +380,7 @@ module Ruboto
                     'jnr/ffi/types',
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
+                    'jnr/x86asm',
                     'org/apache',
                     'org/fusesource',
                     'org/jruby/ant',
@@ -607,7 +612,7 @@ module Ruboto
                   # FIXME(uwe):  Installing bcmail-jdk15-146.jar + bcprov-jdk15-146.jar fails due to
                   # http://code.google.com/p/android/issues/detail?id=40409
                   # This breaks ssl and https. Remove when we stop supporting JRuby <= 1.7.2
-                  if j =~ /bcmail|bcprov/
+                  if j =~ /bcmail|bcprov-jdk15-146/
                     FileUtils.rm j
                     next
                   end
@@ -621,17 +626,21 @@ module Ruboto
                   end
                   # EMXIF
 
+                  # FIXME(uwe): These should be included but break the 64K method count limit
+                  if j =~ /bcpkix-jdk15on-147|bcprov-jdk15on-147|jopenssl|kryptcore|kryptproviderjdk/
+                    FileUtils.rm j
+                    next
+                  end
+                  # EMXIF
+
                   print "#{File.basename(j).chomp('.jar')}..."
                   system "jar xf #{j}"
                   FileUtils.rm j
+                  FileUtils.touch "#{j}.rb"
+                  FileUtils.touch "#{j}.jar.rb"
+                  #FileUtils.rm Dir['**/*$POPULATOR.class']
+                  #FileUtils.rm Dir['**/*$INVOKER$*.class']
                 end
-                # Uncomment this part to split the stdlib into one jar per directory
-                # Dir['jruby.home/lib/ruby/*/*'].select { |f| File.directory? f }.each do |d|
-                #   file = "#{d}.rb"
-                #   `jar -cf ../../jruby-stdlib-#{d.gsub('/', '-')}-#{JRubyJars::VERSION}.jar #{d} #{file if File.exists?(file)}`
-                #   FileUtils.rm_rf d
-                #   FileUtils.rm_rf file if File.exists?(file)
-                # end
 
                 `jar -cf ../../#{jruby_stdlib} .`
                 raise "Creating repackaged jruby-stdlib jar failed: #$?" unless $? == 0

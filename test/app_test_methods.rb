@@ -45,6 +45,10 @@ module AppTestMethods
       next if file =~ /json/ && (RUBOTO_PLATFORM == 'CURRENT' || ANDROID_OS <= 10)
       # EMXIF
 
+      # FIXME(uwe):  Remove when we include jopenssl and bouncycastle
+      next if file =~ /ssl/
+      # EMXIF
+
       if file =~ /_test.rb$/
         next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
         snake_name = file.chomp('_test.rb')
