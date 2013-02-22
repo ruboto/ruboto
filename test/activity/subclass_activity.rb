@@ -1,4 +1,3 @@
-require 'ruboto/activity'
 require 'ruboto/widget'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView

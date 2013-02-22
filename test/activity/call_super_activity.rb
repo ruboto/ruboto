@@ -1,7 +1,6 @@
-require 'ruboto/activity'
 require 'ruboto/widget'
 
-ruboto_import_widgets :Button, :LinearLayout, :TextView
+ruboto_import_widgets :LinearLayout, :TextView
 
 class CallSuperActivity
   def on_create(bundle)

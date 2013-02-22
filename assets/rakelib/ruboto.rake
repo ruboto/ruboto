@@ -394,14 +394,19 @@ def device_path_exists?(path)
   path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
 end
 
+# Determine if the package is installed.
+# Return true if the package is installed and is identical to the local package.
+# Return false if the package is installed, but differs from the local package.
+# Return nil if the package is not installed.
 def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   %w( -0 -1 -2).each do |i|
     path = "/data/app/#{package_name}#{i}.apk"
     o = `adb shell ls -l #{path}`.chomp
-    if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
+    if o =~ /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(path)}$/
+      installed_apk_size = $1.to_i
       apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+      if !File.exists?(apk_file) || installed_apk_size == File.size(apk_file)
         return true
       else
         return false
@@ -410,9 +415,10 @@ def package_installed?(test = false)
 
     sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
     o = `adb shell ls -l #{sdcard_path}`.chomp
-    if o =~ /^-r-xr-xr-x system\s+root\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
+    if o =~ /^-r-xr-xr-x system\s+root\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(sdcard_path)}$/
+      installed_apk_size = $1.to_i
       apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
+      if !File.exists?(apk_file) || installed_apk_size == File.size(apk_file)
         return true
       else
         return false

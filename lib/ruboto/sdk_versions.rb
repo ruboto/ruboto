@@ -15,10 +15,12 @@ module Ruboto
       end
       ANDROID_HOME = File.dirname(File.dirname(Pathname.new(adb_location).realpath))
       unless File.exists? "#{ANDROID_HOME}/tools"
-        raise "Found '#{adb_location}' but it is not in a proper Android SDK installation.
-The 'tools' directory is missing.
-Please set the ANDROID_HOME environment variable."
+        puts "Found '#{adb_location}' but it is not in a proper Android SDK installation."
       end
+    end
+    unless File.exists? "#{ANDROID_HOME}/tools"
+      raise "The '<ANDROID_HOME>/tools' directory is missing.
+Please set the ANDROID_HOME environment variable to a proper Android SDK installation."
     end
     ANDROID_TOOLS_REVISION = File.read("#{ANDROID_HOME}/tools/source.properties").slice(/Pkg.Revision=\d+/).slice(/\d+$/).to_i
   end
