@@ -79,7 +79,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     if [ "$?" != "0" ] ; then
       echo "Unable to start the emulator.  Retrying without loading snapshot."
       set -e
-      emulator -no-snapshot-load -avd $avd &
+      emulator -no-snapshot-load -avd $avd -no-window &
       set +e
       for i in 1 2 3 4 5 6 7 8 9 10 ; do
         killall -0 $EMULATOR_CMD 2> /dev/null
