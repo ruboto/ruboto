@@ -7,7 +7,10 @@ before_install:
   - ls -l android-sdk-linux/tools
   - export ANDROID_HOME=~/builds/ruboto/ruboto/android-sdk-linux
   - echo $ANDROID_HOME
+  - ls -l ${ANDROID_HOME}/tools
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+  - echo $PATH
+  - which android
   - android update sdk --filter 1,2,9 --no-ui --force
   - ls -l android-sdk-linux/platform-tools
 
