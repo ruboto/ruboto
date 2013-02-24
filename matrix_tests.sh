@@ -14,6 +14,12 @@ else
   EMULATOR_CMD=emulator-arm
 fi
 
+if [ "$DISPLAY" == "" ] ; then
+  EMULATOR_OPTS=-no-window -no-audio
+else
+  unset EMULATOR_OPTS
+fi
+
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
   while :; do
@@ -59,13 +65,16 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       exit 2
     fi
 
-    ls -l ~/.android
-    echo n | android create avd -n $avd -t android-$ANDROID_TARGET
-    ls -l ~/.android
+    if [ "`ls ~/.android/avd/$avd.avd`" == "" ] ; then
+      echo Creating AVD $avd
+      sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ${ANDROID_HOME}/platforms/*/*/*/hardware.ini
+      echo n | android create avd -n $avd -t android-$ANDROID_TARGET --sdcard 64M
+      sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ~/.android/avd/$avd.avd/config.ini
+    fi
 
     set -e
     echo Start emulator
-    emulator -avd $avd -no-window -no-audio &
+    emulator -avd $avd $EMUALTOR_OPTS &
 
     set +e
     for i in 1 2 3 ; do
@@ -86,7 +95,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 ps -ef | grep emulator
       echo "Unable to start the emulator.  Retrying without loading snapshot."
       set -e
-      emulator -no-snapshot-load -avd $avd -no-window -no-audio &
+      emulator -no-snapshot-load -avd $avd $EMULATOR_OPTS &
       set +e
       for i in 1 2 3 4 5 6 7 8 9 10 ; do
         killall -0 $EMULATOR_CMD 2> /dev/null
