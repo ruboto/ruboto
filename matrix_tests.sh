@@ -10,7 +10,11 @@ export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 
 uname -a
 
-EMULATOR_CMD=emulator64-arm
+if [ `uname -m` == "x86_64" ] ; then
+  EMULATOR_CMD=emulator64-arm
+else
+  EMULATOR_CMD=emulator-arm
+fi
 
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET

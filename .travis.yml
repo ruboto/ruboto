@@ -4,7 +4,7 @@ before_install:
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-  - android update sdk --filter tool,platform-tool,android-10,android-15,android-16,android-17 --no-ui --force
+  - android update sdk --no-ui --filter tool,platform-tool,android-10,android-15,android-16
 
 rvm:
 #  - "1.8.7"
