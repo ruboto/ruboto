@@ -1,6 +1,10 @@
 language: ruby
 before_install:
   - pwd
+  - ls -l
+  - ls -l android-sdk-linux
+  - ls -l android-sdk-linux/tools
+  - ls -l android-sdk-linux/platform-tools
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=~/builds/ruboto/ruboto/android-sdk-linux
