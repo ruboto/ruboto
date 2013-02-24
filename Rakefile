@@ -281,8 +281,9 @@ task :test do
   test_pattern = ARGV.grep(/^TEST=.*$/)
   ARGV.delete_if { |a| test_pattern.include? a }
   test_pattern.map! { |t| t[5..-1] }
+  $: << File.expand_path('test', File.dirname(__FILE__))
   (test_pattern.any? ? test_pattern : ['test/*_test.rb']).map { |d| Dir[d] }.flatten.each do |f|
-    require f.chomp('.rb')
+    require f.chomp('.rb')[5..-1]
   end
 end
 
