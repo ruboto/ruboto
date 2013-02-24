@@ -12,7 +12,7 @@ before_install:
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
   - echo $PATH
   - which android
-  - android update sdk --filter 1,2,9 --no-ui --force
+  - android update sdk --filter 1,2,3,4,5,6,7,8,9,11,12,13,14 --no-ui --force
   - ls -l android-sdk-linux/platform-tools
 
 rvm:
@@ -33,4 +33,4 @@ jdk:
 #  - FOO=foo BAR=bar
 #  - FOO=bar BAR=foo
 
-script: ./matrix_test.sh
+script: ./matrix_tests.sh
