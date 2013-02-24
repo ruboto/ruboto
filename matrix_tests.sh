@@ -55,6 +55,8 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       exit 2
     fi
 
+    android create avd -n $avd -t android-$ANDROID_TARGET
+
     set -e
     echo Start emulator
     emulator -avd $avd &
