@@ -1,19 +1,10 @@
 language: ruby
 before_install:
-  - pwd
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
-  - ls -l
-  - ls -l android-sdk-linux
-  - ls -l android-sdk-linux/tools
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
-  - echo $ANDROID_HOME
-  - ls -l ${ANDROID_HOME}/tools
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-  - echo $PATH
-  - which android
-  - android update sdk --filter 10,15,16,17 --no-ui --force
-  - ls -l android-sdk-linux/platform-tools
+  - android update sdk --filter tool,platform-tool,android-10,android-15,android-16,android-17 --no-ui --force
 
 rvm:
 #  - "1.8.7"
