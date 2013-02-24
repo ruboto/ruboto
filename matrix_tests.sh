@@ -68,7 +68,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     if [ "`ls ~/.android/avd/$avd.avd`" == "" ] ; then
       echo Creating AVD $avd
       sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ${ANDROID_HOME}/platforms/*/*/*/hardware.ini
-      echo n | android create avd -n $avd -t android-$ANDROID_TARGET -c 64M -s QVGA
+      echo n | android create avd -a -n $avd -t android-$ANDROID_TARGET -c 64M -s HVGA
       sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ~/.android/avd/$avd.avd/config.ini
     fi
 
