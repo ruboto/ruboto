@@ -6,7 +6,7 @@ before_install:
   - ls -l
   - ls -l android-sdk-linux
   - ls -l android-sdk-linux/tools
-  - export ANDROID_HOME=~/builds/ruboto/ruboto/android-sdk-linux
+  - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
   - echo $ANDROID_HOME
   - ls -l ${ANDROID_HOME}/tools
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
