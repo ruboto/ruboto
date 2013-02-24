@@ -5,11 +5,11 @@ before_install:
   - ls -l
   - ls -l android-sdk-linux
   - ls -l android-sdk-linux/tools
-  - ls -l android-sdk-linux/platform-tools
   - export ANDROID_HOME=~/builds/ruboto/ruboto/android-sdk-linux
   - echo $ANDROID_HOME
-  - android update sdk --filter 1,2,9 --no-ui --force
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+  - android update sdk --filter 1,2,9 --no-ui --force
+  - ls -l android-sdk-linux/platform-tools
 
 rvm:
 #  - "1.8.7"
