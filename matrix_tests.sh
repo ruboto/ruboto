@@ -59,7 +59,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
     set -e
     echo Start emulator
-    emulator -avd $avd &
+    emulator -avd $avd -no-window &
 
     set +e
     for i in 1 2 3 ; do

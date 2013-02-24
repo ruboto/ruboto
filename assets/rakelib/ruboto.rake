@@ -294,7 +294,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
       next if File.directory? f
       raise 'Malformed file name' unless f =~ %r{^(.*?)/lib/(.*)$}
       gem_name, lib_file = $1, $2
-      if existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} }
+      if (existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} })
         puts "Overwriting duplicate file #{lib_file} in gem #{$1} with file in #{gem_name}"
         FileUtils.rm existing_file
         scanned_files.delete existing_file
@@ -425,7 +425,7 @@ def package_installed?(test = false)
       end
     end
   end
-  return nil
+  nil
 end
 
 def replace_faulty_code(faulty_file, faulty_code)
@@ -458,7 +458,7 @@ def build_apk(t, release)
   else
     sh "#{ANT_CMD} debug"
   end
-  return true
+  true
 end
 
 def install_apk
@@ -469,6 +469,7 @@ def install_apk
     puts "Package #{package} already installed."
     return
   when false
+    # Install sometimes fails.  Which cases?
     puts "Package #{package} already installed, but of different size.  Replacing package."
     output = `adb install -r #{APK_FILE} 2>&1`
     if $? == 0 && output !~ failure_pattern && output =~ success_pattern
@@ -483,8 +484,11 @@ def install_apk
       puts "Uninstalling #{package} and retrying install."
     end
     uninstall_apk
+  else
+    # Package not installed.
   end
   puts "Installing package #{package}"
+    # Install sometimes fails.  Which cases?
   output = `adb install #{APK_FILE} 2>&1`
   puts output
   raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
@@ -523,5 +527,5 @@ end
 
 def stop_app
   output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
-  return output !~ /Operation not permitted/
+  output !~ /Operation not permitted/
 end
