@@ -8,8 +8,6 @@ RUBOTO_UPDATE_EXAMPLES=1
 
 export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 
-uname -a
-
 if [ `uname -m` == "x86_64" ] ; then
   EMULATOR_CMD=emulator64-arm
 else

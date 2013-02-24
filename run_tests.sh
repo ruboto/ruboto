@@ -44,5 +44,5 @@ if [ "$RUBY_IMPL" != "" ] ; then
 fi
 
 export NOEXEC_DISABLE=1
-rake clean
-rake test $*
+rake --trace clean
+rake --trace test $*
