@@ -39,9 +39,9 @@ new_dx_content = File.read(dx_filename).dup
 # set defaultXmx=-Xmx1024M
 xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
 if new_dx_content =~ xmx_pattern &&
-    ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 3*1024**3
-  puts "Increasing max heap space from #$1#$2 to 3G in #{dx_filename}"
-  new_dx_content.sub!(xmx_pattern, 'defaultMx="-Xmx3G"')
+    ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 2560*1024**2
+  puts "Increasing max heap space from #$1#$2 to 2560M in #{dx_filename}"
+  new_dx_content.sub!(xmx_pattern, 'defaultMx="-Xmx2560M"')
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
 end
 
