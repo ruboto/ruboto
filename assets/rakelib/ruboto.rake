@@ -3,6 +3,7 @@ require 'rubygems'
 require 'time'
 require 'rake/clean'
 require 'rexml/document'
+require 'timeout'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
@@ -469,9 +470,11 @@ def install_apk
     puts "Package #{package} already installed."
     return
   when false
-    # Install sometimes fails.  Which cases?
     puts "Package #{package} already installed, but of different size.  Replacing package."
-    output = `adb install -r #{APK_FILE} 2>&1`
+    output = nil
+    timeout(60) do
+      output = `adb install -r #{APK_FILE} 2>&1`
+    end
     if $? == 0 && output !~ failure_pattern && output =~ success_pattern
       clear_update
       return
@@ -488,11 +491,15 @@ def install_apk
     # Package not installed.
   end
   puts "Installing package #{package}"
-    # Install sometimes fails.  Which cases?
-  output = `adb install #{APK_FILE} 2>&1`
+  output = nil
+  timeout(60) do
+    output = `adb install #{APK_FILE} 2>&1`
+  end
   puts output
   raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
   clear_update
+rescue Timeout::Error
+  retry
 end
 
 def uninstall_apk
