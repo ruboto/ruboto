@@ -636,8 +636,27 @@ module Ruboto
                   print "#{File.basename(j).chomp('.jar')}..."
                   system "jar xf #{j}"
                   FileUtils.rm j
-                  FileUtils.touch "#{j}.rb"
-                  FileUtils.touch "#{j}.jar.rb"
+
+                  if j =~ %r{json/ext/generator.jar$}
+                    jar_load_code = <<-END_CODE
+        require 'jruby'
+        puts 'Starting JSON Generator Service'
+        public
+        Java::json.ext.GeneratorService.new.basicLoad(JRuby.runtime)
+                    END_CODE
+                  elsif j =~ %r{json/ext/parser.jar$}
+                    jar_load_code = <<-END_CODE
+        require 'jruby'
+        puts 'Starting JSON Parser Service'
+        public
+        Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
+                    END_CODE
+                  else
+                    jar_load_code = ''
+                  end
+
+                  File.open("#{j}.rb", 'w'){|f| f << jar_load_code}
+                  File.open("#{j}.jar.rb", 'w'){|f| f << jar_load_code}
                   #FileUtils.rm Dir['**/*$POPULATOR.class']
                   #FileUtils.rm Dir['**/*$INVOKER$*.class']
                 end

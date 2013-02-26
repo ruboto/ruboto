@@ -1,3 +1,4 @@
+# http://rkistner.github.com/android/2013/02/05/android-builds-on-travis-ci/
 language: ruby
 before_install:
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz

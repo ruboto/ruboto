@@ -334,6 +334,20 @@ puts 'Starting JRuby OpenSSL Service'
 public
 Java::JopensslService.new.basicLoad(JRuby.runtime)
             END_CODE
+          elsif jar =~ %r{json/ext/generator.jar$}
+            jar_load_code = <<-END_CODE
+require 'jruby'
+puts 'Starting JSON Generator Service'
+public
+Java::json.ext.GeneratorService.new.basicLoad(JRuby.runtime)
+            END_CODE
+          elsif jar =~ %r{json/ext/parser.jar$}
+            jar_load_code = <<-END_CODE
+require 'jruby'
+puts 'Starting JSON Parser Service'
+public
+Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
+            END_CODE
           else
             jar_load_code = ''
           end
