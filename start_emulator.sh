@@ -40,16 +40,22 @@ while :; do
 
   if [ "$ANDROID_TARGET" == "17" ] ; then
     AVD="Android_4.2"
+    ABI_OPT="--abi armeabi-v7a"
   elif [ "$ANDROID_TARGET" == "16" ] ; then
     AVD="Android_4.1.2"
+    ABI_OPT="--abi armeabi-v7a"
   elif [ "$ANDROID_TARGET" == "15" ] ; then
     AVD="Android_4.0.3"
+    ABI_OPT="--abi armeabi-v7a"
   elif [ "$ANDROID_TARGET" == "13" ] ; then
     AVD="Android_3.2"
+    ABI_OPT="--abi armeabi-v7a"
   elif [ "$ANDROID_TARGET" == "11" ] ; then
     AVD="Android_3.0"
+    ABI_OPT="--abi armeabi-v7a"
   elif [ "$ANDROID_TARGET" == "10" ] ; then
     AVD="Android_2.3.3"
+    ABI_OPT="--abi armeabi"
   else
     echo Unknown api level: $ANDROID_TARGET
     exit 2
@@ -58,7 +64,7 @@ while :; do
   if [ "`ls -d ~/.android/avd/$AVD.avd 2>/dev/null`" == "" ] ; then
     echo Creating AVD $AVD
     sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ${ANDROID_HOME}/platforms/*/*/*/hardware.ini
-    echo n | android create avd -a -n $AVD -t android-$ANDROID_TARGET -c 64M -s HVGA
+    echo n | android create avd -a -n $AVD -t android-$ANDROID_TARGET $ABI_OPT -c 64M -s HVGA
     sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ~/.android/avd/$AVD.avd/config.ini
   fi
 
