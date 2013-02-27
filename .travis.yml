@@ -43,4 +43,4 @@ env:
 #    - ANDROID_TARGETS=16 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
 #    - ANDROID_TARGETS=16 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.2
 
-script: ./start_emulator.sh ; ./run_tests.sh
+script: ./start_emulator.sh && ./run_tests.sh

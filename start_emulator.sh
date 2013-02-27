@@ -138,3 +138,6 @@ ps -ef | grep emulator
     set -e
     exit 1
   ) &
+
+echo Emulator $AVD started OK.
+exit 0
