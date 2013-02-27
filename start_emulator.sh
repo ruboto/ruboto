@@ -1,5 +1,17 @@
 #!/bin/bash -e
 
+if [ `uname -m` == "x86_64" ] ; then
+  EMULATOR_CMD=emulator64-arm
+else
+  EMULATOR_CMD=emulator-arm
+fi
+
+if [ "$DISPLAY" == "" ] ; then
+  EMULATOR_OPTS="-no-window -no-audio"
+else
+  unset EMULATOR_OPTS
+fi
+
   while :; do
     set +e
     killall -0 $EMULATOR_CMD 2> /dev/null

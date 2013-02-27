@@ -8,18 +8,6 @@ RUBOTO_UPDATE_EXAMPLES=1
 
 export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 
-if [ `uname -m` == "x86_64" ] ; then
-  EMULATOR_CMD=emulator64-arm
-else
-  EMULATOR_CMD=emulator-arm
-fi
-
-if [ "$DISPLAY" == "" ] ; then
-  EMULATOR_OPTS="-no-window -no-audio"
-else
-  unset EMULATOR_OPTS
-fi
-
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
 
