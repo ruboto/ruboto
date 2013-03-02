@@ -13,8 +13,6 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
   . ./start_emulator.sh
 
-  adb logcat > adb_logcat.log &
-
   for RUBOTO_PLATFORM in $PLATFORM_MODES ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions=$STANDALONE_JRUBY_VERSIONS

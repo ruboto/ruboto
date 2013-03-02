@@ -3,7 +3,7 @@
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
-TIMEOUT=14400 # 4 hours
+TIMEOUT=2700 # 45 minutes
 BOSSPID=$$
 (
   sleep $TIMEOUT
@@ -11,6 +11,7 @@ BOSSPID=$$
   echo "Test timed out after $TIMEOUT seconds."
   echo
   kill -9 $BOSSPID
+  cat adb_logcat.log
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
