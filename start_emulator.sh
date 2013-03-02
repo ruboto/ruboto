@@ -77,6 +77,7 @@ while :; do
     sleep 1
     killall -0 $EMULATOR_CMD 2> /dev/null
     if [ "$?" == "0" ] ; then
+      unset NEW_SNAPSHOT
       break
     fi
     if [ $i == 3 ] ; then
@@ -95,6 +96,7 @@ while :; do
     for i in 1 2 3 4 5 6 7 8 9 10 ; do
       killall -0 $EMULATOR_CMD 2> /dev/null
       if [ "$?" == "0" ] ; then
+        NEW_SNAPSHOT=1
         break
       fi
       if [ $i == 3 ] ; then
@@ -119,13 +121,16 @@ while :; do
     done
     echo
     if [ `adb get-state` == "device" ] ; then
-      sleep 10 # Let the new emulator calm down a bit.
       break
     fi
   fi
   echo "Unable to start the emulator."
 done
 set -e
+
+if [ $NEW_SNAPSHOT == 1 ] ; then
+  sleep 10 # Allow the emulator to calm down a bit.
+fi
 
 (
   set +e

@@ -12,7 +12,7 @@ require File.expand_path('update_test_methods', File.dirname(__FILE__))
 
 Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
   example_archives = Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"]
-  example_archives = example_archives.sort_by{|a| Gem::Version.new a.slice(/(?<=#{RubotoTest::APP_NAME}_)(.*)(?=_tools_)/)}
+  example_archives = example_archives.sort_by{|a| Gem::Version.new a[RubotoTest::APP_NAME.size + 1..-1].slice(/(.*)(?=_tools_)/)}
   example_archives = example_archives.last(example_limit) if example_limit
   example_archives.each do |f|
     next unless f =~ /^#{RubotoTest::APP_NAME}_(.*)_tools_r(.*)\.tgz$/
