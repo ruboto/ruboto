@@ -148,4 +148,3 @@ set -e
 adb logcat > adb_logcat.log &
 
 echo Emulator $AVD started OK.
-exit 0
