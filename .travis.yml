@@ -24,7 +24,7 @@ jdk:
 
 env:
   global:
-    - RUBOTO_UPDATE_EXAMPLES=1
+    - RUBOTO_UPDATE_EXAMPLES=0
 #    - MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | cut -f1-4 -d'.'`
   matrix:
 #    - ANDROID_TARGET=10 RUBOTO_PLATFORM=CURRENT
