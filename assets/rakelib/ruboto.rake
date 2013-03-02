@@ -420,8 +420,10 @@ def package_installed?(test = false)
     o = `adb shell ls -l #{path}`.chomp
     if o =~ /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(path)}$/
       installed_apk_size = $1.to_i
+      installed_timestamp = Time.parse($2)
       apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || installed_apk_size == File.size(apk_file)
+      if !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
+          installed_timestamp >= File.mtime(apk_file))
         return true
       else
         return false
@@ -432,8 +434,10 @@ def package_installed?(test = false)
     o = `adb shell ls -l #{sdcard_path}`.chomp
     if o =~ /^-r-xr-xr-x system\s+root\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(sdcard_path)}$/
       installed_apk_size = $1.to_i
+      installed_timestamp = Time.parse($2)
       apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || installed_apk_size == File.size(apk_file)
+      if !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
+          installed_timestamp >= File.mtime(apk_file))
         return true
       else
         return false
@@ -484,7 +488,7 @@ def install_apk
     puts "Package #{package} already installed."
     return
   when false
-    puts "Package #{package} already installed, but of different size.  Replacing package."
+    puts "Package #{package} already installed, but of different size or timestamp.  Replacing package."
     output = nil
     timeout(60) do
       output = `adb install -r #{APK_FILE} 2>&1`

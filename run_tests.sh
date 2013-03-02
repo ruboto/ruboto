@@ -47,3 +47,11 @@ fi
 export NOEXEC_DISABLE=1
 rake --trace clean
 rake --trace test $*
+
+TEST_RC=$?
+
+if [ $TEST_RC != 0 ] ; then
+  cat adb_logcat.log
+fi
+
+exit $TEST_RC
