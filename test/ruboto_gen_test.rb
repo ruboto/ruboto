@@ -49,14 +49,15 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
-  # APK was    56.4KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 7.
-  # APK was    61.9KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 10.
-  # APK was    67.2KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 15.
-  # APK was  5879.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.6.7.
-  # APK was  7380.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.0.
-  # APK was  7310.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.2.
-  # APK was  7336.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.3.dev.
-  # APK was  7316.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.3.dev.
+  # APK was    56.4KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 7
+  # APK was    61.9KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 10
+  # APK was    67.2KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 15
+  # APK was    72.9KB.  PLATFORM: CURRENT     ANDROID_TARGET: 16
+  # APK was  5879.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.6.7
+  # APK was  7380.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.0
+  # APK was  7310.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.2
+  # APK was  7336.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.3.dev
+  # APK was  7316.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.3.dev
   def test_new_apk_size_is_within_limits
     apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / 1024
     version = "  PLATFORM: #{RUBOTO_PLATFORM}"
@@ -75,7 +76,7 @@ class RubotoGenTest < Test::Unit::TestCase
           7 => 62.0,
           10 => 62.0,
           15 => 63.0,
-      }[ANDROID_TARGET] || 64.0
+      }[ANDROID_TARGET] || 73.0
     end
     lower_limit = upper_limit * 0.9
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
