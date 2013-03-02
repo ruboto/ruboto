@@ -119,6 +119,7 @@ while :; do
     done
     echo
     if [ `adb get-state` == "device" ] ; then
+      sleep 10 # Let the new emulator calm down a bit.
       break
     fi
   fi
