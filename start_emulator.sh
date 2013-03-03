@@ -129,7 +129,7 @@ done
 set -e
 
 if [ $NEW_SNAPSHOT == 1 ] ; then
-  sleep 10 # Allow the emulator to calm down a bit.
+  sleep 15 # Allow the emulator to calm down a bit.
 fi
 
 (
