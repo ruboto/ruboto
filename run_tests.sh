@@ -50,7 +50,11 @@ rake --trace test $*
 
 TEST_RC=$?
 
-if [ $TEST_RC != 0 ] ; then
+echo Tests exited with code $TEST_RC
+
+if [ "$TEST_RC" != "0" ] ; then
+  echo
+  echo Emulator log:
   cat adb_logcat.log
 fi
 
