@@ -6,7 +6,7 @@ else
   EMULATOR_CMD=emulator-arm
 fi
 
-EMULATOR_OPTS="-partition-size 256"
+EMULATOR_OPTS="-partition-size 128"
 if [ "$DISPLAY" == "" ] ; then
   EMULATOR_OPTS="$EMULATOR_OPTS -no-window -no-audio"
 fi

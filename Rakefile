@@ -392,7 +392,7 @@ namespace :platform do
     puts "Installing package #{package}"
     begin
       output = nil
-      timeout 90 do
+      timeout 120 do
         output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
       end
     rescue TimeoutError
