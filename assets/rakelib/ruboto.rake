@@ -538,6 +538,7 @@ def install_apk
   end
   puts "Installing package #{package}"
   output = nil
+  install_retry_count = 0
   begin
     timeout 120 do
       output = `adb install #{APK_FILE} 2>&1`
