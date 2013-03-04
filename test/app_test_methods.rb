@@ -49,6 +49,10 @@ module AppTestMethods
       next if file =~ /ssl/
       # EMXIF
 
+      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.4.dev
+      next if file =~ /dir_and_file/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.4.dev'))
+      # EMXIF
+
       if file =~ /_test.rb$/
         next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
         snake_name = file.chomp('_test.rb')

@@ -11,12 +11,17 @@ BOSSPID=$$
   echo "Test timed out after $TIMEOUT seconds."
   echo
   kill -9 $BOSSPID
+  echo
+  echo Emulator log:
+  echo
   cat adb_logcat.log
+  echo
+  echo "Test timed out after $TIMEOUT seconds."
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
-trap "echo killing timer ; kill -9 $TIMERPID" EXIT
+trap "kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
 if [ ! $(command -v ant) ] ; then
@@ -55,7 +60,10 @@ echo Tests exited with code $TEST_RC
 if [ "$TEST_RC" != "0" ] ; then
   echo
   echo Emulator log:
+  echo
   cat adb_logcat.log
+  echo
+  echo Tests failed with exit code $TEST_RC
 fi
 
 exit $TEST_RC

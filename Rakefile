@@ -382,7 +382,7 @@ namespace :platform do
       end
       case $1
       when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
-        puts "Found package signed with different certificate.  Uninstalling it and retrying install."
+        puts 'Found package signed with different certificate.  Uninstalling it and retrying install.'
       else
         puts "'adb install' returned an unknown error: (#$?) #{$1 ? "[#$1}]" : output}."
         puts "Uninstalling #{package} and retrying install."
@@ -390,7 +390,15 @@ namespace :platform do
       uninstall_apk
     end
     puts "Installing package #{package}"
-    output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+    begin
+      output = nil
+      timeout 60 do
+        output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+      end
+    rescue TimeoutError
+      puts 'Install of current RubotoCore timed out.  Retrying.'
+      retry
+    end
     puts output
     raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
   end

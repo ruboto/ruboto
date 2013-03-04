@@ -37,10 +37,26 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
       echo ""
 
+      set +e
+
       ./run_tests.sh
       # ./run_tests.sh TEST=test/ruboto_update_test.rb
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ACTIVITY_TEST_PATTERN=subclass ruby test/ruboto_gen_test.rb -n test_activity_tests
+
+      TEST_RC=$?
+      set -e
+
+      echo ""
+      echo "ANDROID_TARGET: $ANDROID_TARGET"
+      echo "RUBOTO_PLATFORM: $RUBOTO_PLATFORM"
+      echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
+      echo "********************************************************************************"
+      echo ""
+
+      if [ "$TEST_RC" != "0" ] ; then
+        exit $TEST_RC
+      fi
     done
   done
 done

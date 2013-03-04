@@ -1,4 +1,4 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 
 class RakeTest < Test::Unit::TestCase
   def setup
@@ -11,18 +11,18 @@ class RakeTest < Test::Unit::TestCase
 
   # FIXME(uwe): Remove condition when we stop supporting android-7
   if ANDROID_OS == 7
-    puts "Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall"
+    puts 'Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall'
   else
     def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
       Dir.chdir APP_DIR do
-        activity_filename = "src/ruboto_test_app_activity.rb"
+        activity_filename = 'src/ruboto_test_app_activity.rb'
         s = File.read(activity_filename)
-        s.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
+        s.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
         File.open(activity_filename, 'w') { |f| f << s }
 
-        test_filename = "test/src/ruboto_test_app_activity_test.rb"
+        test_filename = 'test/src/ruboto_test_app_activity_test.rb'
         s2 = File.read(test_filename)
-        s2.gsub!(/What hath Matz wrought\?/, "This text was changed by script!")
+        s2.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
         File.open(test_filename, 'w') { |f| f << s2 }
 
         apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
@@ -41,7 +41,7 @@ class RakeTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       system 'rake install'
       apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
-      FileUtils.touch "src/ruboto_test_app_activity.rb"
+      FileUtils.touch 'src/ruboto_test_app_activity.rb'
       system 'rake install'
       assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
@@ -53,7 +53,7 @@ class RakeTest < Test::Unit::TestCase
       assert_equal "android:minSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:minSdkVersion='\d+'/)
       assert_equal "android:targetSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:targetSdkVersion='\d+'/)
       prop_file = File.read('project.properties')
-      File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, "target=android-6")}
+      File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, 'target=android-6')}
       system 'rake debug'
       manifest = File.read('AndroidManifest.xml')
       assert_equal "android:minSdkVersion='6'", manifest.slice(/android:minSdkVersion='\d+'/)

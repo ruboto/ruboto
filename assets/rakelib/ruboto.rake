@@ -15,9 +15,9 @@ if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.
 end
 
 adb_version_str = `adb version`
-(puts 'Android SDK platform tools not in PATH (adb command not found).';exit 1) unless $? == 0
-(puts "Unrecognized adb version: #$1";exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
-(puts "adb version 1.0.31 or later required.  Version found: #$1";exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
+(puts 'Android SDK platform tools not in PATH (adb command not found).'; exit 1) unless $? == 0
+(puts "Unrecognized adb version: #$1"; exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
+(puts "adb version 1.0.31 or later required.  Version found: #$1"; exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
 unless ENV['ANDROID_HOME']
   unless ON_WINDOWS
     begin
@@ -28,7 +28,7 @@ unless ENV['ANDROID_HOME']
     end
   end
 end
-(puts 'You need to set the ANDROID_HOME environment variable.';exit 1) unless ENV['ANDROID_HOME']
+(puts 'You need to set the ANDROID_HOME environment variable.'; exit 1) unless ENV['ANDROID_HOME']
 
 # FIXME(uwe):  On windows the file is called dx.bat
 dx_filename = File.join(ENV['ANDROID_HOME'], 'platform-tools', ON_WINDOWS ? 'dx.bat' : 'dx')
@@ -52,25 +52,25 @@ def build_project_name; @build_project_name ||= REXML::Document.new(File.read('b
 def scripts_path; @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
 def app_files_path; @app_files_path ||= "/data/data/#{package}/files" end
 
-PROJECT_DIR        = File.expand_path('..', File.dirname(__FILE__))
+PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
-BUNDLE_JAR         = File.expand_path 'libs/bundle.jar'
-BUNDLE_PATH        = File.expand_path 'bin/bundle'
-MANIFEST_FILE      = File.expand_path 'AndroidManifest.xml'
+BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
+BUNDLE_PATH = File.expand_path 'bin/bundle'
+MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
 PROJECT_PROPS_FILE = File.expand_path 'project.properties'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
-GEM_FILE           = File.expand_path 'Gemfile.apk'
-GEM_LOCK_FILE      = File.expand_path 'Gemfile.apk.lock'
-RELEASE_APK_FILE   = File.expand_path "bin/#{build_project_name}-release.apk"
-APK_FILE           = File.expand_path "bin/#{build_project_name}-debug.apk"
-TEST_APK_FILE      = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
-JRUBY_JARS         = Dir[File.expand_path 'libs/jruby-*.jar']
-RESOURCE_FILES     = Dir[File.expand_path 'res/**/*']
-JAVA_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.java']
-RUBY_SOURCE_FILES  = Dir[File.expand_path 'src/**/*.rb']
-APK_DEPENDENCIES   = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
-KEYSTORE_FILE      = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
-KEYSTORE_ALIAS     = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
+GEM_FILE = File.expand_path 'Gemfile.apk'
+GEM_LOCK_FILE = File.expand_path 'Gemfile.apk.lock'
+RELEASE_APK_FILE = File.expand_path "bin/#{build_project_name}-release.apk"
+APK_FILE = File.expand_path "bin/#{build_project_name}-debug.apk"
+TEST_APK_FILE = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
+JRUBY_JARS = Dir[File.expand_path 'libs/jruby-*.jar']
+RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
+JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
+RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
+APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
+KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
+KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
@@ -136,10 +136,10 @@ task :keystore => KEYSTORE_FILE
 
 file KEYSTORE_FILE do
   unless File.read('ant.properties') =~ /^key.store=/
-    File.open('ant.properties', 'a'){|f| f << "\nkey.store=#{KEYSTORE_FILE}\n"}
+    File.open('ant.properties', 'a') { |f| f << "\nkey.store=#{KEYSTORE_FILE}\n" }
   end
   unless File.read('ant.properties') =~ /^key.alias=/
-    File.open('ant.properties', 'a'){|f| f << "\nkey.alias=#{KEYSTORE_ALIAS}\n"}
+    File.open('ant.properties', 'a') { |f| f << "\nkey.alias=#{KEYSTORE_ALIAS}\n" }
   end
   sh "keytool -genkey -v -keystore #{KEYSTORE_FILE} -alias #{KEYSTORE_ALIAS} -keyalg RSA -keysize 2048 -validity 10000"
 end
@@ -185,9 +185,9 @@ file MANIFEST_FILE => PROJECT_PROPS_FILE do
   sdk_level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
-  manifest.sub!(/(android:minSdkVersion=').*?(')/){"#$1#{sdk_level}#$2"}
-  manifest.sub!(/(android:targetSdkVersion=').*?(')/){"#$1#{sdk_level}#$2"}
-  File.open(MANIFEST_FILE, 'w'){|f| f << manifest} if manifest != old_manifest
+  manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
+  manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
+  File.open(MANIFEST_FILE, 'w') { |f| f << manifest } if manifest != old_manifest
 end
 
 file RUBOTO_CONFIG_FILE
@@ -225,7 +225,23 @@ namespace :test do
   task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
-      sh "#{ANT_CMD} instrument install run-tests-quick"
+      sh "#{ANT_CMD} instrument"
+      install_retry_count = 0
+      begin
+        timeout 60 do
+          sh "#{ANT_CMD} installi"
+        end
+      rescue TimeoutError
+        puts 'Installing package timed out.'
+        install_retry_count += 1
+        if install_retry_count > 3
+          puts 'Retrying install...'
+          retry
+        end
+        puts 'Trying one final time to install the package:'
+        sh "#{ANT_CMD} installi"
+      end
+      sh "#{ANT_CMD} run-tests-quick"
     end
   end
 end

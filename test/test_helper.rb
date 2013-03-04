@@ -20,7 +20,7 @@ module RubotoTest
   Gem.paths = GEM_PATH
   Gem.refresh
   `gem query -i -n bundler`
-  system 'gem install bundler --no-ri --no-rdoc' unless $? == 0
+  system 'gem install bundler -v "!=1.3.1" --no-ri --no-rdoc' unless $? == 0
   `bundle check`
   system 'bundle --system' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))

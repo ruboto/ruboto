@@ -3,7 +3,7 @@ require 'ruboto/widget'
 ruboto_import_widgets :LinearLayout, :TextView
 
 class CallSuperActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     setTitle 'Default'
     setTitle 'With Super', true
