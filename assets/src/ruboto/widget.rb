@@ -20,7 +20,7 @@ java_import 'android.view.View'
 def invoke_with_converted_arguments(target, method_name, values)
   converted_values = [*values].map { |i| @@convert_constants[i] || i }
   scaled_values = converted_values.map.with_index do |v, i|
-    v.is_a?(Integer) && v >= 0x08000000 && v <= 0xFFFFFFFF ?
+    v.is_a?(Integer) && v >= 0x80000000 && v <= 0xFFFFFFFF ?
         v.to_i - 0x100000000 : v
   end
   target.send(method_name, *scaled_values)
