@@ -15,51 +15,60 @@ require 'ruboto/activity'
 # Prepare View
 #
 
-java_import "android.view.View"
+java_import 'android.view.View'
+
+def invoke_with_converted_arguments(target, method_name, values)
+  converted_values = [*values].map { |i| @@convert_constants[i] || i }
+  scaled_values = converted_values.map.with_index do |v, i|
+    v.is_a?(Integer) && v >= 0x08000000 && v <= 0xFFFFFFFF ?
+        v.to_i - 0x100000000 : v
+  end
+  target.send(method_name, *scaled_values)
+end
 
 View.class_eval do
-    @@convert_constants ||= {}
+  @@convert_constants ||= {}
 
-    def self.add_constant_conversion(from, to)
-      @@convert_constants[from] = to
+  def self.add_constant_conversion(from, to)
+    @@convert_constants[from] = to
+  end
+
+  def self.convert_constant(from)
+    @@convert_constants[from] or from
+  end
+
+  def self.setup_constant_conversion
+    (self.constants - self.superclass.constants).each do |i|
+      View.add_constant_conversion i.downcase.to_sym, self.const_get(i)
+    end
+  end
+
+  def configure(context, params = {})
+    if width = params.delete(:width)
+      getLayoutParams.width = View.convert_constant(width)
     end
 
-    def self.convert_constant(from)
-      @@convert_constants[from] or from
+    if height = params.delete(:height)
+      getLayoutParams.height = View.convert_constant(height)
     end
 
-    def self.setup_constant_conversion
-      (self.constants - self.superclass.constants).each do |i|
-        View.add_constant_conversion i.downcase.to_sym, self.const_get(i)
+    if margins = params.delete(:margins)
+      getLayoutParams.set_margins(*margins)
+    end
+
+    if layout = params.delete(:layout)
+      lp = getLayoutParams
+      layout.each do |k, v|
+        method_name = k.to_s.gsub(/_([a-z])/) { $1.upcase }
+        invoke_with_converted_arguments(lp, method_name, v)
       end
     end
 
-    def configure(context, params = {})
-      if width = params.delete(:width)
-        getLayoutParams.width = View.convert_constant(width)
-      end
-
-      if height = params.delete(:height)
-        getLayoutParams.height = View.convert_constant(height)
-      end
-      
-      if margins = params.delete(:margins)
-        getLayoutParams.set_margins(*margins)
-      end
-
-      if layout = params.delete(:layout)
-        lp = getLayoutParams
-        layout.each do |k, v|
-          values = (v.is_a?(Array) ? v : [v]).map { |i| @@convert_constants[i] or i }
-          lp.send("#{k.to_s.gsub(/_([a-z])/) { $1.upcase }}", *values)
-        end
-      end
-
-      params.each do |k, v|
-        values = (v.is_a?(Array) ? v : [v]).map { |i| @@convert_constants[i] or i }
-        self.send("set#{k.to_s.gsub(/(^|_)([a-z])/) { $2.upcase }}", *values)
-      end
+    params.each do |k, v|
+      method_name = "set#{k.to_s.gsub(/(^|_)([a-z])/) { $2.upcase }}"
+      invoke_with_converted_arguments(self, method_name, v)
     end
+  end
 end
 
 #
@@ -96,7 +105,7 @@ def ruboto_import_widget(class_name, package_name="android.widget")
     java_import klass
     class_name = klass.java_class.name.split('.')[-1]
   end
-  
+
   return unless klass
 
   RubotoActivity.class_eval "
@@ -185,7 +194,7 @@ def setup_spinner
         @adapter_list = Java::java.util.ArrayList.new
         @adapter_list.addAll(params[:list])
         item_layout = params.delete(:item_layout) || R::layout::simple_spinner_item
-        @adapter    = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
+        @adapter = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
         @adapter.setDropDownViewResource(params.delete(:dropdown_layout) || R::layout::simple_spinner_dropdown_item)
         setAdapter @adapter
         params.delete :list
