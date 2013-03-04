@@ -506,7 +506,19 @@ def install_apk
   when false
     puts "Package #{package} already installed, but of different size or timestamp.  Replacing package."
     output = nil
-    timeout 120 do
+    install_retry_count = 0
+    begin
+      timeout 120 do
+        output = `adb install -r #{APK_FILE} 2>&1`
+      end
+    rescue Timeout::Error
+      puts "Installing package #{package} timed out."
+      install_retry_count += 1
+      if install_retry_count > 3
+        puts 'Retrying install...'
+        retry
+      end
+      puts 'Trying one final time to install the package:'
       output = `adb install -r #{APK_FILE} 2>&1`
     end
     if $? == 0 && output !~ failure_pattern && output =~ success_pattern
@@ -526,14 +538,23 @@ def install_apk
   end
   puts "Installing package #{package}"
   output = nil
-  timeout 120 do
+  begin
+    timeout 120 do
+      output = `adb install #{APK_FILE} 2>&1`
+    end
+  rescue Timeout::Error
+    puts "Installing package #{package} timed out."
+    install_retry_count += 1
+    if install_retry_count > 3
+      puts 'Retrying install...'
+      retry
+    end
+    puts 'Trying one final time to install the package:'
     output = `adb install #{APK_FILE} 2>&1`
   end
   puts output
   raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
   clear_update
-rescue Timeout::Error
-  retry
 end
 
 def uninstall_apk
