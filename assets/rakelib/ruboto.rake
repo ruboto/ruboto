@@ -228,7 +228,7 @@ namespace :test do
       sh "#{ANT_CMD} instrument"
       install_retry_count = 0
       begin
-        timeout 60 do
+        timeout 90 do
           sh "#{ANT_CMD} installi"
         end
       rescue TimeoutError
@@ -506,7 +506,7 @@ def install_apk
   when false
     puts "Package #{package} already installed, but of different size or timestamp.  Replacing package."
     output = nil
-    timeout(60) do
+    timeout(90) do
       output = `adb install -r #{APK_FILE} 2>&1`
     end
     if $? == 0 && output !~ failure_pattern && output =~ success_pattern
@@ -526,7 +526,7 @@ def install_apk
   end
   puts "Installing package #{package}"
   output = nil
-  timeout(60) do
+  timeout(90) do
     output = `adb install #{APK_FILE} 2>&1`
   end
   puts output
