@@ -127,7 +127,7 @@ while :; do
 done
 set -e
 
-if [ "$NEW_SNAPSHOT" == "1" ] && [ "$ANDROID_TARGET" -lt "15" ] ; then
+if [ "$NEW_SNAPSHOT" == "1" ] ; then
   echo Allow the emulator to calm down a bit.
   sleep 15
 fi
