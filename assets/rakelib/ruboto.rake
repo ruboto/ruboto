@@ -499,6 +499,7 @@ end
 def install_apk
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
+  sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
   case package_installed?
   when true
     puts "Package #{package} already installed."
