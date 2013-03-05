@@ -499,13 +499,13 @@ end
 def install_apk
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
-  sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
   case package_installed?
   when true
     puts "Package #{package} already installed."
     return
   when false
     puts "Package #{package} already installed, but of different size or timestamp.  Replacing package."
+    sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
     output = nil
     install_retry_count = 0
     begin
@@ -536,6 +536,7 @@ def install_apk
     uninstall_apk
   else
     # Package not installed.
+    sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
   end
   puts "Installing package #{package}"
   output = nil
