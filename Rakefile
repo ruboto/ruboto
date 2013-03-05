@@ -12,7 +12,7 @@ PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_DEBUG_APK_BAK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk.bak"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
 PLATFORM_CURRENT_RELEASE_APK = File.expand_path('tmp/RubotoCore-release.apk', File.dirname(__FILE__))
-MANIFEST_FILE = "AndroidManifest.xml"
+MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
@@ -21,7 +21,7 @@ CLEAN.include('ruboto-*.gem', 'tmp')
 
 task :default => :gem
 
-desc "Generate a gem"
+desc 'Generate a gem'
 task :gem => GEM_FILE
 
 file GEM_FILE => GEM_SPEC_FILE do
@@ -63,7 +63,7 @@ end
 
 task :reinstall => [:uninstall, :clean, :install]
 
-desc "Generate an example app"
+desc 'Generate an example app'
 task :example => EXAMPLE_FILE
 
 file EXAMPLE_FILE => :install do
@@ -259,12 +259,12 @@ task :stats do
   puts "\nTotal: #{total}\n\n"
 end
 
-desc "Push the gem to RubyGems"
+desc 'Push the gem to RubyGems'
 task :release => [:clean, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
-  sh "git push --tags"
+  sh 'git push --tags'
   sh "gem push #{GEM_FILE}"
 
   examples_glob = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
@@ -272,7 +272,7 @@ task :release => [:clean, :gem] do
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
   sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' \"#{examples_glob}\""
-  sh "git push"
+  sh 'git push'
 end
 
 desc "Run the tests.  Select which test files to load with 'rake test TEST=test_file_pattern'"
@@ -282,7 +282,7 @@ task :test do
   ARGV.delete_if { |a| test_pattern.include? a }
   test_pattern.map! { |t| t[5..-1] }
   $: << File.expand_path('test', File.dirname(__FILE__))
-  (test_pattern.any? ? test_pattern : ['test/*_test.rb']).map { |d| Dir[d] }.flatten.each do |f|
+  (test_pattern.any? ? test_pattern : %w(test/*_test.rb)).map { |d| Dir[d] }.flatten.each do |f|
     require f.chomp('.rb')[5..-1]
   end
 end
@@ -396,7 +396,7 @@ namespace :platform do
       timeout 180 do
         install_start = Time.now
         output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
-        puts "Install took #{Time.now - install_start}s."
+        puts "Install took #{(Time.now - install_start).to_i}s."
       end
     rescue TimeoutError
       puts 'Install of current RubotoCore timed out.'
@@ -408,7 +408,7 @@ namespace :platform do
       puts 'Retrying one final time...'
       install_start = Time.now
       output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
-      puts "Install took #{Time.now - install_start}s."
+      puts "Install took #{(Time.now - install_start).to_i}s."
     end
     puts output
     raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
@@ -426,7 +426,7 @@ namespace :platform do
 
   def package_installed?
     package_name = package
-    ['', '-0', '-1', '-2'].each do |i|
+    %w( -0 -1 -2).each do |i|
       path = "/data/app/#{package_name}#{i}.apk"
       o = `adb shell ls -l #{path}`.chomp
       if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
