@@ -390,14 +390,25 @@ namespace :platform do
       uninstall_apk
     end
     puts "Installing package #{package}"
+    install_retry_count = 0
     begin
       output = nil
       timeout 180 do
+        install_start = Time.now
         output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+        puts "Install took #{Time.now - install_start}s."
       end
     rescue TimeoutError
-      puts 'Install of current RubotoCore timed out.  Retrying.'
-      retry
+      puts 'Install of current RubotoCore timed out.'
+      install_retry_count += 1
+      if install_retry_count <= 3
+        puts 'Retrying.'
+        retry
+      end
+      puts 'Retrying one final time...'
+      install_start = Time.now
+      output = `adb install #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
+      puts "Install took #{Time.now - install_start}s."
     end
     puts output
     raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
