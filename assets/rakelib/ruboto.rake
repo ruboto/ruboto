@@ -234,7 +234,7 @@ namespace :test do
       rescue TimeoutError
         puts 'Installing package timed out.'
         install_retry_count += 1
-        if install_retry_count > 3
+        if install_retry_count <= 3
           puts 'Retrying install...'
           retry
         end
@@ -515,7 +515,7 @@ def install_apk
     rescue Timeout::Error
       puts "Installing package #{package} timed out."
       install_retry_count += 1
-      if install_retry_count > 3
+      if install_retry_count <= 3
         puts 'Retrying install...'
         retry
       end
@@ -547,7 +547,7 @@ def install_apk
   rescue Timeout::Error
     puts "Installing package #{package} timed out."
     install_retry_count += 1
-    if install_retry_count > 3
+    if install_retry_count <= 3
       puts 'Retrying install...'
       retry
     end

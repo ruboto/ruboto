@@ -40,7 +40,7 @@ module RubotoTest
       '3.0' => 'android-11', '3.1' => 'android-12', '3.2' => 'android-13',
       '4.0.1' => 'android-14', '4.0.3' => 'android-15', '4.0.4' => 'android-15',
       '4.1' => 'android-16', '4.1.1' => 'android-16', '4.1.2' => 'android-16',
-      '4.2' => 'android-17',
+      '4.2' => 'android-17', '4.2.2' => 'android-17',
   }
 
   def self.version_from_device
