@@ -4,6 +4,7 @@ require 'time'
 require 'rake/clean'
 require 'rexml/document'
 require 'timeout'
+require 'ruboto/sdk_versions'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
@@ -160,7 +161,7 @@ end
 
 desc 'Start the emulator with larger disk'
 task :emulator do
-  sh 'emulator -partition-size 1024 -avd Android_3.0'
+  sh "emulator -partition-size 1024 -avd Android_#{Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level]}"
 end
 
 desc 'Start the application on the device/emulator.'
@@ -182,7 +183,6 @@ end
 
 file PROJECT_PROPS_FILE
 file MANIFEST_FILE => PROJECT_PROPS_FILE do
-  sdk_level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
   manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
@@ -388,6 +388,10 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
 end
 
 # Methods
+
+def sdk_level
+  File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
+end
 
 def mark_update(time = Time.now)
   FileUtils.mkdir_p File.dirname(UPDATE_MARKER_FILE)

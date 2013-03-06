@@ -49,7 +49,7 @@ task :uninstall do
   `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? == 0
     puts 'Uninstalling gem'
-    cmd = "gem uninstall ruboto -v #{Ruboto::VERSION}"
+    cmd = "gem uninstall -x ruboto -v #{Ruboto::VERSION}"
     output = `#{cmd}`
     if $? == 0
       puts output

@@ -14,8 +14,9 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://ruboto.org/}
   s.description = Ruboto::DESCRIPTION
   s.rubyforge_project = 'ruboto/ruboto'
+  s.license = 'MIT'
   s.files = FileList['[A-Z]*', 'assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
-  s.executables = ['ruboto']
+  s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
   s.add_dependency('main', '~>4.7', '>=4.7.2')
 end
