@@ -339,10 +339,14 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 require 'jruby'
 Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
             END_CODE
-            classes = Dir['arjdbc/**/*']
-            dbs = /db2|derby|firebird|h2|hsqldb|informix|mimer|mssql|mysql|oracle|postgres|sybase/i
-            files = classes.grep(dbs)
-            FileUtils.rm_f(files)
+
+            # TODO(uwe): Seems ARJDBC requires all these classes to be present...
+            # classes = Dir['arjdbc/**/*']
+            # dbs = /db2|derby|firebird|h2|hsqldb|informix|mimer|mssql|mysql|oracle|postgres|sybase/i
+            # files = classes.grep(dbs)
+            # FileUtils.rm_f(files)
+            # ODOT
+
           elsif jar =~ /shared\/jopenssl.jar$/
             jar_load_code = <<-END_CODE
 require 'jruby'
