@@ -4,7 +4,6 @@ require 'time'
 require 'rake/clean'
 require 'rexml/document'
 require 'timeout'
-require 'ruboto/sdk_versions'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
@@ -161,7 +160,7 @@ end
 
 desc 'Start the emulator with larger disk'
 task :emulator do
-  sh "emulator -partition-size 1024 -avd Android_#{Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level]}"
+  sh "emulator -partition-size 1024 -avd Android_#{sdk_level_name}"
 end
 
 desc 'Start the application on the device/emulator.'
@@ -392,6 +391,15 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
 end
 
 # Methods
+
+API_LEVEL_TO_VERSION = {
+    7 => '2.1', 8 => '2.2', 10 => '2.3.3', 11 => '3.0', 12 => '3.1',
+    13 => '3.2', 14 => '4.0', 15 => '4.0.3', 16 => '4.1.2', 17 => '4.2.2',
+}
+
+def sdk_level_name
+  API_LEVEL_TO_VERSION[sdk_level]
+end
 
 def sdk_level
   File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i

@@ -11,10 +11,6 @@ module Ruboto
         '4.1' => 'android-16', '4.1.1' => 'android-16', '4.1.2' => 'android-16',
         '4.2' => 'android-17', '4.2.2' => 'android-17',
     }
-    API_LEVEL_TO_VERSION = {
-        7 => '2.1', 8 => '2.2', 10 => '2.3.3', 11 => '3.0', 12 => '3.1',
-        13 => '3.2', 14 => '4.0', 15 => '4.0.3', 16 => '4.1.2', 17 => '4.2.2',
-    }
     MINIMUM_SUPPORTED_SDK_LEVEL = 7
     MINIMUM_SUPPORTED_SDK = "android-#{MINIMUM_SUPPORTED_SDK_LEVEL}"
     DEFAULT_TARGET_SDK_LEVEL = 8
