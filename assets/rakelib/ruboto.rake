@@ -213,7 +213,7 @@ namespace :update_scripts do
   end
 end
 
-task :test => :uninstall do
+task :test => APK_DEPENDENCIES + [:uninstall] do
   Dir.chdir('test') do
     puts 'Running tests'
     sh "adb uninstall #{package}.tests"
