@@ -370,14 +370,20 @@ module Ruboto
                     '**/*Windows*',
                     'META-INF',
                     'com/headius',
-                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
+                    'com/kenai/constantine',
+                    'com/kenai/jffi',
+                    'com/kenai/jnr/x86asm',
+                    'com/martiansoftware',
                     'jline', 'jni',
                     'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
-                    'jnr/ffi/annotations', 'jnr/ffi/byref',
-                    'jnr/ffi/provider', 'jnr/ffi/util',
+                    'jnr/ffi/annotations',
+                    'jnr/ffi/byref',
+                    'jnr/ffi/provider',
+                    'jnr/ffi/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
+                    'jnr/posix/FreeBSD*',
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
                     'jnr/x86asm',
@@ -385,16 +391,25 @@ module Ruboto
                     'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
-                    # 'org/jruby/compiler',      # Needed for initialization, but shoud not be necessary
-                    # 'org/jruby/compiler/impl', # Needed for initialization, but shoud not be necessary
+                    # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
+                    # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
+                    'org/jruby/compiler/impl/BaseBodyCompiler*',
                     'org/jruby/compiler/util',
                     'org/jruby/demo',
                     'org/jruby/embed/bsf',
                     'org/jruby/embed/jsr223',
                     'org/jruby/embed/osgi',
                     # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
+                    'org/jruby/ext/ffi/AbstractMemory*',
                     'org/jruby/ext/ffi/io',
                     'org/jruby/ext/ffi/jffi',
+                    #'org/jruby/ir/dataflow',
+                    #'org/jruby/ir/dataflow/analyses',
+                    #'org/jruby/ir/representations',
+                    #'org/jruby/ir/runtime',
+                    #'org/jruby/ir/targets',
+                    #'org/jruby/ir/transformations',
+                    #'org/jruby/ir/util',
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
@@ -408,7 +423,9 @@ module Ruboto
                       '**/*Windows*',
                       'META-INF',
                       'com/headius',
-                      'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
+                      'com/kenai/constantine',
+                      'com/kenai/jffi',
+                      'com/martiansoftware',
                       'jline', 'jni',
                       'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
                       'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
@@ -535,13 +552,15 @@ module Ruboto
               # FIXME(uwe):  Add a Ruboto.yml config for this if it works
               # Reduces the installation footprint, but also reduces performance and increases stack
               # FIXME(uwe):  Measure the performance change
-              if false && jruby_core_version =~ /^1.7./ && Dir.chdir('../..') { verify_min_sdk < 15 }
+              if ENV['STRIP_INVOKERS']
                 invokers = Dir['**/*$INVOKER$*.class']
-                log_action("Removing invokers(#{invokers.size})") do
+                if invokers.size > 0
+                  print "Removing invokers(#{invokers.size})..."
                   FileUtils.rm invokers
                 end
                 populators = Dir['**/*$POPULATOR.class']
-                log_action("Removing populators(#{populators.size})") do
+                if populators.size > 0
+                  print "Removing populators(#{populators.size})..."
                   FileUtils.rm populators
                 end
               end
@@ -636,6 +655,18 @@ module Ruboto
                   print "#{File.basename(j).chomp('.jar')}..."
                   system "jar xf #{j}"
                   FileUtils.rm j
+                  if ENV['STRIP_INVOKERS']
+                    invokers = Dir['**/*$INVOKER$*.class']
+                    if invokers.size > 0
+                      print "Removing invokers(#{invokers.size})..."
+                      FileUtils.rm invokers
+                    end
+                    populators = Dir['**/*$POPULATOR.class']
+                    if populators.size > 0
+                      print "Removing populators(#{populators.size})..."
+                      FileUtils.rm populators
+                    end
+                  end
 
                   if j =~ %r{json/ext/generator.jar$}
                     jar_load_code = <<-END_CODE
@@ -657,8 +688,6 @@ module Ruboto
 
                   File.open("#{j}.rb", 'w'){|f| f << jar_load_code}
                   File.open("#{j}.jar.rb", 'w'){|f| f << jar_load_code}
-                  #FileUtils.rm Dir['**/*$POPULATOR.class']
-                  #FileUtils.rm Dir['**/*$INVOKER$*.class']
                 end
 
                 `jar -cf ../../#{jruby_stdlib} .`

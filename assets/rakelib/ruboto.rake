@@ -37,7 +37,10 @@ unless File.exists? dx_filename
   exit 1
 end
 new_dx_content = File.read(dx_filename).dup
+
+# FIXME(uwe): Set Xmx on windows bat script:
 # set defaultXmx=-Xmx1024M
+
 xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < 2560*1024**2
@@ -332,6 +335,18 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
           unless jar =~ /sqlite-jdbc/
             puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
             `jar xf #{jar}`
+            if ENV['STRIP_INVOKERS']
+              invokers = Dir['**/*$INVOKER$*.class']
+              if invokers.size > 0
+                puts "Removing invokers(#{invokers.size})..."
+                FileUtils.rm invokers
+              end
+              populators = Dir['**/*$POPULATOR.class']
+              if populators.size > 0
+                puts "Removing populators(#{populators.size})..."
+                FileUtils.rm populators
+              end
+            end
           end
           if jar == 'arjdbc/jdbc/adapter_java.jar'
             jar_load_code = <<-END_CODE
