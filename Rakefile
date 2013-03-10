@@ -86,7 +86,7 @@ task :release_docs do
     require 'highline/import'
     user = ask('login   : ') { |q| q.echo = true }
     pass = ask('password: ') { |q| q.echo = '*' }
-  rescue
+  rescue Exception
     print 'user name: '; user = STDIN.gets.chomp
     print ' password: '; pass = STDIN.gets.chomp
   end
@@ -167,7 +167,7 @@ To create a project do
     ruboto gen app --package <your.package.name>
 
 
-You can find an introductory tutorial at https://github.com/ruboto/ruboto/wiki/Getting-started-with-Ruboto
+You can find an introductory tutorial at https://github.com/ruboto/ruboto/wiki
 
 If you have any problems or questions, come see us at http://ruboto.org/
 
