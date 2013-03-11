@@ -41,10 +41,6 @@ module AppTestMethods
       next if file =~ /subclass/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.1.dev'))
       # EMXIF
 
-      # FIXME(uwe):  Remove when we stop testing RubotoCore <= 0.5.2 and android-10
-      next if file =~ /json/ && (RUBOTO_PLATFORM == 'CURRENT' || ANDROID_OS <= 10)
-      # EMXIF
-
       # FIXME(uwe):  Remove when we include jopenssl and bouncycastle
       next if file =~ /ssl/
       # EMXIF

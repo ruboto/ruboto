@@ -1,5 +1,5 @@
 require 'ruboto/util/stack'
-with_large_stack { require 'json' }
+require 'json'
 require 'ruboto/widget'
 
 ruboto_import_widgets :LinearLayout, :TextView

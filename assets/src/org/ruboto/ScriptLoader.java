@@ -76,12 +76,13 @@ public class ScriptLoader {
                             }
                             System.out.println("Set class: " + rubyClass);
                             JRubyAdapter.put(component.getScriptInfo().getRubyClassName(), rubyClass);
-                            Thread t = new Thread(new Runnable(){
+                            // FIXME(uwe):  Collect these threads in a ThreadGroup ?
+                            Thread t = new Thread(null, new Runnable(){
                                 public void run() {
                                     JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
                                     JRubyAdapter.runScriptlet(script);
                                 }
-                            });
+                            }, "ScriptLoader for " + rubyClass, 128 * 1024);
                             try {
                                 t.start();
                                 t.join();
