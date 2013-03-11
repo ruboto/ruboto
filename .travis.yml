@@ -8,6 +8,7 @@ before_install:
   - jdk_switcher use default
   - which java
   - java -version
+  - apt-get install ia32-libs
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
@@ -34,7 +35,7 @@ rvm:
   - "2.0.0"
 #  - jruby-18mode # JRuby in 1.8 mode
 #  - jruby-19mode # JRuby in 1.9 mode
-#  - jruby-20mode # JRuby in 1.9 mode
+#  - jruby-20mode # JRuby in 2.0 mode
 #  - rbx-18mode
 #  - rbx-19mode
 
