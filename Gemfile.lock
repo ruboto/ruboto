@@ -16,10 +16,12 @@ GEM
       fattr (>= 2.2.0)
       map (>= 5.1.0)
     map (6.3.0)
+    rake (10.0.3)
 
 PLATFORMS
   java
   ruby
 
 DEPENDENCIES
+  rake
   ruboto!

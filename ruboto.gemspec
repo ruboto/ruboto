@@ -20,4 +20,5 @@ Gem::Specification.new do |s|
   s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
   s.add_dependency('main', '>=4.7.2')
+  s.add_development_dependency('rake')
 end
