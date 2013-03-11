@@ -15,6 +15,9 @@ before_install:
   - which adb
   - adb version
   - /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools/adb version
+  - which emulator
+  - emulator -version
+  - /home/travis/build/ruboto/ruboto/android-sdk-linux/tools/emulator -version
   - wget http://ci.jruby.org/snapshots/master/jruby-jars-${MASTER}.gem
   - if [ "$JRUBY_JARS_VERSION" == "" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
 
