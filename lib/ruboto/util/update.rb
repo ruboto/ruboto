@@ -364,7 +364,6 @@ module Ruboto
               if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3.dev')
                 excluded_core_packages = [
                     '**/*Darwin*',
-                    '**/*Ruby20*',
                     '**/*Solaris*',
                     '**/*windows*',
                     '**/*Windows*',

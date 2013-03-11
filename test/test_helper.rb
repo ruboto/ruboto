@@ -111,7 +111,7 @@ module RubotoTest
   install_jruby_jars_gem unless RUBOTO_PLATFORM == 'CURRENT'
 
   if RUBOTO_PLATFORM == 'CURRENT'
-    JRUBY_JARS_VERSION = Gem::Version.new('1.7.1')
+    JRUBY_JARS_VERSION = Gem::Version.new('1.7.3')
   else
     # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')

@@ -1,4 +1,5 @@
 require 'rake'
+require 'date'
 lib_path = File.expand_path('lib', File.dirname(__FILE__))
 $:.unshift(lib_path) unless $:.include?(lib_path)
 require 'ruboto/version'
@@ -18,5 +19,6 @@ Gem::Specification.new do |s|
   s.files = FileList['[A-Z]*', 'assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
   s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
-  s.add_dependency('main', '~>4.7', '>=4.7.2')
+  s.add_dependency('main', '>=4.7.2')
+  s.add_dependency('rake')
 end

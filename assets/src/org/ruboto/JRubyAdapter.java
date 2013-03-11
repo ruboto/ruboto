@@ -250,7 +250,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.objectspace.enabled", "false");
             System.setProperty("jruby.thread.pooling", "true");
             System.setProperty("jruby.native.enabled", "false");
-            // System.setProperty("jruby.compat.version", "RUBY1_8"); // RUBY1_9 is the default in JRuby 1.7
+            // System.setProperty("jruby.compat.version", "RUBY2_0"); // RUBY1_9 is the default in JRuby 1.7
             System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
 
@@ -443,7 +443,8 @@ public class JRubyAdapter {
 
     // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
     @Deprecated public static boolean isRubyOneNine() {
-        return ((String)get("RUBY_VERSION")).startsWith("1.9.");
+    String rv = ((String)get("RUBY_VERSION"));
+        return rv.startsWith("2.0.") || rv.startsWith("1.9.");
     }
 
     static void printStackTrace(Throwable t) {

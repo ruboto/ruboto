@@ -1,21 +1,27 @@
+PATH
+  remote: .
+  specs:
+    ruboto (0.10.3.dev)
+      main (>= 4.7.2)
+      rake
+
 GEM
   remote: https://rubygems.org/
   specs:
     arrayfields (4.7.4)
-    chronic (0.6.7)
+    chronic (0.9.1)
     fattr (2.2.1)
-    main (5.0.1)
+    main (5.2.0)
       arrayfields (>= 4.7.4)
       chronic (>= 0.6.2)
       fattr (>= 2.2.0)
       map (>= 5.1.0)
-    map (5.5.0)
-    rake (0.9.2.2)
+    map (6.3.0)
+    rake (10.0.3)
 
 PLATFORMS
   java
   ruby
 
 DEPENDENCIES
-  main
-  rake
+  ruboto!
