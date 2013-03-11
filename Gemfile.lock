@@ -3,7 +3,6 @@ PATH
   specs:
     ruboto (0.10.3.dev)
       main (>= 4.7.2)
-      rake
 
 GEM
   remote: https://rubygems.org/
@@ -17,7 +16,6 @@ GEM
       fattr (>= 2.2.0)
       map (>= 5.1.0)
     map (6.3.0)
-    rake (10.0.3)
 
 PLATFORMS
   java
