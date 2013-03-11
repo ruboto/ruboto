@@ -1,6 +1,8 @@
 # http://rkistner.github.com/android/2013/02/05/android-builds-on-travis-ci/
 language: ruby
 before_install:
+  - uname -a
+  - pwd
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
@@ -12,6 +14,8 @@ before_install:
   - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools/adb
   - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/tools
   - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/tools/emulator
+  - which java
+  - java -version
   - which adb
   - adb version
   - /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools/adb version
