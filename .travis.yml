@@ -1,13 +1,6 @@
 # http://rkistner.github.com/android/2013/02/05/android-builds-on-travis-ci/
 language: ruby
 before_install:
-  - uname -a
-  - jdk_switcher use oraclejdk7
-  - which java
-  - java -version
-  - jdk_switcher use default
-  - which java
-  - java -version
   - sudo apt-get update -qq
   - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
@@ -15,18 +8,6 @@ before_install:
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
   - android update sdk --no-ui --filter tool,platform-tool,android-8,android-$ANDROID_TARGET,sysimg-$ANDROID_TARGET
-  - ls -l /home/travis/build/ruboto/ruboto
-  - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux
-  - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools
-  - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools/adb
-  - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/tools
-  - ls -l /home/travis/build/ruboto/ruboto/android-sdk-linux/tools/emulator
-  - which adb
-  - adb version
-  - /home/travis/build/ruboto/ruboto/android-sdk-linux/platform-tools/adb version
-  - which emulator
-  - emulator -version
-  - /home/travis/build/ruboto/ruboto/android-sdk-linux/tools/emulator -version
   - wget http://ci.jruby.org/snapshots/master/jruby-jars-${MASTER}.gem
   - if [ "$JRUBY_JARS_VERSION" == "" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
 
@@ -52,18 +33,18 @@ env:
     - MASTER=1.7.4.dev
   matrix:
     - ANDROID_TARGET=10 RUBOTO_PLATFORM=CURRENT
-#    - ANDROID_TARGET=10 RUBOTO_PLATFORM=FROM_GEM
-#    - ANDROID_TARGET=10 RUBOTO_PLATFORM=STANDALONE
-#    - ANDROID_TARGET=10 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
-#
-#    - ANDROID_TARGET=15 RUBOTO_PLATFORM=CURRENT
-#    - ANDROID_TARGET=15 RUBOTO_PLATFORM=FROM_GEM
-#    - ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE
-#    - ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
-#
-#    - ANDROID_TARGET=16 RUBOTO_PLATFORM=CURRENT
-#    - ANDROID_TARGET=16 RUBOTO_PLATFORM=FROM_GEM
-#    - ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE
-#    - ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
+    - ANDROID_TARGET=10 RUBOTO_PLATFORM=FROM_GEM
+    - ANDROID_TARGET=10 RUBOTO_PLATFORM=STANDALONE
+    - ANDROID_TARGET=10 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
+
+    - ANDROID_TARGET=15 RUBOTO_PLATFORM=CURRENT
+    - ANDROID_TARGET=15 RUBOTO_PLATFORM=FROM_GEM
+    - ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE
+    - ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
+
+    - ANDROID_TARGET=16 RUBOTO_PLATFORM=CURRENT
+    - ANDROID_TARGET=16 RUBOTO_PLATFORM=FROM_GEM
+    - ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE
+    - ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE JRUBY_JARS_VERSION=1.7.3
 
 script: ./start_emulator.sh && ./run_tests.sh
