@@ -24,7 +24,7 @@ class Thread
   def self.with_large_stack(opts = {}, &block)
     opts = {:size => opts} if opts.is_a? Integer
     stack_size_kb = opts.delete(:size) || 64
-    name = opts.delete(:name) || "Thread with large stack"
+    name = opts.delete(:name) || 'Thread with large stack'
     raise "Unknown option(s): #{opts.inspect}" unless opts.empty?
     t = java.lang.Thread.new(nil, block, name, stack_size_kb * 1024)
     t.start
