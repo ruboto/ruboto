@@ -8,7 +8,7 @@ before_install:
   - jdk_switcher use default
   - which java
   - java -version
-  - apt-get install ia32-libs
+  - sudo apt-get install ia32-libs
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
