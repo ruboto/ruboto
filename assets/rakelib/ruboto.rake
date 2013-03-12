@@ -262,7 +262,12 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   platforms = Gem.platforms
   ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
   Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new('universal-java')]
-  Object.const_set('RUBY_ENGINE', 'jruby')
+  old_verbose, $VERBOSE = $VERBOSE, nil
+  begin
+    Object.const_set('RUBY_ENGINE', 'jruby')
+  ensure
+    $VERBOSE = old_verbose
+  end
 
   ENV['BUNDLE_GEMFILE'] = GEM_FILE
   require 'bundler'
@@ -276,7 +281,12 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   Bundler::Installer.install(Bundler.root, definition)
 
   # Restore RUBY_ENGINE (limit the scope of this hack)
-  Object.const_set('RUBY_ENGINE', ruby_engine) if ruby_engine
+  old_verbose, $VERBOSE = $VERBOSE, nil
+  begin
+    Object.const_set('RUBY_ENGINE', ruby_engine)
+  ensure
+    $VERBOSE = old_verbose
+  end
   Gem.platforms = platforms
 
   gem_paths = Dir["#{BUNDLE_PATH}/gems"]
