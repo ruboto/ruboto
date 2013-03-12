@@ -36,7 +36,7 @@ module Ruboto
           puts "\nGenerating Android test project #{name} in #{root}..."
           system %Q{android create test-project -m "#{root.gsub('"', '\"')}" -n "#{name}Test" -p "#{root.gsub('"', '\"')}/test"}
           FileUtils.rm_rf File.join(root, 'test', 'src', verify_package.split('.'))
-          puts "Done"
+          puts 'Done'
         end
 
         Dir.chdir File.join(root, 'test') do
@@ -67,7 +67,7 @@ module Ruboto
           #   puts 'Added external permission tag'
           # end
 
-          File.open("AndroidManifest.xml", 'w') { |f| REXML::Formatters::OrderedAttributes.new(4).write(test_manifest.document, f) }
+          File.open('AndroidManifest.xml', 'w') { |f| REXML::Formatters::OrderedAttributes.new(4).write(test_manifest.document, f) }
 
           run_tests_override = <<-EOF
 <!-- BEGIN added by Ruboto -->
@@ -120,14 +120,14 @@ module Ruboto
           # EMXIF
 
           ant_script.gsub!(/\s*<!-- BEGIN added by Ruboto -->.*?<!-- END added by Ruboto -->\s*/m, '')
-          raise "Bad ANT script" unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{run_tests_override}\n\n\\1")
+          raise 'Bad ANT script' unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{run_tests_override}\n\n\\1")
           File.open('build.xml', 'w') { |f| f << ant_script }
         end
       end
 
       def update_jruby(force=nil, explicit = false)
-        jruby_core = Dir.glob("libs/jruby-core-*.jar")[0]
-        jruby_stdlib = Dir.glob("libs/jruby-stdlib-*.jar")[0]
+        jruby_core = Dir.glob('libs/jruby-core-*.jar')[0]
+        jruby_stdlib = Dir.glob('libs/jruby-stdlib-*.jar')[0]
 
         unless force
           if !jruby_core || !jruby_stdlib
@@ -145,7 +145,7 @@ module Ruboto
         new_jruby_version = JRubyJars::VERSION
 
         unless force
-          current_jruby_version = jruby_core ? jruby_core[16..-5] : "None"
+          current_jruby_version = jruby_core ? jruby_core[16..-5] : 'None'
           if current_jruby_version == new_jruby_version
             puts "JRuby is up to date at version #{new_jruby_version}. Make sure you 'gem update jruby-jars' if there is a new version."
             return false
@@ -155,11 +155,11 @@ module Ruboto
           puts "New jruby version: #{new_jruby_version}"
         end
 
-        copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        log_action("Removing #{jruby_core}") { File.delete *Dir.glob("libs/jruby-core-*.jar") } if jruby_core
-        log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob("libs/jruby-stdlib-*.jar") } if jruby_stdlib
-        log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, "libs" }
-        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, "libs" }
+        copier = AssetCopier.new Ruboto::ASSETS, File.expand_path('.')
+        log_action("Removing #{jruby_core}") { File.delete *Dir.glob('libs/jruby-core-*.jar') } if jruby_core
+        log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob('libs/jruby-stdlib-*.jar') } if jruby_stdlib
+        log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, 'libs' }
+        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, 'libs' }
 
         unless File.read('project.properties') =~ /^dex.force.jumbo=/
           log_action('Setting JUMBO dex file format') do
@@ -182,17 +182,17 @@ module Ruboto
         FileUtils.rm(Dir['libs/dexmaker*.jar'])
         # EMXIF
 
-        jar_file = Dir.glob("libs/dx.jar")[0]
+        jar_file = Dir.glob('libs/dx.jar')[0]
 
         # FIXME(uwe): Remove when we stop updating from Ruboto 0.10.0 and older.
-        jruby_present = !!Dir.glob("libs/jruby-core-*.jar")[0]
+        jruby_present = !!Dir.glob('libs/jruby-core-*.jar')[0]
         log_action("Removing #{jar_file}") { File.delete jar_file } if jar_file && !jruby_present
         # EMXIF
 
         return if !jar_file && !force
 
-        copier = AssetCopier.new Ruboto::ASSETS, File.expand_path(".")
-        log_action("Copying dx.jar to libs") { copier.copy 'libs' }
+        copier = AssetCopier.new Ruboto::ASSETS, File.expand_path('.')
+        log_action('Copying dx.jar to libs') { copier.copy 'libs' }
       end
 
       def update_assets
@@ -229,9 +229,9 @@ module Ruboto
 
       def update_classes(old_version, force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        log_action("Ruboto java classes") { copier.copy "src/org/ruboto/*.java" }
-        log_action("Ruboto java test classes") { copier.copy "src/org/ruboto/test/*.java", "test" }
-        Dir["src/**/*.java"].each do |f|
+        log_action('Ruboto java classes') { copier.copy 'src/org/ruboto/*.java' }
+        log_action('Ruboto java test classes') { copier.copy 'src/org/ruboto/test/*.java', 'test' }
+        Dir['src/**/*.java'].each do |f|
           source_code = File.read(f)
           if source_code =~ /^\s*package\s+org.ruboto\s*;/
             next
@@ -241,7 +241,7 @@ module Ruboto
             generate_inheriting_file(class_name, subclass_name, verify_package)
 
             # FIXME(uwe): Remove when we stop supporting upgrading from ruboto 0.7.0 and ruboto 0.8.0
-            if (old_version == '0.7.0' || old_version == '0.8.0')
+            if old_version == '0.7.0' || old_version == '0.8.0'
               puts "Ruboto version #{old_version.inspect} detected."
               script_file = File.expand_path("#{SCRIPTS_DIR}/#{underscore(subclass_name)}.rb")
               puts "Adding explicit super call in #{script_file}"
@@ -272,8 +272,8 @@ module Ruboto
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
           if sdk_element = verify_manifest.elements['uses-sdk']
-            min_sdk ||= sdk_element.attributes["android:minSdkVersion"]
-            target ||= sdk_element.attributes["android:targetSdkVersion"]
+            min_sdk ||= sdk_element.attributes['android:minSdkVersion']
+            target ||= sdk_element.attributes['android:targetSdkVersion']
           else
             min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
             target ||= MINIMUM_SUPPORTED_SDK_LEVEL
@@ -295,30 +295,30 @@ module Ruboto
             app_element.attributes['android:largeHeap'] ||= 'true'
           end
 
-          if !app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoActivity", 'android:exported' => 'false'}
+          unless app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}
           end
 
-          if !app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
-            app_element.add_element 'activity', {"android:name" => "org.ruboto.RubotoDialog", 'android:exported' => 'false', "android:theme" => "@android:style/Theme.Dialog"}
+          unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoDialog', 'android:exported' => 'false', 'android:theme' => '@android:style/Theme.Dialog'}
           end
 
-          if !app_element.elements["service[@android:name='org.ruboto.RubotoService']"]
-            app_element.add_element 'service', {"android:name" => "org.ruboto.RubotoService", 'android:exported' => 'false'}
+          unless app_element.elements["service[@android:name='org.ruboto.RubotoService']"]
+            app_element.add_element 'service', {'android:name' => 'org.ruboto.RubotoService', 'android:exported' => 'false'}
           end
 
           if sdk_element
-            sdk_element.attributes["android:minSdkVersion"] = min_sdk
-            sdk_element.attributes["android:targetSdkVersion"] = target
+            sdk_element.attributes['android:minSdkVersion'] = min_sdk
+            sdk_element.attributes['android:targetSdkVersion'] = target
           else
-            verify_manifest.add_element 'uses-sdk', {"android:minSdkVersion" => min_sdk, "android:targetSdkVersion" => target}
+            verify_manifest.add_element 'uses-sdk', {'android:minSdkVersion' => min_sdk, 'android:targetSdkVersion' => target}
           end
           save_manifest
         end
       end
 
       def update_core_classes(force = nil)
-        generate_core_classes(:class => "all", :method_base => "on", :method_include => "", :method_exclude => "", :force => force, :implements => "")
+        generate_core_classes(:class => 'all', :method_base => 'on', :method_include => '', :method_exclude => '', :force => force, :implements => '')
       end
 
       def read_ruboto_version
@@ -327,13 +327,13 @@ module Ruboto
       end
 
       def update_ruboto(force=nil)
-        log_action("Copying ruboto/version.rb") do
-          from = File.expand_path(Ruboto::GEM_ROOT + "/lib/ruboto/version.rb")
+        log_action('Copying ruboto/version.rb') do
+          from = File.expand_path(Ruboto::GEM_ROOT + '/lib/ruboto/version.rb')
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
           FileUtils.mkdir_p File.dirname(to)
           FileUtils.cp from, to
         end
-        log_action("Copying additional ruboto script components") do
+        log_action('Copying additional ruboto script components') do
           Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/**/*.rb").each do |from|
             to = File.expand_path("./#{from.slice /#{SCRIPTS_DIR}\/ruboto\/.*\.rb/}")
             FileUtils.mkdir_p File.dirname(to)
@@ -357,7 +357,7 @@ module Ruboto
             FileUtils.rm_rf 'tmp'
             Dir.mkdir 'tmp'
             Dir.chdir 'tmp' do
-              FileUtils.move "../#{jruby_core}", "."
+              FileUtils.move "../#{jruby_core}", '.'
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
@@ -374,8 +374,11 @@ module Ruboto
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
                     'jline', 'jni',
-                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
+                    'jnr/constants/platform/darwin',
+                    'jnr/constants/platform/fake',
+                    'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd',
+                    'jnr/constants/platform/sunos',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
                     'jnr/ffi/provider',
@@ -571,20 +574,31 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar -bootclasspath #{Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/android-*/android.jar"][0]} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
-              raise "Compile failed" unless $? == 0
+              android_jar = Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/*/android.jar"][0]
+              unless android_jar
+                puts
+                puts '*' * 80
+                puts "    Could not find any Android platforms in #{Ruboto::SdkVersions::ANDROID_HOME}/platforms."
+                puts '    At least one Android Platform SDK must be installed to compile the Ruboto classes.'
+                puts '    Please install an Android Platform SDK using the "android" package manager.'
+                puts '*' * 80
+                puts
+                exit 1
+              end
+              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar -bootclasspath #{android_jar} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
+              raise 'Compile failed' unless $? == 0
 
               `jar -cf ../#{jruby_core} .`
               raise "Creating repackaged jruby-core jar failed: #$?" unless $? == 0
             end
-            FileUtils.remove_dir "tmp", true
+            FileUtils.remove_dir 'tmp', true
           end
         end
       end
 
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
-        min_sdk_version = verify_manifest.elements['uses-sdk'].attributes["android:minSdkVersion"].to_i
+        min_sdk_version = verify_manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
         excluded_stdlibs = [*verify_ruboto_config[:excluded_stdlibs]].compact
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
@@ -607,9 +621,9 @@ module Ruboto
 
                 # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
                 if jruby_stdlib_version < Gem::Version.new('1.7.0.preview1')
-                  lib_dirs = ['1.8', '1.9', 'site_ruby/1.8', 'site_ruby/1.9', 'site_ruby/shared']
+                  lib_dirs = %w(1.8 1.9 site_ruby/1.8 site_ruby/1.9 site_ruby/shared)
                 else
-                  lib_dirs = ['1.8', '1.9', 'shared']
+                  lib_dirs = %w(1.8 1.9 shared)
                 end
                 # ODOT
 
@@ -707,22 +721,22 @@ module Ruboto
             FileUtils.rm_rf 'tmp'
             Dir.mkdir 'tmp'
             Dir.chdir 'tmp' do
-              FileUtils.move "../#{dx_jar}", "."
+              FileUtils.move "../#{dx_jar}", '.'
               `jar -xf #{dx_jar}`
               raise "Unpacking dx.jar jar failed: #$?" unless $? == 0
               File.delete dx_jar
-                excluded_core_packages = [
-                    'com/android/dx/command',
-                    # 'com/android/dx/ssa', # Tests run OK without this package, but we may loose some optimizations.
-                    'junit',
-                ]
+              excluded_core_packages = [
+                  'com/android/dx/command',
+                  # 'com/android/dx/ssa', # Tests run OK without this package, but we may loose some optimizations.
+                  'junit',
+              ]
               excluded_core_packages.each do |i|
                 FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
               end
               `jar -cf ../#{dx_jar} .`
               raise "Creating repackaged dx.jar failed: #$?" unless $? == 0
             end
-            FileUtils.remove_dir "tmp", true
+            FileUtils.remove_dir 'tmp', true
           end
         end
       end
