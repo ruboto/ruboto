@@ -21,10 +21,6 @@ module RubotoTest
   Gem.refresh
   `gem query -i -n bundler`
   system 'gem install bundler --no-ri --no-rdoc' unless $? == 0
-  if Gem::Version.new(`bundle --version`[/\d+\.\d+\.\d+/]) >= Gem::Version.new('1.3.1') &&
-      Gem::Version.new(`gem --version`) < Gem::Version.new('2.0.2')
-    system 'gem install --no-ri --no-rdoc -v ">=2.0.2" rubygems-update'
-  end
   `bundle check`
   system 'bundle --system' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))

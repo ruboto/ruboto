@@ -267,7 +267,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   ENV['BUNDLE_GEMFILE'] = GEM_FILE
   require 'bundler'
   Bundler.bundle_path = Pathname.new BUNDLE_PATH
-
+  Bundler.ui = Bundler::UI::Shell.new
   definition = Bundler.definition
   definition.validate_ruby!
   Bundler::Installer.install(Bundler.root, definition)
