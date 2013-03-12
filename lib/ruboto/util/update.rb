@@ -585,10 +585,13 @@ module Ruboto
                 puts
                 exit 1
               end
-              `javac -source 1.6 -target 1.6 -cp .:#{Ruboto::ASSETS}/libs/dx.jar -bootclasspath #{android_jar} -d . #{Ruboto::GEM_ROOT}/lib/*.java`
+              android_jar.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              class_path = ['.', "#{Ruboto::ASSETS}/libs/dx.jar"].join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              sources = "#{Ruboto::GEM_ROOT}/lib/*.java".gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              `javac -source 1.6 -target 1.6 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
               raise 'Compile failed' unless $? == 0
 
-              `jar -cf ../#{jruby_core} .`
+              `jar -cf ..#{File::ALT_SEPARATOR || File::SEPARATOR}#{jruby_core} .`
               raise "Creating repackaged jruby-core jar failed: #$?" unless $? == 0
             end
             FileUtils.remove_dir 'tmp', true
