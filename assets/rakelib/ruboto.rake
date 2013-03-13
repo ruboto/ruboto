@@ -297,7 +297,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
-      Dir['{activerecord-jdbc-adapter, jruby-openssl}-*'].each do |g|
+      Dir['{activerecord-jdbc-adapter,jruby-openssl}-*'].each do |g|
         puts "Removing #{g} gem since it is included in the RubotoCore platform apk."
         FileUtils.rm_rf g
       end
