@@ -305,6 +305,45 @@ public class JRubyAdapter {
             }
 
             try {
+                //////////////////////////////////
+                //
+                // Set jruby.home
+                //
+
+                String jrubyHome = "file:" + apkName + "!/jruby.home";
+
+                // FIXME(uwe): Remove when we stop supporting RubotoCore 0.4.7
+                Log.i("RUBOTO_CORE_VERSION_NAME: " + RUBOTO_CORE_VERSION_NAME);
+                if (RUBOTO_CORE_VERSION_NAME != null &&
+                        (RUBOTO_CORE_VERSION_NAME.equals("0.4.7") || RUBOTO_CORE_VERSION_NAME.equals("0.4.8"))) {
+                    jrubyHome = "file:" + apkName + "!";
+                }
+                // EMXIF
+
+                Log.i("Setting JRUBY_HOME: " + jrubyHome);
+                // This needs to be set before the ScriptingContainer is initialized
+                System.setProperty("jruby.home", jrubyHome);
+
+                //////////////////////////////////
+                //
+                // Disable rubygems
+                //
+
+                Class rubyClass = Class.forName("org.jruby.Ruby", true, scriptingContainerClass.getClassLoader());
+                Class rubyInstanceConfigClass = Class.forName("org.jruby.RubyInstanceConfig", true, scriptingContainerClass.getClassLoader());
+
+                Object config = rubyInstanceConfigClass.getConstructor().newInstance();
+                rubyInstanceConfigClass.getMethod("setDisableGems", boolean.class).invoke(config, true);
+                rubyInstanceConfigClass.getMethod("setLoader", ClassLoader.class).invoke(config, classLoader);
+
+                // This will become the global runtime and be used by our ScriptingContainer
+                rubyClass.getMethod("newInstance", rubyInstanceConfigClass).invoke(null, config);
+
+                //////////////////////////////////
+                //
+                // Create the ScriptingContainer
+                //
+
                 Class scopeClass = Class.forName("org.jruby.embed.LocalContextScope", true, scriptingContainerClass.getClassLoader());
                 Class behaviorClass = Class.forName("org.jruby.embed.LocalVariableBehavior", true, scriptingContainerClass.getClassLoader());
 
@@ -337,21 +376,8 @@ public class JRubyAdapter {
                   setOutputStream(output);
                 }
 
-                String jrubyHome = "file:" + apkName + "!/jruby.home";
-
-                // FIXME(uwe): Remove when we stop supporting RubotoCore 0.4.7
-                Log.i("RUBOTO_CORE_VERSION_NAME: " + RUBOTO_CORE_VERSION_NAME);
-                if (RUBOTO_CORE_VERSION_NAME != null &&
-                        (RUBOTO_CORE_VERSION_NAME.equals("0.4.7") || RUBOTO_CORE_VERSION_NAME.equals("0.4.8"))) {
-                    jrubyHome = "file:" + apkName + "!";
-                }
-                // EMXIF
-
-                Log.i("Setting JRUBY_HOME: " + jrubyHome);
-                System.setProperty("jruby.home", jrubyHome);
-
                 addLoadPath(scriptsDirName(appContext));
-    	        put("$package_name", appContext.getPackageName());
+    	          put("$package_name", appContext.getPackageName());
 
                 initialized = true;
             } catch (ClassNotFoundException e) {
