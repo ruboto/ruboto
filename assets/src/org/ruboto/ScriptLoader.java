@@ -79,8 +79,10 @@ public class ScriptLoader {
                             // FIXME(uwe):  Collect these threads in a ThreadGroup ?
                             Thread t = new Thread(null, new Runnable(){
                                 public void run() {
+                                    long loadStart = System.currentTimeMillis();
                                     JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
                                     JRubyAdapter.runScriptlet(script);
+                                    System.out.println("Script load took " + (System.currentTimeMillis() - loadStart) + "ms");
                                 }
                             }, "ScriptLoader for " + rubyClass, 128 * 1024);
                             try {
