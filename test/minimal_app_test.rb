@@ -1,4 +1,4 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 
 if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
   require 'bigdecimal'
