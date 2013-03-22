@@ -326,6 +326,15 @@ public class JRubyAdapter {
 
                 //////////////////////////////////
                 //
+                // Determine Output
+                //
+
+                if (out != null) {
+                  output = out;
+                }
+
+                //////////////////////////////////
+                //
                 // Disable rubygems
                 //
 
@@ -335,6 +344,11 @@ public class JRubyAdapter {
                 Object config = rubyInstanceConfigClass.getConstructor().newInstance();
                 rubyInstanceConfigClass.getMethod("setDisableGems", boolean.class).invoke(config, true);
                 rubyInstanceConfigClass.getMethod("setLoader", ClassLoader.class).invoke(config, classLoader);
+
+                if (output != null) {
+                    rubyInstanceConfigClass.getMethod("setOutput", PrintStream.class).invoke(config, output);
+                    rubyInstanceConfigClass.getMethod("setError", PrintStream.class).invoke(config, output);
+                }
 
                 // This will become the global runtime and be used by our ScriptingContainer
                 rubyClass.getMethod("newInstance", rubyInstanceConfigClass).invoke(null, config);
@@ -367,13 +381,6 @@ public class JRubyAdapter {
                     callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
                 } else {
                     Log.e("Unable to find app files dir!");
-                }
-
-                if (out != null) {
-                  output = out;
-                  setOutputStream(out);
-                } else if (output != null) {
-                  setOutputStream(output);
                 }
 
                 addLoadPath(scriptsDirName(appContext));
