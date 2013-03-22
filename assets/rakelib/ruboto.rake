@@ -163,7 +163,7 @@ end
 
 desc 'Start the emulator with larger disk'
 task :emulator do
-  sh "emulator -partition-size 1024 -avd Android_#{sdk_level_name}"
+  start_emulator
 end
 
 desc 'Start the application on the device/emulator.'
@@ -637,4 +637,141 @@ end
 def stop_app
   output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
   output !~ /Operation not permitted/
+end
+
+def start_emulator
+  STDOUT.sync = true
+  # FIXME(uwe):  Use RBConfig instead
+  if `uname -m`.chomp == 'x86_64'
+    emulator_cmd = 'emulator64-arm'
+  else
+    emulator_cmd = 'emulator-arm'
+  end
+  
+  emulator_opts = '-partition-size 256'
+  if ENV['DISPLAY'].nil?
+    emulator_opts << ' -no-window -no-audio'
+  end
+
+  avd_name = "Android_#{sdk_level_name}"
+  new_snapshot = false
+  loop do
+    `killall -0 #{emulator_cmd} 2> /dev/null`
+    if $? == 0
+      `killall #{emulator_cmd}`
+      10.times do |i|
+        `killall -0 #{emulator_cmd} 2> /dev/null`
+        if $? != 0
+          break
+        end
+        if i == 3
+          print 'Waiting for emulator to die: ...'
+        elsif i > 3
+          print '.'
+        end
+        sleep 1
+      end
+      puts
+      `killall -0 #{emulator_cmd} 2> /dev/null`
+      if $? == 0
+        puts 'Emulator still running.'
+        `killall -9 #{emulator_cmd}`
+        sleep 1
+      end
+    end
+
+    if [17, 16, 15, 13, 11].include? sdk_level
+      abi_opt = '--abi armeabi-v7a'
+    elsif sdk_level == 10
+      abi_opt = '--abi armeabi'
+    end
+
+    unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
+      puts "Creating AVD #{avd_name}"
+      heap_size = File.read('AndroidManifest.xml') =~ 'largeHeap' ? 256 : 48
+      # FIXME(uwe):  Use Ruby instead
+      `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['ANDROID_HOME']}/platforms/*/*/*/hardware.ini`
+      `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
+      `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini`
+      new_snapshot = true
+    end
+  
+    puts 'Start emulator'
+    system "emulator -avd #{avd_name} #{emulator_opts} &"
+  
+    3.times do |i|
+      sleep 1
+      `killall -0 #{emulator_cmd} 2> /dev/null`
+      if $? == 0
+        break
+      end
+      if i == 3
+        print 'Waiting for emulator: ...'
+      elsif i > 3
+          print '.'
+      end
+    end
+    puts
+    `killall -0 #{emulator_cmd} 2> /dev/null`
+    if $? != 0
+      puts 'Unable to start the emulator.  Retrying without loading snapshot.'
+      system "emulator -no-snapshot-load -avd #{avd_name} #{emulator_opts} &"
+      10.times do |i|
+        `killall -0 #{emulator_cmd} 2> /dev/null`
+        if $? == 0
+          new_snapshot = true
+          break
+        end
+        if i == 3
+          print 'Waiting for emulator: ...'
+        elsif i > 3
+            print '.'
+        end
+        sleep 1
+      end
+    end
+  
+    `killall -0 #{emulator_cmd} 2> /dev/null`
+    if $? == 0
+      print 'Emulator started: '
+      50.times do
+        if `adb get-state`.chomp == 'device'
+          break
+        end
+        print '.'
+        sleep 1
+      end
+      puts
+      if `adb get-state`.chomp == 'device'
+        break
+      end
+    end
+    puts 'Unable to start the emulator.'
+  end
+
+  if new_snapshot
+    puts 'Allow the emulator to calm down a bit.'
+    sleep 15
+  end
+  
+  system %Q{(
+    set +e
+    for i in 1 2 3 4 5 6 7 8 9 10 ; do
+      sleep 6
+      adb shell input keyevent 82 >/dev/null 2>&1
+      if [ "$?" == "0" ] ; then
+        set -e
+        adb shell input keyevent 82 >/dev/null 2>&1
+        adb shell input keyevent 4 >/dev/null 2>&1
+        exit 0
+      fi
+    done
+    echo "Failed to unlock screen"
+    set -e
+    exit 1
+  ) &}
+  
+  system "adb logcat > adb_logcat.log &"
+  
+  puts "Emulator #{avd_name} started OK."
 end
