@@ -124,7 +124,7 @@ end
 # The main program
 # If we get an exception, then print it out and keep going (we do NOT want
 # to disconnect unexpectedly!)
-irc = IRC.new('irc.freenode.net', 6667, 'welcome_bot', '#ruboto')
+irc = WelcomeBot.new('irc.freenode.net', 6667, 'welcome_bot', '#ruboto')
 irc.connect()
 begin
   irc.main_loop()
