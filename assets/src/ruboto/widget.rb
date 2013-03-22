@@ -165,6 +165,7 @@ def setup_image_button
 end
 
 def setup_list_view
+  Java::android.widget.ListView.__persistent__ = true
   Java::android.widget.ListView.class_eval do
     def configure(context, params = {})
       if list = params.delete(:list)
@@ -186,6 +187,7 @@ def setup_list_view
 end
 
 def setup_spinner
+  Java::android.widget.Spinner.__persistent__ = true
   Java::android.widget.Spinner.class_eval do
     attr_reader :adapter, :adapter_list
 
