@@ -12,8 +12,11 @@ class WelcomeBot
     @port = port
     @nick = nick
     @channel = channel
-    @store = File.exists?(RECORD_FILE) ? YAML.load(File.read(RECORD_FILE)) :
+    @store = File.exists?(RECORD_FILE) ?
+        YAML.load(File.read(RECORD_FILE)) :
         {:record => 0, :people => {}}
+    @store[:people].delete_if { |n, _| is_bot?(n) }
+    save_store
   end
 
   def send(s)
@@ -45,13 +48,28 @@ class WelcomeBot
       send "NOTICE #{$1} :\001VERSION Ruby-irc v0.042\001"
     when /^:(.+?) (\d+) #{@nick} = #{@channel} :(.*)$/
       attendees = $3.split(' ').map { |a| a.gsub '@', '' }
-      attendees -= [@nick, 'irclogger_com']
-      attendees.delete_if{|a| a =~ /GitHub\d+/}
-      puts "People: #{attendees.join(' ')}"
+      attendees.delete_if { |a| is_bot?(a) }
+      attendees.sort!
+      puts "People: #{attendees.size} #{attendees.join(' ')}"
       record = @store[:record]
       crowd = attendees.size
       attendees.each do |a|
-        welcome(a) unless @store[:people][a]
+        if @store[:people][a]
+          if @store[:people][a][:quit] && @store[:people][a][:joined] < @store[:people][a][:quit]
+            puts "Marked #{a} as present."
+            @store[:people][a][:joined] = Time.now
+          end
+        else
+          welcome(a)
+        end
+      end
+      @store[:people].each do |n, d|
+        if !attendees.include?(n)
+          if !d[:quit] || d[:joined] > d[:quit]
+            puts "Marked #{n} as absent."
+            d[:quit] = Time.now
+          end
+        end
       end
       if crowd > record
         update_record(crowd)
@@ -59,28 +77,36 @@ class WelcomeBot
       save_store
     when /^:(.+?)!(.*?)@(.*?) JOIN #{@channel}$/
       new_user = $1
-      if new_user == @nick || new_user =~ /GitHub\d+/
-        puts '[ IGNORED ]'
+      if is_bot?(new_user)
+        puts '[ IGNORED BOT ]'
       else
         if @store[:people].include?(new_user)
-          puts "Old member rejoined: #new_user.  Last seen #{(@store[:people][new_user][:joined] || @store[:people][new_user][:quit]).strftime '%Y-%m-%d %H:%M'}"
+          puts "Old member rejoined: #{new_user}.  Last seen #{(@store[:people][new_user][:joined] || @store[:people][new_user][:quit]).strftime '%Y-%m-%d %H:%M'}"
           @store[:people][new_user][:joined] = Time.now
         else
           welcome(new_user)
         end
-        join_count = @store[:people].select { |n, d| d[:quit].nil? || d[:joined] > d[:quit] }.size
-        puts "People: #{join_count}"
-        if join_count > @store[:record]
-          update_record(join_count)
-        end
+        attendees = dump_members
+        update_record(attendees.size) if attendees.size > @store[:record]
         save_store
       end
     when /^:(.+?)!(.+?)@(.+?) QUIT :(.*)$/
       @store[:people][$1][:quit] = Time.now
+      dump_members
       save_store
     else
       puts '[ IGNORED ]'
     end
+  end
+
+  def dump_members
+    attendees = @store[:people].keys.select { |k| d = @store[:people][k]; d[:quit].nil? || d[:joined] > d[:quit] }.sort
+    puts "People: #{attendees.size} #{attendees.join(' ')}"
+    attendees
+  end
+
+  def is_bot?(name)
+    [@nick, 'irclogger_com', 'Ruboto'].include?(name) || name =~ /^GitHub\d+$/
   end
 
   def update_record(join_count)
