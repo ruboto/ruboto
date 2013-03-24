@@ -15,7 +15,7 @@ class WelcomeBot
     @store = File.exists?(RECORD_FILE) ?
         YAML.load(File.read(RECORD_FILE)) :
         {:record => 0, :people => {}}
-    @store[:people].delete_if { |n, _| is_bot?(n) }
+    @store[:people].delete_if { |n, _| ignore?(n) }
     save_store
   end
 
@@ -48,7 +48,7 @@ class WelcomeBot
       send "NOTICE #{$1} :\001VERSION Ruby-irc v0.042\001"
     when /^:(.+?) (\d+) #{@nick} = #{@channel} :(.*)$/
       attendees = $3.split(' ').map { |a| a.gsub '@', '' }
-      attendees.delete_if { |a| is_bot?(a) }
+      attendees.delete_if { |a| ignore?(a) }
       attendees.sort!
       puts "People: #{attendees.size} #{attendees.join(' ')}"
       record = @store[:record]
@@ -77,8 +77,8 @@ class WelcomeBot
       save_store
     when /^:(.+?)!(.*?)@(.*?) JOIN #{@channel}$/
       new_user = $1
-      if is_bot?(new_user)
-        puts '[ IGNORED BOT ]'
+      if ignore?(new_user)
+        puts '[ IGNORED user ]'
       else
         if @store[:people].include?(new_user)
           puts "Old member rejoined: #{new_user}.  Last seen #{(@store[:people][new_user][:joined] || @store[:people][new_user][:quit]).strftime '%Y-%m-%d %H:%M'}"
@@ -105,8 +105,16 @@ class WelcomeBot
     attendees
   end
 
+  def ignore?(name)
+    is_bot?(name) || is_alias?(name)
+  end
+
   def is_bot?(name)
     [@nick, 'irclogger_com', 'Ruboto'].include?(name) || name =~ /^GitHub\d+$/
+  end
+
+  def is_alias?(name)
+    @store[:people].keys.any?{|n| n != name && n == name.chomp('_')}
   end
 
   def update_record(join_count)
