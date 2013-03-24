@@ -164,8 +164,10 @@ class Test::Unit::TestCase
   def generate_app(options = {})
     example = options.delete(:example) || false
     update = options.delete(:update) || false
+    # FIXME(uwe): Remove exclusion feature
     excluded_stdlibs = options.delete(:excluded_stdlibs)
-    standalone = options.delete(:standalone) || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
+    included_stdlibs = options.delete(:included_stdlibs)
+    standalone = options.delete(:standalone) || !!included_stdlibs  || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     bundle = options.delete(:bundle)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -177,6 +179,7 @@ class Test::Unit::TestCase
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
+    template_dir << "_with_#{included_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if included_stdlibs
     if File.exists?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
@@ -210,6 +213,7 @@ class Test::Unit::TestCase
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
           if standalone
+            include_stdlibs(included_stdlibs) if included_stdlibs
             exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
             system "#{RUBOTO_CMD} gen jruby"
             raise "update jruby failed with return code #$?" if $? != 0
@@ -273,6 +277,11 @@ class Test::Unit::TestCase
       FileUtils.rm_rf 'tmp/RubotoCore'
       fail 'Error (un)installing RubotoCore'
     end
+  end
+
+  def include_stdlibs(included_stdlibs)
+    puts "Adding ruboto.yml: #{included_stdlibs.join(' ')}"
+    File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:included_stdlibs => included_stdlibs}) }
   end
 
   def exclude_stdlibs(excluded_stdlibs)

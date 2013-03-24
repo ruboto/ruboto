@@ -602,6 +602,7 @@ module Ruboto
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
         min_sdk_version = verify_manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
+        included_stdlibs = [*verify_ruboto_config[:included_stdlibs]].compact
         excluded_stdlibs = [*verify_ruboto_config[:excluded_stdlibs]].compact
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
@@ -619,6 +620,34 @@ module Ruboto
 
               raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
               jruby_stdlib_version = Gem::Version.new($1)
+
+              if included_stdlibs
+
+                # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
+                if jruby_stdlib_version < Gem::Version.new('1.7.0.preview1')
+                  lib_dirs = %w(1.8 1.9 site_ruby/1.8 site_ruby/1.9 site_ruby/shared)
+                else
+                  lib_dirs = %w(1.8 1.9 shared)
+                end
+                # ODOT
+
+                print 'excluded...'
+
+                lib_dirs.each do |ld|
+                  Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
+                    libs = Dir['*'].map{|d|d.sub /\.(rb|jar)$/, ''}.uniq
+                    libs.each do |d|
+                      next if included_stdlibs.include? d
+                      FileUtils.rm_rf d if File.exists? d
+                      file = "#{d}.rb"
+                      FileUtils.rm_rf file if File.exists? file
+                      jarfile = "#{d}.jar"
+                      FileUtils.rm_rf jarfile if File.exists? jarfile
+                      print "#{d}..."
+                    end
+                  end
+                end
+              end
 
               if excluded_stdlibs.any?
 
