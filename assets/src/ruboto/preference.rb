@@ -8,9 +8,9 @@
 
 require 'ruboto/activity'
 
-java_import "android.preference.PreferenceScreen"
-java_import "android.preference.Preference"
-java_import "org.ruboto.RubotoPreferenceActivity"
+java_import 'android.preference.PreferenceScreen'
+java_import 'android.preference.Preference'
+java_import 'org.ruboto.RubotoPreferenceActivity'
 ruboto_configure_activity(RubotoPreferenceActivity)
 
 RubotoPreferenceActivity.class_eval do
@@ -49,7 +49,7 @@ def ruboto_import_preferences(*preferences)
   preferences.each { |i| ruboto_import_preference i }
 end
 
-def ruboto_import_preference(class_name, package_name="android.preference")
+def ruboto_import_preference(class_name, package_name='android.preference')
   klass = java_import("#{package_name}.#{class_name}") || eval("Java::#{package_name}.#{class_name}")
   return unless klass
 

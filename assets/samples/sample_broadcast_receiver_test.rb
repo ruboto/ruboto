@@ -27,7 +27,7 @@ test('broadcast changes title', :ui => false) do |activity|
         receiver_ready = true
         android.os.Looper.loop
       rescue
-        puts "Exception starting receiver"
+        puts 'Exception starting receiver'
         puts $!.message
         puts $!.backtrace.join("\n")
       end
