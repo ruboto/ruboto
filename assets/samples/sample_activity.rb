@@ -6,7 +6,7 @@ ruboto_import_widgets :Button, :LinearLayout, :TextView
 # http://xkcd.com/378/
 
 class SampleActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title 'Domo arigato, Mr Ruboto!'
 
