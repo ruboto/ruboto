@@ -154,11 +154,11 @@ You generate an app with the option `--activity FooActivity`, which means that r
 
     class FooActivity
       include Ruboto::Activity
-      def on_create(bundle)
+      def onCreate(bundle)
         Log.v 'MYAPPNAME', 'onCreate got called!'
       end
 
-      def on_pause
+      def onPause
         Log.v 'MYAPPNAME', 'onPause got called!'
       end
     end

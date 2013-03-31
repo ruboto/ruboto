@@ -4,7 +4,7 @@ require 'ruboto/util/toast'
 ruboto_import_widgets :LinearLayout, :TextView
 
 class OptionMenuActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
@@ -15,7 +15,7 @@ class OptionMenuActivity
         end
   end
 
-  def on_create_options_menu(menu)
+  def onCreateOptionsMenu(menu)
     mi = menu.add('Test')
     # mi.icon = $package.R::drawable::get_ruboto_core
     mi.setIcon($package.R::drawable::get_ruboto_core)

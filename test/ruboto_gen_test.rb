@@ -123,7 +123,7 @@ require 'ruboto/widget'
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
 class RubotoTestAppActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title 'ListView Example'
 
@@ -174,7 +174,7 @@ end
 class RubotoArrayAdapter
   import android.content.Context
 
-  def get_view(position, convert_view, parent)
+  def getView(position, convert_view, parent)
     puts "IN get_view!!!"
     @inflater = context.getSystemService(Context::LAYOUT_INFLATER_SERVICE) unless @inflater
     if convert_view
@@ -215,11 +215,6 @@ class RubotoArrayAdapter
     puts "Exception getting list item view: \#$!"
     puts $!.backtrace.join("\n")
     convert_view
-  end
-
-  def getView(position, convert_view, parent)
-    puts "IN get_view!!!"
-    get_view(position, convert_view, parent)
   end
 
 end

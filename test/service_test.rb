@@ -25,7 +25,7 @@ require 'ruboto/widget'
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class RubotoTestAppActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     $ruboto_test_app_activity = self
     set_title 'Domo arigato, Mr Ruboto!'
@@ -71,8 +71,8 @@ require 'ruboto/service'
 class RubotoTestService
   TARGET_TEXT = 'What hath Matz wrought!'
 
-  def on_create
-    puts "service on_create"
+  def onCreate
+    puts "service onCreate"
     Thread.start do
       loop do
         sleep 1
@@ -81,12 +81,12 @@ class RubotoTestService
     end
     puts "\#{self.class} started."
 
-    $ruboto_test_app_activity.set_title 'on_create'
+    $ruboto_test_app_activity.set_title 'onCreate'
 
     android.app.Service::START_STICKY
   end
 
-  def on_start_command(intent, flags, start_id)
+  def onStartCommand(intent, flags, start_id)
     puts "service on_start_command(\#{intent}, \#{flags}, \#{start_id})"
     $ruboto_test_app_activity.set_title 'on_start_command'
     $ruboto_test_app_activity.set_text TARGET_TEXT

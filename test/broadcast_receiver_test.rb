@@ -19,8 +19,8 @@ class BroadcastReceiverTest < Test::Unit::TestCase
       activity_filename = 'src/ruboto_test_app_activity.rb'
       activity_content = File.read(activity_filename)
 
-      assert activity_content.sub!(/  def on_create\(bundle\)\n/, <<EOF)
-  def on_create(bundle)
+      assert activity_content.sub!(/  def onCreate\(bundle\)\n/, <<EOF)
+  def onCreate(bundle)
     super
     $broadcast_test_activity = self
     @receiver = $package.ClickReceiver.new
@@ -52,8 +52,8 @@ EOF
       receiver_filename = 'src/click_receiver.rb'
       receiver_content = File.read(receiver_filename)
 
-      assert receiver_content.sub!(/  def on_receive\(context, intent\)\n.*?^  end\n/m, <<EOF)
-  def on_receive(context, intent)
+      assert receiver_content.sub!(/  def onReceive\(context, intent\)\n.*?^  end\n/m, <<EOF)
+  def onReceive(context, intent)
     Log.d "RUBOTO TEST", "Changing UI text"
     context.run_on_ui_thread{$broadcast_test_activity.find_view_by_id(42).text = '#{message}'}
     Log.d "RUBOTO TEST", "UI text changed OK!"

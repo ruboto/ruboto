@@ -1,5 +1,5 @@
 class RubyFileActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title 'Ruby file Activity'
 

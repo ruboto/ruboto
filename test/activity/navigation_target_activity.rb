@@ -1,5 +1,5 @@
 class NavigationTargetActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title 'Navigation Target Activity'
 

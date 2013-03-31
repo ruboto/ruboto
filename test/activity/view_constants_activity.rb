@@ -3,7 +3,7 @@ require 'ruboto/widget'
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class ViewConstantsActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     $ruboto_test_app_activity = self
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')

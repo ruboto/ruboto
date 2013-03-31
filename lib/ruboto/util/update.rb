@@ -602,7 +602,7 @@ module Ruboto
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
         min_sdk_version = verify_manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
-        included_stdlibs = [*verify_ruboto_config[:included_stdlibs]].compact
+        included_stdlibs = verify_ruboto_config[:included_stdlibs]
         excluded_stdlibs = [*verify_ruboto_config[:excluded_stdlibs]].compact
         Dir.chdir 'libs' do
           jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]

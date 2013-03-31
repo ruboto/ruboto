@@ -4,7 +4,7 @@ require 'ruboto/widget'
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
 class NavigationActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
@@ -51,7 +51,7 @@ class NavigationActivity
 
   def start_inline_activity
     start_ruboto_activity do
-      def on_create(bundle)
+      def onCreate(bundle)
         super
         set_title 'Inline Activity'
         self.content_view =
@@ -65,7 +65,7 @@ class NavigationActivity
 
   def start_inline_activity_with_options
     start_ruboto_activity(:class_name => 'InlineActivity') do
-      def on_create(bundle)
+      def onCreate(bundle)
         super
         set_title 'Inline Activity'
         self.content_view =
@@ -104,7 +104,7 @@ class NavigationActivity
 end
 
 class InfileActivity
-  def on_create(bundle)
+  def onCreate(bundle)
     super
     set_title 'Infile Activity'
     self.content_view =
