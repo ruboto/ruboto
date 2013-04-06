@@ -1,7 +1,7 @@
 activity Java::org.ruboto.test_app.ViewConstantsActivity
-java_import "android.view.ViewGroup"
-java_import "android.view.Gravity"
-java_import "android.os.Build"
+java_import 'android.view.ViewGroup'
+java_import 'android.view.Gravity'
+java_import 'android.os.Build'
 
 setup do |activity|
   start = Time.now

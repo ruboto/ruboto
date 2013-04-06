@@ -23,9 +23,4 @@ class StartupExceptionActivity
     super
     @text_view.text = 'Startup OK'
   end
-
-  def onPause
-    super
-    @text_view.text = 'Paused'
-  end
 end
