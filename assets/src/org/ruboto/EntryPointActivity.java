@@ -18,7 +18,10 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private ProgressDialog loadingDialog;
     private boolean dialogCancelled = false;
     private BroadcastReceiver receiver;
+
+    // FIXME(uwe):  Remove this field?  Duplicated by ScriptInfo.isLoaded() ?
     protected boolean appStarted = false;
+    // EMXIF
 
 	public void onCreate(Bundle bundle) {
         Log.d("onCreate: ");

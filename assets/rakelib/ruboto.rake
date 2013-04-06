@@ -257,11 +257,17 @@ task :bundle => BUNDLE_JAR
 file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
+  require 'bundler'
+  require 'bundler/vendored_thor'
 
-  # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
+  # Store original RubyGems/Bundler environment
   platforms = Gem.platforms
   ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
+  gem_paths = {'GEM_HOME' => Gem.path, 'GEM_PATH' => Gem.dir}
+
+  # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
   Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new('universal-java')]
+  Gem.paths = {'GEM_HOME' => BUNDLE_PATH, 'GEM_PATH' => BUNDLE_PATH}
   old_verbose, $VERBOSE = $VERBOSE, nil
   begin
     Object.const_set('RUBY_ENGINE', 'jruby')
@@ -270,11 +276,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   end
 
   ENV['BUNDLE_GEMFILE'] = GEM_FILE
-  require 'bundler'
-
-  require 'bundler/vendored_thor'
   Bundler.ui = Bundler::UI::Shell.new
-
   Bundler.bundle_path = Pathname.new BUNDLE_PATH
   definition = Bundler.definition
   definition.validate_ruby!
@@ -288,6 +290,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     $VERBOSE = old_verbose
   end
   Gem.platforms = platforms
+  Gem.paths = gem_paths
 
   gem_paths = Dir["#{BUNDLE_PATH}/gems"]
   raise 'Gem path not found' if gem_paths.empty?
@@ -373,6 +376,10 @@ Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
             # files = classes.grep(dbs)
             # FileUtils.rm_f(files)
             # ODOT
+
+            # FIXME(uwe): Extract files with case sensitive names for ARJDBC 1.2.7-1.3.x
+            puts `jar xf #{jar} arjdbc/mssql/MSSQLRubyJdbcConnection.class arjdbc/sqlite3/SQLite3RubyJdbcConnection.class`
+            # EMXIF
 
           elsif jar =~ /shared\/jopenssl.jar$/
             jar_load_code = <<-END_CODE
@@ -689,8 +696,9 @@ def start_emulator
     unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
       puts "Creating AVD #{avd_name}"
       heap_size = File.read('AndroidManifest.xml') =~ 'largeHeap' ? 256 : 48
-      # FIXME(uwe):  Use Ruby instead
-      `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['ANDROID_HOME']}/platforms/*/*/*/hardware.ini`
+      # FIXME(uwe):  Use Ruby instead.
+      # FIXME(uwe):  Only change the heap size to be larger.
+      # `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['ANDROID_HOME']}/platforms/*/*/*/hardware.ini`
       `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
       `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini`
       new_snapshot = true

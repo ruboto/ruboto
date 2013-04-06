@@ -62,7 +62,7 @@ while :; do
 
   if [ "`ls -d ~/.android/avd/$AVD.avd 2>/dev/null`" == "" ] ; then
     echo Creating AVD $AVD
-    sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ${ANDROID_HOME}/platforms/*/*/*/hardware.ini
+    # sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ${ANDROID_HOME}/platforms/*/*/*/hardware.ini
     echo n | android create avd -a -n $AVD -t android-$ANDROID_TARGET $ABI_OPT -c 64M -s HVGA
     sed -i.bak -e "s/vm.heapSize=24/vm.heapSize=48/" ~/.android/avd/$AVD.avd/config.ini
   fi
