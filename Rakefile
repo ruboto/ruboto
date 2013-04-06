@@ -131,7 +131,7 @@ task :release_docs do
         break
       end
     end
-    cat ||= i['pull_request'] && 'Pull requests'
+    cat ||= i['pull_request'] && i['pull_request']['html_url'] && 'Pull requests'
     cat ||= 'Other'
     cat
   end
