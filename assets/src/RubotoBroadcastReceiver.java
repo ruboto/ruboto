@@ -31,6 +31,9 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
             Log.d("onReceive: " + this);
+            if (ScriptLoader.isCalledFromJRuby()) {
+                return;
+            }
             if (!scriptLoaded) {
                 if (JRubyAdapter.setUpJRuby(context)) {
                     ScriptLoader.loadScript(this);

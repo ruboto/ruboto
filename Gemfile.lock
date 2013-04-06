@@ -7,7 +7,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    arrayfields (4.7.4)
+    arrayfields (4.9.0)
     chronic (0.9.1)
     fattr (2.2.1)
     main (5.2.0)
@@ -16,7 +16,7 @@ GEM
       fattr (>= 2.2.0)
       map (>= 5.1.0)
     map (6.3.0)
-    rake (10.0.3)
+    rake (10.0.4)
 
 PLATFORMS
   java
