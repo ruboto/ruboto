@@ -21,41 +21,41 @@ module Ruboto
 
       def self.main
         Main {
-          mode "gen" do
-            mode "app" do
+          mode 'gen' do
+            mode 'app' do
               include Ruboto::Util::LogAction
               include Ruboto::Util::Build
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
 
-              option("package"){
+              option('package'){
                 required
                 argument :required
-                description "Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)"
+                description 'Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)'
               }
-              option("name"){
+              option('name'){
                 argument :required
-                description "Name of your app.  Defaults to the last part of the package name capitalized."
+                description 'Name of your app.  Defaults to the last part of the package name capitalized.'
               }
-              option("activity"){
+              option('activity'){
                 argument :required
-                description "Name of your primary Activity.  Defaults to the name of the application with Activity appended."
+                description 'Name of your primary Activity.  Defaults to the name of the application with Activity appended.'
               }
-              option("path"){
+              option('path'){
                 argument :required
-                description "Path to where you want your app.  Defaults to the last part of the package name."
+                description 'Path to where you want your app.  Defaults to the last part of the package name.'
               }
-              option("target") {
+              option('target') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
                 description "Android version to target. Must begin with 'android-' (e.g., 'android-8' for froyo)"
               }
-              option("min-sdk") {
+              option('min-sdk') {
                 argument :required
                 description "Minimum android version supported. Must begin with 'android-'."
               }
-              option("with-jruby") {
-                description "Generate the JRuby jars jar"
+              option('with-jruby') {
+                description 'Generate the JRuby jars jar'
                 cast :boolean
               }
               option('force') {
@@ -83,7 +83,7 @@ module Ruboto
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
                 exit $? unless $? == 0
                 unless File.exists? path
-                  puts "Android project was not created"
+                  puts 'Android project was not created'
                   exit_failure!
                 end
                 Dir.chdir path do
@@ -92,9 +92,9 @@ module Ruboto
                   FileUtils.rm_f 'res/layout/main.xml'
                   puts 'Removed file res/layout/main.xml'
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
-                  File.open("res/values/strings.xml", 'w') {|f| verify_strings.document.write(f, 4)}
+                  File.open('res/values/strings.xml', 'w') {|f| verify_strings.document.write(f, 4)}
                 end
-                puts "Done"
+                puts 'Done'
 
                 Dir.chdir root do
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
@@ -107,8 +107,8 @@ module Ruboto
                   update_dx_jar true if with_jruby
                   update_core_classes 'include'
 
-                  log_action("Generating the default Activity and script") do
-                    generate_inheriting_file "Activity", activity, package
+                  log_action('Generating the default Activity and script') do
+                    generate_inheriting_file 'Activity', activity, package
                   end
                 end
 
@@ -116,7 +116,7 @@ module Ruboto
               end
             end
 
-            mode "jruby" do
+            mode 'jruby' do
               include Ruboto::Util::LogAction
               include Ruboto::Util::Build
               include Ruboto::Util::Update
@@ -127,26 +127,26 @@ module Ruboto
               end
             end
 
-            mode "class" do
+            mode 'class' do
               include Ruboto::Util::Build
               include Ruboto::Util::Verify
 
-              argument("class"){
+              argument('class'){
                 required
-                alternatives = Dir[File.join(Ruboto::ASSETS, "src/Inheriting*.java")].map{|f| File.basename(f)[10..-6]} - ['Class']
+                alternatives = Dir[File.join(Ruboto::ASSETS, 'src/Inheriting*.java')].map{|f| File.basename(f)[10..-6]} - %w(Class)
                 description "the Android Class that you want: #{alternatives[0..-2].map{|c| "#{c}, "}}or #{alternatives[-1]}"
                 validate {|v| alternatives.include? v}
               }
 
-              option("script_name"){
+              option('script_name'){
                 argument :required
-                description "name of the ruby script that this class will execute. Should end in .rb.  Optional."
+                description 'name of the ruby script that this class will execute. Should end in .rb.  Optional.'
               }
 
-              option("name"){
+              option('name'){
                 required
                 argument :required
-                description "name of the class (and file). Should be CamelCase"
+                description 'name of the class (and file). Should be CamelCase'
               }
 
               def run
@@ -163,7 +163,7 @@ module Ruboto
                   if app_element.elements["#{tag}[@android:name='#{name}']"]
                     puts "#{klass} already present in manifest."
                   else
-                    app_element.add_element tag, {"android:name" => "#{"#{verify_package}." if klass == 'Service'}#{name}"}
+                    app_element.add_element tag, {'android:name' => "#{"#{verify_package}." if klass == 'Service'}#{name}"}
                     save_manifest
                     puts "Added #{tag} to manifest."
                   end
@@ -171,52 +171,52 @@ module Ruboto
               end
             end
 
-            mode "subclass" do
+            mode 'subclass' do
               include Ruboto::Util::Build
 
-              argument("class"){
+              argument('class'){
                 required
-                description "the Android Class that you want to subclass (e.g., package.Class)."
+                description 'the Android Class that you want to subclass (e.g., package.Class).'
               }
 
-              option("name"){
+              option('name'){
                 required
                 argument :required
-                description "name of the class (and file). Should be CamelCase"
+                description 'name of the class (and file). Should be CamelCase'
               }
 
-              option("package"){
+              option('package'){
                 argument :required
-                description "package for the new class (if not specified, uses project package)"
+                description 'package for the new class (if not specified, uses project package)'
               }
 
-              option("method_base"){
+              option('method_base'){
                 required
                 validate {|i| %w(all on none abstract).include?(i)}
                 argument :required
-                description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)"
+                description 'the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)'
               }
 
-              option("method_include"){
+              option('method_include'){
                 argument :required
-                defaults ""
-                description "additional methods to add to the base list"
+                defaults ''
+                description 'additional methods to add to the base list'
               }
 
-              option("method_exclude"){
+              option('method_exclude'){
                 argument :required
-                defaults ""
-                description "methods to remove from the base list"
+                defaults ''
+                description 'methods to remove from the base list'
               }
 
-              option("implements"){
+              option('implements'){
                 required
                 argument :required
-                defaults ""
-                description "comma separated list interfaces to implement"
+                defaults ''
+                description 'comma separated list interfaces to implement'
               }
 
-              option("force"){
+              option('force'){
                 argument :required
                 validate {|i| %w(include exclude).include?(i)}
                 description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
@@ -229,26 +229,26 @@ module Ruboto
               end
             end
 
-            mode "interface" do
+            mode 'interface' do
               include Ruboto::Util::Build
 
-              argument("interface"){
+              argument('interface'){
                 required
-                description "the Android Interface that you want to implement (e.g., package.Interface)."
+                description 'the Android Interface that you want to implement (e.g., package.Interface).'
               }
 
-              option("name"){
+              option('name'){
                 required
                 argument :required
-                description "name of the class (and file) that will implement the interface. Should be CamelCase"
+                description 'name of the class (and file) that will implement the interface. Should be CamelCase'
               }
 
-              option("package"){
+              option('package'){
                 argument :required
-                description "package for the new class (if not specified, uses project package)"
+                description 'package for the new class (if not specified, uses project package)'
               }
 
-              option("force"){
+              option('force'){
                 argument :required
                 validate {|i| %w(include exclude).include?(i)}
                 description "force added and deprecated interfaces (values: 'include' or 'exclude')"
@@ -262,45 +262,45 @@ module Ruboto
               end
             end
 
-            mode "core" do
+            mode 'core' do
               include Ruboto::Util::Build
 
-              argument("class"){
+              argument('class'){
                 required
                 validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i)}
                 description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, OnItemSelectedListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
               }
 
-              option("method_base"){
+              option('method_base'){
                 required
                 argument :required
                 validate {|i| %w(all on none).include?(i)}
-                defaults "on"
-                description "the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)"
+                defaults 'on'
+                description 'the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)'
               }
 
-              option("method_include"){
+              option('method_include'){
                 required
                 argument :required
-                defaults ""
-                description "additional methods to add to the base list"
+                defaults ''
+                description 'additional methods to add to the base list'
               }
 
-              option("method_exclude"){
+              option('method_exclude'){
                 required
                 argument :required
-                defaults ""
-                description "methods to remove from the base list"
+                defaults ''
+                description 'methods to remove from the base list'
               }
 
-              option("implements"){
+              option('implements'){
                 required
                 argument :required
-                defaults ""
+                defaults ''
                 description "for classes only, interfaces to implement (cannot be used with 'gen core all')"
               }
 
-              option("force"){
+              option('force'){
                 argument :required
                 validate {|i| %w(include exclude).include?(i)}
                 description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
@@ -308,31 +308,31 @@ module Ruboto
 
               def run
                 abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless
-                %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params["class"].value) or params["implements"].value == ""
+                %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params['class'].value) or params['implements'].value == ''
                 generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
               end
             end
           end
 
-          mode "update" do
+          mode 'update' do
             include Ruboto::Util::LogAction
             include Ruboto::Util::Update
             include Ruboto::Util::Verify
 
-            argument("what") {
+            argument('what') {
               required
               # FIXME(uwe): Deprecated "ruboto update ruboto" in Ruboto 0.8.1.  Remove september 2013.
               validate {|i| %w(jruby app ruboto).include?(i)}
               description "What do you want to update: 'app', 'jruby', or 'ruboto'"
             }
 
-            option("force") {
+            option('force') {
               description "force an update even if the version hasn't changed"
             }
 
             def run
               case params['what'].value
-              when "app" then
+              when 'app' then
                 force = params['force'].value
                 old_version = read_ruboto_version
                 if old_version && Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
@@ -355,18 +355,18 @@ module Ruboto
                 update_icons force
                 update_core_classes 'include'
                 update_bundle
-              when "jruby" then
+              when 'jruby' then
                 update_jruby(params['force'].value, true) || abort
               # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
-              when "ruboto" then
+              when 'ruboto' then
                 puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"
                 update_ruboto(params['force'].value) || abort
               end
             end
           end
 
-          option "version" do
-            description "display ruboto version"
+          option 'version' do
+            description 'display ruboto version'
           end
 
           # just running `ruboto`
