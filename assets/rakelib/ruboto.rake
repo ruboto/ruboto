@@ -695,7 +695,7 @@ def start_emulator
 
     unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
       puts "Creating AVD #{avd_name}"
-      heap_size = File.read('AndroidManifest.xml') =~ 'largeHeap' ? 256 : 48
+      heap_size = (File.read('AndroidManifest.xml') =~ /largeHeap/) ? 256 : 48
       # FIXME(uwe):  Use Ruby instead.
       # FIXME(uwe):  Only change the heap size to be larger.
       # `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['ANDROID_HOME']}/platforms/*/*/*/hardware.ini`
