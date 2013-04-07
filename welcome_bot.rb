@@ -124,8 +124,6 @@ class WelcomeBot
 
   def welcome(nick)
     send "PRIVMSG #{@channel} :#{nick}:  Hi!  Welcome to the #{@channel} channel!"
-    send "PRIVMSG #{@channel} :#{nick}:  Ping any op or member if you have a question.  donV is on European time."
-    send "PRIVMSG #{@channel} :#{nick}:  Please be patient and hang around if you don't get a response immediately."
     @store[:people][nick] = {:joined => Time.now}
     send "PRIVMSG donV :#{nick} is number #{@store[:people].size} who joined the #{@channel} channel."
     sleep 30

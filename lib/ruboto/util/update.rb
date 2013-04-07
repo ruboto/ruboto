@@ -362,6 +362,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3.dev')
+                #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
                     '**/*Darwin*',
                     '**/*Solaris*',
@@ -391,9 +392,29 @@ module Ruboto
                     'jnr/x86asm',
                     'org/apache',
                     'org/fusesource',
+                    'org/jruby/anno/AnnotationBinder',
+                    'org/jruby/anno/AnnotationBinder',
+                    'org/jruby/anno/Coercion',
+                    'org/jruby/anno/CoercionType',
+                    'org/jruby/anno/FrameField',
+                    'org/jruby/anno/InvokerGenerator',
+                    'org/jruby/anno/JavaMethodDescriptor',
+                    'org/jruby/anno/JRubyClass',
+                    'org/jruby/anno/JRubyConstant',
+                    'org/jruby/anno/JRubyMethod',
+                    'org/jruby/anno/JRubyModule',
                     'org/jruby/ant',
                     'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
+                    'org/jruby/compiler/ASTCompiler',
+                    'org/jruby/compiler/ASTInspector',
+                    'org/jruby/compiler/ASTInspector',
+                    'org/jruby/compiler/BodyCompiler',
+                    'org/jruby/compiler/BranchCallback',
+                    'org/jruby/compiler/CacheCompiler',
+                    'org/jruby/compiler/CompilerCallback',
+                    'org/jruby/compiler/DefinedCallback',
+                    'org/jruby/compiler/FastSwitchType',
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
                     'org/jruby/compiler/impl/BaseBodyCompiler*',
                     'org/jruby/compiler/util',
@@ -415,6 +436,7 @@ module Ruboto
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
+                    'org/yecht',
                 ]
                 elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
                   excluded_core_packages = [
