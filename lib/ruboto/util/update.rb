@@ -271,7 +271,7 @@ module Ruboto
 
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
-          if sdk_element = verify_manifest.elements['uses-sdk']
+          if (sdk_element = verify_manifest.elements['uses-sdk'])
             min_sdk ||= sdk_element.attributes['android:minSdkVersion']
             target ||= sdk_element.attributes['android:targetSdkVersion']
           else
@@ -392,29 +392,9 @@ module Ruboto
                     'jnr/x86asm',
                     'org/apache',
                     'org/fusesource',
-                    'org/jruby/anno/AnnotationBinder',
-                    'org/jruby/anno/AnnotationBinder',
-                    'org/jruby/anno/Coercion',
-                    'org/jruby/anno/CoercionType',
-                    'org/jruby/anno/FrameField',
-                    'org/jruby/anno/InvokerGenerator',
-                    'org/jruby/anno/JavaMethodDescriptor',
-                    'org/jruby/anno/JRubyClass',
-                    'org/jruby/anno/JRubyConstant',
-                    'org/jruby/anno/JRubyMethod',
-                    'org/jruby/anno/JRubyModule',
                     'org/jruby/ant',
                     'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
-                    'org/jruby/compiler/ASTCompiler',
-                    'org/jruby/compiler/ASTInspector',
-                    'org/jruby/compiler/ASTInspector',
-                    'org/jruby/compiler/BodyCompiler',
-                    'org/jruby/compiler/BranchCallback',
-                    'org/jruby/compiler/CacheCompiler',
-                    'org/jruby/compiler/CompilerCallback',
-                    'org/jruby/compiler/DefinedCallback',
-                    'org/jruby/compiler/FastSwitchType',
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
                     'org/jruby/compiler/impl/BaseBodyCompiler*',
                     'org/jruby/compiler/util',
@@ -439,127 +419,17 @@ module Ruboto
                     'org/yecht',
                 ]
                 elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
-                  excluded_core_packages = [
-                      '**/*Darwin*',
-                      '**/*Ruby20*',
-                      '**/*Solaris*',
-                      '**/*windows*',
-                      '**/*Windows*',
-                      'META-INF',
-                      'com/headius',
-                      'com/kenai/constantine',
-                      'com/kenai/jffi',
-                      'com/martiansoftware',
-                      'jline', 'jni',
-                      'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                      'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
-                      'jnr/ffi/annotations', 'jnr/ffi/byref',
-                      'jnr/ffi/provider', 'jnr/ffi/util',
-                      'jnr/ffi/Struct$*',
-                      'jnr/ffi/types',
-                      'jnr/posix/MacOS*',
-                      'jnr/posix/OpenBSD*',
-                      'org/apache',
-                      'org/fusesource',
-                      'org/jruby/ant',
-                      'org/jruby/cext',
-                      'org/jruby/compiler/util',
-                      'org/jruby/demo',
-                      'org/jruby/embed/bsf',
-                      'org/jruby/embed/jsr223',
-                      'org/jruby/embed/osgi',
-                      'org/jruby/ext/ffi/io',
-                      'org/jruby/ext/ffi/jffi',
-                      'org/jruby/javasupport/bsf',
-                  ]
+                  excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf)
                 elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1')
-                  excluded_core_packages = [
-                      '**/*Darwin*',
-                      '**/*Ruby20*',
-                      '**/*Solaris*',
-                      '**/*windows*',
-                      '**/*Windows*',
-                      'META-INF',
-                      'com/headius',
-                      'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
-                      'jline', 'jni',
-                      'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                      'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
-                      'jnr/ffi/annotations', 'jnr/ffi/byref',
-                      'jnr/ffi/provider', 'jnr/ffi/util',
-                      'jnr/ffi/Struct$*',
-                      'jnr/ffi/types',
-                      'jnr/posix/MacOS*',
-                      'jnr/posix/OpenBSD*',
-                      'org/apache',
-                      'org/fusesource',
-                      'org/jruby/ant',
-                      'org/jruby/cext',
-                      'org/jruby/compiler/util',
-                      'org/jruby/demo',
-                      'org/jruby/embed/bsf',
-                      'org/jruby/embed/jsr223',
-                      'org/jruby/embed/osgi',
-                      'org/jruby/ext/ffi/io',
-                      'org/jruby/ext/ffi/jffi',
-                      'org/jruby/ext/openssl', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.
-                      'org/jruby/javasupport/bsf',
-                      'org/jruby/org/bouncycastle', # TODO(uwe): Issue #154 Add back when we add jruby-openssl.  The bouncycastle included in Android is cripled.
-                  ]
+                  excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf org/jruby/org/bouncycastle)
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.0')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.0
-                excluded_core_packages = [
-                    '**/*Darwin*',
-                    '**/*Solaris*',
-                    '**/*windows*',
-                    '**/*Windows*',
-                    'META-INF',
-                    'com/headius',
-                    'com/kenai/constantine', 'com/kenai/jffi', 'com/martiansoftware',
-                    'jline', 'jni',
-                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos',
-                    'jnr/ffi/annotations', 'jnr/ffi/byref',
-                    'jnr/ffi/provider', 'jnr/ffi/util',
-                    'jnr/ffi/Struct$*',
-                    'jnr/ffi/types',
-                    'jnr/posix/MacOS*',
-                    'jnr/posix/OpenBSD*',
-                    'org/apache',
-                    'org/bouncycastle',
-                    'org/fusesource',
-                    'org/jruby/ant',
-                    'org/jruby/cext',
-                    'org/jruby/compiler/util',
-                    'org/jruby/demo',
-                    'org/jruby/embed/bsf',
-                    'org/jruby/embed/jsr223',
-                    'org/jruby/embed/osgi',
-                    'org/jruby/ext/ffi/io',
-                    'org/jruby/ext/ffi/jffi',
-                    'org/jruby/ext/openssl',
-                    'org/jruby/javasupport/bsf',
-                ]
+                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/bouncycastle org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf)
                 # ODOT
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.6.0')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.6.x
                 print 'Retaining com.kenai.constantine and removing jnr for JRuby 1.6.x...'
-                excluded_core_packages = [
-                    'META-INF', 'cext',
-                    'com/kenai/jffi', 'com/martiansoftware', 'ext', 'java',
-                    'jline', 'jni',
-                    'jnr',
-                    'jnr/constants/platform/darwin', 'jnr/constants/platform/fake', 'jnr/constants/platform/freebsd',
-                    'jnr/constants/platform/openbsd', 'jnr/constants/platform/sunos', 'jnr/constants/platform/windows',
-                    'jnr/ffi/annotations', 'jnr/ffi/byref', 'jnr/ffi/provider', 'jnr/ffi/util',
-                    'jnr/netdb', 'jnr/ffi/posix/util',
-                    'org/apache', 'org/jruby/ant',
-                    'org/jruby/compiler/ir',
-                    'org/jruby/compiler/util',
-                    'org/jruby/demo', 'org/jruby/embed/bsf',
-                    'org/jruby/embed/jsr223', 'org/jruby/embed/osgi', 'org/jruby/ext/ffi', 'org/jruby/javasupport/bsf',
-                    'org/jruby/runtime/invokedynamic',
-                ]
+                excluded_core_packages = %w(META-INF cext com/kenai/jffi com/martiansoftware ext java jline jni jnr jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/constants/platform/windows jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/netdb jnr/ffi/posix/util org/apache org/jruby/ant org/jruby/compiler/ir org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi org/jruby/javasupport/bsf org/jruby/runtime/invokedynamic)
                 # ODOT
               else
                 raise "Unsupported JRuby version: #{jruby_core_version.inspect}."
@@ -779,6 +649,7 @@ module Ruboto
               `jar -xf #{dx_jar}`
               raise "Unpacking dx.jar jar failed: #$?" unless $? == 0
               File.delete dx_jar
+              #noinspection RubyLiteralArrayInspection
               excluded_core_packages = [
                   'com/android/dx/command',
                   # 'com/android/dx/ssa', # Tests run OK without this package, but we may loose some optimizations.
