@@ -8,7 +8,7 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="667px"
+   width="500px"
    height="500px"
    version="1.1"
    id="svg2490"
@@ -109,7 +109,7 @@
   <rect
      style="fill:#30587c;fill-opacity:1;stroke:none"
      id="rect3980"
-     width="667"
+     width="499.99973"
      height="500"
      x="-6.9251799e-10"
      y="1.4253654e-14"
@@ -125,7 +125,7 @@
      inkscape:label="vectorart" />
   <g
      id="g4028"
-     transform="translate(80, -34)">
+     transform="translate(1.2523439,-14)">
     <g
        transform="translate(-1.80028,0)"
        id="g4012">
@@ -242,8 +242,7 @@
   </g>
   <g
      id="g4114"
-     style="stroke:#ffffff;stroke-opacity:1"
-	 transform="translate(80, -20)">
+     style="stroke:#ffffff;stroke-opacity:1">
     <path
        d="m 180.53004,419.83428 0,24 c 0,13.25483 -10.74517,24 -24,24 -13.25483,0 -24,-10.74517 -24,-24 l 0,-24"
        id="path2538"
