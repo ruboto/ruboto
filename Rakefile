@@ -138,7 +138,7 @@ task :release_docs do
   puts
   puts "Subject: [ANN] Ruboto #{milestone_name} released!"
   puts
-  puts "The Ruboto team is proud to announce the release of Ruboto #{milestone_name}."
+  puts "The Ruboto team is pleased to announce the release of Ruboto #{milestone_name}."
   puts
   puts Ruboto::DESCRIPTION
   puts
