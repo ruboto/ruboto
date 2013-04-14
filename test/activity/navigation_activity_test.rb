@@ -41,19 +41,19 @@ test('button starts infile class activity', :ui => false) do |activity|
   button_activity_text 48, activity, 42, 'This is an infile activity.'
 end
 
-test("infile activity starts again", :ui => false) do |activity|
+test('infile activity starts again', :ui => false) do |activity|
   button_activity_text 48, activity, 42, 'This is an infile activity.'
 end
 
-test("start ruby file activity", :ui => false) do |activity|
+test('start ruby file activity', :ui => false) do |activity|
   button_activity_text 49, activity, 42, 'This is a Ruby file activity.'
 end
 
-test("start ruby file activity again", :ui => false) do |activity|
+test('start ruby file activity again', :ui => false) do |activity|
   button_activity_text 49, activity, 42, 'This is a Ruby file activity.'
 end
 
-test("start ruboto activity without config", :ui => false) do |activity|
+test('start ruboto activity without config', :ui => false) do |activity|
   a = start_activity_by_button activity, 50
   assert_equal 'Ruboto Test App', a.title
 end
@@ -75,8 +75,8 @@ def start_activity_by_button(activity, button_id, activity_class_name = 'org.rub
   current_activity
 end
 
-def button_activity_text button_id, activity, expected_text_id, expected_text_string,
-    activity_class_name = 'org.ruboto.RubotoActivity'
+def button_activity_text(button_id, activity, expected_text_id, expected_text_string,
+    activity_class_name = 'org.ruboto.RubotoActivity')
   current_activity = start_activity_by_button(activity, button_id, activity_class_name)
   start = Time.now
   loop do
@@ -91,7 +91,7 @@ ensure
   if current_activity
     finish_at = Time.now
     finished = false
-    current_activity.run_on_ui_thread { current_activity.finish ; finished = true }
+    current_activity.run_on_ui_thread { current_activity.finish; finished = true }
     loop do
       break if finished || (Time.now - finish_at > 10)
       puts 'wait for finish'
