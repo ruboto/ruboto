@@ -63,7 +63,7 @@ MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
 PROJECT_PROPS_FILE = File.expand_path 'project.properties'
 RUBOTO_CONFIG_FILE = File.expand_path 'ruboto.yml'
 GEM_FILE = File.expand_path 'Gemfile.apk'
-GEM_LOCK_FILE = File.expand_path 'Gemfile.apk.lock'
+GEM_LOCK_FILE = "#{GEM_FILE}.lock"
 RELEASE_APK_FILE = File.expand_path "bin/#{build_project_name}-release.apk"
 APK_FILE = File.expand_path "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
@@ -266,7 +266,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   gem_paths = {'GEM_HOME' => Gem.path, 'GEM_PATH' => Gem.dir}
 
   # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
-  Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new('universal-java')]
+  Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new("universal-dalvik-#{sdk_level}"), Gem::Platform.new('universal-java')]
   Gem.paths = {'GEM_HOME' => BUNDLE_PATH, 'GEM_PATH' => BUNDLE_PATH}
   old_verbose, $VERBOSE = $VERBOSE, nil
   begin
@@ -762,7 +762,7 @@ def start_emulator
     sleep 15
   end
   
-  system %Q{(
+  system '(
     set +e
     for i in 1 2 3 4 5 6 7 8 9 10 ; do
       sleep 6
@@ -777,9 +777,9 @@ def start_emulator
     echo "Failed to unlock screen"
     set -e
     exit 1
-  ) &}
+  ) &'
   
-  system "adb logcat > adb_logcat.log &"
+  system 'adb logcat > adb_logcat.log &'
   
   puts "Emulator #{avd_name} started OK."
 end
