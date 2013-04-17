@@ -1,4 +1,4 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'fileutils'
 
 class BroadcastReceiverTest < Test::Unit::TestCase
@@ -54,13 +54,13 @@ EOF
 
       assert receiver_content.sub!(/  def onReceive\(context, intent\)\n.*?^  end\n/m, <<EOF)
   def onReceive(context, intent)
-    Log.d "RUBOTO TEST", "Changing UI text"
+    Log.d 'RUBOTO TEST', 'Changing UI text'
     context.run_on_ui_thread{$broadcast_test_activity.find_view_by_id(42).text = '#{message}'}
-    Log.d "RUBOTO TEST", "UI text changed OK!"
+    Log.d 'RUBOTO TEST', 'UI text changed OK!'
   rescue Exception
-    Log.e "RUBOTO TEST", "Exception changing UI text: \#{$!.message}"
-    Log.e "RUBOTO TEST", $!.message
-    Log.e "RUBOTO TEST", $!.backtrace.join("\\n")
+    Log.e 'RUBOTO TEST', "Exception changing UI text: \#{$!.message}"
+    Log.e 'RUBOTO TEST', $!.message
+    Log.e 'RUBOTO TEST', $!.backtrace.join("\\n")
   end
 EOF
       File.open(receiver_filename, 'w') { |f| f << receiver_content }

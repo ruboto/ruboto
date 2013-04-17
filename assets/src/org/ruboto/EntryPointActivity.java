@@ -13,6 +13,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * This Activity acts as an entry point to the app.  It must initialize the
+ * JRuby runtime before continuing its life cycle.
+ * While JRuby is initializing, a progress dialog is shown.
+ * If R.layout.splash is defined, by adding a res/layout/splash.xml file,
+ * this layout is displayed instead of the progress dialog.
+ */
 public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private int splash = 0;
     private ProgressDialog loadingDialog;
@@ -24,7 +31,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     // EMXIF
 
 	public void onCreate(Bundle bundle) {
-        Log.d("onCreate: ");
+        Log.d("EntryPointActivity onCreate:");
 
 	    try {
     		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
@@ -34,6 +41,9 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
         if (JRubyAdapter.isInitialized()) {
             appStarted = true;
+		} else {
+		    showProgress();
+            initJRuby(true);
 		}
 	    super.onCreate(bundle);
 	}
@@ -53,26 +63,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     	    fireRubotoActivity();
         } else {
             Log.d("Not initialized");
-            showProgress();
-            receiver = new BroadcastReceiver(){
-                public void onReceive(Context context, Intent intent) {
-                    Log.i("received broadcast: " + intent);
-                    Log.i("URI: " + intent.getData());
-                    if (intent.getData().toString().equals("package:org.ruboto.core")) {
-                        Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_SHORT).show();
-                        if (receiver != null) {
-                    	    unregisterReceiver(receiver);
-                    	    receiver = null;
-                        }
-                        showProgress();
-                        initJRuby(false);
-                    }
-                }
-            };
-            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-            filter.addDataScheme("package");
-            registerReceiver(receiver, filter);
-            initJRuby(true);
             super.onResume();
         }
     }
@@ -103,12 +93,9 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                 final boolean jrubyOk = JRubyAdapter.setUpJRuby(EntryPointActivity.this);
                 if (jrubyOk) {
                     Log.d("onResume: JRuby OK");
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            fireRubotoActivity();
-                        }
-                    });
+                    fireRubotoActivity();
                 } else {
+                    registerPackageInstallReceiver();
                     runOnUiThread(new Runnable() {
                         public void run() {
                             if (firstTime) {
@@ -152,10 +139,15 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         if(appStarted) return;
         appStarted = true;
         Log.i("Starting activity");
-        ScriptLoader.loadScript(this, args[0]);
-        onStart();
-        super.onResume();
-        hideProgress();
+        ScriptLoader.loadScript(this);
+        runOnUiThread(new Runnable() {
+            public void run() {
+                ScriptLoader.callOnCreate(EntryPointActivity.this, args[0]);
+                onStart();
+                onResume();
+                hideProgress();
+            }
+        });
     }
 
     private void showProgress() {
@@ -186,4 +178,24 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         }
     }
 
+    private void registerPackageInstallReceiver() {
+        receiver = new BroadcastReceiver(){
+            public void onReceive(Context context, Intent intent) {
+                Log.i("received broadcast: " + intent);
+                Log.i("URI: " + intent.getData());
+                if (intent.getData().toString().equals("package:org.ruboto.core")) {
+                    Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_SHORT).show();
+                    if (receiver != null) {
+        	            unregisterReceiver(receiver);
+        	            receiver = null;
+                    }
+                    showProgress();
+                    initJRuby(false);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addDataScheme("package");
+        registerReceiver(receiver, filter);
+    }
 }

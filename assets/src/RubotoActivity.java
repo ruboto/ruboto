@@ -48,15 +48,18 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         }
 
         if (JRubyAdapter.isInitialized() && scriptInfo.isReadyToLoad()) {
-    	    ScriptLoader.loadScript(this, (Object[]) args);
+    	    ScriptLoader.loadScript(this);
+    	    ScriptLoader.callOnCreate(this, (Object[]) args);
         } else {
             super.onCreate(bundle);
         }
     }
 
+    // FIXME(uwe):  What is this for?
     public boolean rubotoAttachable() {
       return true;
     }
+    // EMXIF
 
   /****************************************************************************************
    * 

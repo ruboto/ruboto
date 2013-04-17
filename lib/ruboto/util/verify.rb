@@ -17,7 +17,10 @@ module Ruboto
       end
 
       def save_manifest
-        File.open("AndroidManifest.xml", 'w') {|f| REXML::Formatters::OrderedAttributes.new(4).write(verify_manifest.document, f)}
+        File.open('AndroidManifest.xml', 'w') do |f|
+          REXML::Formatters::OrderedAttributes.new(4).write(verify_manifest.document, f)
+          f.puts
+        end
       end
       
       def verify_test_manifest
@@ -27,7 +30,7 @@ module Ruboto
       end
 
       def save_test_manifest
-        File.open("test/AndroidManifest.xml", 'w') {|f| verify_test_manifest.document.write(f, 4)}
+        File.open('test/AndroidManifest.xml', 'w') {|f| verify_test_manifest.document.write(f, 4)}
       end
 
       def verify_package
@@ -42,7 +45,7 @@ module Ruboto
 
       def verify_sdk_versions
         verify_manifest
-        @uses_sdk ||= @manifest.elements["uses-sdk"]
+        @uses_sdk ||= @manifest.elements['uses-sdk']
         abort "you must specify your sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @uses_sdk
         @uses_sdk
       end
@@ -82,7 +85,7 @@ module Ruboto
       end
 
       def save_ruboto_config
-        File.open("ruboto.yml", 'w') {|f| YAML.dump verify_ruboto_config}
+        File.open('ruboto.yml', 'w') {|f| f << YAML.dump(verify_ruboto_config)}
       end
 
     end

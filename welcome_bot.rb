@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!ruby
 
 require 'socket'
 require 'yaml'
@@ -35,10 +35,9 @@ class WelcomeBot
   end
 
   def handle_server_input(s)
-    puts s
     case s.strip
     when /^PING :(.+)$/i
-      puts '[ Server ping ]'
+      puts "[ Server ping ]: #{s}"
       send "PONG :#{$1}"
     when /^:(.+?)!(.+?)@(.+?)\sPRIVMSG\s.+\s:[\001]PING (.+)[\001]$/i
       puts "[ CTCP PING from #{$1}!#{$2}@#{$3} ]"

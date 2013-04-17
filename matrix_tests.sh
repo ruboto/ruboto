@@ -60,3 +60,5 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     done
   done
 done
+
+echo Matrix tests completed OK!

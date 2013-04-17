@@ -21,15 +21,17 @@ public class ScriptLoader {
         return false;
     }
 
-    public static void loadScript(final RubotoComponent component, Object... args) {
+    public static void loadScript(final RubotoComponent component) {
         try {
             if (component.getScriptInfo().getScriptName() != null) {
-                System.out.println("Looking for Ruby class: " + component.getScriptInfo().getRubyClassName());
+                Log.d("Loading component: " + component);
+                Log.d("Looking for Ruby class: " + component.getScriptInfo().getRubyClassName());
                 Object rubyClass = JRubyAdapter.get(component.getScriptInfo().getRubyClassName());
-                System.out.println("Found: " + rubyClass);
+                Log.d("Found: " + rubyClass);
                 final Script rubyScript = new Script(component.getScriptInfo().getScriptName());
                 Object rubyInstance;
                 if (rubyScript.exists()) {
+                    Log.d("Found script.");
                     rubyInstance = component;
                     final String script = rubyScript.getContents();
                     boolean scriptContainsClass = script.matches("(?s).*class "
@@ -38,12 +40,13 @@ public class ScriptLoader {
                             .equals(component.getClass().getSimpleName());
                     if (scriptContainsClass) {
                         if (hasBackingJavaClass) {
+                            Log.d("hasBackingJavaClass");
                             if (rubyClass != null && !rubyClass.toString().startsWith("Java::")) {
-                                System.out.println("Found Ruby class instead of Java class.  Reloading.");
+                                Log.d("Found Ruby class instead of Java class.  Reloading.");
                                 rubyClass = null;
                             }
                         } else {
-                            System.out.println("Script defines methods on meta class");
+                            Log.d("Script defines methods on meta class");
 
                             // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
                             if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
@@ -60,11 +63,11 @@ public class ScriptLoader {
                         }
                     }
                     if (rubyClass == null || !hasBackingJavaClass) {
-                        System.out.println("Loading script: " + component.getScriptInfo().getScriptName());
+                        Log.d("Loading script: " + component.getScriptInfo().getScriptName());
                         if (scriptContainsClass) {
-                            System.out.println("Script contains class definition");
+                            Log.d("Script contains class definition");
                             if (rubyClass == null && hasBackingJavaClass) {
-                                System.out.println("Script has separate Java class");
+                                Log.d("Script has separate Java class");
 
                                 // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
                                 if (!JRubyAdapter.isJRubyPreOneSeven()) {
@@ -74,7 +77,7 @@ public class ScriptLoader {
 
                                 rubyClass = JRubyAdapter.runScriptlet("Java::" + component.getClass().getName());
                             }
-                            System.out.println("Set class: " + rubyClass);
+                            Log.d("Set class: " + rubyClass);
                             JRubyAdapter.put(component.getScriptInfo().getRubyClassName(), rubyClass);
                             // FIXME(uwe):  Collect these threads in a ThreadGroup ?
                             Thread t = new Thread(null, new Runnable(){
@@ -82,7 +85,7 @@ public class ScriptLoader {
                                     long loadStart = System.currentTimeMillis();
                                     JRubyAdapter.setScriptFilename(rubyScript.getAbsolutePath());
                                     JRubyAdapter.runScriptlet(script);
-                                    System.out.println("Script load took " + (System.currentTimeMillis() - loadStart) + "ms");
+                                    Log.d("Script load took " + (System.currentTimeMillis() - loadStart) + "ms");
                                 }
                             }, "ScriptLoader for " + rubyClass, 128 * 1024);
                             try {
@@ -101,19 +104,16 @@ public class ScriptLoader {
                     }
                 } else if (rubyClass != null) {
                     // We have a predefined Ruby class without corresponding Ruby source file.
-                    System.out.println("Create separate Ruby instance for class: " + rubyClass);
+                    Log.d("Create separate Ruby instance for class: " + rubyClass);
                     rubyInstance = JRubyAdapter.runRubyMethod(rubyClass, "new");
                     JRubyAdapter.runRubyMethod(rubyInstance, "instance_variable_set", "@ruboto_java_instance", component);
                 } else {
                     // Neither script file nor predefined class
+                    Log.e("Missing script and class.  Either script or predefined class must be present.");
                     throw new RuntimeException("Either script or predefined class must be present.");
                 }
-                if (rubyClass != null) {
-                    if (component instanceof android.content.Context) {
-                        callOnCreate(rubyInstance, args, component.getScriptInfo().getRubyClassName());
-                    }
-                }
                 component.getScriptInfo().setRubyInstance(rubyInstance);
+                Log.d(component.getScriptInfo().getRubyInstance() + "(" + component.getScriptInfo().getRubyClassName() + "): " + JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false)"));
             }
         } catch(IOException e){
             e.printStackTrace();
@@ -123,27 +123,29 @@ public class ScriptLoader {
         }
     }
 
-    private static final void callOnCreate(Object rubyInstance, Object[] args, String rubyClassName) {
-        System.out.println("Call onCreate on: " + rubyInstance + ", " + JRubyAdapter.get("JRUBY_VERSION"));
-        // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-        if (JRubyAdapter.isJRubyPreOneSeven()) {
-            if (args.length > 0) {
-                JRubyAdapter.put("$bundle", args[0]);
-            }
-            JRubyAdapter.put("$ruby_instance", rubyInstance);
-            JRubyAdapter.runScriptlet("$ruby_instance.on_create(" + (args.length > 0 ? "$bundle" : "") + ")");
-        } else if (JRubyAdapter.isJRubyOneSeven()) {
-            // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
-            if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
-                JRubyAdapter.runRubyMethod(rubyInstance, "onCreate", args);
-            } else if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
-                JRubyAdapter.runRubyMethod(rubyInstance, "on_create", args);
+    public static final void callOnCreate(final RubotoComponent component, Object... args) {
+        if (component instanceof android.content.Context) {
+            Log.d("Call onCreate on: " + component.getScriptInfo().getRubyInstance() + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+            // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
+            if (JRubyAdapter.isJRubyPreOneSeven()) {
+                if (args.length > 0) {
+                    JRubyAdapter.put("$bundle", args[0]);
+                }
+                JRubyAdapter.put("$ruby_instance", component.getScriptInfo().getRubyInstance());
+                JRubyAdapter.runScriptlet("$ruby_instance.on_create(" + (args.length > 0 ? "$bundle" : "") + ")");
+            } else if (JRubyAdapter.isJRubyOneSeven()) {
+                // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
+                if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
+                    JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onCreate", args);
+                } else if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
+                    JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "on_create", args);
+                }
+                // EMXIF
+            } else {
+                throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
             }
             // EMXIF
-        } else {
-            throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
         }
-        // EMXIF
     }
 
 }

@@ -1,7 +1,7 @@
 import android.util.Log
 
 class SampleBroadcastReceiver
-  # will get called whenever the BroadcastReceiver receives an intent (whenever onReceive is called)
+  # Will get called whenever the BroadcastReceiver receives an intent.
   def onReceive(context, intent)
     Log.v 'SampleBroadcastReceiver', 'Broadcast received!'
     Log.v 'SampleBroadcastReceiver', intent.getExtras.to_s

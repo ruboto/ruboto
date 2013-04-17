@@ -30,7 +30,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
 
     public void onReceive(android.content.Context context, android.content.Intent intent) {
         try {
-            Log.d("onReceive: " + this);
+            Log.d("onReceive: " + this + " " + ScriptLoader.isCalledFromJRuby() + " " + scriptLoaded);
             if (ScriptLoader.isCalledFromJRuby()) {
                 return;
             }
@@ -43,6 +43,8 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                 }
             }
 
+            Log.d("onReceive: JRuby version: " + JRubyAdapter.isJRubyPreOneSeven() + " " + JRubyAdapter.isJRubyOneSeven() + " " + JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onReceive}") + " " + scriptInfo.getRubyClassName());
+            Log.d("onReceive " + this + " " + scriptInfo.getRubyInstance() + "(" + scriptInfo.getRubyClassName() + "): " + JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false)"));
             // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
             if (JRubyAdapter.isJRubyPreOneSeven()) {
     	        JRubyAdapter.put("$broadcast_receiver", this);
@@ -52,6 +54,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
             } else if (JRubyAdapter.isJRubyOneSeven()) {
             // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
             if ((Boolean)JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onReceive}")) {
+                Log.d("onReceive: call method");
     	        JRubyAdapter.runRubyMethod(this, "onReceive", new Object[]{context, intent});
             } else if ((Boolean)JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_receive}")) {
     	        JRubyAdapter.runRubyMethod(this, "on_receive", new Object[]{context, intent});

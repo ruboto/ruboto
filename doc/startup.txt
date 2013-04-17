@@ -1,0 +1,41 @@
+Different startup sequences
+
+Initial entry point activity:
+
+InheritedActivity            EntryPointActivity      RubotoActivity      Activity
+=================================================================================
+onCreate
+scriptInfo.setClassName ===> onCreate
+                             showProgress
+                             initJRuby          ===> onCreate       ===> onCreate
+
+===========================> onResume           ===> onResume       ===> onResume
+
+===========================> fireRubotoActivity
+                             ScriptLoader.loadScript
+                             runOnUiThread:
+                               ScriptLoader.callOnCreate
+                               onStart          ===> onStart        ===> onStart    Duplicate!
+                               onResume         ===> onResume       ===> onResume   Duplicate!
+                               hideProgress
+
+Second entry point activity:
+
+InheritedActivity            EntryPointActivity      RubotoActivity      Activity
+=================================================================================
+onCreate
+scriptInfo.setClassName
+setClassName            ===> onCreate
+                             appStarted = true  ===> onCreate
+                                                     ScriptLoader.loadScript
+                                                     ScriptLoader.callOnCreate => onCreate
+
+===========================> onResume           ===> onResume       ===> onResume
+
+
+
+RubotoActivity with class name:
+
+RubotoActivity      Activity
+=================================================================================
+onCreate
