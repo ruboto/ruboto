@@ -24,7 +24,6 @@ public class ScriptLoader {
     public static void loadScript(final RubotoComponent component) {
         try {
             if (component.getScriptInfo().getScriptName() != null) {
-                Log.d("Loading component: " + component);
                 Log.d("Looking for Ruby class: " + component.getScriptInfo().getRubyClassName());
                 Object rubyClass = JRubyAdapter.get(component.getScriptInfo().getRubyClassName());
                 Log.d("Found: " + rubyClass);

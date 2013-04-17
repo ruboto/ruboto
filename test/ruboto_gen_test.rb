@@ -109,7 +109,7 @@ class RubotoGenTest < Test::Unit::TestCase
 
       # FIXME(uwe):  Workaround for Ruboto Issue #246
       java_source = File.read(java_source_file)
-      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T>\2<T>').gsub(/T.class/, 'Object.class')}
+      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T> \2<T>').gsub(/T.class/, 'Object.class')}
       # EMXIF
 
       assert File.exists?('src/ruboto_array_adapter.rb')
