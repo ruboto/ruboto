@@ -1,4 +1,4 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'test/app_test_methods'
 
 module UpdateTestMethods
@@ -34,10 +34,10 @@ module UpdateTestMethods
   unless Gem::Version.new(@old_ruboto_version) <= Gem::Version.new('0.10.0.rc.0')
     def test_broadcast_receiver
       Dir.chdir APP_DIR do
-        puts "Adding a broadcast receiver"
+        puts 'Adding a broadcast receiver'
         install_ruboto_gem @old_ruboto_version
         system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
-        fail "Creation of broadcast receiver failed" if $? != 0
+        fail 'Creation of broadcast receiver failed' if $? != 0
         assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
         assert File.exists? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
@@ -49,10 +49,10 @@ module UpdateTestMethods
 
     def test_broadcast_receiver_updated_twice
       Dir.chdir APP_DIR do
-        puts "Adding a broadcast receiver"
+        puts 'Adding a broadcast receiver'
         install_ruboto_gem @old_ruboto_version
         system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
-        fail "Creation of broadcast receiver failed" if $? != 0
+        fail 'Creation of broadcast receiver failed' if $? != 0
         assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
         assert File.exists? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
@@ -66,10 +66,10 @@ module UpdateTestMethods
 
   def test_subclass_is_updated
     Dir.chdir APP_DIR do
-      puts "Adding a subclass"
+      puts 'Adding a subclass'
       install_ruboto_gem @old_ruboto_version
       system "ruboto _#{@old_ruboto_version}_ gen subclass android.database.sqlite.SQLiteOpenHelper --name MyDatabaseHelper --method_base on"
-      fail "Creation of subclass failed" if $? != 0
+      fail 'Creation of subclass failed' if $? != 0
       assert File.exists? 'src/org/ruboto/test_app/MyDatabaseHelper.java'
       if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.8.1.rc.0')
         assert File.exists? 'src/my_database_helper.rb'
@@ -86,10 +86,10 @@ module UpdateTestMethods
   private
 
   def assert_code(code)
-    filename = "src/ruboto_test_app_activity.rb"
+    filename = 'src/ruboto_test_app_activity.rb'
     Dir.chdir APP_DIR do
       s = File.read(filename)
-      raise "Code injection failed!" unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
+      raise 'Code injection failed!' unless s.gsub!(/(require 'ruboto\/widget')/, "\\1\n#{code}")
       File.open(filename, 'w') { |f| f << s }
     end
   end

@@ -28,14 +28,13 @@ ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
 class MyArrayAdapter < android.widget.ArrayAdapter
   def get_view(position, convert_view, parent)
-    puts "IN get_view!!!"
     @inflater ||= context.getSystemService(Context::LAYOUT_INFLATER_SERVICE)
     row = convert_view ? convert_view : @inflater.inflate(mResource, nil)
     row.findViewById(mFieldId).text = get_item(position)
     row
   rescue Exception
     puts "Exception getting list item view: \#$!"
-    puts $!.backtrace.join("\n")
+    puts $!.backtrace.join("\\n")
     convert_view
   end
 end

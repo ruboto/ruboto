@@ -482,7 +482,7 @@ end
 # Return nil if the package is not installed.
 def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
-  %w( -0 -1 -2).each do |i|
+  ['', '-0', '-1', '-2'].each do |i|
     path = "/data/app/#{package_name}#{i}.apk"
     o = `adb shell ls -l #{path}`.chomp
     if o =~ /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(path)}$/
