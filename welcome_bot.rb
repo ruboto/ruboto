@@ -93,8 +93,6 @@ class WelcomeBot
       @store[:people][$1][:quit] = Time.now
       dump_members
       save_store
-    else
-      puts '[ IGNORED ]'
     end
   end
 
@@ -118,6 +116,7 @@ class WelcomeBot
 
   def update_record(join_count)
     send "PRIVMSG #{@channel} :Wow!  #{join_count} people on this channel!  That's a new record!"
+    send "PRIVMSG donV :#{join_count} people on the #ruboto channel!  That's a new record!"
     @store[:record] = join_count
   end
 
