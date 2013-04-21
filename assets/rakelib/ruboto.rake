@@ -4,6 +4,7 @@ require 'time'
 require 'rake/clean'
 require 'rexml/document'
 require 'timeout'
+require 'net/telnet'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
@@ -654,7 +655,7 @@ def start_emulator
   else
     emulator_cmd = 'emulator-arm'
   end
-  
+
   emulator_opts = '-partition-size 256'
   if ENV['DISPLAY'].nil?
     emulator_opts << ' -no-window -no-audio'
@@ -662,6 +663,24 @@ def start_emulator
 
   avd_name = "Android_#{sdk_level_name}"
   new_snapshot = false
+
+  if `adb devices` =~ /emulator-5554/
+    t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK/)
+    output = ''
+    t.cmd('avd name') { |c| output << c }
+    if output =~ /OK\n(.*)\nOK/
+      running_avd_name = $1
+      if running_avd_name == avd_name
+      puts "Emulator #{avd_name} is already running."
+      return
+      else
+        puts "Emulator #{running_avd_name} is running."
+      end
+    else
+      puts 'No emulator is running.'
+    end
+  end
+
   loop do
     `killall -0 #{emulator_cmd} 2> /dev/null`
     if $? == 0
@@ -703,10 +722,10 @@ def start_emulator
       `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini`
       new_snapshot = true
     end
-  
+
     puts 'Start emulator'
     system "emulator -avd #{avd_name} #{emulator_opts} &"
-  
+
     3.times do |i|
       sleep 1
       `killall -0 #{emulator_cmd} 2> /dev/null`
@@ -716,7 +735,7 @@ def start_emulator
       if i == 3
         print 'Waiting for emulator: ...'
       elsif i > 3
-          print '.'
+        print '.'
       end
     end
     puts
@@ -733,12 +752,12 @@ def start_emulator
         if i == 3
           print 'Waiting for emulator: ...'
         elsif i > 3
-            print '.'
+          print '.'
         end
         sleep 1
       end
     end
-  
+
     `killall -0 #{emulator_cmd} 2> /dev/null`
     if $? == 0
       print 'Emulator started: '
@@ -761,7 +780,7 @@ def start_emulator
     puts 'Allow the emulator to calm down a bit.'
     sleep 15
   end
-  
+
   system '(
     set +e
     for i in 1 2 3 4 5 6 7 8 9 10 ; do
@@ -778,8 +797,8 @@ def start_emulator
     set -e
     exit 1
   ) &'
-  
+
   system 'adb logcat > adb_logcat.log &'
-  
+
   puts "Emulator #{avd_name} started OK."
 end

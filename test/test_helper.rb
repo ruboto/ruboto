@@ -258,7 +258,7 @@ class Test::Unit::TestCase
     end
     check_platform_installation
     Dir.chdir APP_DIR do
-      system 'rake test:quick'
+      system 'rake emulator test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
     end
   end
