@@ -53,12 +53,23 @@ class RakeTest < Test::Unit::TestCase
       assert_equal "android:minSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:minSdkVersion='\d+'/)
       assert_equal "android:targetSdkVersion='#{ANDROID_TARGET}'", manifest.slice(/android:targetSdkVersion='\d+'/)
       prop_file = File.read('project.properties')
-      File.open('project.properties', 'w'){|f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, 'target=android-6')}
+      File.open('project.properties', 'w') { |f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, 'target=android-6') }
       system 'rake debug'
       manifest = File.read('AndroidManifest.xml')
       assert_equal "android:minSdkVersion='6'", manifest.slice(/android:minSdkVersion='\d+'/)
       assert_equal "android:targetSdkVersion='6'", manifest.slice(/android:targetSdkVersion='\d+'/)
     end
+  end
+
+  def test_install_with_space_in_project_name
+    app_dir = "#{APP_DIR} with_space"
+    FileUtils.mv APP_DIR, app_dir
+    Dir.chdir app_dir do
+      system 'rake install'
+      raise "'rake install' exited with code #$?" unless $? == 0
+    end
+  ensure
+    FileUtils.rm_rf app_dir
   end
 
 end
