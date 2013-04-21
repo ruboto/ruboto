@@ -1,10 +1,11 @@
 # http://rkistner.github.com/android/2013/02/05/android-builds-on-travis-ci/
 language: ruby
 before_install:
+  - export ANDROID_OS=$ANDROID_TARGET
   - sudo apt-get update -qq
   - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
-  - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
-  - tar -zxf android-sdk_r21-linux.tgz
+  - wget http://dl.google.com/android/android-sdk_r21.1-linux.tgz
+  - tar -zxf android-sdk_r21.1-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
   - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
   - android update sdk --no-ui --filter tool,platform-tool,android-8,android-$ANDROID_TARGET,sysimg-$ANDROID_TARGET
