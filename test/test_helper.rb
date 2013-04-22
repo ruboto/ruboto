@@ -265,11 +265,11 @@ class Test::Unit::TestCase
 
   def check_platform_installation
     if RUBOTO_PLATFORM == 'STANDALONE'
-      system 'rake emulator platform:uninstall'
+      system 'rake platform:uninstall'
     elsif RUBOTO_PLATFORM == 'CURRENT'
-      system 'rake emulator platform:current'
+      system 'rake platform:current'
     elsif RUBOTO_PLATFORM == 'FROM_GEM'
-      system 'rake emulator platform:install'
+      system 'rake platform:install'
     else
       fail "Unknown Ruboto platform: #{RUBOTO_PLATFORM.inspect}"
     end
