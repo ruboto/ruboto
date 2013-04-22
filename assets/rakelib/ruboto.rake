@@ -163,9 +163,9 @@ task :tag do
   sh 'git push origin master --tags'
 end
 
-desc 'Start the emulator with larger disk'
+desc 'Start the emulator'
 task :emulator do
-  start_emulator
+  start_emulator(sdk_level)
 end
 
 desc 'Start the application on the device/emulator.'
@@ -648,7 +648,7 @@ def stop_app
   output !~ /Operation not permitted/
 end
 
-def start_emulator
+def start_emulator(sdk_level)
   STDOUT.sync = true
   # FIXME(uwe):  Use RBConfig instead
   if `uname -m`.chomp == 'x86_64'
