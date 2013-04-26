@@ -43,8 +43,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                 }
             }
 
-            Log.d("onReceive: JRuby version: " + JRubyAdapter.isJRubyPreOneSeven() + " " + JRubyAdapter.isJRubyOneSeven() + " " + JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onReceive}") + " " + scriptInfo.getRubyClassName());
-            Log.d("onReceive " + this + " " + scriptInfo.getRubyInstance() + "(" + scriptInfo.getRubyClassName() + "): " + JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false)"));
             // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
             if (JRubyAdapter.isJRubyPreOneSeven()) {
     	        JRubyAdapter.put("$broadcast_receiver", this);

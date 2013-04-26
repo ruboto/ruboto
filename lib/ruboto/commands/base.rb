@@ -365,6 +365,61 @@ module Ruboto
             end
           end
 
+          mode 'setup' do
+            def run
+              case RbConfig::CONFIG['host_os']
+              when /^darwin(.*)/
+                java_loc = `which java`
+                java_loc = nil if java_loc.empty?
+                if java_loc
+                  puts "Found Java at #{java_loc}"
+                else
+                  puts 'Java not found.'
+                end
+                javac_loc = `which javac`
+                javac_loc = nil if javac_loc.empty?
+                if javac_loc
+                  puts "Found Java compiler at #{javac_loc}"
+                else
+                  puts 'Java compiler not found.'
+                end
+                adb_loc = `which adb`
+                adb_loc = nil if adb_loc.empty?
+                if adb_loc
+                  puts "Found Android SDK command adb at #{adb_loc}"
+                else
+                  puts 'Android command adb not found.'
+                end
+                dx_loc = `which dx`
+                dx_loc = nil if dx_loc.empty?
+                if dx_loc
+                  puts "Found Android SDK command dx at #{dx_loc}"
+                else
+                  puts 'Android command dx not found.'
+                end
+                emulator_loc = `which emulator`
+                emulator_loc = nil if emulator_loc.empty?
+                if emulator_loc
+                  puts "Found Android emulator at #{emulator_loc}"
+                else
+                  puts 'Android emulator not found.'
+                end
+                puts
+                if java_loc && javac_loc && adb_loc && dx_loc && emulator_loc
+                  puts '*** Ruboto setup is OK! ***'
+                else
+                  puts '!!! Ruboto setup is NOT OK !!!'
+                end
+                puts
+              else
+                puts "\nWe did not recognize your platform: #{RbConfig::CONFIG['host_os'].inspect}."
+                puts 'If you would like to contribute to the setup for this platform,'
+                puts 'please file an issue at https://github.com/ruboto/ruboto/issues'
+                puts
+              end
+            end
+          end
+
           option 'version' do
             description 'display ruboto version'
           end
