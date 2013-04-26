@@ -390,7 +390,7 @@ module Ruboto
                 else
                   puts 'Android command adb not found.'
                 end
-                dx_loc = `which dx`
+                dx_loc = `which dx`.chomp
                 dx_loc = nil if dx_loc.empty?
                 if dx_loc
                   puts "Found Android SDK command dx at #{dx_loc}"
@@ -414,9 +414,25 @@ module Ruboto
                   puts 'Apache ANT not found.'
                 end
 
+                begin
+                  if File.read('project.properties') =~ /target=(.*)/
+                    puts "Detected app with api level #{$1}"
+                    platform_sdk_loc = `ls -d #{dx_loc}\/..\/..\/platforms\/#{$1}`
+                    platform_sdk_loc = nil if platform_sdk_loc.empty?
+                    if platform_sdk_loc
+                      puts "Found Android platform SDK at #{platform_sdk_loc}"
+                    else
+                      puts 'Android platform SDK not found.'
+                    end
+                  end
+                rescue
+                  platform_sdk_loc = ''
+                end
+
                 puts
 
-                if java_loc && javac_loc && adb_loc && dx_loc && emulator_loc
+                if java_loc && javac_loc && adb_loc && dx_loc && emulator_loc &&
+                    platform_sdk_loc
                   puts '*** Ruboto setup is OK! ***'
                 else
                   puts '!!! Ruboto setup is NOT OK !!!'
