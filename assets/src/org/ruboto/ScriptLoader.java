@@ -112,7 +112,6 @@ public class ScriptLoader {
                     throw new RuntimeException("Either script or predefined class must be present.");
                 }
                 component.getScriptInfo().setRubyInstance(rubyInstance);
-                Log.d(component.getScriptInfo().getRubyInstance() + "(" + component.getScriptInfo().getRubyClassName() + "): " + JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false)"));
             }
         } catch(IOException e){
             e.printStackTrace();
@@ -124,7 +123,7 @@ public class ScriptLoader {
 
     public static final void callOnCreate(final RubotoComponent component, Object... args) {
         if (component instanceof android.content.Context) {
-            Log.d("Call onCreate on: " + component.getScriptInfo().getRubyInstance() + ", " + JRubyAdapter.get("JRUBY_VERSION"));
+            Log.d("Call onCreate on: " + component.getScriptInfo().getRubyInstance());
             // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
             if (JRubyAdapter.isJRubyPreOneSeven()) {
                 if (args.length > 0) {

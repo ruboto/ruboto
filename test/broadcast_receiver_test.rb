@@ -38,6 +38,15 @@ class BroadcastReceiverTest < Test::Unit::TestCase
     end
 EOF
 
+      assert activity_content.sub!(/^  private$/m, <<EOF)
+  def onPause
+    super
+    unregisterReceiver(@receiver)
+  end
+
+  private
+EOF
+
       assert activity_content.sub!(/  def butterfly\n.*?  end\n/m, <<EOF)
   def butterfly
     intent = android.content.Intent.new
@@ -45,6 +54,7 @@ EOF
     send_broadcast(intent)
   end
 EOF
+
       File.open(activity_filename, 'w') { |f| f << activity_content }
 
       system "#{RUBOTO_CMD} gen class BroadcastReceiver --name ClickReceiver"

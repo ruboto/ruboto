@@ -51,11 +51,25 @@ if new_dx_content =~ xmx_pattern &&
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
 end
 
-def manifest; @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
-def package; manifest.root.attribute('package') end
-def build_project_name; @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
-def scripts_path; @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
-def app_files_path; @app_files_path ||= "/data/data/#{package}/files" end
+def manifest;
+  @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE))
+end
+
+def package;
+  manifest.root.attribute('package')
+end
+
+def build_project_name;
+  @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value
+end
+
+def scripts_path;
+  @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts"
+end
+
+def app_files_path;
+  @app_files_path ||= "/data/data/#{package}/files"
+end
 
 PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
@@ -76,6 +90,7 @@ RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
 APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
+APK_FILE_REGEXP = /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+(.*)$/
 
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
@@ -484,36 +499,16 @@ end
 # Return nil if the package is not installed.
 def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
-  ['', '-0', '-1', '-2'].each do |i|
-    path = "/data/app/#{package_name}#{i}.apk"
-    o = `adb shell ls -l #{path}`.chomp
-    if o =~ /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(path)}$/
-      installed_apk_size = $1.to_i
-      installed_timestamp = Time.parse($2)
-      apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
-          installed_timestamp >= File.mtime(apk_file))
-        return true
-      else
-        return false
-      end
-    end
-
-    sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
-    o = `adb shell ls -l #{sdcard_path}`.chomp
-    if o =~ /^-r-xr-xr-x system\s+root\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+#{File.basename(sdcard_path)}$/
-      installed_apk_size = $1.to_i
-      installed_timestamp = Time.parse($2)
-      apk_file = test ? TEST_APK_FILE : APK_FILE
-      if !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
-          installed_timestamp >= File.mtime(apk_file))
-        return true
-      else
-        return false
-      end
-    end
-  end
-  nil
+  path_line = `adb shell pm path #{package_name}`.chomp
+  return nil if path_line.empty?
+  path = path_line[8..-1]
+  o = `adb shell ls -l #{path}`.chomp
+  raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
+  installed_apk_size = $1.to_i
+  installed_timestamp = Time.parse($2)
+  apk_file = test ? TEST_APK_FILE : APK_FILE
+  !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
+      installed_timestamp >= File.mtime(apk_file))
 end
 
 def replace_faulty_code(faulty_file, faulty_code)
@@ -672,8 +667,8 @@ def start_emulator(sdk_level)
     if output =~ /OK\n(.*)\nOK/
       running_avd_name = $1
       if running_avd_name == avd_name
-      puts "Emulator #{avd_name} is already running."
-      return
+        puts "Emulator #{avd_name} is already running."
+        return
       else
         puts "Emulator #{running_avd_name} is running."
       end
