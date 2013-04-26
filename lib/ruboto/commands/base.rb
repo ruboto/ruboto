@@ -397,6 +397,7 @@ module Ruboto
                 else
                   puts 'Android command dx not found.'
                 end
+
                 emulator_loc = `which emulator`
                 emulator_loc = nil if emulator_loc.empty?
                 if emulator_loc
@@ -404,7 +405,17 @@ module Ruboto
                 else
                   puts 'Android emulator not found.'
                 end
+
+                ant_loc = `which ant`
+                ant_loc = nil if ant_loc.empty?
+                if ant_loc
+                  puts "Found Apache ANT at #{ant_loc}"
+                else
+                  puts 'Apache ANT not found.'
+                end
+
                 puts
+
                 if java_loc && javac_loc && adb_loc && dx_loc && emulator_loc
                   puts '*** Ruboto setup is OK! ***'
                 else
