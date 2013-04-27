@@ -43,7 +43,7 @@ new_dx_content = File.read(dx_filename).dup
 # set defaultXmx=-Xmx1024M
 
 xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
-MINIMUM_DX_HEAP_SIZE = 2304
+MINIMUM_DX_HEAP_SIZE = 2048
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < MINIMUM_DX_HEAP_SIZE*1024**2
   puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
