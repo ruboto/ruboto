@@ -538,6 +538,8 @@ def build_apk(t, release)
     changed_prereqs.each { |f| puts "#{f} changed." }
     puts "Forcing rebuild of #{apk_file}."
   end
+  sh 'free'
+  sh 'vmstat'
   if release
     sh "#{ANT_CMD} release"
   else
