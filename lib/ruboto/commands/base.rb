@@ -468,11 +468,11 @@ module Ruboto
                   if File.exists? platform_sdk_loc
                     puts "Found Android platform SDK at #{platform_sdk_loc}"
                   else
-                    puts 'Android platform SDK not found.'
+                    puts "Android platform SDK for #{api_level} not found."
                     print 'Would you like to download and install it? (Y/n): '
                     a = STDIN.gets.chomp.upcase
                     if a == 'Y' || a.empty?
-                      system "android update sdk --no-ui --filter tool,platform-tool,#{api_level},sysimg-#{api_level.slice(/\d+$/)}"
+                      system "android update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
                     else
                       platform_sdk_loc = nil
                     end
@@ -496,8 +496,9 @@ module Ruboto
                     if a == 'Y' || a.empty?
                       File.open(File.expand_path('~/.profile'), 'a') do |f|
                         f.puts "\n# BEGIN Ruboto PATH setup"
-                        f << missing_paths.map {|path| %Q{export PATH="#{path}:$PATH"\n}}
+                        missing_paths.each{|path| f.puts %Q{export PATH="#{path}:$PATH"}}
                         f.puts '# END Ruboto PATH setup'
+                        f.puts
                       end
                     else
                       platform_sdk_loc = nil
