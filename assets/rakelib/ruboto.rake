@@ -49,6 +49,7 @@ if new_dx_content =~ xmx_pattern &&
   puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
   new_dx_content.sub!(xmx_pattern, %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"})
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
+  puts new_dx_content.lines.grep(xmx_pattern)
 end
 
 def manifest;

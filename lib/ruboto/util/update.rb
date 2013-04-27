@@ -466,11 +466,11 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              android_jar = Dir["#{Ruboto::SdkVersions::ANDROID_HOME}/platforms/*/android.jar"][0]
+              android_jar = Dir["#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/*/android.jar"][0]
               unless android_jar
                 puts
                 puts '*' * 80
-                puts "    Could not find any Android platforms in #{Ruboto::SdkVersions::ANDROID_HOME}/platforms."
+                puts "    Could not find any Android platforms in #{Ruboto::SdkLocations::ANDROID_HOME}/platforms."
                 puts '    At least one Android Platform SDK must be installed to compile the Ruboto classes.'
                 puts '    Please install an Android Platform SDK using the "android" package manager.'
                 puts '*' * 80
