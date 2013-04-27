@@ -4,6 +4,7 @@ require 'rexml/document'
 require 'ruboto/version'
 require 'ruboto/description'
 require 'ruboto/sdk_versions'
+require 'ruboto/sdk_locations'
 require 'uri'
 require 'net/https'
 
@@ -15,7 +16,7 @@ PLATFORM_CURRENT_RELEASE_APK = File.expand_path('tmp/RubotoCore-release.apk', Fi
 MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
-EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
+EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 

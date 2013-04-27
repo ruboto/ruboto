@@ -5,9 +5,11 @@ require 'rubygems'
 require 'fileutils'
 require 'yaml'
 require 'ruboto/sdk_versions'
+require 'ruboto/sdk_locations'
 
 module RubotoTest
   include Ruboto::SdkVersions
+  include Ruboto::SdkLocations
 
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR

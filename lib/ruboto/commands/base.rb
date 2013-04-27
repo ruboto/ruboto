@@ -8,7 +8,6 @@ require 'ruboto/util/log_action'
 require 'ruboto/util/xml_element'
 require 'ruboto/util/code_formatting'
 require 'ruboto/util/build'
-require 'ruboto/util/update'
 require 'ruboto/util/verify'
 require 'ruboto/util/scan_in_api'
 require 'ruboto/core_ext/array'
@@ -20,28 +19,30 @@ module Ruboto
       include Ruboto::SdkVersions
 
       def self.main
-        Main {
+        Main do
           mode 'gen' do
+            require 'ruboto/util/update'
+
             mode 'app' do
               include Ruboto::Util::LogAction
               include Ruboto::Util::Build
               include Ruboto::Util::Update
               include Ruboto::Util::Verify
 
-              option('package'){
+              option('package') {
                 required
                 argument :required
                 description 'Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)'
               }
-              option('name'){
+              option('name') {
                 argument :required
                 description 'Name of your app.  Defaults to the last part of the package name capitalized.'
               }
-              option('activity'){
+              option('activity') {
                 argument :required
                 description 'Name of your primary Activity.  Defaults to the name of the application with Activity appended.'
               }
-              option('path'){
+              option('path') {
                 argument :required
                 description 'Path to where you want your app.  Defaults to the last part of the package name.'
               }
@@ -65,7 +66,7 @@ module Ruboto
 
               def run
                 package = params['package'].value
-                name = params['name'].value || package.split('.').last.split('_').map{|s| s.capitalize}.join
+                name = params['name'].value || package.split('.').last.split('_').map { |s| s.capitalize }.join
                 name[0..0] = name[0..0].upcase
                 activity = params['activity'].value || "#{name}Activity"
                 path = params['path'].value || package.split('.').last
@@ -91,8 +92,8 @@ module Ruboto
                   puts "Removed file #{"src/#{package.gsub '.', '/'}/#{activity}"}.java"
                   FileUtils.rm_f 'res/layout/main.xml'
                   puts 'Removed file res/layout/main.xml'
-                  verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2').gsub(/([a-z\d])([A-Z])/,'\1 \2')
-                  File.open('res/values/strings.xml', 'w') {|f| verify_strings.document.write(f, 4)}
+                  verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2').gsub(/([a-z\d])([A-Z])/, '\1 \2')
+                  File.open('res/values/strings.xml', 'w') { |f| verify_strings.document.write(f, 4) }
                 end
                 puts 'Done'
 
@@ -131,19 +132,19 @@ module Ruboto
               include Ruboto::Util::Build
               include Ruboto::Util::Verify
 
-              argument('class'){
+              argument('class') {
                 required
-                alternatives = Dir[File.join(Ruboto::ASSETS, 'src/Inheriting*.java')].map{|f| File.basename(f)[10..-6]} - %w(Class)
-                description "the Android Class that you want: #{alternatives[0..-2].map{|c| "#{c}, "}}or #{alternatives[-1]}"
-                validate {|v| alternatives.include? v}
+                alternatives = Dir[File.join(Ruboto::ASSETS, 'src/Inheriting*.java')].map { |f| File.basename(f)[10..-6] } - %w(Class)
+                description "the Android Class that you want: #{alternatives[0..-2].map { |c| "#{c}, " }}or #{alternatives[-1]}"
+                validate { |v| alternatives.include? v }
               }
 
-              option('script_name'){
+              option('script_name') {
                 argument :required
                 description 'name of the ruby script that this class will execute. Should end in .rb.  Optional.'
               }
 
-              option('name'){
+              option('name') {
                 required
                 argument :required
                 description 'name of the class (and file). Should be CamelCase'
@@ -174,83 +175,83 @@ module Ruboto
             mode 'subclass' do
               include Ruboto::Util::Build
 
-              argument('class'){
+              argument('class') {
                 required
                 description 'the Android Class that you want to subclass (e.g., package.Class).'
               }
 
-              option('name'){
+              option('name') {
                 required
                 argument :required
                 description 'name of the class (and file). Should be CamelCase'
               }
 
-              option('package'){
+              option('package') {
                 argument :required
                 description 'package for the new class (if not specified, uses project package)'
               }
 
-              option('method_base'){
+              option('method_base') {
                 required
-                validate {|i| %w(all on none abstract).include?(i)}
+                validate { |i| %w(all on none abstract).include?(i) }
                 argument :required
                 description 'the base set of methods to generate (adjusted with method_include and method_exclude): all, none, abstract, on (e.g., onClick)'
               }
 
-              option('method_include'){
+              option('method_include') {
                 argument :required
                 defaults ''
                 description 'additional methods to add to the base list'
               }
 
-              option('method_exclude'){
+              option('method_exclude') {
                 argument :required
                 defaults ''
                 description 'methods to remove from the base list'
               }
 
-              option('implements'){
+              option('implements') {
                 required
                 argument :required
                 defaults ''
                 description 'comma separated list interfaces to implement'
               }
 
-              option('force'){
+              option('force') {
                 argument :required
-                validate {|i| %w(include exclude).include?(i)}
+                validate { |i| %w(include exclude).include?(i) }
                 description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
               }
 
               def run
                 generate_inheriting_file 'Class', params['name'].value
                 generate_subclass_or_interface(
-                %w(class name package method_base method_include method_exclude implements force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h})
+                    %w(class name package method_base method_include method_exclude implements force).inject({}) { |h, i| h[i.to_sym] = params[i].value; h })
               end
             end
 
             mode 'interface' do
               include Ruboto::Util::Build
 
-              argument('interface'){
+              argument('interface') {
                 required
                 description 'the Android Interface that you want to implement (e.g., package.Interface).'
               }
 
-              option('name'){
+              option('name') {
                 required
                 argument :required
                 description 'name of the class (and file) that will implement the interface. Should be CamelCase'
               }
 
-              option('package'){
+              option('package') {
                 argument :required
                 description 'package for the new class (if not specified, uses project package)'
               }
 
-              option('force'){
+              option('force') {
                 argument :required
-                validate {|i| %w(include exclude).include?(i)}
+                validate { |i| %w(include exclude).include?(i) }
                 description "force added and deprecated interfaces (values: 'include' or 'exclude')"
               }
 
@@ -258,63 +259,63 @@ module Ruboto
                 # FIXME(uwe):  DEPRECATED!  Remove before Ruboto version 1.0.0.
                 puts "\nThe use of \"ruboto gen interface\" has been deprecated.  Please use\n\n    ruboto gen subclass\n\ninstead.\n\n"
                 generate_inheriting_file 'Class', params['name'].value
-                generate_subclass_or_interface %w(interface name package force).inject({}) {|h, i| h[i.to_sym] = params[i].value; h}
+                generate_subclass_or_interface %w(interface name package force).inject({}) { |h, i| h[i.to_sym] = params[i].value; h }
               end
             end
 
             mode 'core' do
               include Ruboto::Util::Build
 
-              argument('class'){
+              argument('class') {
                 required
-                validate {|i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i)}
+                validate { |i| %w(Activity Service BroadcastReceiver View PreferenceActivity TabActivity OnClickListener OnItemClickListener OnItemSelectedListener all).include?(i) }
                 description "Activity, Service, BroadcastReceiver, View, OnClickListener, OnItemClickListener, OnItemSelectedListener, or all (default = all); Other activities not included in 'all': PreferenceActivity, TabActivity"
               }
 
-              option('method_base'){
+              option('method_base') {
                 required
                 argument :required
-                validate {|i| %w(all on none).include?(i)}
+                validate { |i| %w(all on none).include?(i) }
                 defaults 'on'
                 description 'the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)'
               }
 
-              option('method_include'){
+              option('method_include') {
                 required
                 argument :required
                 defaults ''
                 description 'additional methods to add to the base list'
               }
 
-              option('method_exclude'){
+              option('method_exclude') {
                 required
                 argument :required
                 defaults ''
                 description 'methods to remove from the base list'
               }
 
-              option('implements'){
+              option('implements') {
                 required
                 argument :required
                 defaults ''
                 description "for classes only, interfaces to implement (cannot be used with 'gen core all')"
               }
 
-              option('force'){
+              option('force') {
                 argument :required
-                validate {|i| %w(include exclude).include?(i)}
+                validate { |i| %w(include exclude).include?(i) }
                 description "force handling of added and deprecated methods (values: 'include' or 'exclude') unless individually included or excluded"
               }
 
               def run
-                abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless
-                %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params['class'].value) or params['implements'].value == ''
-                generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) {|h, i| h[i] = params[i.to_s].value; h}
+                abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params['class'].value) or params['implements'].value == ''
+                generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) { |h, i| h[i] = params[i.to_s].value; h }
               end
             end
           end
 
           mode 'update' do
+            require 'ruboto/util/update'
             include Ruboto::Util::LogAction
             include Ruboto::Util::Update
             include Ruboto::Util::Verify
@@ -322,7 +323,7 @@ module Ruboto
             argument('what') {
               required
               # FIXME(uwe): Deprecated "ruboto update ruboto" in Ruboto 0.8.1.  Remove september 2013.
-              validate {|i| %w(jruby app ruboto).include?(i)}
+              validate { |i| %w(jruby app ruboto).include?(i) }
               description "What do you want to update: 'app', 'jruby', or 'ruboto'"
             }
 
@@ -357,7 +358,7 @@ module Ruboto
                 update_bundle
               when 'jruby' then
                 update_jruby(params['force'].value, true) || abort
-              # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
+                # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
               when 'ruboto' then
                 puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"
                 update_ruboto(params['force'].value) || abort
@@ -369,6 +370,8 @@ module Ruboto
             def run
               case RbConfig::CONFIG['host_os']
               when /^darwin(.*)/
+                missing_paths = []
+
                 java_loc = `which java`
                 java_loc = nil if java_loc.empty?
                 if java_loc
@@ -383,19 +386,38 @@ module Ruboto
                 else
                   puts 'Java compiler not found.'
                 end
-                adb_loc = `which adb`
-                adb_loc = nil if adb_loc.empty?
-                if adb_loc
-                  puts "Found Android SDK command adb at #{adb_loc}"
+
+                ant_loc = `which ant`
+                ant_loc = nil if ant_loc.empty?
+                if ant_loc
+                  puts "Found Apache ANT at #{ant_loc}"
                 else
-                  puts 'Android command adb not found.'
+                  puts 'Apache ANT not found.'
                 end
-                dx_loc = `which dx`.chomp
-                dx_loc = nil if dx_loc.empty?
-                if dx_loc
-                  puts "Found Android SDK command dx at #{dx_loc}"
+
+                android_loc = `which android`
+                android_loc = nil if android_loc.empty?
+                if android_loc
+                  puts "Found Android package installer at #{android_loc}"
                 else
-                  puts 'Android command dx not found.'
+                  android_loc = File.expand_path '~/android-sdk-macosx/tools/android'
+                  unless File.exists? android_loc
+                    puts 'Android package installer not found.'
+                    print 'Would you like to download and install it? (Y/n): '
+                    a = STDIN.gets.chomp.upcase
+                    if a == 'Y' || a.empty?
+                      Dir.chdir File.expand_path('~/') do
+                        asdk_file_name = 'android-sdk_r21.1-macosx.zip'
+                        system "wget http://dl.google.com/android/#{asdk_file_name}"
+                        system "unzip #{asdk_file_name}"
+                        system "rm #{asdk_file_name}"
+                      end
+                    else
+                      android_loc = nil
+                    end
+                  end
+                  ENV['PATH'] = "#{File.dirname(android_loc)}:#{ENV['PATH']}"
+                  missing_paths << "#{File.dirname(android_loc)}"
                 end
 
                 emulator_loc = `which emulator`
@@ -406,23 +428,53 @@ module Ruboto
                   puts 'Android emulator not found.'
                 end
 
-                ant_loc = `which ant`
-                ant_loc = nil if ant_loc.empty?
-                if ant_loc
-                  puts "Found Apache ANT at #{ant_loc}"
+                adb_loc = `which adb`
+                adb_loc = nil if adb_loc.empty?
+                if adb_loc
+                  puts "Found Android SDK command adb at #{adb_loc}"
                 else
-                  puts 'Apache ANT not found.'
+                  adb_loc = File.expand_path '~/android-sdk-macosx/platform-tools/adb'
+                  unless File.exists? adb_loc
+                    puts 'Android command adb not found.'
+                    print 'Would you like to download and install it? (Y/n): '
+                    a = STDIN.gets.chomp.upcase
+                    if a == 'Y' || a.empty?
+                      system 'android update sdk --no-ui --filter tool,platform-tool'
+                    else
+                      adb_loc = nil
+                    end
+                  else
+                    puts "Found Android SDK command adb at #{adb_loc}"
+                  end
+                  ENV['PATH'] = "#{File.dirname(adb_loc)}:#{ENV['PATH']}"
+                  missing_paths << "#{File.dirname(adb_loc)}"
+                end
+
+                dx_loc = `which dx`.chomp
+                dx_loc = nil if dx_loc.empty?
+                if dx_loc
+                  puts "Found Android SDK command dx at #{dx_loc}"
+                else
+                  puts 'Android command dx not found.'
                 end
 
                 begin
                   if File.read('project.properties') =~ /target=(.*)/
-                    puts "Detected app with api level #{$1}"
-                    platform_sdk_loc = `ls -d #{dx_loc}\/..\/..\/platforms\/#{$1}`
-                    platform_sdk_loc = nil if platform_sdk_loc.empty?
-                    if platform_sdk_loc
-                      puts "Found Android platform SDK at #{platform_sdk_loc}"
+                    api_level = $1
+                  else
+                    api_level = 'android-10'
+                  end
+                  platform_sdk_loc = File.expand_path "#{dx_loc}/../../platforms/#{api_level}"
+                  if File.exists? platform_sdk_loc
+                    puts "Found Android platform SDK at #{platform_sdk_loc}"
+                  else
+                    puts 'Android platform SDK not found.'
+                    print 'Would you like to download and install it? (Y/n): '
+                    a = STDIN.gets.chomp.upcase
+                    if a == 'Y' || a.empty?
+                      system "android update sdk --no-ui --filter tool,platform-tool,#{api_level},sysimg-#{api_level.slice(/\d+$/)}"
                     else
-                      puts 'Android platform SDK not found.'
+                      platform_sdk_loc = nil
                     end
                   end
                 rescue
@@ -433,9 +485,26 @@ module Ruboto
 
                 if java_loc && javac_loc && adb_loc && dx_loc && emulator_loc &&
                     platform_sdk_loc
-                  puts '*** Ruboto setup is OK! ***'
+                  puts '    *** Ruboto setup is OK! ***'
+                  unless missing_paths.empty?
+                    puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
+                    missing_paths.each do |path|
+                      puts %Q{    export PATH="#{path}:$PATH"}
+                    end
+                    print "\nWould you like to append these lines to your ~/.profile script? (Y/n): "
+                    a = STDIN.gets.chomp.upcase
+                    if a == 'Y' || a.empty?
+                      File.open(File.expand_path('~/.profile'), 'a') do |f|
+                        f.puts "\n# BEGIN Ruboto PATH setup"
+                        f << missing_paths.map {|path| %Q{export PATH="#{path}:$PATH"\n}}
+                        f.puts '# END Ruboto PATH setup'
+                      end
+                    else
+                      platform_sdk_loc = nil
+                    end
+                  end
                 else
-                  puts '!!! Ruboto setup is NOT OK !!!'
+                  puts '    !!! Ruboto setup is NOT OK !!!'
                 end
                 puts
               else
@@ -473,7 +542,7 @@ module Ruboto
               }
             end
           end
-        }
+        end
       end
     end
   end
