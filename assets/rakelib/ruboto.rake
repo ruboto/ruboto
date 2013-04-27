@@ -51,6 +51,7 @@ if new_dx_content =~ xmx_pattern &&
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
   puts new_dx_content.lines.grep(xmx_pattern)
 end
+system 'free'
 
 def manifest;
   @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE))
