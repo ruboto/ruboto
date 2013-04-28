@@ -165,7 +165,7 @@ You generate an app with the option `--activity FooActivity`, which means that r
 
 The arguments passed to the methods are the same as the arguments that the java methods take. Consult the Android documentation.
 
-Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto.rb) where everything is defined.
+Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-irb/blob/master/src/ruboto.rb) where everything is defined.
 
 Testing
 -------
