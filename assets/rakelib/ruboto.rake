@@ -51,7 +51,6 @@ if new_dx_content =~ xmx_pattern &&
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
   puts new_dx_content.lines.grep(xmx_pattern)
 end
-system 'free'
 
 def manifest;
   @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE))
@@ -92,8 +91,9 @@ RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
 APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
-APK_FILE_REGEXP = /^-rw-r--r-- system\s+system\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s+(.*)$/
-
+APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+\d{4})\s+(.*)$/
+#                    -rw-r--r--    1 1000     1000         59252 Aug 15  2010 /data/app/org.update_test-1.apk
+#                    -rw-r--r-- system   system    7487556 2013-04-21 14:01 org.ruboto.example.gps-1.apk
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
 task :default => :debug
@@ -502,8 +502,13 @@ end
 def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   path_line = `adb shell pm path #{package_name}`.chomp
-  return nil if path_line.empty?
-  path = path_line[8..-1]
+
+  # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
+  puts path_line unless path_line =~ /^package:(.*)$/
+  # EMXIF
+
+  return nil unless path_line =~ /^package:(.*)$/
+  path = $1
   o = `adb shell ls -l #{path}`.chomp
   raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
   installed_apk_size = $1.to_i
@@ -538,8 +543,6 @@ def build_apk(t, release)
     changed_prereqs.each { |f| puts "#{f} changed." }
     puts "Forcing rebuild of #{apk_file}."
   end
-  sh 'free'
-  sh 'vmstat'
   if release
     sh "#{ANT_CMD} release"
   else

@@ -72,4 +72,12 @@ class RakeTest < Test::Unit::TestCase
     FileUtils.rm_rf app_dir
   end
 
+  def test_install_when_adb_server_is_stopped
+    Dir.chdir APP_DIR do
+      system 'adb kill-server'
+      system 'rake install'
+      raise "'rake install' exited with code #$?" unless $? == 0
+    end
+  end
+
 end
