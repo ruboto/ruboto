@@ -428,11 +428,6 @@ module Ruboto
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.0
                 excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/bouncycastle org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf)
                 # ODOT
-              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.6.0')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.6.x
-                print 'Retaining com.kenai.constantine and removing jnr for JRuby 1.6.x...'
-                excluded_core_packages = %w(META-INF cext com/kenai/jffi com/martiansoftware ext java jline jni jnr jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/constants/platform/windows jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/netdb jnr/ffi/posix/util org/apache org/jruby/ant org/jruby/compiler/ir org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi org/jruby/javasupport/bsf org/jruby/runtime/invokedynamic)
-                # ODOT
               else
                 raise "Unsupported JRuby version: #{jruby_core_version.inspect}."
               end
@@ -516,17 +511,8 @@ module Ruboto
               jruby_stdlib_version = Gem::Version.new($1)
 
               if included_stdlibs
-
-                # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
-                if jruby_stdlib_version < Gem::Version.new('1.7.0.preview1')
-                  lib_dirs = %w(1.8 1.9 site_ruby/1.8 site_ruby/1.9 site_ruby/shared)
-                else
-                  lib_dirs = %w(1.8 1.9 shared)
-                end
-                # ODOT
-
+                lib_dirs = %w(1.8 1.9 shared)
                 print 'excluded...'
-
                 lib_dirs.each do |ld|
                   Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
                     libs = Dir['*'].map{|d|d.sub /\.(rb|jar)$/, ''}.uniq
@@ -544,16 +530,7 @@ module Ruboto
               end
 
               if excluded_stdlibs.any?
-
-                # TODO(uwe): Simplify when we stop supporting JRuby < 1.7.0
-                if jruby_stdlib_version < Gem::Version.new('1.7.0.preview1')
-                  lib_dirs = %w(1.8 1.9 site_ruby/1.8 site_ruby/1.9 site_ruby/shared)
-                else
-                  lib_dirs = %w(1.8 1.9 shared)
-                end
-                # ODOT
-
-                lib_dirs.each do |ld|
+                %w(1.8 1.9 shared).each do |ld|
                   excluded_stdlibs.each do |d|
                     dir = "new/jruby.home/lib/ruby/#{ld}/#{d}"
                     FileUtils.rm_rf dir if File.exists? dir

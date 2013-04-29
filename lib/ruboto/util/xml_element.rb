@@ -19,17 +19,17 @@ module Ruboto
       end
 
       def name
-        self["name"]
+        self['name']
       end
 
       def attribute(name)
-        self["values"][name]
+        self['values'][name]
       end
 
       def add_element(name, attributes)
         new_element = XMLElement.new
-        new_element["name"] = name
-        new_element["values"] = attributes
+        new_element['name'] = name
+        new_element['values'] = attributes
 
         self[name] = [] unless self[name]
         self[name] << new_element
@@ -44,61 +44,61 @@ module Ruboto
       def find_class_or_interface(klass, a_type)
         abort "ERROR: Can't parse package from #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
 
-        package = self["package"].find{|i| i.attribute("name") == $1}
+        package = self['package'].find{|i| i.attribute('name') == $1}
         abort "ERROR: Can't find package #{$1}" unless package
-        if a_type == "either"
-          package["class"].find{|i| i.attribute("name") == $2} or package["interface"].find{|i| i.attribute("name") == $2}
+        if a_type == 'either'
+          package['class'].find{|i| i.attribute('name') == $2} or package['interface'].find{|i| i.attribute('name') == $2}
         else
-          package[a_type].find{|i| i.attribute("name") == $2}
+          package[a_type].find{|i| i.attribute('name') == $2}
         end
       end
 
       def find_class(package_and_class)
-        find_class_or_interface(package_and_class, "class")
+        find_class_or_interface(package_and_class, 'class')
       end
 
       def find_interface(package_and_interface)
-        find_class_or_interface(package_and_interface, "interface")
+        find_class_or_interface(package_and_interface, 'interface')
       end
 
-      def all_methods(method_base="all", method_include="", method_exclude="", implements="")
+      def all_methods(method_base='all', method_include='', method_exclude='', implements='')
         # get all the methogs
         all_methods = get_elements('method').select{|m| m.attribute('static') != 'true'}
 
         # establish the base set of methods
         working_methods = case method_base.to_s
-        when "all" then
+        when 'all' then
           all_methods
-        when "none" then
+        when 'none' then
           []
-        when "abstract" then
-          all_methods.select{|i| i.attribute("abstract") == "true"}
-        when "on" then
-          all_methods.select{|i| i.attribute("name").match(/^on[A-Z]/)}
+        when 'abstract' then
+          all_methods.select{|i| i.attribute('abstract') == 'true'}
+        when 'on' then
+          all_methods.select{|i| i.attribute('name').match(/^on[A-Z]/)}
         end
 
         # make sure to include requested methods
-        include_methods = method_include.split(",") if method_include.is_a?(String)
-        all_methods.each{|i| working_methods << i if include_methods.include?(i.attribute("name"))}
+        include_methods = method_include.split(',') if method_include.is_a?(String)
+        all_methods.each{|i| working_methods << i if include_methods.include?(i.attribute('name'))}
 
         # make sure to exclude rejected methods
-        exclude_methods = method_exclude.split(",") if method_exclude.is_a?(String)
-        working_methods = working_methods.select{|i| not exclude_methods.include?(i.attribute("name"))}
+        exclude_methods = method_exclude.split(',') if method_exclude.is_a?(String)
+        working_methods = working_methods.select{|i| not exclude_methods.include?(i.attribute('name'))}
 
         # remove methods marked final
-        working_methods = working_methods.select{|i| (not i.attribute("final")) or i.attribute("final") == "false"}
+        working_methods = working_methods.select{|i| (not i.attribute('final')) or i.attribute('final') == 'false'}
 
         # get additional methods from parent
-        if name =="class" and attribute("extends")
-          parent = root.find_class(attribute("extends"))
+        if name =='class' and attribute('extends')
+          parent = root.find_class(attribute('extends'))
           parent_methods = parent.all_methods(method_base, method_include, method_exclude)
           working_signatures = working_methods.map(&:method_signature)
           working_methods += parent_methods.select{|i| not working_signatures.include?(i.method_signature)}
         end
 
         # get additional methods from interfaces
-        if name =="class" and implements != ""
-          implements.split(",").each do |i|
+        if name =='class' and implements != ''
+          implements.split(',').each do |i|
             interface = root.find_interface(i)
             abort("Unkown interface: #{i}") unless interface
             working_signatures = working_methods.map(&:method_signature)
@@ -110,100 +110,86 @@ module Ruboto
       end
 
       def parameters
-        get_elements("parameter").map {|p| [p.attribute("name"), p.attribute("type").gsub("&lt;", "<").gsub("&gt;", ">")]}
+        get_elements('parameter').map {|p| [p.attribute('name'), p.attribute('type').gsub('&lt;', '<').gsub('&gt;', '>')]}
       end
 
       def method_signature
-        "#{attribute("name")}(#{parameters.map{|i| i[1]}.join(',')})"
+        "#{attribute('name')}(#{parameters.map{|i| i[1]}.join(',')})"
       end
 
       def constant_string
-        "CB_" + attribute("name").gsub(/[A-Z]/) {|i| "_#{i}"}.upcase.gsub(/^ON_/, "")
+        'CB_' + attribute('name').gsub(/[A-Z]/) {|i| "_#{i}"}.upcase.gsub(/^ON_/, '')
       end
 
       def super_string
-        if attribute("api_added") and
-          attribute("api_added").to_i > verify_min_sdk.to_i and
-          attribute("api_added").to_i <= verify_target_sdk.to_i
+        if attribute('api_added') and
+          attribute('api_added').to_i > verify_min_sdk.to_i and
+          attribute('api_added').to_i <= verify_target_sdk.to_i
           nil
-        elsif attribute("abstract") == "true"
+        elsif attribute('abstract') == 'true'
           nil
-        elsif name == "method"
-          "super.#{attribute("name")}(#{parameters.map{|i| i[0]}.join(", ")});"
-        elsif name == "constructor"
-          "super(#{parameters.map{|i| i[0]}.join(", ")});"
+        elsif name == 'method'
+          "super.#{attribute('name')}(#{parameters.map{|i| i[0]}.join(', ')});"
+        elsif name == 'constructor'
+          "super(#{parameters.map{|i| i[0]}.join(', ')});"
         end
       end
 
       def default_return
-        return nil unless attribute("return")
-        case attribute("return")
-        when "boolean" then "return false;"
-        when "int"     then "return 0;"
-        when "void"    then nil
-        else                "return null;"
+        return nil unless attribute('return')
+        case attribute('return')
+        when 'boolean' then 'return false;'
+        when 'int' then 'return 0;'
+        when 'void' then nil
+        else
+          'return null;'
         end
       end
 
       def super_return
         rv = super_string
-        return "{#{rv} return;}" unless attribute("return")
+        return "{#{rv} return;}" unless attribute('return')
         rv ? "return #{rv}" : default_return
       end
 
       def ruby_call(camelize = false)
         params = parameters
-        args = ""
+        args = ''
         if params.size > 1
-          args = ", new Object[]{" + params.map{|i| i[0]}.join(", ") + "}"
+          args = ', new Object[]{' + params.map { |i| i[0] }.join(', ') + '}'
         elsif params.size > 0
-          args = ", " + params.map{|i| i[0]}.join(", ")
+          args = ', ' + params.map { |i| i[0] }.join(', ')
         end
 
-        return_cast = ""
-        convert_return = ""
-        if attribute("return") && attribute("return") != "void"
-          if (attribute("return").include?(".") or attribute("return") == "int[]")
-            return_class = attribute("return")
-          elsif attribute("return") == 'int'
-            return_int = true
+        return_cast = ''
+        convert_return = ''
+        if attribute('return') && attribute('return') != 'void'
+          if attribute('return').include?('.') || attribute('return') == 'int[]'
+            return_class = attribute('return')
+          elsif attribute('return') == 'int'
             return_class = 'Integer'
           else
-            return_class = attribute("return").capitalize
+            return_class = attribute('return').capitalize
           end
-          return_cast = "return (#{return_class.gsub("&lt;", "<").gsub("&gt;", ">")}) " if return_class
+          return_cast = "return (#{return_class.gsub('&lt;', '<').gsub('&gt;', '>')}) " if return_class
           convert_return = "#{return_class.sub(/<.*>$/, '')}.class, "
         end
 
-          method_name = camelize ? attribute("name") : snake_case_attribute
-          global_args = params.map{|i| "$arg_#{i[0]}"}.join(", ")
-              ["// FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7"] +
-              if_else(
-                  "JRubyAdapter.isJRubyPreOneSeven()",
-                  params.map{|i| "JRubyAdapter.put(\"$arg_#{i[0]}\", #{i[0]});"} +
-                  [
-                      'JRubyAdapter.put("$ruby_instance", scriptInfo.getRubyInstance());',
-                      "#{return_cast}#{'((Number)' if return_int}JRubyAdapter.runScriptlet(\"$ruby_instance.#{method_name}(#{global_args})\")#{').intValue()' if return_int};",
-                  ],
-                  if_else(
-                      "JRubyAdapter.isJRubyOneSeven()",
-                      ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}scriptInfo.getRubyInstance(), \"#{method_name}\"#{args});"],
-                      ['throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));']
-                  )
-              )
+        method_name = camelize ? attribute('name') : snake_case_attribute
+        ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}scriptInfo.getRubyInstance(), \"#{method_name}\"#{args});"]
       end
 
       def snake_case_attribute
-        attribute("name").gsub(/[A-Z]/) { |i| "_#{i}" }.downcase
+        attribute('name').gsub(/[A-Z]/) { |i| "_#{i}" }.downcase
       end
 
       def method_definition(class_name)
         method_call(
-            (attribute("return") ? attribute("return") : "void"),
-            attribute("name"), parameters,
+            (attribute('return') ? attribute('return') : 'void'),
+            attribute('name'), parameters,
             get_elements('exception').map { |m| m.attribute('type') },
             ["if (ScriptLoader.isCalledFromJRuby()) #{super_return}",
-             if_else("!JRubyAdapter.isInitialized()",
+             if_else('!JRubyAdapter.isInitialized()',
                      [%Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
                       super_return]),
              'String rubyClassName = scriptInfo.getRubyClassName();',
