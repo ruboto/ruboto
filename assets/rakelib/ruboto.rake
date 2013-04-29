@@ -279,39 +279,44 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
   require 'bundler'
-  require 'bundler/vendored_thor'
+  if Gem::Version.new(Bundler::VERSION) <= Gem::Version.new('1.3.5')
+    require 'bundler/vendored_thor'
 
-  # Store original RubyGems/Bundler environment
-  platforms = Gem.platforms
-  ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
-  gem_paths = {'GEM_HOME' => Gem.path, 'GEM_PATH' => Gem.dir}
+    # Store original RubyGems/Bundler environment
+    platforms = Gem.platforms
+    ruby_engine = defined?(RUBY_ENGINE) && RUBY_ENGINE
+    gem_paths = {'GEM_HOME' => Gem.path, 'GEM_PATH' => Gem.dir}
 
-  # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
-  Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new("universal-dalvik-#{sdk_level}"), Gem::Platform.new('universal-java')]
-  Gem.paths = {'GEM_HOME' => BUNDLE_PATH, 'GEM_PATH' => BUNDLE_PATH}
-  old_verbose, $VERBOSE = $VERBOSE, nil
-  begin
-    Object.const_set('RUBY_ENGINE', 'jruby')
-  ensure
-    $VERBOSE = old_verbose
+    # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
+    Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new("universal-dalvik-#{sdk_level}"), Gem::Platform.new('universal-java')]
+    Gem.paths = {'GEM_HOME' => BUNDLE_PATH, 'GEM_PATH' => BUNDLE_PATH}
+    old_verbose, $VERBOSE = $VERBOSE, nil
+    begin
+      Object.const_set('RUBY_ENGINE', 'jruby')
+    ensure
+      $VERBOSE = old_verbose
+    end
+
+    ENV['BUNDLE_GEMFILE'] = GEM_FILE
+    Bundler.ui = Bundler::UI::Shell.new
+    Bundler.bundle_path = Pathname.new BUNDLE_PATH
+    definition = Bundler.definition
+    definition.validate_ruby!
+    Bundler::Installer.install(Bundler.root, definition)
+
+    # Restore RUBY_ENGINE (limit the scope of this hack)
+    old_verbose, $VERBOSE = $VERBOSE, nil
+    begin
+      Object.const_set('RUBY_ENGINE', ruby_engine)
+    ensure
+      $VERBOSE = old_verbose
+    end
+    Gem.platforms = platforms
+    Gem.paths = gem_paths
+  else
+    # Bundler.settings[:platform] = Gem::Platform::DALVIK
+    sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
   end
-
-  ENV['BUNDLE_GEMFILE'] = GEM_FILE
-  Bundler.ui = Bundler::UI::Shell.new
-  Bundler.bundle_path = Pathname.new BUNDLE_PATH
-  definition = Bundler.definition
-  definition.validate_ruby!
-  Bundler::Installer.install(Bundler.root, definition)
-
-  # Restore RUBY_ENGINE (limit the scope of this hack)
-  old_verbose, $VERBOSE = $VERBOSE, nil
-  begin
-    Object.const_set('RUBY_ENGINE', ruby_engine)
-  ensure
-    $VERBOSE = old_verbose
-  end
-  Gem.platforms = platforms
-  Gem.paths = gem_paths
 
   gem_paths = Dir["#{BUNDLE_PATH}/gems"]
   raise 'Gem path not found' if gem_paths.empty?
