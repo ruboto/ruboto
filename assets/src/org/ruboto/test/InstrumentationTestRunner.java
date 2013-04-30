@@ -47,9 +47,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
             Thread t = new Thread(null, new Runnable() {
                 public void run() {
                     JRubyLoadedOk.set(JRubyAdapter.setUpJRuby(getTargetContext()));
-                    if (!JRubyAdapter.isJRubyPreOneSeven()) {
-                        JRubyAdapter.runScriptlet("Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
-                    }
+                    JRubyAdapter.runScriptlet("Java::OrgRubotoTest::InstrumentationTestRunner.__persistent__ = true");
                 }
             }, "Setup JRuby from instrumentation test runner", 64 * 1024);
             try {
@@ -174,18 +172,10 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
         buffer.close();
         JRubyAdapter.setScriptFilename(f);
 
-        // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
-        if (JRubyAdapter.isJRubyPreOneSeven()) {
-            JRubyAdapter.put("$test", this);
-            JRubyAdapter.put("$script_code", source.toString());
-            JRubyAdapter.put("$filename", f);
-            JRubyAdapter.runScriptlet("$test.instance_eval($script_code, $filename)");
+        if (f.equals("test_helper.rb")) {
+            JRubyAdapter.runScriptlet(source.toString());
         } else {
-            if (f.equals("test_helper.rb")) {
-                JRubyAdapter.runScriptlet(source.toString());
-            } else {
-                JRubyAdapter.runRubyMethod(this, "instance_eval", source.toString(), f);
-            }
+            JRubyAdapter.runRubyMethod(this, "instance_eval", source.toString(), f);
         }
         Log.d(getClass().getName(), "Test script " + f + " loaded");
     }

@@ -105,7 +105,7 @@ public class Script {
      * Instance methods
      */
     public String execute() throws IOException {
-        return JRubyAdapter.execute(getContents());
+        return JRubyAdapter.runScriptlet(getContents()).toString();
     }
 
     boolean exists() {

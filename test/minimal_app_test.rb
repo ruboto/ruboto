@@ -12,21 +12,15 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       cleanup_app
     end
 
-    # APK was 3.5MB.  JRuby: 1.6.7,     ANDROID_TARGET: 15
-    # APK was 3.3MB.  JRuby: 1.6.7.2,   ANDROID_TARGET: 10
     # APK was 4.7MB.  JRuby: 1.7.0,     ANDROID_TARGET: 15
     # APK was 4.5MB.  JRuby: 1.7.2,     ANDROID_TARGET: 10
     # APK was 4.5MB.  JRuby: 1.7.2,     ANDROID_TARGET: 15
     # APK was 4.3MB.  JRuby: 1.7.3,     ANDROID_TARGET: 10
     # APK was 4.2MB.  JRuby: 1.7.3,     ANDROID_TARGET: 15
     # APK was 4.4MB.  JRuby: 1.7.4.dev, ANDROID_TARGET: 10
-
     def test_minimal_apk_is_within_limits
       apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
       upper_limit = {
-          '1.6.7' => 3.5,
-          '1.6.7.2' => 3.5,
-          '1.6.8' => 3.5,
           '1.7.0' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
           '1.7.1' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
           '1.7.2' => ANDROID_TARGET < 15 ? 4.6 : 4.9,
@@ -42,8 +36,6 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       run_app_tests
     end
 
-    # APK was 3.5MB.  JRuby: 1.6.7,     ANDROID_TARGET: 15.
-    # APK was 3.3MB.  JRuby: 1.6.7.2,   ANDROID_TARGET: 10.
     # APK was 4.7MB.  JRuby: 1.7.0,     ANDROID_TARGET: 15.
     # APK was 4.5MB.  JRuby: 1.7.2,     ANDROID_TARGET: 10.
     # APK was 4.5MB.  JRuby: 1.7.2,     ANDROID_TARGET: 15.
@@ -55,9 +47,6 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
         rubygems runit shell soap test uri webrick win32 wsdl xmlrpc xsd ../1.9}
       apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
       upper_limit = {
-          '1.6.7' => 3.5,
-          '1.6.7.2' => 3.5,
-          '1.6.8' => 3.5,
           '1.7.0' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
           '1.7.1' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
           '1.7.2' => ANDROID_TARGET < 15 ? 4.6 : 4.9,

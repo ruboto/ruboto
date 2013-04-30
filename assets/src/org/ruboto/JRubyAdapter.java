@@ -23,92 +23,6 @@ public class JRubyAdapter {
     private static String localVariableBehavior = "TRANSIENT";
     private static String RUBOTO_CORE_VERSION_NAME;
 
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object... args)}
-     */
-    @Deprecated public static void callMethod(Object receiver, String methodName, Object[] args) {
-        runRubyMethod(receiver, methodName, args);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object... args)}
-     */
-    @Deprecated public static void callMethod(Object object, String methodName, Object arg) {
-        runRubyMethod(object, methodName, arg);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Object receiver, String methodName, Object... args)}
-     */
-    @Deprecated public static void callMethod(Object object, String methodName) {
-        runRubyMethod(object, methodName, new Object[] {});
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args)}
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object[] args, Class<T> returnType) {
-        return (T) runRubyMethod(returnType, receiver, methodName, args);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args)}
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Object arg, Class<T> returnType) {
-        return (T) runRubyMethod(returnType, receiver, methodName, arg);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.1, replaced by {@link #runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args)}
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated public static <T> T callMethod(Object receiver, String methodName, Class<T> returnType) {
-        return (T) runRubyMethod(returnType, receiver, methodName);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.0, replaced by {@link #put(String name, Object object)}
-     */
-    @Deprecated public static void defineGlobalConstant(String name, Object object) {
-        put(name, object);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.0, replaced by {@link #put(String name, Object object)}
-     */
-    @Deprecated public static void defineGlobalVariable(String name, Object object) {
-        put(name, object);
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.0, replaced by {@link #runScriptlet(String code)}
-     */
-    @Deprecated public static Object exec(String code) {
-        try {
-            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-            return runScriptletMethod.invoke(ruby, code);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            if (isDebugBuild) {
-                throw ((RuntimeException) ite.getCause());
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * @deprecated  As of Ruboto 0.7.0, replaced by {@link #runScriptlet(String code)}
-     */
-    @Deprecated public static String execute(String code) {
-        return (String) runRubyMethod(String.class, exec(code), "inspect");
-    }
-
     public static Object get(String name) {
         try {
             Method getMethod = ruby.getClass().getMethod("get", String.class);
@@ -132,21 +46,8 @@ public class JRubyAdapter {
 
     public static Object runRubyMethod(Object receiver, String methodName, Object... args) {
         try {
-            // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
-            if (isJRubyPreOneSeven()) {
-                if (args.length == 0) {
-                    Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Class.class);
-                    // System.out.println("Calling callMethod(" + receiver + ", " + methodName + ", " + Object.class + ")");
-                    return m.invoke(ruby, receiver, methodName, Object.class);
-                } else {
-                    Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
-                    // System.out.println("Calling callMethod(" + receiver + ", " + methodName + ", " + args + ", " + Object.class + ")");
-                    return m.invoke(ruby, receiver, methodName, args, Object.class);
-                }
-            } else {
-                Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
-                return m.invoke(ruby, Object.class, receiver, methodName, args);
-            }
+            Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
+            return m.invoke(ruby, Object.class, receiver, methodName, args);
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         } catch (IllegalAccessException iae) {
@@ -163,19 +64,8 @@ public class JRubyAdapter {
     @SuppressWarnings("unchecked")
     public static <T> T runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args) {
         try {
-            // FIXME(uwe):  Simplify when we stop supporting JRuby < 1.7.0
-            if (isJRubyPreOneSeven()) {
-                if (args.length == 0) {
-                  Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Class.class);
-                  return (T) m.invoke(ruby, receiver, methodName, returnType);
-                } else {
-                  Method m = ruby.getClass().getMethod("callMethod", Object.class, String.class, Object[].class, Class.class);
-                  return (T) m.invoke(ruby, receiver, methodName, args, returnType);
-                }
-            } else {
-                Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
-                return (T) m.invoke(ruby, returnType, receiver, methodName, args);
-            }
+            Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
+            return (T) m.invoke(ruby, returnType, receiver, methodName, args);
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         } catch (IllegalAccessException iae) {
@@ -457,16 +347,6 @@ public class JRubyAdapter {
         Log.e(e.getMessage() != null ? e.getMessage() : e.getClass().getName());
         e.printStackTrace();
         ruby = null;
-    }
-
-    // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
-    @Deprecated public static boolean isJRubyPreOneSeven() {
-        return ((String)get("JRUBY_VERSION")).equals("1.7.0.dev") || ((String)get("JRUBY_VERSION")).startsWith("1.6.");
-    }
-
-    // FIXME(uwe):  Remove when we stop supporting JRuby < 1.7.0
-    @Deprecated public static boolean isJRubyOneSeven() {
-        return !isJRubyPreOneSeven() && ((String)get("JRUBY_VERSION")).startsWith("1.7.");
     }
 
     // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
