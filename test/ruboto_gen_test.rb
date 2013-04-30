@@ -51,7 +51,7 @@ class RubotoGenTest < Test::Unit::TestCase
 
   # APK was    56.4KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 7
   # APK was    53.4KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 10
-  # APK was    67.2KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 15
+  # APK was    54.5KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 15
   # APK was    73.1KB.  PLATFORM: CURRENT,    ANDROID_TARGET: 16
   # APK was  7380.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.0
   # APK was  7310.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.2
@@ -76,7 +76,7 @@ class RubotoGenTest < Test::Unit::TestCase
       upper_limit = {
           7 => 62.0,
           10 => 54.0,
-          15 => 63.0,
+          15 => 55.0,
           16 => 74.0,
       }[ANDROID_TARGET] || 74.0
     end
