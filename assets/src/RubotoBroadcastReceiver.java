@@ -43,13 +43,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
                 }
             }
 
-            // FIXME(uwe): Simplify when we stop supporting JRuby 1.6.x
-            if (JRubyAdapter.isJRubyPreOneSeven()) {
-    	        JRubyAdapter.put("$broadcast_receiver", this);
-    	        JRubyAdapter.put("$context", context);
-    	        JRubyAdapter.put("$intent", intent);
-                JRubyAdapter.runScriptlet("$broadcast_receiver.on_receive($context, $intent)");
-            } else if (JRubyAdapter.isJRubyOneSeven()) {
             // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
             if ((Boolean)JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onReceive}")) {
                 Log.d("onReceive: call method");
@@ -58,9 +51,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     	        JRubyAdapter.runRubyMethod(this, "on_receive", new Object[]{context, intent});
             }
             // EMXIF
-            } else {
-                throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
-        	}
         } catch(Exception e) {
             e.printStackTrace();
         }

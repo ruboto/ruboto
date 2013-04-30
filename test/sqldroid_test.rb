@@ -1,9 +1,7 @@
-require File.expand_path("test_helper", File.dirname(__FILE__))
+require File.expand_path('test_helper', File.dirname(__FILE__))
 
-# FIXME(uwe):  Remove check when we stop supporting JRuby older than 1.7.0.rc1
 # FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
-if RubotoTest::JRUBY_JARS_VERSION >= Gem::Version.new('1.7.0.rc1') &&
-    (RubotoTest::ANDROID_OS >= 15 || RubotoTest::RUBOTO_PLATFORM != 'STANDALONE')
+if RubotoTest::ANDROID_OS >= 15 || RubotoTest::RUBOTO_PLATFORM != 'STANDALONE'
 
 require 'bigdecimal'
 require 'test/app_test_methods'

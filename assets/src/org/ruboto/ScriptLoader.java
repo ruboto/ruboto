@@ -47,15 +47,15 @@ public class ScriptLoader {
                         } else {
                             Log.d("Script defines methods on meta class");
 
-                            // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-                            if (JRubyAdapter.isJRubyPreOneSeven() || JRubyAdapter.isRubyOneEight()) {
+                            // FIXME(uwe): Simplify when we stop support for Ruby 1.8 mode.
+                            if (JRubyAdapter.isRubyOneEight()) {
                                 JRubyAdapter.put("$java_instance", component);
                                 rubyClass = JRubyAdapter.runScriptlet("class << $java_instance; self; end");
-                            } else if (JRubyAdapter.isJRubyOneSeven() && JRubyAdapter.isRubyOneNine()) {
+                            } else if (JRubyAdapter.isRubyOneNine()) {
                                 JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
                                 rubyClass = JRubyAdapter.runRubyMethod(component, "singleton_class");
                             } else {
-                                throw new RuntimeException("Unknown JRuby/Ruby version: " + JRubyAdapter.get("JRUBY_VERSION") + "/" + JRubyAdapter.get("RUBY_VERSION"));
+                                throw new RuntimeException("Unknown Ruby version: " + JRubyAdapter.get("RUBY_VERSION"));
                             }
                             // EMXIF
 
@@ -67,13 +67,7 @@ public class ScriptLoader {
                             Log.d("Script contains class definition");
                             if (rubyClass == null && hasBackingJavaClass) {
                                 Log.d("Script has separate Java class");
-
-                                // FIXME(uwe): Simplify when we stop support for JRuby < 1.7.0
-                                if (!JRubyAdapter.isJRubyPreOneSeven()) {
-                                    JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
-                                }
-                                // EMXIF
-
+                                JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
                                 rubyClass = JRubyAdapter.runScriptlet("Java::" + component.getClass().getName());
                             }
                             Log.d("Set class: " + rubyClass);
@@ -124,23 +118,11 @@ public class ScriptLoader {
     public static final void callOnCreate(final RubotoComponent component, Object... args) {
         if (component instanceof android.content.Context) {
             Log.d("Call onCreate on: " + component.getScriptInfo().getRubyInstance());
-            // FIXME(uwe): Simplify when we stop support for RubotoCore 0.4.7
-            if (JRubyAdapter.isJRubyPreOneSeven()) {
-                if (args.length > 0) {
-                    JRubyAdapter.put("$bundle", args[0]);
-                }
-                JRubyAdapter.put("$ruby_instance", component.getScriptInfo().getRubyInstance());
-                JRubyAdapter.runScriptlet("$ruby_instance.on_create(" + (args.length > 0 ? "$bundle" : "") + ")");
-            } else if (JRubyAdapter.isJRubyOneSeven()) {
-                // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
-                if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
-                    JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onCreate", args);
-                } else if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
-                    JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "on_create", args);
-                }
-                // EMXIF
-            } else {
-                throw new RuntimeException("Unknown JRuby version: " + JRubyAdapter.get("JRUBY_VERSION"));
+            // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
+            if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
+                JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onCreate", args);
+            } else if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
+                JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "on_create", args);
             }
             // EMXIF
         }
