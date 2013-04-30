@@ -39,7 +39,7 @@ class BroadcastReceiverTest < Test::Unit::TestCase
 EOF
 
       assert activity_content.sub!(/^  private$/m, <<EOF)
-  def onPause
+  def onDestroy
     super
     unregisterReceiver(@receiver)
   end
