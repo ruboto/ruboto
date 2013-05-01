@@ -508,13 +508,20 @@ end
 # Return nil if the package is not installed.
 def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
-  path_line = `adb shell pm path #{package_name}`.chomp
+  loop do
+    path_line = `adb shell pm path #{package_name}`.chomp
+    return nil if path_line.empty?
+    break if path_line =~ /^package:(.*)$/
 
-  # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
-  puts path_line unless path_line =~ /^package:(.*)$/
-  # EMXIF
+    # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
+    puts '*' * 80
+    puts 'Unexpected output from pm path'
+    puts '*' * 80
+    puts path_line
+    puts '*' * 80
+    # EMXIF
+  end
 
-  return nil unless path_line =~ /^package:(.*)$/
   path = $1
   o = `adb shell ls -l #{path}`.chomp
   raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
