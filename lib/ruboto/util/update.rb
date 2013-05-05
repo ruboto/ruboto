@@ -511,7 +511,7 @@ module Ruboto
               jruby_stdlib_version = Gem::Version.new($1)
 
               if included_stdlibs
-                lib_dirs = %w(1.8 1.9 shared)
+                lib_dirs = %w(1.8 1.9 2.0 shared)
                 print 'excluded...'
                 lib_dirs.each do |ld|
                   Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
@@ -530,7 +530,7 @@ module Ruboto
               end
 
               if excluded_stdlibs.any?
-                %w(1.8 1.9 shared).each do |ld|
+                %w(1.8 1.9 2.0 shared).each do |ld|
                   excluded_stdlibs.each do |d|
                     dir = "new/jruby.home/lib/ruby/#{ld}/#{d}"
                     FileUtils.rm_rf dir if File.exists? dir

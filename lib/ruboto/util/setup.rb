@@ -1,10 +1,10 @@
+require 'ruboto/sdk_versions'
+
 module Ruboto
   module Util
     module Setup
       # Todo: Find a way to look this up
-      ANDROID_SDK_VERSION = "21.1"
-
-      ANDROID_DEFAULT_API_LEVEL = 'android-10'
+      ANDROID_SDK_VERSION = '21.1'
 
       #########################################
       #
@@ -52,7 +52,7 @@ module Ruboto
         rescue
         end
 
-        return ANDROID_DEFAULT_API_LEVEL
+        return Ruboto::SdkVersions::DEFAULT_TARGET_SDK
       end
 
       def path_setup_file

@@ -510,8 +510,19 @@ def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   loop do
     path_line = `adb shell pm path #{package_name}`.chomp
-    return nil if path_line.empty?
-    break if path_line =~ /^package:(.*)$/
+
+    # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
+    puts '*' * 80
+    puts 'Output from pm path'
+    puts '*' * 80
+    puts $?.inspect
+    puts '*' * 80
+    puts path_line
+    puts '*' * 80
+    # EMXIF
+
+    return nil if $? == 0 && path_line.empty?
+    break if $? == 0 && path_line =~ /^package:(.*)$/
 
     # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
     puts '*' * 80
@@ -520,6 +531,8 @@ def package_installed?(test = false)
     puts path_line
     puts '*' * 80
     # EMXIF
+
+    sleep 0.5
   end
 
   path = $1
