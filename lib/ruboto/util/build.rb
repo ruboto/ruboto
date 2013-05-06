@@ -30,11 +30,11 @@ module Ruboto
       #   all api levels
       #
       def get_class_or_interface(klass, force=nil)
-        element = verify_api.find_class_or_interface(klass, "either")
+        element = verify_api.find_class_or_interface(klass, 'either')
 
         abort "ERROR: #{klass} not found" unless element
 
-        unless force == "include"
+        unless force == 'include'
           abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use '--force include' to create it" if
             element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
           abort "#{klass} deprecated for targetSdkVersion, deprecated in #{element.attribute('deprecated')}; use '--force include' to create it" if
@@ -71,16 +71,16 @@ module Ruboto
 
         abort = false
         new_methods = methods
-        unless force == "include"
+        unless force == 'include'
           # Inform and remove methods changed inside the scope of the sdk versions
           new_methods = methods.select do |i|
-            if i.attribute('api_added') and i.attribute('api_added').to_i > min_api and force == "exclude"
+            if i.attribute('api_added') and i.attribute('api_added').to_i > min_api and force == 'exclude'
               false
             elsif i.attribute('api_added') and i.attribute('api_added').to_i > min_api
               puts "Can't create #{i.method_signature} -- added in #{i.attribute('api_added')} -- use method_exclude or force exclude"
               abort = true
               false
-            elsif i.attribute('deprecated') and i.attribute('deprecated').to_i <= target_api and force == "exclude"
+            elsif i.attribute('deprecated') and i.attribute('deprecated').to_i <= target_api and force == 'exclude'
               false
             elsif i.attribute('deprecated') and i.attribute('deprecated').to_i <= target_api
               puts "Can't create #{i.method_signature} -- deprecated in #{i.attribute('deprecated')} -- use method_exclude or force exclude"
@@ -91,7 +91,7 @@ module Ruboto
             end
           end
 
-          abort("Aborting!") if abort
+          abort('Aborting!') if abort
         end
 
         new_methods
@@ -101,7 +101,7 @@ module Ruboto
       # generate_subclass_or_interface: Creates a subclass or interface based on the specifications.
       #
       def generate_subclass_or_interface(params)
-        defaults = {:template => "InheritingClass", :method_base => "all", :method_include => "", :method_exclude => "", :force => nil, :implements => ""}
+        defaults = {:template => 'InheritingClass', :method_base => 'all', :method_include => '', :method_exclude => '', :force => nil, :implements => ''}
         params = defaults.merge(params)
         params[:package] ||= verify_package
 
@@ -112,19 +112,19 @@ module Ruboto
         methods = check_methods(methods, params[:force])
         puts "Done. Methods created: #{methods.count}"
 
-        params[:implements] = params[:implements].split(",").push('org.ruboto.RubotoComponent').join(",")
+        params[:implements] = params[:implements].split(',').push('org.ruboto.RubotoComponent').join(',')
 
-        action = class_desc.name == "class" ? "extends" : "implements"
+        action = class_desc.name == 'class' ? 'extends' : 'implements'
         build_file params[:template], params[:package], params[:name], {
-            "THE_METHOD_BASE" => params[:method_base].to_s,
-            "THE_PACKAGE" => params[:package],
-            "THE_ACTION" => action,
-            "THE_ANDROID_CLASS" => (params[:class] || params[:interface]) +
-                (params[:implements] == "" ? "" : ((action != 'implements' ? " implements " : ', ') + params[:implements].split(",").join(", "))),
-            "THE_RUBOTO_CLASS" => params[:name],
-            "THE_CONSTRUCTORS" => class_desc.name == "class" ?
-                class_desc.get_elements("constructor").map { |i| i.constructor_definition(params[:name]) }.join("\n\n") : "",
-            "THE_METHODS" => methods.map { |i| i.method_definition(params[:name]) }.join("\n\n")
+            'THE_METHOD_BASE' => params[:method_base].to_s,
+            'THE_PACKAGE' => params[:package],
+            'THE_ACTION' => action,
+            'THE_ANDROID_CLASS' => (params[:class] || params[:interface]) +
+                (params[:implements] == '' ? '' : ((action != 'implements' ? ' implements ' : ', ') + params[:implements].split(',').join(', '))),
+            'THE_RUBOTO_CLASS' => params[:name],
+            'THE_CONSTRUCTORS' => class_desc.name == 'class' ?
+                class_desc.get_elements('constructor').map { |i| i.constructor_definition(params[:name]) }.join("\n\n") : '',
+            'THE_METHODS' => methods.map { |i| i.method_definition(params[:name]) }.join("\n\n")
         }
       end
 
@@ -133,22 +133,22 @@ module Ruboto
       #   on the API specifications.
       #
       def generate_core_classes(params)
-        hash = {:package => "org.ruboto"}
+        hash = {:package => 'org.ruboto'}
         %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
-        hash[:method_exclude] = params[:method_exclude].split(",").push("onCreate").push("onBind").push("onStartCommand").join(",")
+        hash[:method_exclude] = params[:method_exclude].split(',').push('onCreate').push('onBind').push('onStartCommand').join(',')
 
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver).each do |i|
-          name = i.split(".")[-1]
-          if(params[:class] == name or params[:class] == "all")
+          name = i.split('.')[-1]
+          if params[:class] == name or params[:class] == 'all'
             generate_subclass_or_interface(hash.merge({:template => "Ruboto#{name}", :class => i, :name => "Ruboto#{name}"}))
           end
         end
 
         # Activities that can be created, but only directly  (i.e., not included in all)
         %w(android.preference.PreferenceActivity android.app.TabActivity).each do |i|
-          name = i.split(".")[-1]
+          name = i.split('.')[-1]
           if params[:class] == name
-            generate_subclass_or_interface(hash.merge({:template => "RubotoActivity", :class => i, :name => "Ruboto#{name}"}))
+            generate_subclass_or_interface(hash.merge({:template => 'RubotoActivity', :class => i, :name => "Ruboto#{name}"}))
           end
         end
       end
@@ -164,30 +164,30 @@ module Ruboto
         text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
         file_existed = File.exists?(file)
         File.open(file, 'w') do |f|
-          f << text.gsub("THE_PACKAGE", package).gsub("Sample#{klass}", name).gsub("Inheriting#{klass}", name).gsub("sample_#{underscore(klass)}.rb", script_name)
+          f << text.gsub('THE_PACKAGE', package).gsub("Sample#{klass}", name).gsub("Inheriting#{klass}", name).gsub("sample_#{underscore(klass)}.rb", script_name)
         end
         puts "#{file_existed ? 'Updated' : 'Added'} file #{file}."
 
         script_file = File.expand_path("#{SCRIPTS_DIR}/#{script_name}", dest)
-        if !File.exists? script_file
+        unless File.exists? script_file
           sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb"))
-          sample_source.gsub!("THE_PACKAGE", package)
+          sample_source.gsub!('THE_PACKAGE', package)
           sample_source.gsub!("Sample#{klass}", name)
-          sample_source.gsub!("start.rb", script_name)
+          sample_source.gsub!('start.rb', script_name)
           FileUtils.mkdir_p File.join(dest, SCRIPTS_DIR)
-          File.open script_file, "a" do |f|
+          File.open script_file, 'a' do |f|
             f << sample_source
           end
           puts "Added file #{script_file}."
         end
 
         test_file = File.expand_path("test/src/#{script_name.chomp('.rb')}_test.rb", dest)
-        if !File.exists? test_file
+        unless File.exists? test_file
           sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb"))
-          sample_test_source.gsub!("THE_PACKAGE", package)
+          sample_test_source.gsub!('THE_PACKAGE', package)
           sample_test_source.gsub!("Sample#{klass}", name)
           sample_test_source.gsub!('SampleActivity', verify_activity)
-          File.open test_file, "a" do |f|
+          File.open test_file, 'a' do |f|
             f << sample_test_source
           end
           puts "Added file #{test_file}."
