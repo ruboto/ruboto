@@ -512,6 +512,11 @@ module Ruboto
 
               if included_stdlibs
                 lib_dirs = %w(1.8 1.9 2.0 shared)
+
+                # FIXME(uwe): Remove when we stop testing JRuby < 1.7.4.dev
+                lib_dirs.delete('2.0') if jruby_stdlib_version < Gem::Version.new('1.7.4.dev')
+                # EMXIF
+
                 print 'excluded...'
                 lib_dirs.each do |ld|
                   Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
@@ -531,6 +536,9 @@ module Ruboto
 
               if excluded_stdlibs.any?
                 %w(1.8 1.9 2.0 shared).each do |ld|
+                  # FIXME(uwe): Remove when we stop testing JRuby < 1.7.4.dev
+                  next if ld == '2.0' && jruby_stdlib_version < Gem::Version.new('1.7.4.dev')
+                  # EMXIF
                   excluded_stdlibs.each do |d|
                     dir = "new/jruby.home/lib/ruby/#{ld}/#{d}"
                     FileUtils.rm_rf dir if File.exists? dir
