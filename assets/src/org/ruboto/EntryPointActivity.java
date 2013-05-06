@@ -362,25 +362,24 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     }
     // EMXIF
 
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Log.d("onActivityResult: " + requestCode + ", " + resultCode + ", " + data);
-//        Log.d("onActivityResult: " + INSTALL_REQUEST_CODE + ", " + RESULT_OK + ", " + RESULT_CANCELED);
-//        if (requestCode == INSTALL_REQUEST_CODE) {
-//            if (resultCode == RESULT_OK) {
-//                Log.d("onActivityResult: Install OK.");
-//                String result=data.getStringExtra("result");
-//            } else if (resultCode == RESULT_CANCELED) {
-//                Log.d("onActivityResult: Install canceled.");
-//                deleteFile(RUBOTO_APK);
-//                if (!JRubyAdapter.isInitialized()) {
-//                    finish();
-//                }
-//            } else {
-//                Log.e("onActivityResult: resultCode: " + resultCode);
-//            }
-//        }
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("onActivityResult: " + requestCode + ", " + resultCode + ", " + data);
+        Log.d("onActivityResult: " + INSTALL_REQUEST_CODE + ", " + RESULT_OK + ", " + RESULT_CANCELED);
+        if (requestCode == INSTALL_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Log.d("onActivityResult: Install OK.");
+            } else if (resultCode == RESULT_CANCELED) {
+                Log.d("onActivityResult: Install canceled.");
+                deleteFile(RUBOTO_APK);
+                if (!JRubyAdapter.isInitialized()) {
+                    finish();
+                }
+            } else {
+                Log.e("onActivityResult: resultCode: " + resultCode);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     private boolean hasInternetPermission() {
         String permission = "android.permission.INTERNET";
