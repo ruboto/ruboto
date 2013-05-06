@@ -370,10 +370,12 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                 Log.d("onActivityResult: Install OK.");
             } else if (resultCode == RESULT_CANCELED) {
                 Log.d("onActivityResult: Install canceled.");
+                // FIXME(uwe): Maybe show a dialog explaining that RubotoCore is needed and try again?
                 deleteFile(RUBOTO_APK);
                 if (!JRubyAdapter.isInitialized()) {
                     finish();
                 }
+                // EMXIF
             } else {
                 Log.e("onActivityResult: resultCode: " + resultCode);
             }
