@@ -130,14 +130,7 @@ public class InstrumentationTestRunner extends android.test.InstrumentationTestR
     }
 
     public void test(String name, Map options, Object block) {
-        // FIXME(uwe): Remove when we stop supporting Android 2.2
-        if (android.os.Build.VERSION.SDK_INT <= 8) {
-          name ="runTest";
-        }
-        // FIXME end
-
         boolean runOnUiThread = options == null || options.get("ui") == "true";
-
         Test test = new ActivityTest(activityClass, JRubyAdapter.getScriptFilename(), setup, teardown, name, runOnUiThread, block);
         suite.addTest(test);
         Log.d(getClass().getName(), "Made test instance: " + test);

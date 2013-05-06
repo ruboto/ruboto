@@ -152,11 +152,6 @@ public class JRubyAdapter {
             System.setProperty("jruby.ji.proxyClassFactory", "org.ruboto.DalvikProxyClassFactory");
             System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
 
-            // Workaround for bug in Android 2.2
-            // http://code.google.com/p/android/issues/detail?id=9431
-            // System.setProperty("java.net.preferIPv4Stack", "true");
-    		// System.setProperty("java.net.preferIPv6Addresses", "false");
-
             ClassLoader classLoader;
             Class<?> scriptingContainerClass;
             String apkName = null;
@@ -376,29 +371,7 @@ public class JRubyAdapter {
     private static String scriptsDirName(Context context) {
         File storageDir = null;
         if (isDebugBuild()) {
-
-            // FIXME(uwe): Simplify this as soon as we drop support for android-7
-            if (android.os.Build.VERSION.SDK_INT >= 8) {
-                try {
-                    Method method = context.getClass().getMethod("getExternalFilesDir", String.class);
-                    storageDir = (File) method.invoke(context, (Object) null);
-                } catch (SecurityException e) {
-                    printStackTrace(e);
-                } catch (NoSuchMethodException e) {
-                    printStackTrace(e);
-                } catch (IllegalArgumentException e) {
-                    printStackTrace(e);
-                } catch (IllegalAccessException e) {
-                    printStackTrace(e);
-                } catch (InvocationTargetException e) {
-                    printStackTrace(e);
-                }
-            } else {
-                storageDir = new File(Environment.getExternalStorageDirectory(), "Android/data/" + context.getPackageName() + "/files");
-                Log.e("Calculated path to sdcard the old way: " + storageDir);
-            }
-            // FIXME end
-
+            storageDir = context.getExternalFilesDir(null);
             if (storageDir == null || (!storageDir.exists() && !storageDir.mkdirs())) {
                 Log.e("Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
                 storageDir = context.getFilesDir();

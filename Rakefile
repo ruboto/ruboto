@@ -331,7 +331,7 @@ namespace :platform do
   desc 'Download the current RubotoCore platform release apk'
   file PLATFORM_CURRENT_RELEASE_APK do
     puts 'Downloading the current RubotoCore platform release apk'
-    uri = URI('https://raw.github.com/ruboto/ruboto-core/master/dist/RubotoCore-release.apk')
+    uri = URI('http://ruboto.org/downloads/RubotoCore-release.apk')
     begin
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true

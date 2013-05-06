@@ -49,7 +49,7 @@ module Ruboto
               option('target') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
-                description "Android version to target. Must begin with 'android-' (e.g., 'android-8' for froyo)"
+                description "Android version to target. Must begin with 'android-' (e.g., 'android-10' for gingerbread)"
               }
               option('min-sdk') {
                 argument :required

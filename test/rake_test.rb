@@ -9,32 +9,27 @@ class RakeTest < Test::Unit::TestCase
     cleanup_app
   end
 
-  # FIXME(uwe): Remove condition when we stop supporting android-7
-  if ANDROID_OS == 7
-    puts 'Skipping sdcard test since files on sdcard are not removed on android-7 on app uninstall'
-  else
-    def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
-      Dir.chdir APP_DIR do
-        activity_filename = 'src/ruboto_test_app_activity.rb'
-        s = File.read(activity_filename)
-        s.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
-        File.open(activity_filename, 'w') { |f| f << s }
+  def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
+    Dir.chdir APP_DIR do
+      activity_filename = 'src/ruboto_test_app_activity.rb'
+      s = File.read(activity_filename)
+      s.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
+      File.open(activity_filename, 'w') { |f| f << s }
 
-        test_filename = 'test/src/ruboto_test_app_activity_test.rb'
-        s2 = File.read(test_filename)
-        s2.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
-        File.open(test_filename, 'w') { |f| f << s2 }
+      test_filename = 'test/src/ruboto_test_app_activity_test.rb'
+      s2 = File.read(test_filename)
+      s2.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
+      File.open(test_filename, 'w') { |f| f << s2 }
 
-        apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
-      end
-      run_app_tests
-
-      # FIXME(uwe): Uncomment this when we can build the test package without building the main package
-      # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
-      # EMXIF
-
-      assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
+      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
     end
+    run_app_tests
+
+    # FIXME(uwe): Uncomment this when we can build the test package without building the main package
+    # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
+    # EMXIF
+
+    assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
   end
 
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed

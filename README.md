@@ -42,7 +42,7 @@ Command-line Tools
 ### Application generator
 
     $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min-sdk another-android-version --activity MainActivityName
-Version values must be specified using'android-' and the sdk level number (e.g., android-8 is froyo).
+Version values must be specified using'android-' and the sdk level number (e.g., android-10 is gingerbread).
 
 <a name="class_generator"></a>
 ### Class generator
@@ -231,12 +231,14 @@ Tips & Tricks
 
 ### Emulators
 
+You can start an emulator corresponding to the api level of your project with `rake emulator`.  The emulator will be created for you and will be called after the android version of you rproject, like "Android_4.0.3".
+
 If you're doing a lot of Android development, you'll probably find yourself typing `emulator -avd name_of_emulator` a lot to open emulators. It can be convenient to alias these to shorter commands.
 
 For example, in your `~/.bashrc`, `~/.zshrc`, or similar file, you might put
-    alias eclair="emulator -avd eclair"
-    alias froyo="emulator -avd froyo"
-If you have an "eclair" emulator that runs Android 2.1 and a "froyo" one that runs Android 2.2.
+    alias ics="emulator -avd Android_4.0.3"
+    alias jellyb="emulator -avd Android_4.1.2"
+If you have an "Android_4.0.3" emulator that runs Android 4..0.1 and a "Android_4.1.2" one that runs Android 4.1.2.
 
 
 Alternatives
