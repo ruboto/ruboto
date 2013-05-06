@@ -33,9 +33,9 @@ module Ruboto
 
       def android_package_os_id
         case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then "macosx"
-        when /^linux(.*)/ then "linux"
-        when /^windows(.*)/ then "windows"
+        when /^darwin(.*)/ then 'macosx'
+        when /^linux(.*)/ then 'linux'
+        when /^windows(.*)/ then 'windows'
         else
           ## Error
           nil
@@ -52,14 +52,14 @@ module Ruboto
         rescue
         end
 
-        return Ruboto::SdkVersions::DEFAULT_TARGET_SDK
+        Ruboto::SdkVersions::DEFAULT_TARGET_SDK
       end
 
       def path_setup_file
         case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then ".profile"
-        when /^linux(.*)/ then ".bashrc"
-        when /^windows(.*)/ then "windows"
+        when /^darwin(.*)/ then '.profile'
+        when /^linux(.*)/ then '.bashrc'
+        when /^windows(.*)/ then 'windows'
           ## Error
         else
           ## Error
@@ -79,7 +79,7 @@ module Ruboto
             return exe if File.executable? exe
           }
         end
-        return nil
+        nil
       end
 
       #########################################
@@ -90,24 +90,24 @@ module Ruboto
       def check_all
         @missing_paths = []
 
-        @java_loc = check_for("java", "Java")
-        @javac_loc = check_for("javac", "Java Compiler")
-        @ant_loc = check_for("ant", "Apache ANT")
-        @android_loc = check_for("android", "Android Package Installer", 
-                                  File.join(File.expand_path("~"), android_package_directory, 'tools', 'android'))
-        @emulator_loc = check_for("emulator", "Android Emulator")
-        @adb_loc = check_for("adb", "Android SDK Command adb",
-                              File.join(File.expand_path("~"), android_package_directory, 'platform-tools', 'adb'))
-        @dx_loc = check_for("dx", "Android SDK Command dx")
+        @java_loc = check_for('java', 'Java')
+        @javac_loc = check_for('javac', 'Java Compiler')
+        @ant_loc = check_for('ant', 'Apache ANT')
+        @android_loc = check_for('android', 'Android Package Installer',
+                                  File.join(File.expand_path('~'), android_package_directory, 'tools', 'android'))
+        @emulator_loc = check_for('emulator', 'Android Emulator')
+        @adb_loc = check_for('adb', 'Android SDK Command adb',
+                              File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
+        @dx_loc = check_for('dx', 'Android SDK Command dx')
         check_for_android_platform
 
         puts
         if @java_loc && @javac_loc && @adb_loc && @dx_loc && @emulator_loc && @platform_sdk_loc
           puts "    *** Ruboto setup is OK! ***\n"
-          return true
+          true
         else
           puts "    !!! Ruboto setup is NOT OK !!!\n"
-          return false
+          false
         end
       end
 
@@ -121,7 +121,7 @@ module Ruboto
           @missing_paths << "#{File.dirname(rv)}"
         end
 
-        puts "#{pretty_name || cmd}: " + (rv ?  "Found at #{rv}" : "Not found")
+        puts "#{pretty_name || cmd}: " + (rv ?  "Found at #{rv}" : 'Not found')
         rv
       end
 
@@ -131,7 +131,7 @@ module Ruboto
           if File.exists? @platform_sdk_loc
             puts "Android platform SDK: Found at #{@platform_sdk_loc}"
           else
-            puts "Android platform SDK: Not found"
+            puts 'Android platform SDK: Not found'
             @platform_sdk_loc = nil
           end
         rescue
@@ -175,7 +175,7 @@ module Ruboto
                 return
               end
             end
-            @android_loc = File.join(File.expand_path("~"), android_package_directory, 'tools', 'android')
+            @android_loc = File.join(File.expand_path('~'), android_package_directory, 'tools', 'android')
             ENV['PATH'] = "#{File.dirname(@android_loc)}:#{ENV['PATH']}"
             @missing_paths << "#{File.dirname(@android_loc)}"
           end
@@ -189,7 +189,7 @@ module Ruboto
           a = STDIN.gets.chomp.upcase
           if a == 'Y' || a.empty?
             system 'android update sdk --no-ui --filter tool,platform-tool'
-            @adb_loc = File.join(File.expand_path("~"), android_package_directory, 'platform-tools', 'adb')
+            @adb_loc = File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb')
             ENV['PATH'] = "#{File.dirname(@adb_loc)}:#{ENV['PATH']}"
             @missing_paths << "#{File.dirname(@adb_loc)}"
           end
@@ -231,7 +231,7 @@ module Ruboto
               f.puts '# END Ruboto PATH setup'
               f.puts
             end
-            puts "Path updated. Please close your command window and reopen."
+            puts 'Path updated. Please close your command window and reopen.'
           end
         end
       end
