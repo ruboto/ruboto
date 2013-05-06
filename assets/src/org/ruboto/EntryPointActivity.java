@@ -32,6 +32,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
 	public void onCreate(Bundle bundle) {
         Log.d("EntryPointActivity onCreate:");
+		getScriptInfo().setRubyClassName(getClass().getSimpleName());
 
 	    try {
     		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
