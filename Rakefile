@@ -272,7 +272,7 @@ task :release => [:clean, :gem] do
   sh "git rm #{examples_glob}" unless Dir[examples_glob].empty?
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
-  sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkVersions::ANDROID_TOOLS_REVISION}' \"#{examples_glob}\""
+  sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}' \"#{examples_glob}\""
   sh 'git push'
 end
 
