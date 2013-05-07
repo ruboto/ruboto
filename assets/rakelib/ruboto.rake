@@ -575,6 +575,8 @@ def build_apk(t, release)
   else
     p RbConfig::CONFIG['host_os']
     sh 'free' if RbConfig::CONFIG['host_os'] =~ /linux/
+    sh 'ulimit -a' if RbConfig::CONFIG['host_os'] =~ /linux/
+
     sh "#{ANT_CMD} debug"
   end
   true
