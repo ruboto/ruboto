@@ -573,6 +573,8 @@ def build_apk(t, release)
   if release
     sh "#{ANT_CMD} release"
   else
+    p RbConfig::CONFIG['host_os']
+    sh 'free' if RbConfig::CONFIG['host_os'] =~ /linux/
     sh "#{ANT_CMD} debug"
   end
   true

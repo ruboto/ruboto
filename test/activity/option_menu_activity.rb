@@ -17,7 +17,6 @@ class OptionMenuActivity
 
   def onCreateOptionsMenu(menu)
     mi = menu.add('Test')
-    # mi.icon = $package.R::drawable::get_ruboto_core
     mi.setIcon($package.R::drawable::get_ruboto_core)
     mi.set_on_menu_item_click_listener do |menu_item|
       @text_view.text = 'What hath Matz wrought!'
