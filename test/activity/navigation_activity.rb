@@ -34,18 +34,18 @@ class NavigationActivity
   def java_backed_by_ruby_class
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    configBundle = android.os.Bundle.new
-    configBundle.put_string('ClassName', 'NavigationTargetActivity')
-    i.putExtra('Ruboto Config', configBundle)
+    config_bundle = android.os.Bundle.new
+    config_bundle.put_string('ClassName', 'NavigationTargetActivity')
+    i.putExtra('Ruboto Config', config_bundle)
     startActivity(i)
   end
 
   def java_backed_by_script_name
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    configBundle = android.os.Bundle.new
-    configBundle.put_string('Script', 'navigation_target_activity.rb')
-    i.putExtra('Ruboto Config', configBundle)
+    config_bundle = android.os.Bundle.new
+    config_bundle.put_string('Script', 'navigation_target_activity.rb')
+    i.putExtra('Ruboto Config', config_bundle)
     startActivity(i)
   end
 
@@ -80,18 +80,18 @@ class NavigationActivity
   def start_infile_activity
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    configBundle = android.os.Bundle.new
-    configBundle.put_string('ClassName', 'InfileActivity')
-    i.putExtra('Ruboto Config', configBundle)
+    config_bundle = android.os.Bundle.new
+    config_bundle.put_string('ClassName', 'InfileActivity')
+    i.putExtra('Ruboto Config', config_bundle)
     startActivity(i)
   end
 
   def start_ruby_file_activity
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    configBundle = android.os.Bundle.new
-    configBundle.put_string('ClassName', 'RubyFileActivity')
-    i.putExtra('Ruboto Config', configBundle)
+    config_bundle = android.os.Bundle.new
+    config_bundle.put_string('ClassName', 'RubyFileActivity')
+    i.putExtra('Ruboto Config', config_bundle)
     startActivity(i)
   end
 

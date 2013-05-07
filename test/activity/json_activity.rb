@@ -12,7 +12,7 @@ class JsonActivity
         linear_layout :orientation => LinearLayout::VERTICAL, :gravity => android.view.Gravity::CENTER do
           text_view :id => 42, :text => with_large_stack { JSON.load('["foo"]')[0] },
                     :text_size => 48.0, :gravity => android.view.Gravity::CENTER
-          text_view :id => 43, :text => with_large_stack { JSON.dump(['foo']) },
+          text_view :id => 43, :text => with_large_stack { JSON.dump(%w(foo)) },
                     :text_size => 48.0, :gravity => android.view.Gravity::CENTER
           text_view :id => 44, :text => with_large_stack { 'foo'.to_json },
                     :text_size => 48.0, :gravity => android.view.Gravity::CENTER

@@ -11,7 +11,7 @@ setup do |activity|
 end
 
 test('button changes text') do |activity|
-  assert_equal "What hath Matz wrought?", @text_view.text
+  assert_equal 'What hath Matz wrought?', @text_view.text
   activity.findViewById(43).performClick
-  assert_equal "What hath Matz wrought!", @text_view.text
+  assert_equal 'What hath Matz wrought!', @text_view.text
 end

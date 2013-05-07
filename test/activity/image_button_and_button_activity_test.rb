@@ -11,13 +11,13 @@ setup do |activity|
 end
 
 test('button changes text') do |activity|
-  assert_equal "What hath Matz wrought?", @text_view.text
+  assert_equal 'What hath Matz wrought?', @text_view.text
   activity.find_view_by_id(44).perform_click
   assert_equal 'Button pressed', @text_view.text
 end
 
 test('image button changes text') do |activity|
-  assert_equal "What hath Matz wrought?", @text_view.text
+  assert_equal 'What hath Matz wrought?', @text_view.text
   activity.find_view_by_id(43).perform_click
   assert_equal 'Image button pressed', @text_view.text
 end
