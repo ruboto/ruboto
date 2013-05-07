@@ -136,6 +136,45 @@ task :release_docs do
     cat ||= 'Other'
     cat
   end
+
+  puts '=' * 80
+  puts
+  puts <<EOF
+Subject: [ANN] Ruboto #{milestone_name} release candidate
+
+Hi all!
+
+The Ruboto #{milestone_name} release candidate is now available.
+
+#{milestone_description}
+
+As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
+
+    [sudo] gem install ruboto --pre
+
+and test your apps after updating with
+
+    ruboto update app
+
+If you have an app released for public consumption, please let us know.  Our developer program seeks to help developers getting started using Ruboto, and ensure good quality across Ruboto releases.  Currently we are supporting the apps listed here:
+
+    https://github.com/ruboto/ruboto/wiki/Promoted-apps
+
+If you are just starting with Ruboto, but still want to contribute, please select and complete one of the tutorials and mark it with the version of Ruboto you used.
+
+    https://github.com/ruboto/ruboto/wiki/Tutorials-and-examples
+
+If you find a bug or have a suggestion, please file an issue in the issue tracker:
+
+    https://github.com/ruboto/ruboto/issues
+
+--
+The Ruboto Team
+http://ruboto.org/
+
+EOF
+
+  puts '=' * 80
   puts
   puts "Subject: [ANN] Ruboto #{milestone_name} released!"
   puts
@@ -180,7 +219,7 @@ The Ruboto Team
 http://ruboto.org/
 
 EOF
-
+  puts '=' * 80
 end
 
 desc 'Fetch download stats form rubygems.org'
@@ -262,11 +301,11 @@ end
 
 desc 'Push the gem to RubyGems'
 task :release => [:clean, :gem] do
-  output = `git status --porcelain`
-  raise "Workspace not clean!\n#{output}" unless output.empty?
-  sh "git tag #{Ruboto::VERSION}"
-  sh 'git push --tags'
-  sh "gem push #{GEM_FILE}"
+  #output = `git status --porcelain`
+  #raise "Workspace not clean!\n#{output}" unless output.empty?
+  #sh "git tag #{Ruboto::VERSION}"
+  #sh 'git push --tags'
+  #sh "gem push #{GEM_FILE}"
 
   examples_glob = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
   sh "git rm #{examples_glob}" unless Dir[examples_glob].empty?
