@@ -197,15 +197,26 @@ EOF
   puts <<EOF
 Installation:
 
-To use Ruboto, you need to install a Java JDK, the Android SDK, Apache ANT, and a Ruby implementation.  Then do (possibly as root)
+To use Ruboto, you need to install a Ruby implementation.  Then do (possibly as root)
 
     gem install ruboto
-
+    ruboto setup
 
 To create a project do
 
     ruboto gen app --package <your.package.name>
+    cd <project directory>
+    ruboto setup
 
+To run an emulator for your project
+
+    cd <project directory>
+    rake emulator
+
+To run your project
+
+    cd <project directory>
+    rake install start
 
 You can find an introductory tutorial at https://github.com/ruboto/ruboto/wiki
 
