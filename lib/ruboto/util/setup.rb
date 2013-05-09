@@ -3,6 +3,7 @@ require 'ruboto/sdk_versions'
 module Ruboto
   module Util
     module Setup
+      include Ruboto::SdkVersions
       # Todo: Find a way to look this up
       ANDROID_SDK_VERSION = '21.1'
 
@@ -35,7 +36,7 @@ module Ruboto
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/ then 'macosx'
         when /^linux(.*)/ then 'linux'
-        when /^windows(.*)/ then 'windows'
+        when /^mswin32|windows(.*)/ then 'windows'
         else
           ## Error
           nil
@@ -50,16 +51,16 @@ module Ruboto
         begin
           return $1 if File.read('project.properties') =~ /target=(.*)/
         rescue
+          # ignored
         end
-
-        Ruboto::SdkVersions::DEFAULT_TARGET_SDK
+        DEFAULT_TARGET_SDK
       end
 
       def path_setup_file
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/ then '.profile'
         when /^linux(.*)/ then '.bashrc'
-        when /^windows(.*)/ then 'windows'
+        when /^mswin32|windows(.*)/ then 'windows'
           ## Error
         else
           ## Error
@@ -103,10 +104,10 @@ module Ruboto
 
         puts
         if @java_loc && @javac_loc && @adb_loc && @dx_loc && @emulator_loc && @platform_sdk_loc
-          puts "    *** Ruboto setup is OK! ***\n"
+          puts "    *** Ruboto setup is OK! ***\n\n"
           true
         else
-          puts "    !!! Ruboto setup is NOT OK !!!\n"
+          puts "    !!! Ruboto setup is NOT OK !!!\n\n"
           false
         end
       end
@@ -168,11 +169,22 @@ module Ruboto
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "tar -xzf #{asdk_file_name}"
                 system "rm #{asdk_file_name}"
-              when /^windows(.*)/
-                # Todo: Need platform independent download
-                ## Error
+              when /^mswin32|windows(.*)/
+                # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
                 asdk_file_name = "installer_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.exe"
+                require 'net/http'
+                Net::HTTP.start('dl.google.com') do |http|
+                  puts 'Downloading...'
+                  resp = http.get("/android/#{asdk_file_name}")
+                  open(asdk_file_name, 'wb') { |file| file.write(resp.body) }
+                end
+                puts "Installing #{asdk_file_name}..."
+                system asdk_file_name
+                raise "Unexpected exit code while installing the Android SDK: #{$?}" unless $? == 0
+                FileUtils.rm_f asdk_file_name
                 return
+              else
+                raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
               end
             end
             @android_loc = File.join(File.expand_path('~'), android_package_directory, 'tools', 'android')
