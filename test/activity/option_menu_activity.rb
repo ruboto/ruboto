@@ -4,6 +4,8 @@ require 'ruboto/util/toast'
 ruboto_import_widgets :LinearLayout, :TextView
 
 class OptionMenuActivity
+  attr_reader :text_view
+
   def onCreate(bundle)
     super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')

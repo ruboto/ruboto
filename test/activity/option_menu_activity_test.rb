@@ -3,9 +3,9 @@ activity Java::org.ruboto.test_app.OptionMenuActivity
 setup do |activity|
   start = Time.now
   loop do
-    @text_view = activity.findViewById(42)
-    sleep 1
+    @text_view = activity.text_view
     break if @text_view || (Time.now - start > 60)
+    sleep 1
   end
   assert @text_view
 end
