@@ -13,7 +13,7 @@ module Ruboto
       #
 
       def setup_ruboto
-        check =  check_all
+        check = check_all
 
         if not check and RbConfig::CONFIG['host_os'] == /^windows(.*)/
           puts "\nWe can't directly install Android on Windows."
@@ -21,10 +21,10 @@ module Ruboto
           puts 'please file an issue at https://github.com/ruboto/ruboto/issues'
           puts
           return
-       end
+        end
 
-       install_all if not check
-       config_path
+        install_all if not check
+        config_path
       end
 
       #########################################
@@ -34,9 +34,12 @@ module Ruboto
 
       def android_package_os_id
         case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then 'macosx'
-        when /^linux(.*)/ then 'linux'
-        when /^mswin32|windows(.*)/ then 'windows'
+        when /^darwin(.*)/ then
+          'macosx'
+        when /^linux(.*)/ then
+          'linux'
+        when /^mswin32|windows(.*)/ then
+          'windows'
         else
           ## Error
           nil
@@ -44,7 +47,11 @@ module Ruboto
       end
 
       def android_package_directory
-        "android-sdk-#{android_package_os_id}"
+        if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+          'AppData/Local/Android/android-sdk'
+        else
+          "android-sdk-#{android_package_os_id}"
+        end
       end
 
       def api_level
@@ -58,9 +65,12 @@ module Ruboto
 
       def path_setup_file
         case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then '.profile'
-        when /^linux(.*)/ then '.bashrc'
-        when /^mswin32|windows(.*)/ then 'windows'
+        when /^darwin(.*)/ then
+          '.profile'
+        when /^linux(.*)/ then
+          '.bashrc'
+        when /^mswin32|windows(.*)/ then
+          'windows'
           ## Error
         else
           ## Error
@@ -95,10 +105,10 @@ module Ruboto
         @javac_loc = check_for('javac', 'Java Compiler')
         @ant_loc = check_for('ant', 'Apache ANT')
         @android_loc = check_for('android', 'Android Package Installer',
-                                  File.join(File.expand_path('~'), android_package_directory, 'tools', 'android'))
+                                 File.join(File.expand_path('~'), android_package_directory, 'tools', 'android'))
         @emulator_loc = check_for('emulator', 'Android Emulator')
         @adb_loc = check_for('adb', 'Android SDK Command adb',
-                              File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
+                             File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
         @dx_loc = check_for('dx', 'Android SDK Command dx')
         check_for_android_platform
 
@@ -122,7 +132,7 @@ module Ruboto
           @missing_paths << "#{File.dirname(rv)}"
         end
 
-        puts "#{pretty_name || cmd}: " + (rv ?  "Found at #{rv}" : 'Not found')
+        puts "#{pretty_name || cmd}: " + (rv ? "Found at #{rv}" : 'Not found')
         rv
       end
 
@@ -146,10 +156,94 @@ module Ruboto
       #
 
       def install_all
+        install_java
         install_android
         install_adb
         install_platform
       end
+
+      def install_java
+        case RbConfig::CONFIG['host_os']
+        when /^darwin(.*)/
+        when /^linux(.*)/
+        when /^mswin32|windows(.*)/
+          # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
+          #set IS_ELEVATED=0
+          #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
+          #if %IS_ELEVATED%==0 (
+          #    echo You must run the command prompt as administrator to install.
+          #    exit /b 1
+          #)
+
+          java_installer_file_name = 'jdk-7-windows-x64.exe'
+          require 'net/http'
+          require 'net/https'
+          resp = nil
+          @cookies = ['gpw_e24=http%3A%2F%2Fwww.oracle.com']
+          puts 'Downloading...'
+          Net::HTTP.start('download.oracle.com') do |http|
+            resp, _ = http.get("/otn-pub/java/jdk/7/#{java_installer_file_name}", cookie_header)
+            resp.body
+          end
+          resp = process_response(resp)
+          open(java_installer_file_name, 'wb') { |file| file.write(resp.body) }
+          puts "Installing #{java_installer_file_name}..."
+          system java_installer_file_name
+          raise "Unexpected exit code while installing Java: #{$?}" unless $? == 0
+          FileUtils.rm_f java_installer_file_name
+          return
+        else
+          raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+        end
+      end
+
+      def cookie_header
+        return {} if @cookies.empty?
+        {'Cookie' => @cookies.join(';')}
+      end
+      private :cookie_header
+
+      def store_cookie(response)
+        return unless response['set-cookie']
+        header = response['set-cookie']
+        header.gsub! /expires=.{3},/, ''
+        header.split(',').each do |cookie|
+          cookie_value = cookie.strip.slice(/^.*?;/).chomp(';')
+          if cookie_value =~ /^(.*?)=(.*)$/
+            name = $1
+            @cookies.delete_if { |c| c =~ /^#{name}=/ }
+          end
+          @cookies << cookie_value unless cookie_value =~ /^.*?=$/
+        end
+        @cookies.uniq!
+      end
+      private :store_cookie
+
+      def process_response(response)
+        store_cookie(response)
+        if response.code == '302'
+          redirect_url = response['location']
+          puts "Following redirect to #{redirect_url}"
+          url = URI.parse(redirect_url)
+          if redirect_url =~ /^http:\/\//
+            Net::HTTP.start(url.host, url.port) do |http|
+              response = http.get(redirect_url, cookie_header)
+              response.body
+            end
+          else
+            http = Net::HTTP.new(url.host, url.port)
+            http.use_ssl = true
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            response = http.get(redirect_url, cookie_header)
+            response.body
+          end
+          return process_response(response)
+        elsif response.code != '200'
+          raise "Got response code #{response.code}"
+        end
+        response
+      end
+      private :process_response
 
       def install_android
         unless @android_loc
@@ -159,7 +253,7 @@ module Ruboto
           if a == 'Y' || a.empty?
             Dir.chdir File.expand_path('~/') do
               case RbConfig::CONFIG['host_os']
-              when /^darwin(.*)/ 
+              when /^darwin(.*)/
                 asdk_file_name = "android-sdk_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.zip"
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "unzip #{asdk_file_name}"
@@ -171,6 +265,13 @@ module Ruboto
                 system "rm #{asdk_file_name}"
               when /^mswin32|windows(.*)/
                 # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
+                #set IS_ELEVATED=0
+                #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
+                #if %IS_ELEVATED%==0 (
+                #    echo You must run the command prompt as administrator to install.
+                #    exit /b 1
+                #)
+
                 asdk_file_name = "installer_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.exe"
                 require 'net/http'
                 Net::HTTP.start('dl.google.com') do |http|
@@ -227,23 +328,31 @@ module Ruboto
 
       def config_path
         unless @missing_paths.empty?
-          puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
-          @missing_paths.each do |path|
-            puts %Q{    export PATH="#{path}:$PATH"}
-          end
-          print "\nWould you like to append these lines to your configuration script? (Y/n): "
-          a = STDIN.gets.chomp.upcase
-          if a == 'Y' || a.empty?
-            print "What script do you use to configure your PATH? (#{path_setup_file}): "
-            a = STDIN.gets.chomp.downcase
-
-            File.open(File.expand_path("~/#{a.empty? ? path_setup_file : a}"), 'a') do |f|
-              f.puts "\n# BEGIN Ruboto PATH setup"
-              @missing_paths.each{|path| f.puts %Q{export PATH="#{path}:$PATH"}}
-              f.puts '# END Ruboto PATH setup'
-              f.puts
+          if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+            puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
+            @missing_paths.each do |path|
+              puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
             end
-            puts 'Path updated. Please close your command window and reopen.'
+            system %Q{setx PATH "%PATH%;#{@missing_paths.map{|path| path.gsub '/', '\\'}.join(';')}"}
+          else
+            puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
+            @missing_paths.each do |path|
+              puts %Q{    export PATH="#{path}:$PATH"}
+            end
+            print "\nWould you like to append these lines to your configuration script? (Y/n): "
+            a = STDIN.gets.chomp.upcase
+            if a == 'Y' || a.empty?
+              print "What script do you use to configure your PATH? (#{path_setup_file}): "
+              a = STDIN.gets.chomp.downcase
+
+              File.open(File.expand_path("~/#{a.empty? ? path_setup_file : a}"), 'a') do |f|
+                f.puts "\n# BEGIN Ruboto PATH setup"
+                @missing_paths.each { |path| f.puts %Q{export PATH="#{path}:$PATH"} }
+                f.puts '# END Ruboto PATH setup'
+                f.puts
+              end
+              puts 'Path updated. Please close your command window and reopen.'
+            end
           end
         end
       end
