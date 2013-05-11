@@ -363,7 +363,7 @@ module Ruboto
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
-              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3.dev')
+              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.4.dev')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
                     '**/*Darwin*',
@@ -384,10 +384,12 @@ module Ruboto
                     'jnr/constants/platform/sunos',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
+                    'jnr/ffi/mapper',
                     'jnr/ffi/provider',
                     'jnr/ffi/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
+                    'jnr/posix/Aix*',
                     'jnr/posix/FreeBSD*',
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
@@ -408,6 +410,8 @@ module Ruboto
                     'org/jruby/ext/ffi/AbstractMemory*',
                     'org/jruby/ext/ffi/io',
                     'org/jruby/ext/ffi/jffi',
+                    'org/jruby/ext/ripper',
+                    'org/jruby/ext/tracepoint',
                     #'org/jruby/ir/dataflow',
                     #'org/jruby/ir/dataflow/analyses',
                     #'org/jruby/ir/representations',
@@ -420,10 +424,12 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                     'org/yecht',
                 ]
-                elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
-                  excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf)
-                elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1')
-                  excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf org/jruby/org/bouncycastle)
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3')
+                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht)
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
+                excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf)
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.1')
+                excluded_core_packages = %w(**/*Darwin* **/*Ruby20* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf org/jruby/org/bouncycastle)
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.0')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.0
                 excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/MacOS* jnr/posix/OpenBSD* org/apache org/bouncycastle org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/openssl org/jruby/javasupport/bsf)
@@ -520,7 +526,7 @@ module Ruboto
                 print 'excluded...'
                 lib_dirs.each do |ld|
                   Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
-                    libs = Dir['*'].map{|d|d.sub /\.(rb|jar)$/, ''}.uniq
+                    libs = Dir['*'].map { |d| d.sub /\.(rb|jar)$/, '' }.uniq
                     libs.each do |d|
                       next if included_stdlibs.include? d
                       FileUtils.rm_rf d if File.exists? d
@@ -610,8 +616,8 @@ module Ruboto
                     jar_load_code = ''
                   end
 
-                  File.open("#{j}.rb", 'w'){|f| f << jar_load_code}
-                  File.open("#{j}.jar.rb", 'w'){|f| f << jar_load_code}
+                  File.open("#{j}.rb", 'w') { |f| f << jar_load_code }
+                  File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
                 end
 
                 `jar -cf ../../#{jruby_stdlib} .`
