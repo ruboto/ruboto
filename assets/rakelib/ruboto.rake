@@ -50,7 +50,7 @@ if new_dx_content =~ xmx_pattern &&
   new_dx_content.sub!(xmx_pattern, %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"})
 
   # FIXME(uwe): For travis debugging  Remove when travis is stable.
-  new_dx_content.sub!(/^exec/, "free\necho Virtual:\nps -e -ovsize=,args= | sort -b -k1,1n | tail -n10\necho RSS:\nps -e -orss=,args= | sort -b -k1,1n | tail -n10\nexec") if RbConfig::CONFIG['host_os'] =~ /linux/
+  new_dx_content.sub!(/^exec/, "free\necho Virtual:\nps -e -ovsize=,args= | sort -b -k1,1n | tail -n10\necho RSS:\nps -e -orss=,args= | sort -b -k1,1n | tail -n10\necho $javaOpts\necho $@\nexec") if RbConfig::CONFIG['host_os'] =~ /linux/
   # EMXIF
 
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
