@@ -13,17 +13,7 @@ module Ruboto
       #
 
       def setup_ruboto
-        check = check_all
-
-        if not check and RbConfig::CONFIG['host_os'] == /^windows(.*)/
-          puts "\nWe can't directly install Android on Windows."
-          puts 'If you would like to contribute to the setup for Windows,'
-          puts 'please file an issue at https://github.com/ruboto/ruboto/issues'
-          puts
-          return
-        end
-
-        install_all if not check
+        install_all if not check_all
         config_path
       end
 
@@ -113,7 +103,7 @@ module Ruboto
         check_for_android_platform
 
         puts
-        if @java_loc && @javac_loc && @adb_loc && @dx_loc && @emulator_loc && @platform_sdk_loc
+        if @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @adb_loc && @dx_loc && @platform_sdk_loc
           puts "    *** Ruboto setup is OK! ***\n\n"
           true
         else
@@ -156,9 +146,10 @@ module Ruboto
       #
 
       def install_all
-        install_java
-        install_android
-        install_adb
+        install_java unless @java_loc && @javac_loc
+        install_ant unless @ant_loc
+        install_android unless @android_loc && @emulator_loc && @dx_loc
+        install_adb unless @adb_loc
         install_platform
       end
 
@@ -175,23 +166,101 @@ module Ruboto
           #    exit /b 1
           #)
 
-          java_installer_file_name = 'jdk-7-windows-x64.exe'
-          require 'net/http'
-          require 'net/https'
-          resp = nil
-          @cookies = ['gpw_e24=http%3A%2F%2Fwww.oracle.com']
-          puts 'Downloading...'
-          Net::HTTP.start('download.oracle.com') do |http|
-            resp, _ = http.get("/otn-pub/java/jdk/7/#{java_installer_file_name}", cookie_header)
-            resp.body
+          puts 'Java JDK was not found.'
+          print 'Would you like to download and install it? (Y/n): '
+          a = STDIN.gets.chomp.upcase
+          if a == 'Y' || a.empty?
+            java_installer_file_name = 'jdk-7-windows-x64.exe'
+            require 'net/http'
+            require 'net/https'
+            resp = nil
+            @cookies = %w(gpw_e24=http%3A%2F%2Fwww.oracle.com)
+            puts 'Downloading...'
+            Net::HTTP.start('download.oracle.com') do |http|
+              resp, _ = http.get("/otn-pub/java/jdk/7/#{java_installer_file_name}", cookie_header)
+              resp.body
+            end
+            resp = process_response(resp)
+            open(java_installer_file_name, 'wb') { |file| file.write(resp.body) }
+            puts "Installing #{java_installer_file_name}..."
+            system java_installer_file_name
+            raise "Unexpected exit code while installing Java: #{$?}" unless $? == 0
+            FileUtils.rm_f java_installer_file_name
+          else
+            puts
+            puts 'You can download and install the Java JDK manually from'
+            puts 'http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html'
+            puts
           end
-          resp = process_response(resp)
-          open(java_installer_file_name, 'wb') { |file| file.write(resp.body) }
-          puts "Installing #{java_installer_file_name}..."
-          system java_installer_file_name
-          raise "Unexpected exit code while installing Java: #{$?}" unless $? == 0
-          FileUtils.rm_f java_installer_file_name
-          return
+          unless check_for('javac')
+            ENV['JAVA_HOME'] = 'c:\\Program Files\\Java\\jdk1.7.0'
+            if Dir.exists?(ENV['JAVA_HOME'])
+              @javac_loc = "#{ENV['JAVA_HOME'].gsub('\\', '/')}/bin/javac"
+              puts "Setting the JAVA_HOME environment variable to #{ENV['JAVA_HOME']}"
+              system %Q{setx JAVA_HOME "#{ENV['JAVA_HOME']}"}
+              @missing_paths << "#{File.dirname(@javac_loc)}"
+            end
+          end
+        else
+          raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+        end
+      end
+
+      def install_ant
+        case RbConfig::CONFIG['host_os']
+        when /^darwin(.*)/
+        when /^linux(.*)/
+        when /^mswin32|windows(.*)/
+          # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
+          #set IS_ELEVATED=0
+          #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
+          #if %IS_ELEVATED%==0 (
+          #    echo You must run the command prompt as administrator to install.
+          #    exit /b 1
+          #)
+
+          puts 'Apache ANT was not found.'
+          print 'Would you like to download and install it? (Y/n): '
+          a = STDIN.gets.chomp.upcase
+          if a == 'Y' || a.empty?
+            Dir.chdir Dir.home do
+              ant_package_file_name = 'apache-ant-1.9.0-bin.tar.gz'
+              require 'net/http'
+              require 'net/https'
+              puts 'Downloading...'
+              Net::HTTP.start('apache.vianett.no') do |http|
+                resp, _ = http.get("/ant/binaries/#{ant_package_file_name}")
+                open(ant_package_file_name, 'wb') { |file| file.write(resp.body) }
+              end
+              puts "Installing #{ant_package_file_name}..."
+              require 'rubygems/package'
+              require 'zlib'
+              Gem::Package::TarReader.new(Zlib::GzipReader.open(ant_package_file_name)).each do |entry|
+                puts entry.full_name
+                if entry.directory?
+                  FileUtils.mkdir_p entry.full_name
+                elsif entry.file?
+                  FileUtils.mkdir_p File.dirname(entry.full_name)
+                  File.open(entry.full_name, 'wb'){|f| f << entry.read}
+                end
+              end
+              FileUtils.rm_f ant_package_file_name
+            end
+          else
+            puts
+            puts 'You can download and install Apache ANT manually from'
+            puts 'http://ant.apache.org/bindownload.cgi'
+            puts
+          end
+          unless check_for('ant')
+            ENV['ANT_HOME'] = File.expand_path(File.join('~', 'apache-ant-1.9.0')).gsub('/', '\\')
+            if Dir.exists?(ENV['ANT_HOME'])
+              @ant_loc = "#{ENV['ANT_HOME'].gsub('\\', '/')}/bin/ant"
+              puts "Setting the ANT_HOME environment variable to #{ENV['ANT_HOME']}"
+              system %Q{setx ANT_HOME "#{ENV['ANT_HOME']}"}
+              @missing_paths << "#{File.dirname(@ant_loc)}"
+            end
+          end
         else
           raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
         end
@@ -333,7 +402,7 @@ module Ruboto
             @missing_paths.each do |path|
               puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
             end
-            system %Q{setx PATH "%PATH%;#{@missing_paths.map{|path| path.gsub '/', '\\'}.join(';')}"}
+            system %Q{setx PATH "%PATH%;#{@missing_paths.map { |path| path.gsub '/', '\\' }.join(';')}"}
           else
             puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
             @missing_paths.each do |path|
