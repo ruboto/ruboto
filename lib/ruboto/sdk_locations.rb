@@ -2,11 +2,29 @@ require 'pathname'
 
 module Ruboto
   module SdkLocations
+    #
+    # OS independent "which"
+    # From: http://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
+    #
+    def self.which(cmd)
+      exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+      ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+        exts.each do |ext|
+          exe = File.join(path, "#{cmd}#{ext}")
+          return exe if File.executable? exe
+        end
+      end
+      nil
+    end
+    def which(cmd)
+      SdkLocations.which(cmd)
+    end
+
     if ENV['ANDROID_HOME']
       ANDROID_HOME = ENV['ANDROID_HOME']
     else
-      adb_location = `#{RUBY_PLATFORM =~ /mingw|mswin/ ? 'where' : 'which'} adb`.chomp
-      if adb_location.empty?
+      adb_location = which('adb')
+      unless adb_location
         raise 'Unable to locate the "adb" command.  Either set the ANDROID_HOME environment variable or add the location of the "adb" command to your path.'
       end
       ANDROID_HOME = File.dirname(File.dirname(Pathname.new(adb_location).realpath))

@@ -15,23 +15,30 @@ if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.
   exit 1
 end
 
+#
+# OS independent "which"
+# From: http://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
+#
+def which(cmd)
+  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+    exts.each do |ext|
+      exe = File.join(path, "#{cmd}#{ext}")
+      return exe if File.executable? exe
+    end
+  end
+  nil
+end
+
 adb_version_str = `adb version`
 (puts 'Android SDK platform tools not in PATH (adb command not found).'; exit 1) unless $? == 0
 (puts "Unrecognized adb version: #$1"; exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
 (puts "adb version 1.0.31 or later required.  Version found: #$1"; exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
-unless ENV['ANDROID_HOME']
-  unless ON_WINDOWS
-    begin
-      adb_path = `which adb`
-      ENV['ANDROID_HOME'] = File.dirname(File.dirname(adb_path)) if $? == 0
-    rescue Errno::ENOENT
-      puts "Unable to detect adb location: #$!"
-    end
-  end
+if ENV['ANDROID_HOME'].nil? && (adb_path = which('adb'))
+  ENV['ANDROID_HOME'] = File.dirname(File.dirname(adb_path))
 end
 (puts 'You need to set the ANDROID_HOME environment variable.'; exit 1) unless ENV['ANDROID_HOME']
 
-# FIXME(uwe):  On windows the file is called dx.bat
 dx_filename = File.join(ENV['ANDROID_HOME'], 'platform-tools', ON_WINDOWS ? 'dx.bat' : 'dx')
 unless File.exists? dx_filename
   puts 'You need to install the Android SDK Platform-tools!'
@@ -39,10 +46,7 @@ unless File.exists? dx_filename
 end
 new_dx_content = File.read(dx_filename).dup
 
-# FIXME(uwe): Set Xmx on windows bat script:
-# set defaultXmx=-Xmx1024M
-
-xmx_pattern = /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
+xmx_pattern = ON_WINDOWS ? /^set defaultXmx=-Xmx(\d+)(M|m|G|g|T|t)/ : /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
 MINIMUM_DX_HEAP_SIZE = 2048
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < MINIMUM_DX_HEAP_SIZE*1024**2
@@ -504,31 +508,10 @@ def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   loop do
     path_line = `adb shell pm path #{package_name}`.chomp
-
-    # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
-    puts '*' * 80
-    puts 'Output from pm path'
-    puts '*' * 80
-    puts $?.inspect
-    puts '*' * 80
-    puts path_line
-    puts '*' * 80
-    # EMXIF
-
     return nil if $? == 0 && path_line.empty?
     break if $? == 0 && path_line =~ /^package:(.*)$/
-
-    # FIXME(uwe): Debug travis CI.  Remove when Travis CI is OK.
-    puts '*' * 80
-    puts 'Unexpected output from pm path'
-    puts '*' * 80
-    puts path_line
-    puts '*' * 80
-    # EMXIF
-
     sleep 0.5
   end
-
   path = $1
   o = `adb shell ls -l #{path}`.chomp
   raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
@@ -674,8 +657,7 @@ end
 
 def start_emulator(sdk_level)
   STDOUT.sync = true
-  # FIXME(uwe):  Use RBConfig instead
-  if `uname -m`.chomp == 'x86_64'
+  if RbConfig::CONFIG['host_cpu'] == 'x86_64'
     emulator_cmd = 'emulator64-arm'
   else
     emulator_cmd = 'emulator-arm'
@@ -690,10 +672,12 @@ def start_emulator(sdk_level)
   new_snapshot = false
 
   if `adb devices` =~ /emulator-5554/
-    t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK/)
+    t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK\n/)
+    t.waitfor(/^OK\n/)
     output = ''
     t.cmd('avd name') { |c| output << c }
-    if output =~ /OK\n(.*)\nOK/
+    t.close
+    if output =~ /(.*)\nOK\n/
       running_avd_name = $1
       if running_avd_name == avd_name
         puts "Emulator #{avd_name} is already running."
@@ -702,8 +686,10 @@ def start_emulator(sdk_level)
         puts "Emulator #{running_avd_name} is running."
       end
     else
-      puts 'No emulator is running.'
+      raise "Unexpected response from emulator: #{output.inspect}"
     end
+  else
+    puts 'No emulator is running.'
   end
 
   loop do
@@ -739,17 +725,17 @@ def start_emulator(sdk_level)
 
     unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
       puts "Creating AVD #{avd_name}"
-      heap_size = (File.read('AndroidManifest.xml') =~ /largeHeap/) ? 256 : 48
-      # FIXME(uwe):  Use Ruby instead.
-      # FIXME(uwe):  Only change the heap size to be larger.
-      # `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['ANDROID_HOME']}/platforms/*/*/*/hardware.ini`
       `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
-      `sed -i.bak -e "s/vm.heapSize=[0-9]*/vm.heapSize=#{heap_size}/" #{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini`
+      avd_config_file_name = "#{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini"
+      old_avd_config = File.read(avd_config_file_name)
+      heap_size = (File.read('AndroidManifest.xml') =~ /largeHeap/) ? 256 : 48
+      new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/){|m| p m ; m.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m}
+      File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
       new_snapshot = true
     end
 
     puts 'Start emulator'
-    system "emulator -avd #{avd_name} #{emulator_opts} &"
+    system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
 
     3.times do |i|
       sleep 1
@@ -767,7 +753,7 @@ def start_emulator(sdk_level)
     `killall -0 #{emulator_cmd} 2> /dev/null`
     if $? != 0
       puts 'Unable to start the emulator.  Retrying without loading snapshot.'
-      system "emulator -no-snapshot-load -avd #{avd_name} #{emulator_opts} &"
+      system "emulator -no-snapshot-load -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
       10.times do |i|
         `killall -0 #{emulator_cmd} 2> /dev/null`
         if $? == 0

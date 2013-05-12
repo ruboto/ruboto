@@ -1,9 +1,11 @@
 require 'ruboto/sdk_versions'
+require 'ruboto/sdk_locations'
 
 module Ruboto
   module Util
     module Setup
       include Ruboto::SdkVersions
+      include Ruboto::SdkLocations
       # Todo: Find a way to look this up
       ANDROID_SDK_VERSION = '21.1'
 
@@ -68,21 +70,6 @@ module Ruboto
         end
       end
 
-      #
-      # OS independent "which"
-      # From: http://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
-      #
-      def which(cmd)
-        exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
-        ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-          exts.each { |ext|
-            exe = File.join(path, "#{cmd}#{ext}")
-            return exe if File.executable? exe
-          }
-        end
-        nil
-      end
-
       #########################################
       #
       # Check Methods
@@ -122,7 +109,7 @@ module Ruboto
           @missing_paths << "#{File.dirname(rv)}"
         end
 
-        puts "#{pretty_name || cmd}: " + (rv ? "Found at #{rv}" : 'Not found')
+        puts "#{'%20s' % (pretty_name || cmd)}: " + (rv ? 'Found' : 'Not found')
         rv
       end
 
@@ -357,9 +344,16 @@ module Ruboto
                 raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
               end
             end
-            @android_loc = File.join(File.expand_path('~'), android_package_directory, 'tools', 'android')
             ENV['PATH'] = "#{File.dirname(@android_loc)}:#{ENV['PATH']}"
-            @missing_paths << "#{File.dirname(@android_loc)}"
+          end
+          unless check_for('android')
+            ENV['ANDROID_HOME'] = File.join(File.expand_path('~'), android_package_directory, 'tools', 'android').gsub(File::SEPARATOR, FILE::ALT_SEPARATOR || FILE::SEPARATOR)
+            if Dir.exists?(ENV['ANDROID_HOME'])
+              @android_loc = "#{ENV['ANDROID_HOME'].gsub(FILE::ALT_SEPARATOR || FILE::SEPARATOR, File::SEPARATOR)}/tools/android"
+              puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
+              system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
+              @missing_paths << "#{File.dirname(@android_loc)}"
+            end
           end
         end
       end

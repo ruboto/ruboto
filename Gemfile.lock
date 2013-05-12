@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    ruboto (0.12.0)
+    ruboto (0.13.0.dev)
       main (>= 4.7.2)
+      rake
 
 GEM
   remote: https://rubygems.org/
@@ -23,5 +24,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rake
   ruboto!
