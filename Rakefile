@@ -122,6 +122,7 @@ task :release_docs do
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
   milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
   milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
+  milestone_description = milestone_description.split("\r\n").map{|s| s.scan(/\S.{0,80}\S(?=\s|$)|\S+/).join("\n")}.join("\r\n")
   categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Pull requests' => nil, 'Other' => nil}
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name'] }

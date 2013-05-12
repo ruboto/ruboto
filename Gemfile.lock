@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (0.12.0.rc.1)
+    ruboto (0.12.0)
       main (>= 4.7.2)
 
 GEM
