@@ -664,7 +664,7 @@ def start_emulator(sdk_level)
   end
 
   emulator_opts = '-partition-size 256'
-  if ENV['DISPLAY'].nil?
+  if !ON_WINDOWS && ENV['DISPLAY'].nil?
     emulator_opts << ' -no-window -no-audio'
   end
 
