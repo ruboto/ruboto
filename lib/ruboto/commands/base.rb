@@ -82,7 +82,7 @@ module Ruboto
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."
                 system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
-                exit $? unless $? == 0
+                exit $?.to_i unless $? == 0
                 unless File.exists? path
                   puts 'Android project was not created'
                   exit_failure!
