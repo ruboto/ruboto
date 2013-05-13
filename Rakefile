@@ -78,6 +78,12 @@ file EXAMPLE_FILE => :install do
   end
 end
 
+class String
+  def wrap(indent = 0)
+    scan(/\S.{0,72}\S(?=\s|$)|\S+/).join("\n" + ' ' * indent)
+  end
+end
+
 desc 'Generate release docs for a given milestone'
 task :release_docs do
   raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
@@ -122,7 +128,7 @@ task :release_docs do
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
   milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
   milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
-  milestone_description = milestone_description.split("\r\n").map{|s| s.scan(/\S.{0,80}\S(?=\s|$)|\S+/).join("\n")}.join("\r\n")
+  milestone_description = milestone_description.split("\r\n").map(&:wrap).join("\r\n")
   categories = {'Features' => 'feature', 'Bugfixes' => 'bug', 'Internal' => 'internal', 'Support' => 'support', 'Documentation' => 'documentation', 'Pull requests' => nil, 'Other' => nil}
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name'] }
@@ -181,7 +187,7 @@ EOF
   puts
   puts "The Ruboto team is pleased to announce the release of Ruboto #{milestone_name}."
   puts
-  puts Ruboto::DESCRIPTION
+  puts Ruboto::DESCRIPTION.gsub("\n", ' ').wrap
   puts
   puts "New in version #{milestone_name}:\n"
   puts
@@ -189,7 +195,7 @@ EOF
   puts
   (categories.keys & grouped_issues.keys).each do |cat|
     puts "#{cat}:\n\n"
-    grouped_issues[cat].each { |i| puts %Q{* Issue ##{i['number']} #{i['title']}} }
+    grouped_issues[cat].each { |i| puts %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }
     puts
   end
   puts "You can find a complete list of issues here:\n\n"
@@ -198,7 +204,8 @@ EOF
   puts <<EOF
 Installation:
 
-To use Ruboto, you need to install a Ruby implementation.  Then do (possibly as root)
+To use Ruboto, you need to install a Ruby implementation.  Then do
+(possibly as root)
 
     gem install ruboto
     ruboto setup
@@ -219,7 +226,8 @@ To run your project
     cd <project directory>
     rake install start
 
-You can find an introductory tutorial at https://github.com/ruboto/ruboto/wiki
+You can find an introductory tutorial at
+https://github.com/ruboto/ruboto/wiki
 
 If you have any problems or questions, come see us at http://ruboto.org/
 
