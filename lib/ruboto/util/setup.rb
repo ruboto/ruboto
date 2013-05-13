@@ -78,7 +78,7 @@ module Ruboto
       def check_all
         @missing_paths = []
 
-        @java_loc = check_for('java', 'Java')
+        @java_loc = check_for('java', 'Java runtime')
         @javac_loc = check_for('javac', 'Java Compiler')
         @ant_loc = check_for('ant', 'Apache ANT')
         @android_loc = check_for('android', 'Android Package Installer',
@@ -109,7 +109,7 @@ module Ruboto
           @missing_paths << "#{File.dirname(rv)}"
         end
 
-        puts "#{'%20s' % (pretty_name || cmd)}: " + (rv ? 'Found' : 'Not found')
+        puts "#{'%-25s' % (pretty_name || cmd)}: " + (rv ? 'Found' : 'Not found')
         rv
       end
 
@@ -117,9 +117,9 @@ module Ruboto
         begin
           @platform_sdk_loc = File.expand_path "#{@dx_loc}/../../platforms/#{api_level}"
           if File.exists? @platform_sdk_loc
-            puts "Android platform SDK: Found at #{@platform_sdk_loc}"
+            puts 'Android platform SDK     : Found'
           else
-            puts 'Android platform SDK: Not found'
+            puts 'Android platform SDK     : Not found'
             @platform_sdk_loc = nil
           end
         rescue
