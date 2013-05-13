@@ -736,6 +736,7 @@ def start_emulator(sdk_level)
 
     puts 'Start emulator'
     system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
+    return if ON_WINDOWS
 
     3.times do |i|
       sleep 1
