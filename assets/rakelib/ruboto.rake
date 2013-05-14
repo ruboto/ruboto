@@ -51,7 +51,8 @@ MINIMUM_DX_HEAP_SIZE = 2048
 if new_dx_content =~ xmx_pattern &&
     ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < MINIMUM_DX_HEAP_SIZE*1024**2
   puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
-  new_dx_content.sub!(xmx_pattern, %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"})
+  new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{MINIMUM_DX_HEAP_SIZE}M} : %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"}
+  new_dx_content.sub!(xmx_pattern, new_xmx_value)
 
   # FIXME(uwe): For travis debugging  Remove when travis is stable.
   new_dx_content.sub!(/^exec/, "free\necho Virtual:\nps -e -ovsize=,args= | sort -b -k1,1n | tail -n10\necho RSS:\nps -e -orss=,args= | sort -b -k1,1n | tail -n10\necho $javaOpts\necho $@\nexec") if RbConfig::CONFIG['host_os'] =~ /linux/
@@ -550,7 +551,11 @@ def build_apk(t, release)
   if release
     sh "#{ANT_CMD} release"
   else
+
+    # FIXME(uwe): For travis debugging  Remove when travis is stable.
     sh 'free' if RbConfig::CONFIG['host_os'] =~ /linux/
+    # EMXIF
+
     sh "#{ANT_CMD} debug"
   end
   true
