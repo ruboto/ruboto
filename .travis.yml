@@ -7,8 +7,8 @@ before_install:
   - wget http://dl.google.com/android/android-sdk_r22-linux.tgz
   - tar -zxf android-sdk_r22-linux.tgz
   - export ANDROID_HOME=~/build/ruboto/ruboto/android-sdk-linux
-  - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-  - echo y | android update sdk --no-ui --filter tool,platform-tool,android-10,android-$ANDROID_TARGET,sysimg-$ANDROID_TARGET
+  - export PATH=${PATH}:${ANDROID_HOME}/build-tools/*:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/tools
+  - printf "y\ny\ny\n" | android update sdk --no-ui --filter build-tools,platform-tools,tools,android-10,android-$ANDROID_TARGET,sysimg-$ANDROID_TARGET
   - wget http://ci.jruby.org/snapshots/master/jruby-jars-${MASTER}.gem
   - if [ "$JRUBY_JARS_VERSION" == "" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - free
