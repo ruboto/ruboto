@@ -205,7 +205,7 @@ EOF
 Installation:
 
 To use Ruboto, you need to install a Ruby implementation.  Then do
-(possibly as root)
+(possibly as root/administrator)
 
     gem install ruboto
     ruboto setup
