@@ -7,7 +7,9 @@ module Ruboto
       include Ruboto::SdkVersions
       include Ruboto::SdkLocations
       # Todo: Find a way to look this up
-      ANDROID_SDK_VERSION = '21.1'
+      ANDROID_SDK_VERSION = '22'
+      BUILD_TOOLS_VERSION = '17.0.0'
+      # odoT
 
       #########################################
       #
@@ -76,6 +78,7 @@ module Ruboto
       #
 
       def check_all
+        @existing_paths = []
         @missing_paths = []
 
         @java_loc = check_for('java', 'Java runtime')
@@ -103,7 +106,9 @@ module Ruboto
         rv = which(cmd)
         rv = nil if rv.nil? or rv.empty?
 
-        if rv.nil? and alt_dir and File.exists?(alt_dir)
+        if rv
+          @existing_paths << File.dirname(rv)
+        elsif alt_dir and File.exists?(alt_dir)
           rv = alt_dir
           ENV['PATH'] = "#{File.dirname(rv)}:#{ENV['PATH']}"
           @missing_paths << "#{File.dirname(rv)}"
@@ -115,7 +120,7 @@ module Ruboto
 
       def check_for_android_platform
         begin
-          @platform_sdk_loc = File.expand_path "#{@dx_loc}/../../platforms/#{api_level}"
+          @platform_sdk_loc = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
           if File.exists? @platform_sdk_loc
             puts 'Android platform SDK     : Found'
           else
@@ -135,9 +140,9 @@ module Ruboto
       def install_all
         install_java unless @java_loc && @javac_loc
         install_ant unless @ant_loc
-        install_android unless @android_loc && @emulator_loc && @dx_loc
-        install_adb unless @adb_loc
-        install_platform
+        install_android_sdk unless @android_loc
+        install_android_tools unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
+        install_platform unless @platform_sdk_loc
       end
 
       def install_java
@@ -228,7 +233,7 @@ module Ruboto
                   FileUtils.mkdir_p entry.full_name
                 elsif entry.file?
                   FileUtils.mkdir_p File.dirname(entry.full_name)
-                  File.open(entry.full_name, 'wb'){|f| f << entry.read}
+                  File.open(entry.full_name, 'wb') { |f| f << entry.read }
                 end
               end
               FileUtils.rm_f ant_package_file_name
@@ -257,6 +262,7 @@ module Ruboto
         return {} if @cookies.empty?
         {'Cookie' => @cookies.join(';')}
       end
+
       private :cookie_header
 
       def store_cookie(response)
@@ -273,6 +279,7 @@ module Ruboto
         end
         @cookies.uniq!
       end
+
       private :store_cookie
 
       def process_response(response)
@@ -299,9 +306,10 @@ module Ruboto
         end
         response
       end
+
       private :process_response
 
-      def install_android
+      def install_android_sdk
         unless @android_loc
           puts 'Android package installer not found.'
           print 'Would you like to download and install it? (Y/n): '
@@ -358,16 +366,29 @@ module Ruboto
         end
       end
 
-      def install_adb
-        if @android_loc and not @adb_loc
-          puts 'Android command adb not found.'
+      def install_android_tools
+        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil?)
+          puts 'Android tools not found.'
           print 'Would you like to download and install it? (Y/n): '
           a = STDIN.gets.chomp.upcase
           if a == 'Y' || a.empty?
-            system 'android update sdk --no-ui --filter tool,platform-tool'
-            @adb_loc = File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb')
-            ENV['PATH'] = "#{File.dirname(@adb_loc)}:#{ENV['PATH']}"
-            @missing_paths << "#{File.dirname(@adb_loc)}"
+            system 'android update sdk --no-ui --filter build-tools-#{BUILD_TOOLS_VERSION},platform-tool,tool'
+            raise "Unexpected exit code (#{$?}) when installing Android SDK Tools." unless $? == 0
+            if @dx_loc.nil?
+              @dx_loc = Dir[File.join(File.expand_path('~'), android_package_directory, 'build-tools', '*', 'dx')][-1]
+              ENV['PATH'] = "#{File.dirname(@dx_loc)}:#{ENV['PATH']}"
+              @missing_paths << "#{File.dirname(@dx_loc)}"
+            end
+            if @adb_loc.nil?
+              @adb_loc = File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb')
+              ENV['PATH'] = "#{File.dirname(@adb_loc)}:#{ENV['PATH']}"
+              @missing_paths << "#{File.dirname(@adb_loc)}"
+            end
+            if @emulator_loc.nil?
+              @emulator_loc = File.join(File.expand_path('~'), android_package_directory, 'tools', 'emulator')
+              ENV['PATH'] = "#{File.dirname(@emulator_loc)}:#{ENV['PATH']}"
+              @missing_paths << "#{File.dirname(@emulator_loc)}"
+            end
           end
         end
       end
@@ -407,13 +428,14 @@ module Ruboto
             if a == 'Y' || a.empty?
               print "What script do you use to configure your PATH? (#{path_setup_file}): "
               a = STDIN.gets.chomp.downcase
-
-              File.open(File.expand_path("~/#{a.empty? ? path_setup_file : a}"), 'a') do |f|
-                f.puts "\n# BEGIN Ruboto PATH setup"
-                @missing_paths.each { |path| f.puts %Q{export PATH="#{path}:$PATH"} }
-                f.puts '# END Ruboto PATH setup'
-                f.puts
-              end
+              config_file_name = File.expand_path("~/#{a.empty? ? path_setup_file : a}")
+              old_config = File.read(config_file_name)
+              new_config = old_config.dup
+              new_config.gsub! /\n*# BEGIN Ruboto PATH setup\n.*?\n# END Ruboto PATH setup\n*/m, ''
+              new_config << "\n\n# BEGIN Ruboto PATH setup\n"
+              (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each { |path| new_config << %Q{export PATH="#{path}:$PATH"\n} }
+              new_config << "# END Ruboto PATH setup\n\n"
+              File.open(config_file_name, 'wb'){|f| f << new_config}
               puts 'Path updated. Please close your command window and reopen.'
             end
           end
