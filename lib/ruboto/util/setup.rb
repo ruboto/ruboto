@@ -1,3 +1,4 @@
+require 'pty'
 require 'ruboto/sdk_versions'
 
 module Ruboto
@@ -103,10 +104,9 @@ module Ruboto
         @javac_loc = check_for('javac', 'Java Compiler')
         @ant_loc = check_for('ant', 'Apache ANT')
         check_for_android_sdk
-        @emulator_loc = check_for('emulator', 'Android Emulator')
-        @adb_loc = check_for('adb', 'Android SDK Command adb',
-                             File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
-        @dx_loc = check_for('dx', 'Android SDK Command dx')
+        check_for_emulator
+        check_for_platform_tools
+        check_for_build_tools
         check_for_android_platform
 
         puts
@@ -117,6 +117,21 @@ module Ruboto
           puts "    !!! Ruboto setup is NOT OK !!!\n\n"
           false
         end
+      end
+
+      def check_for_emulator
+        @emulator_loc = check_for('emulator', 'Android Emulator',
+                                  File.join(File.expand_path('~'), android_package_directory, 'tools', 'emulator'))
+      end
+
+      def check_for_platform_tools
+        @adb_loc = check_for('adb', 'Android SDK Command adb',
+                             File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
+      end
+
+      def check_for_build_tools
+        @dx_loc = check_for('dx', 'Android SDK Command dx',
+                            Dir[File.join(File.expand_path('~'), android_package_directory, 'build-tools', '*', 'dx')][-1])
       end
 
       def check_for_android_sdk
@@ -393,23 +408,11 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            system "android --silent update sdk --no-ui --filter build-tools-#{BUILD_TOOLS_VERSION},platform-tool,tool"
-            raise "Unexpected exit code (#{$?}) when installing Android SDK Tools." unless $? == 0
-            if @dx_loc.nil?
-              @dx_loc = Dir[File.join(File.expand_path('~'), android_package_directory, 'build-tools', '*', 'dx')][-1]
-              ENV['PATH'] = "#{File.dirname(@dx_loc)}:#{ENV['PATH']}"
-              @missing_paths << "#{File.dirname(@dx_loc)}"
-            end
-            if @adb_loc.nil?
-              @adb_loc = File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb')
-              ENV['PATH'] = "#{File.dirname(@adb_loc)}:#{ENV['PATH']}"
-              @missing_paths << "#{File.dirname(@adb_loc)}"
-            end
-            if @emulator_loc.nil?
-              @emulator_loc = File.join(File.expand_path('~'), android_package_directory, 'tools', 'emulator')
-              ENV['PATH'] = "#{File.dirname(@emulator_loc)}:#{ENV['PATH']}"
-              @missing_paths << "#{File.dirname(@emulator_loc)}"
-            end
+            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{BUILD_TOOLS_VERSION},platform-tool,tool --force"
+            update_sdk(update_cmd, accept_all)
+            check_for_build_tools
+            check_for_platform_tools
+            check_for_emulator
           end
         end
       end
@@ -422,9 +425,39 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            system "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
-            @platform_sdk_loc = File.expand_path "#{@dx_loc}/../../platforms/#{api_level}"
+            update_cmd = "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
+            update_sdk(update_cmd, accept_all)
+            check_for_android_platform
           end
+        end
+      end
+
+      def update_sdk(update_cmd, accept_all)
+        begin
+          PTY.spawn(update_cmd) do |stdin, stdout, pid|
+            begin
+              output = ''
+              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+              stdin.each_char do |text|
+                print text
+                output << text
+
+                #puts
+                #puts output
+                #puts((output =~ question_pattern).inspect)
+
+                if accept_all && output =~ question_pattern
+                  stdout.puts 'y'
+                  output.sub! question_pattern, ''
+                end
+              end
+            rescue Errno::EIO
+              puts 'Errno:EIO error, but this probably just means that the process has finished giving output'
+              sleep 1
+            end
+          end
+        rescue PTY::ChildExited
+          puts 'The child process exited!'
         end
       end
 
