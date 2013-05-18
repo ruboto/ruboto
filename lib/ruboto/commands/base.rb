@@ -362,6 +362,8 @@ module Ruboto
               when 'ruboto' then
                 puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"
                 update_ruboto(params['force'].value) || abort
+              else
+                raise "Unknown update target: #{params['what'].value.inspect}"
               end
             end
           end
@@ -370,8 +372,12 @@ module Ruboto
             require 'ruboto/util/setup'
             include Ruboto::Util::Setup
 
+            option('yes', 'y') {
+              description 'answer "yes" to all interactive questions.  Will automatically install needed components.'
+            }
+
             def run
-              setup_ruboto
+              setup_ruboto(params['yes'].value)
             end
           end
 
