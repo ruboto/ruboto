@@ -39,9 +39,12 @@ if ENV['ANDROID_HOME'].nil? && (adb_path = which('adb'))
 end
 (puts 'You need to set the ANDROID_HOME environment variable.'; exit 1) unless ENV['ANDROID_HOME']
 
-dx_filename = File.join(ENV['ANDROID_HOME'], 'platform-tools', ON_WINDOWS ? 'dx.bat' : 'dx')
-unless File.exists? dx_filename
-  puts 'You need to install the Android SDK Platform-tools!'
+# FIXME(uwe): Simplify when we stop supporting Android SDK < 22: Don't look in pltform-tools for dx
+dx_filename = Dir[File.join(ENV['ANDROID_HOME'], '{build-tools/*,platform-tools}', ON_WINDOWS ? 'dx.bat' : 'dx')][-1]
+# EMXIF
+
+unless dx_filename
+  puts 'You need to install the Android SDK Build-tools!'
   exit 1
 end
 new_dx_content = File.read(dx_filename).dup
