@@ -23,7 +23,7 @@ module Ruboto
       # OS independent "which"
       # From: http://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
       #
-      def self.which(cmd)
+      def which(cmd)
         exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
         ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
           exts.each do |ext|
@@ -32,10 +32,6 @@ module Ruboto
           end
         end
         nil
-      end
-
-      def which(cmd)
-        Setup.which(cmd)
       end
 
       private

@@ -1,9 +1,9 @@
 require 'pathname'
-require 'ruboto/setup'
+require 'ruboto/util/setup'
 
 module Ruboto
   module SdkLocations
-    include Setup
+    extend Ruboto::Util::Setup
     if ENV['ANDROID_HOME']
       ANDROID_HOME = ENV['ANDROID_HOME']
     else
