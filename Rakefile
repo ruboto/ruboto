@@ -4,7 +4,6 @@ require 'rexml/document'
 require 'ruboto/version'
 require 'ruboto/description'
 require 'ruboto/sdk_versions'
-require 'ruboto/sdk_locations'
 require 'uri'
 require 'net/https'
 
@@ -16,7 +15,6 @@ PLATFORM_CURRENT_RELEASE_APK = File.expand_path('tmp/RubotoCore-release.apk', Fi
 MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
-EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -65,9 +63,11 @@ end
 task :reinstall => [:uninstall, :clean, :install]
 
 desc 'Generate an example app'
-task :example => EXAMPLE_FILE
-
-file EXAMPLE_FILE => :install do
+task :example => :install do
+  require 'ruboto/sdk_locations'
+  EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
+  examples_glob = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
+  sh "git rm #{examples_glob}" unless Dir[examples_glob].empty?
   puts "Creating example app #{EXAMPLE_FILE}"
   app_name = 'RubotoTestApp'
   Dir.chdir File.dirname(EXAMPLE_FILE) do
@@ -321,14 +321,11 @@ end
 
 desc 'Push the gem to RubyGems'
 task :release => [:clean, :gem] do
-  #output = `git status --porcelain`
-  #raise "Workspace not clean!\n#{output}" unless output.empty?
-  #sh "git tag #{Ruboto::VERSION}"
-  #sh 'git push --tags'
-  #sh "gem push #{GEM_FILE}"
-
-  examples_glob = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
-  sh "git rm #{examples_glob}" unless Dir[examples_glob].empty?
+  output = `git status --porcelain`
+  raise "Workspace not clean!\n#{output}" unless output.empty?
+  sh "git tag #{Ruboto::VERSION}"
+  sh 'git push --tags'
+  sh "gem push #{GEM_FILE}"
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
   sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}' \"#{examples_glob}\""
