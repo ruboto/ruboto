@@ -48,6 +48,7 @@ script:
     - ruboto setup -y
     - cat ~/.bashrc
     - echo $PATH
+    - PS1='$ '
     - source /home/travis/.bashrc
     - . /home/travis/.bashrc
     - echo $PATH
