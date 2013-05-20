@@ -484,7 +484,11 @@ module Ruboto
               new_config = old_config.dup
               new_config.gsub! /\n*# BEGIN Ruboto PATH setup\n.*?\n# END Ruboto PATH setup\n*/m, ''
               new_config << "\n\n# BEGIN Ruboto PATH setup\n"
-              (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each { |path| new_config << %Q{export PATH="#{path}:$PATH"\n} }
+              new_config << "echo Setting Ruboto path...\n"
+              (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each do |path|
+                new_config << %Q{PATH="#{path}:$PATH"\n}
+              end
+              new_config << "echo $PATH\n"
               new_config << "# END Ruboto PATH setup\n\n"
               File.open(config_file_name, 'wb') { |f| f << new_config }
               puts "Updated #{config_file_name} with paths."
