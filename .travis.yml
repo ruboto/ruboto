@@ -47,7 +47,9 @@ script:
     - rake install
     - ruboto setup -y
     - cat ~/.bashrc
+    - echo $PATH
     - source ~/.bashrc
+    - echo $PATH
     - ./start_emulator.sh
     - ./run_tests.sh
 
