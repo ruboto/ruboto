@@ -46,12 +46,7 @@ env:
 script:
     - rake install
     - ruboto setup -y
-    - cat ~/.bashrc
-    - echo $PATH
-    - PS1='$ '
-    - source /home/travis/.bashrc
-    - . /home/travis/.bashrc
-    - echo $PATH
+    - source ~/.rubotorc
     - ./start_emulator.sh
     - ./run_tests.sh
 
