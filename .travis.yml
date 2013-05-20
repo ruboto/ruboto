@@ -46,6 +46,7 @@ env:
 script:
     - rake install
     - ruboto setup -y
+    - source ~/.bashrc
     - ./start_emulator.sh
     - ./run_tests.sh
 

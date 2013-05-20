@@ -437,19 +437,13 @@ module Ruboto
               stdin.each_char do |text|
                 print text
                 output << text
-
-                #puts
-                #puts output
-                #puts((output =~ question_pattern).inspect)
-
                 if accept_all && output =~ question_pattern
                   stdout.puts 'y'
                   output.sub! question_pattern, ''
                 end
               end
             rescue Errno::EIO
-              puts 'Errno:EIO error, but this probably just means that the process has finished giving output'
-              sleep 1
+              # This probably just means that the process has finished giving output.
             end
           end
         rescue PTY::ChildExited
@@ -493,6 +487,9 @@ module Ruboto
               (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each { |path| new_config << %Q{export PATH="#{path}:$PATH"\n} }
               new_config << "# END Ruboto PATH setup\n\n"
               File.open(config_file_name, 'wb') { |f| f << new_config }
+              if accept_all
+                puts "Updated #{config_file_name}."
+              end
               puts 'Path updated. Please close your command window and reopen.'
             end
           end
