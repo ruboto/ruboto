@@ -14,10 +14,10 @@ module Ruboto
       # Core Set up Method
       #
 
-      def setup_ruboto(accept_all, api_level = SdkVersions::DEFAULT_TARGET_SDK)
+      def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK])
         @platform_sdk_loc = {}
-        project_api_level = read_project_api_level
-        install_all(accept_all, api_level, project_api_level) unless check_all(api_level, project_api_level)
+        api_levels = [read_project_api_level, *api_levels].compact.uniq
+        install_all(accept_all, api_levels) unless check_all(api_levels)
         config_path(accept_all)
       end
 
@@ -93,7 +93,7 @@ module Ruboto
       # Check Methods
       #
 
-      def check_all(api_level, project_api_level)
+      def check_all(api_levels)
         @existing_paths = []
         @missing_paths = []
 
@@ -104,8 +104,7 @@ module Ruboto
         check_for_emulator
         check_for_platform_tools
         check_for_build_tools
-        check_for_android_platform(api_level)
-        check_for_android_platform(project_api_level) if project_api_level
+        api_levels.each { |api_level| check_for_android_platform(api_level) }
 
         puts
         ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
@@ -165,13 +164,16 @@ module Ruboto
       # Install Methods
       #
 
-      def install_all(accept_all, api_level, project_api_level)
+      def install_all(accept_all, api_levels)
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
-        install_platform(accept_all, api_level) unless @platform_sdk_loc[api_level]
-        install_platform(accept_all, api_level) if project_api_level && !@platform_sdk_loc[project_api_level]
+        if @android_loc
+          api_levels.each do |api_level|
+            install_platform(accept_all, api_level) unless @platform_sdk_loc[api_level]
+          end
+        end
       end
 
       def install_java(accept_all)
@@ -410,17 +412,15 @@ module Ruboto
       end
 
       def install_platform(accept_all, api_level)
-        if @android_loc and not @platform_sdk_loc[api_level]
-          puts "Android platform SDK for #{api_level} not found."
-          unless accept_all
-            print 'Would you like to download and install it? (Y/n): '
-            a = STDIN.gets.chomp.upcase
-          end
-          if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
-            update_sdk(update_cmd, accept_all)
-            check_for_android_platform(api_level)
-          end
+        puts "Android platform SDK for #{api_level} not found."
+        unless accept_all
+          print 'Would you like to download and install it? (Y/n): '
+          a = STDIN.gets.chomp.upcase
+        end
+        if accept_all || a == 'Y' || a.empty?
+          update_cmd = "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
+          update_sdk(update_cmd, accept_all)
+          check_for_android_platform(api_level)
         end
       end
 

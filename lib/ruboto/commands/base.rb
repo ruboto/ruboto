@@ -376,7 +376,7 @@ module Ruboto
               description 'sets the target Android API level to set up for (example: -t android-16)'
               argument :required
               default Ruboto::SdkVersions::DEFAULT_TARGET_SDK
-
+              arity -1
             }
 
             option('yes', 'y') {
