@@ -45,7 +45,7 @@ env:
 
 script:
     - rake install
-    - ruboto setup -y
+    - ruboto setup -y -t android-$ANDROID_TARGET
     - source ~/.rubotorc
     - ./start_emulator.sh
     - ./run_tests.sh
