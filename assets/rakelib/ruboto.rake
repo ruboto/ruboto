@@ -733,7 +733,11 @@ def start_emulator(sdk_level)
 
     unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
       puts "Creating AVD #{avd_name}"
-      `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
+      puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
+      if $? != 0
+        puts 'Failed to create AVD.'
+        exit 3
+      end
       avd_config_file_name = "#{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini"
       old_avd_config = File.read(avd_config_file_name)
       heap_size = (File.read('AndroidManifest.xml') =~ /largeHeap/) ? 256 : 48
