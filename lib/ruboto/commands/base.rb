@@ -372,12 +372,19 @@ module Ruboto
             require 'ruboto/util/setup'
             include Ruboto::Util::Setup
 
+            option('target', 't') {
+              description 'sets the target Android API level to set up for (example: -t android-16)'
+              argument :required
+              default Ruboto::SdkVersions::DEFAULT_TARGET_SDK
+
+            }
+
             option('yes', 'y') {
               description 'answer "yes" to all interactive questions.  Will automatically install needed components.'
             }
 
             def run
-              setup_ruboto(params['yes'].value)
+              setup_ruboto(params['yes'].value, params['target'].value)
             end
           end
 

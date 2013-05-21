@@ -14,8 +14,10 @@ module Ruboto
       # Core Set up Method
       #
 
-      def setup_ruboto(accept_all)
-        install_all(accept_all) unless check_all
+      def setup_ruboto(accept_all, api_level = SdkVersions::DEFAULT_TARGET_SDK)
+        @platform_sdk_loc = {}
+        project_api_level = read_project_api_level
+        install_all(accept_all, api_level, project_api_level) unless check_all(api_level, project_api_level)
         config_path(accept_all)
       end
 
@@ -63,13 +65,12 @@ module Ruboto
         end
       end
 
-      def api_level
+      def read_project_api_level
         begin
           return $1 if File.read('project.properties') =~ /target=(.*)/
         rescue
           # ignored
         end
-        SdkVersions::DEFAULT_TARGET_SDK
       end
 
       def path_setup_file
@@ -92,7 +93,7 @@ module Ruboto
       # Check Methods
       #
 
-      def check_all
+      def check_all(api_level, project_api_level)
         @existing_paths = []
         @missing_paths = []
 
@@ -103,16 +104,13 @@ module Ruboto
         check_for_emulator
         check_for_platform_tools
         check_for_build_tools
-        check_for_android_platform
+        check_for_android_platform(api_level)
+        check_for_android_platform(project_api_level) if project_api_level
 
         puts
-        if @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @adb_loc && @dx_loc && @platform_sdk_loc
-          puts "    *** Ruboto setup is OK! ***\n\n"
-          true
-        else
-          puts "    !!! Ruboto setup is NOT OK !!!\n\n"
-          false
-        end
+        ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
+        puts "    #{ok ? '*** Ruboto setup is OK! ***' : '!!! Ruboto setup is NOT OK !!!'}\n\n"
+        ok
       end
 
       def check_for_emulator
@@ -147,21 +145,18 @@ module Ruboto
           @missing_paths << "#{File.dirname(rv)}"
         end
 
-        puts "#{'%-25s' % (pretty_name || cmd)}: " + (rv ? 'Found' : 'Not found')
+        puts "#{'%-25s' % (pretty_name || cmd)}: #{(rv ? 'Found' : 'Not found')}"
         rv
       end
 
-      def check_for_android_platform
+      def check_for_android_platform(api_level)
         begin
-          @platform_sdk_loc = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
-          if File.exists? @platform_sdk_loc
-            puts 'Android platform SDK     : Found'
-          else
-            puts 'Android platform SDK     : Not found'
-            @platform_sdk_loc = nil
-          end
+          @platform_sdk_loc[api_level] = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
+          found = File.exists? @platform_sdk_loc[api_level]
+          @platform_sdk_loc[api_level] = nil unless found
+          puts "#{'%-25s' % "Platform SDK #{api_level}"}: #{(found ? 'Found' : 'Not found')}"
         rescue
-          @platform_sdk_loc = nil
+          @platform_sdk_loc[api_level] = nil
         end
       end
 
@@ -170,12 +165,13 @@ module Ruboto
       # Install Methods
       #
 
-      def install_all(accept_all)
+      def install_all(accept_all, api_level, project_api_level)
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
-        install_platform(accept_all) unless @platform_sdk_loc
+        install_platform(accept_all, api_level) unless @platform_sdk_loc[api_level]
+        install_platform(accept_all, api_level) if project_api_level && !@platform_sdk_loc[project_api_level]
       end
 
       def install_java(accept_all)
@@ -413,8 +409,8 @@ module Ruboto
         end
       end
 
-      def install_platform(accept_all)
-        if @android_loc and not @platform_sdk_loc
+      def install_platform(accept_all, api_level)
+        if @android_loc and not @platform_sdk_loc[api_level]
           puts "Android platform SDK for #{api_level} not found."
           unless accept_all
             print 'Would you like to download and install it? (Y/n): '
@@ -423,31 +419,36 @@ module Ruboto
           if accept_all || a == 'Y' || a.empty?
             update_cmd = "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
             update_sdk(update_cmd, accept_all)
-            check_for_android_platform
+            check_for_android_platform(api_level)
           end
         end
       end
 
       def update_sdk(update_cmd, accept_all)
-        begin
-          PTY.spawn(update_cmd) do |stdin, stdout, pid|
-            begin
-              output = ''
-              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
-              stdin.each_char do |text|
-                print text
-                output << text
-                if accept_all && output =~ question_pattern
-                  stdout.puts 'y'
-                  output.sub! question_pattern, ''
+        if accept_all
+          begin
+            PTY.spawn(update_cmd) do |stdin, stdout, pid|
+              begin
+                output = ''
+                question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+                STDOUT.sync = true
+                stdin.each_char do |text|
+                  print text
+                  output << text
+                  if output =~ question_pattern
+                    stdout.puts 'y'
+                    output.sub! question_pattern, ''
+                  end
                 end
+              rescue Errno::EIO
+                # This probably just means that the process has finished giving output.
               end
-            rescue Errno::EIO
-              # This probably just means that the process has finished giving output.
             end
+          rescue PTY::ChildExited
+            puts 'The child process exited!'
           end
-        rescue PTY::ChildExited
-          puts 'The child process exited!'
+        else
+          system update_cmd
         end
       end
 
