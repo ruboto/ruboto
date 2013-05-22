@@ -4,10 +4,8 @@ require 'ruboto/sdk_versions'
 module Ruboto
   module Util
     module Setup
-      # Todo: Find a way to look this up
-      ANDROID_SDK_VERSION = '22'
-      BUILD_TOOLS_VERSION = '17.0.0'
-      # odoT
+      REPOSITORY_BASE = 'https://dl-ssl.google.com/android/repository'
+      REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
 
       #########################################
       #
@@ -86,6 +84,19 @@ module Ruboto
           ## Error
           nil
         end
+      end
+
+      def get_tools_version(type="tool")
+        require 'rexml/document'
+        require 'open-uri'
+
+        doc = REXML::Document.new(open(REPOSITORY_URL))
+        version = doc.root.elements["sdk:#{type}/sdk:revision/sdk:major"].text
+        minor = doc.root.elements["sdk:#{type}/sdk:revision/sdk:minor"]
+        micro = doc.root.elements["sdk:#{type}/sdk:revision/sdk:micro"]
+        version += ".#{minor.text}" if minor
+        version += ".#{micro.text}" if micro
+        version
       end
 
       #########################################
@@ -349,12 +360,12 @@ module Ruboto
             Dir.chdir File.expand_path('~/') do
               case RbConfig::CONFIG['host_os']
               when /^darwin(.*)/
-                asdk_file_name = "android-sdk_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.zip"
+                asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.zip"
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "unzip #{'-o ' if accept_all}#{asdk_file_name}"
                 system "rm #{asdk_file_name}"
               when /^linux(.*)/
-                asdk_file_name = "android-sdk_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.tgz"
+                asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.tgz"
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "tar -xzf #{asdk_file_name}"
                 system "rm #{asdk_file_name}"
@@ -367,7 +378,7 @@ module Ruboto
                 #    exit /b 1
                 #)
 
-                asdk_file_name = "installer_r#{ANDROID_SDK_VERSION}-#{android_package_os_id}.exe"
+                asdk_file_name = "installer_r#{get_tools_version}-#{android_package_os_id}.exe"
                 require 'net/http'
                 Net::HTTP.start('dl.google.com') do |http|
                   puts 'Downloading...'
@@ -402,7 +413,7 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{BUILD_TOOLS_VERSION},platform-tool,tool --force"
+            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool --force"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
