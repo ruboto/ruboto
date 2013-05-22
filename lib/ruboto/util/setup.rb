@@ -491,10 +491,10 @@ module Ruboto
               new_config = old_config.dup
               new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
               new_config << "\n\n# BEGIN Ruboto setup\n"
-              new_config << "source ~/.ruboto\n"
+              new_config << "source #{rubotorc}\n"
               new_config << "# END Ruboto setup\n\n"
               File.open(config_file_name, 'wb') { |f| f << new_config }
-              puts "Updated #{config_file_name} to load the ~/.ruboto config file."
+              puts "Updated #{config_file_name} to load the #{rubotorc} config file."
               puts 'Please close your command window and reopen, or run'
               puts
               puts "    source #{rubotorc}"
