@@ -496,6 +496,7 @@ module Ruboto
               File.open(config_file_name, 'wb') { |f| f << new_config }
               puts "Updated #{config_file_name} to load the ~/.ruboto config file."
               puts 'Please close your command window and reopen, or run'
+              puts
               puts "    source #{rubotorc}"
               puts
             end
