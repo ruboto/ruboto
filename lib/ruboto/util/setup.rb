@@ -1,4 +1,3 @@
-require 'pty'
 require 'ruboto/sdk_versions'
 
 module Ruboto
@@ -437,26 +436,22 @@ module Ruboto
 
       def update_sdk(update_cmd, accept_all)
         if accept_all
-          begin
-            PTY.spawn(update_cmd) do |stdin, stdout, pid|
-              begin
-                output = ''
-                question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
-                STDOUT.sync = true
-                stdin.each_char do |text|
-                  print text
-                  output << text
-                  if output =~ question_pattern
-                    stdout.puts 'y'
-                    output.sub! question_pattern, ''
-                  end
+          IO.popen(update_cmd, 'r+') do |cmd_io|
+            begin
+              output = ''
+              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+              STDOUT.sync = true
+              cmd_io.each_char do |text|
+                print text
+                output << text
+                if output =~ question_pattern
+                  cmd_io.puts 'y'
+                  output.sub! question_pattern, ''
                 end
-              rescue Errno::EIO
-                # This probably just means that the process has finished giving output.
               end
+            rescue Errno::EIO
+              # This probably just means that the process has finished giving output.
             end
-          rescue PTY::ChildExited
-            puts 'The child process exited!'
           end
         else
           system update_cmd

@@ -66,8 +66,8 @@ desc 'Generate an example app'
 task :example => :install do
   require 'ruboto/sdk_locations'
   EXAMPLE_FILE = File.expand_path("examples/RubotoTestApp_#{Ruboto::VERSION}_tools_r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}.tgz", File.dirname(__FILE__))
-  examples_glob = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
-  sh "git rm #{examples_glob}" unless Dir[examples_glob].empty?
+  EXAMPLES_GLOB = "#{EXAMPLE_FILE.slice(/^.*?_\d+\.\d+\.\d+/)}*"
+  sh "git rm #{EXAMPLES_GLOB}" unless Dir[EXAMPLES_GLOB].empty?
   puts "Creating example app #{EXAMPLE_FILE}"
   app_name = 'RubotoTestApp'
   Dir.chdir File.dirname(EXAMPLE_FILE) do
@@ -328,7 +328,7 @@ task :release => [:clean, :gem] do
   sh "gem push #{GEM_FILE}"
   Rake::Task[:example].invoke
   sh "git add #{EXAMPLE_FILE}"
-  sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}' \"#{examples_glob}\""
+  sh "git commit -m '* Added example app for Ruboto #{Ruboto::VERSION} tools r#{Ruboto::SdkLocations::ANDROID_TOOLS_REVISION}' \"#{EXAMPLES_GLOB}\""
   sh 'git push'
 end
 
