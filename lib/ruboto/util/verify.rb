@@ -88,6 +88,26 @@ module Ruboto
         File.open('ruboto.yml', 'w') {|f| f << YAML.dump(verify_ruboto_config)}
       end
 
+      def verify_project_properties
+        return @project_properties if project_properties
+        abort "cannot find your #{properties_file_name} to extract info from it. Make sure you're in the root directory of your app." unless File.exists? properties_file_name
+      end
+
+      def project_properties
+        return @project_properties if @project_properties
+        properties_file_name = 'project.properties'
+        return nil unless File.exists? properties_file_name
+        @project_properties = File.read(properties_file_name)
+      end
+
+      def project_api_level
+        begin
+          return $1 if project_properties =~ /^target=(.*)$/
+        rescue
+          # ignored
+        end
+      end
+
     end
   end
 end

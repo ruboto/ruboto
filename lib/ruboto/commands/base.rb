@@ -17,6 +17,7 @@ module Ruboto
   module Commands
     module Base
       include Ruboto::SdkVersions
+      include Ruboto::Util::Verify
 
       def self.main
         Main do
@@ -27,7 +28,6 @@ module Ruboto
               include Ruboto::Util::LogAction
               include Ruboto::Util::Build
               include Ruboto::Util::Update
-              include Ruboto::Util::Verify
 
               option('package') {
                 required
@@ -121,7 +121,6 @@ module Ruboto
               include Ruboto::Util::LogAction
               include Ruboto::Util::Build
               include Ruboto::Util::Update
-              include Ruboto::Util::Verify
 
               def run
                 update_jruby true
@@ -130,7 +129,6 @@ module Ruboto
 
             mode 'class' do
               include Ruboto::Util::Build
-              include Ruboto::Util::Verify
 
               argument('class') {
                 required
@@ -318,7 +316,6 @@ module Ruboto
             require 'ruboto/util/update'
             include Ruboto::Util::LogAction
             include Ruboto::Util::Update
-            include Ruboto::Util::Verify
 
             argument('what') {
               required
@@ -375,8 +372,10 @@ module Ruboto
             option('target', 't') {
               description 'sets the target Android API level to set up for (example: -t android-16)'
               argument :required
-              default Ruboto::SdkVersions::DEFAULT_TARGET_SDK
+              default DEFAULT_TARGET_SDK
               arity -1
+              cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
+              validate {|t| t =~ /^android-\d+$/}
             }
 
             option('yes', 'y') {
@@ -385,6 +384,25 @@ module Ruboto
 
             def run
               setup_ruboto(params['yes'].value, params['target'].values)
+            end
+          end
+
+          mode 'emulator' do
+            require 'ruboto/util/emulator'
+            include Ruboto::Util::Emulator
+            project_api_level = project_api_level
+
+            option('target', 't') {
+              description 'sets the target Android API level for the emulator (example: -t android-15)'
+              required unless project_api_level
+              argument :required
+              default(project_api_level) if project_api_level
+              cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
+              validate {|t| t =~ /^android-\d+$/}
+            }
+
+            def run
+              start_emulator(params['target'].value)
             end
           end
 

@@ -1,8 +1,10 @@
 require 'ruboto/sdk_versions'
+require 'ruboto/util/verify'
 
 module Ruboto
   module Util
     module Setup
+      include Ruboto::Util::Verify
       REPOSITORY_BASE = 'https://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
 
@@ -13,7 +15,7 @@ module Ruboto
 
       def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK])
         @platform_sdk_loc = {}
-        api_levels = [read_project_api_level, *api_levels].compact.uniq
+        api_levels = [project_api_level, *api_levels].compact.uniq
         install_all(accept_all, api_levels) unless check_all(api_levels)
         config_path(accept_all)
       end
@@ -59,14 +61,6 @@ module Ruboto
           'AppData/Local/Android/android-sdk'
         else
           "android-sdk-#{android_package_os_id}"
-        end
-      end
-
-      def read_project_api_level
-        begin
-          return $1 if File.read('project.properties') =~ /target=(.*)/
-        rescue
-          # ignored
         end
       end
 
@@ -428,7 +422,7 @@ module Ruboto
           a = STDIN.gets.chomp.upcase
         end
         if accept_all || a == 'Y' || a.empty?
-          update_cmd = "android --silent update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
+          update_cmd = "android update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
           update_sdk(update_cmd, accept_all)
           check_for_android_platform(api_level)
         end
