@@ -48,7 +48,7 @@ class WelcomeBot
     when /^:(.+?) (\d+) #{@nick} = #{@channel} :(.*)$/
       attendees = $3.split(' ').map { |a| a.gsub '@', '' }
       attendees.delete_if { |a| ignore?(a) }
-      attendees.sort!
+      attendees.sort_by!(&:upcase)
       puts "People: #{attendees.size} #{attendees.join(' ')}"
       record = @store[:record]
       crowd = attendees.size
@@ -97,7 +97,7 @@ class WelcomeBot
   end
 
   def dump_members
-    attendees = @store[:people].keys.select { |k| d = @store[:people][k]; d[:quit].nil? || d[:joined] > d[:quit] }.sort
+    attendees = @store[:people].keys.select { |k| d = @store[:people][k]; d[:quit].nil? || d[:joined] > d[:quit] }.sort_by(&:upcase)
     puts "People: #{attendees.size} #{attendees.join(' ')}"
     attendees
   end
@@ -111,7 +111,7 @@ class WelcomeBot
   end
 
   def is_alias?(name)
-    @store[:people].keys.any?{|n| n != name && n == name.chomp('_')}
+    @store[:people].keys.any?{|n| n != name && n == name.gsub(/_|-$/, '')}
   end
 
   def update_record(join_count)
