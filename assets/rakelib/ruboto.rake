@@ -214,7 +214,10 @@ file MANIFEST_FILE => PROJECT_PROPS_FILE do
   manifest = old_manifest.dup
   manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
   manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
-  File.open(MANIFEST_FILE, 'w') { |f| f << manifest } if manifest != old_manifest
+  if manifest != old_manifest
+    puts "\nUpdating #{File.basename MANIFEST_FILE} with target from #{File.basename PROJECT_PROPS_FILE}\n\n"
+    File.open(MANIFEST_FILE, 'w') { |f| f << manifest }
+  end
 end
 
 file RUBOTO_CONFIG_FILE
