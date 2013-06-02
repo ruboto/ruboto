@@ -106,8 +106,9 @@ task :default => :debug
 if File.exists?(CLASSES_CACHE)
   expected_jars = File.readlines(CLASSES_CACHE).grep(%r{#{PROJECT_DIR}/libs/(.*\.jar) \\}).map { |l| l =~ %r{#{PROJECT_DIR}/libs/(.*\.jar) \\}; $1 }
   actual_jars = Dir['libs/*.jar'].map { |f| f =~ /libs\/(.*\.jar)/; $1 }
-  if expected_jars != actual_jars
-    puts "Jars have changed: #{((expected_jars | actual_jars) - (expected_jars & actual_jars)).join(', ')}"
+  changed_jars = ((expected_jars | actual_jars) - (expected_jars & actual_jars))
+  unless changed_jars.empty?
+    puts "Jars have changed: #{changed_jars.join(', ')}"
     FileUtils.touch(CLASSES_CACHE)
   end
 end
