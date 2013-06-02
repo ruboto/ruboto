@@ -34,10 +34,10 @@ class RakeTest < Test::Unit::TestCase
 
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
-      system 'rake install'
+      system 'rake debug'
       apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
       FileUtils.touch 'src/ruboto_test_app_activity.rb'
-      system 'rake install'
+      system 'rake debug'
       assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
   end

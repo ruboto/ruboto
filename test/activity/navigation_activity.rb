@@ -1,7 +1,7 @@
 require 'ruboto/activity'
 require 'ruboto/widget'
 
-ruboto_import_widgets :Button, :LinearLayout, :TextView
+ruboto_import_widgets :Button, :LinearLayout, :ScrollView, :TextView
 
 class NavigationActivity
   def onCreate(bundle)
@@ -12,14 +12,18 @@ class NavigationActivity
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
           text_view :text => 'Navigation', :id => 42, :width => :match_parent,
                     :gravity => :center, :text_size => 48.0
-          button :text => 'Java backed by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { java_backed_by_java_class }
-          button :text => 'Java backed by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { java_backed_by_ruby_class }
-          button :text => 'Java backed by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { java_backed_by_script_name }
-          button :text => 'Inline block', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
-          button :text => 'Inline block with options', :width => :match_parent, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
-          button :text => 'Infile class', :width => :match_parent, :id => 48, :on_click_listener => proc { start_infile_activity }
-          button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
-          button :text => 'RubotoActivity no config', :width => :match_parent, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
+          scroll_view :layout => {:weight= => 1} do
+            linear_layout :orientation => :vertical do
+              button :text => 'Java backed by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { java_backed_by_java_class }
+              button :text => 'Java backed by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { java_backed_by_ruby_class }
+              button :text => 'Java backed by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { java_backed_by_script_name }
+              button :text => 'Inline block', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
+              button :text => 'Inline block with options', :width => :match_parent, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
+              button :text => 'Infile class', :width => :match_parent, :id => 48, :on_click_listener => proc { start_infile_activity }
+              button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
+              button :text => 'RubotoActivity no config', :width => :match_parent, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
+            end
+          end
         end
   end
 
@@ -34,18 +38,14 @@ class NavigationActivity
   def java_backed_by_ruby_class
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    config_bundle = android.os.Bundle.new
-    config_bundle.put_string('ClassName', 'NavigationTargetActivity')
-    i.putExtra('Ruboto Config', config_bundle)
+    i.putExtra(Ruboto::CLASS_NAME_KEY, 'NavigationTargetActivity')
     startActivity(i)
   end
 
   def java_backed_by_script_name
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    config_bundle = android.os.Bundle.new
-    config_bundle.put_string('Script', 'navigation_target_activity.rb')
-    i.putExtra('Ruboto Config', config_bundle)
+    i.putExtra(Ruboto::SCRIPT_NAME_KEY, 'navigation_target_activity.rb')
     startActivity(i)
   end
 
@@ -80,18 +80,14 @@ class NavigationActivity
   def start_infile_activity
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    config_bundle = android.os.Bundle.new
-    config_bundle.put_string('ClassName', 'InfileActivity')
-    i.putExtra('Ruboto Config', config_bundle)
+    i.putExtra(Ruboto::CLASS_NAME_KEY, 'InfileActivity')
     startActivity(i)
   end
 
   def start_ruby_file_activity
     i = android.content.Intent.new
     i.setClassName($package_name, 'org.ruboto.RubotoActivity')
-    config_bundle = android.os.Bundle.new
-    config_bundle.put_string('ClassName', 'RubyFileActivity')
-    i.putExtra('Ruboto Config', config_bundle)
+    i.putExtra(Ruboto::CLASS_NAME_KEY, 'RubyFileActivity')
     startActivity(i)
   end
 

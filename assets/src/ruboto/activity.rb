@@ -36,13 +36,11 @@ module Ruboto
       else
         Object.const_set(class_name, Class.new(&block))
       end
-      b = Java::android.os.Bundle.new
-      b.putInt('Theme', theme) if theme
-      b.putString('ClassName', class_name)
-      b.putString('Script', options[:script]) if options[:script]
       i = android.content.Intent.new
       i.setClass self, klass.java_class
-      i.putExtra('Ruboto Config', b)
+      i.putExtra(Ruboto::THEME_KEY, theme) if theme
+      i.putExtra(Ruboto::CLASS_NAME_KEY, class_name) if class_name
+      i.putExtra(Ruboto::SCRIPT_NAME_KEY, options[:script]) if options[:script]
       startActivity i
       self
     end

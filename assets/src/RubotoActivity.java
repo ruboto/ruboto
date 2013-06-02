@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
+    public static final String THEME_KEY = "RUBOTO_THEME";
     private final ScriptInfo scriptInfo = new ScriptInfo();
     private String remoteVariable = null;
     Bundle[] args;
@@ -39,13 +40,19 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         args = new Bundle[1];
         args[0] = bundle;
 
+        // FIXME(uwe):  Deprecated as of Ruboto 0.13.0.  Remove in june 2014 (twelve months).
         Bundle configBundle = getIntent().getBundleExtra("Ruboto Config");
         if (configBundle != null) {
             if (configBundle.containsKey("Theme")) {
                 setTheme(configBundle.getInt("Theme"));
             }
-            scriptInfo.setFromIntent(getIntent());
         }
+        // EMXIF
+
+        if (getIntent().hasExtra(THEME_KEY)) {
+            setTheme(getIntent().getIntExtra(THEME_KEY, 0));
+        }
+        scriptInfo.setFromIntent(getIntent());
 
         if (JRubyAdapter.isInitialized() && scriptInfo.isReadyToLoad()) {
     	    ScriptLoader.loadScript(this);

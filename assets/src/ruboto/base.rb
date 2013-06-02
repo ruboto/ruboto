@@ -23,3 +23,9 @@ end
 
 java_import 'android.R'
 AndroidIds = JavaUtilities.get_proxy_class('android.R$id')
+
+module Ruboto
+  CLASS_NAME_KEY = org.ruboto.ScriptInfo::CLASS_NAME_KEY
+  SCRIPT_NAME_KEY = org.ruboto.ScriptInfo::SCRIPT_NAME_KEY
+  THEME_KEY = org.ruboto.RubotoActivity::THEME_KEY
+end

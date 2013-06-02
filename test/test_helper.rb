@@ -254,10 +254,6 @@ class Test::Unit::TestCase
   end
 
   def run_app_tests
-    if [7, 8].include? ANDROID_OS
-      puts "Skipping instrumentation tests on #{ANDROID_OS} since they don't work."
-      return
-    end
     check_platform_installation
     Dir.chdir APP_DIR do
       system 'rake test:quick'
