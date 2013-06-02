@@ -85,11 +85,13 @@ GEM_LOCK_FILE = "#{GEM_FILE}.lock"
 RELEASE_APK_FILE = File.expand_path "bin/#{build_project_name}-release.apk"
 APK_FILE = File.expand_path "bin/#{build_project_name}-debug.apk"
 TEST_APK_FILE = File.expand_path "test/bin/#{build_project_name}Test-debug.apk"
-JRUBY_JARS = Dir[File.expand_path 'libs/jruby-*.jar']
+JRUBY_JARS = Dir[File.expand_path 'libs/{jruby-*,dx}.jar']
+JARS = Dir[File.expand_path 'libs/*.jar'] - JRUBY_JARS
 RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
-APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
+CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
+APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR, CLASSES_CACHE] + JRUBY_JARS + JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
@@ -100,6 +102,17 @@ APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
 task :default => :debug
+
+if File.exists?(CLASSES_CACHE)
+  expected_jars = File.readlines(CLASSES_CACHE).grep(%r{#{PROJECT_DIR}/libs/(.*\.jar) \\}).map { |l| l =~ %r{#{PROJECT_DIR}/libs/(.*\.jar) \\}; $1 }
+  actual_jars = Dir['libs/*.jar'].map { |f| f =~ /libs\/(.*\.jar)/; $1 }
+  if expected_jars != actual_jars
+    puts "Jars have changed: #{((expected_jars | actual_jars) - (expected_jars & actual_jars)).join(', ')}"
+    FileUtils.touch(CLASSES_CACHE)
+  end
+end
+
+file CLASSES_CACHE
 
 file JRUBY_JARS => RUBOTO_CONFIG_FILE do
   next unless File.exists? RUBOTO_CONFIG_FILE
@@ -123,7 +136,7 @@ task :debug => APK_FILE
 
 namespace :debug do
   desc 'build debug package if compiled files have changed'
-  task :quick => [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR] + JRUBY_JARS + JAVA_SOURCE_FILES + RESOURCE_FILES do |t|
+  task :quick => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
     build_apk(t, false)
   end
 end
