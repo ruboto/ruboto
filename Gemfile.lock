@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     ruboto (0.13.0.rc.1)
+      jruby-jars
       main (>= 4.7.2)
       rake
 
@@ -11,6 +12,7 @@ GEM
     arrayfields (4.9.0)
     chronic (0.9.1)
     fattr (2.2.1)
+    jruby-jars (1.7.4)
     main (5.2.0)
       arrayfields (>= 4.7.4)
       chronic (>= 0.6.2)

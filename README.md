@@ -1,31 +1,56 @@
-Ruboto
-=============
+Ruboto - JRuby On Android
+=========================
 
-Ruby on Android.
+Ruboto (JRuby on Android) is a platform for developing full stand-alone apps for
+Android using the Ruby language and libraries.  It includes support libraries
+and generators for creating projects, classes, tests, and more.  The complete
+APIs of Android, Java, and Ruby are available to you using the Ruby language.
 
 Installation
--------
+------------
+
+To use Ruboto you need a Ruby implementation installed:
+
+* http://ruby-lang.org/
+* http://jruby.org/
+* http://rubini.us/
+
+Ruby installation tools:
+
+* [rvm](https://rvm.io)
+* [pik](https://github.com/vertiginous/pik)
+
+Then run (possibly as root/administrator):
 
     $ gem install ruboto
 
-Getting Started
+Tools
 ---------------
 
-Before you use Ruboto, you should do the following things:
+Before you use Ruboto, you need the following tools installed:
 
-* Install the JDK if it's not on your system already
-* Install [jruby](http://jruby.org/) if you don't already have it. JRuby has a [very easy install process](http://jruby.org/#2), or you can use [rvm](https://rvm.io/rvm/install/)
-* Install [the Android SDK](http://developer.android.com/sdk/index.html)
-* Add the sdk to `$ANDROID_HOME` as an absolute path (Java does not expand tildes `~`)
-* Add the sdk's `tools/` and `platform-tools/` directory to your `$PATH`
-* Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html) image unless you want to develop using your phone.
+* A Java Development Kit (JDK)
+* [The Android SDK](http://developer.android.com/sdk/index.html)
+* [jruby-jars](https://rubygems.org/gems/jruby-jars)
 
-General Information
-------------------
+* Add the sdk to the "ANDROID_HOME" environment variable as an absolute path
+  (Java does not expand tildes `~`)
+* Add the sdk's `tools`, `build-tools`, and `platform-tools/` directory to your
+  "PATH" environment variable.
 
-The Rakefile assumes that you are in the root directory of your app, as do all commands of the `ruboto` command line utility, other than `ruboto gen app`.
+Ruboto offers a setup command to help you with the component installation and
+configuration:
 
-The Rakefile requires you to run it through JRuby's rake.
+    $ ruboto setup
+
+* Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html)
+  image unless you want to develop using your phone.
+
+Ruboto offers a command to help you create and run the emulator for a given
+version (api-level) of Android.
+
+    $ ruboto emulator -t android-17
+
 
 Command-line Tools
 -------
@@ -34,7 +59,7 @@ Command-line Tools
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
 * [Callback generator](#class_generator) to generate specific subclasses to open up access (callbacks) for various portions of the Android API.
 * [Packaging task](#packaging_task) to generate an apk file
-* [Deployment task](#deployment_task) to deploy a generated package to an emulator or connected device
+* [Release task](#release_task) to deploy a generated package to an emulator or connected device
 * [Develop without having to compile to try every change](#update_scripts)
 
 
@@ -58,46 +83,62 @@ Ex:
 
 You can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
 
-Starting with Ruboto 0.6.0 there are easy ways to do this within your scripts. The new way of generating interfaces and subclasses is described in the wiki [Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks)._
+Starting with Ruboto 0.6.0 there are easy ways to do this within your scripts.
+The new way of generating interfaces and subclasses is described in the wiki
+[Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks).
 
 <a name="packaging_task"></a>
 ### Packaging task
 
 This will generate an apk file.
 
-    $ rake
+    $ rake debug
 
 To generate an apk and install it to a connected device (or emulator) all in one go, run
 
     $ rake install
 
-<a name="deployment_task"></a>
-### Deployment task
+To start the installed app, run
 
-When you're ready to post your app to the Market, you need to do a few things.
+    $ rake start
 
-First, you'll need to generate a key to sign the app with using `keytool` if you do not already have one. If you're ok with accepting some sane defaults, you can use
-    $ ruboto gen key --alias alias_for_your_key
-with an optional flag `--keystore /path/to/keystore.keystore`, which defaults to `~/.android/production.keystore`. It will ask for a password for the keystore and one for the key itself. Make sure that you remember those two passwords, as well as the alias for the key.
+You can chain these commands:
 
-Also make sure to keep your key backed up (if you lose it, you won't be able to release updates to your app that can install right over the old versions), but secure.
+    $ rake install start
 
-Once you have your key, use the `rake publish` task to generate a market-ready `.apk` file. You will need the `RUBOTO_KEYSTORE` and `RUBOTO_KEY_ALIAS` environment variables set to the path to the keystore and the alias for the key, respectively. So either run
-    $ RUBOTO_KEYSTORE=~/.android/production.keystore RUBOTO_KEY_ALIAS=foo rake publish
-or set those environment variables in your `~/.bashrc` or similar file and just run
-    $ rake publish
+<a name="release_task"></a>
+### Release task
+
+When you're ready to post your app to the Market, run the `release` task.
+
+    $ rake release
+
+This will generate a keystore for you if it is not already present.
+It will ask for a password for the keystore and one for the key itself.  Make
+sure that you remember those two passwords, as well as the alias for the key.
+
+Also make sure to keep your key backed up (if you lose it, you won't be able to
+release updates to your app that can install right over the old versions), but
+secure.
+
 Now get that `.apk` to the market!
 
 <a name="update_scripts"></a>
 ### Updating Your Scripts on a Device
 
-With traditional Android development, you have to recompile your app and reinstall it on your test device/emulator every time you make a change. That's slow and annoying.
+With traditional Android development, you have to recompile your app and
+reinstall it on your test device/emulator every time you make a change. That's
+slow and annoying.
 
-Luckily, with Ruboto, most of your changes are in the scripts, not in the compiles Java files. So if your changes are Ruby-only, you can just run
+Luckily, with Ruboto, most of your changes are in the scripts, not in the
+compiled Java files. So if your changes are Ruby-only, you can just run
 
     $ rake update_scripts
 
 to have it copy the current version of your scripts to your device.
+To update the scripts and restart the app in one go, run
+
+    $ rake update_scripts:restart
 
 Sorry if this takes away your excuse to have sword fights:
 
@@ -105,9 +146,15 @@ Sorry if this takes away your excuse to have sword fights:
 
 Caveats:
 
-This only works if your changes are all Ruby. If you have Java changes (which would generally just mean generating new classes) or changes to the xml, you will need to recompile your script.
+This only works if your changes are all Ruby. If you have Java changes (which
+would generally just mean generating new classes) or changes to the xml, you
+will need to recompile your app.  The `update_scripts` task will revert to
+build the complete apk and install it if it detects non-Ruby source changes.
 
-Also, you need root access to your device for this to work, as it needs to write to directories that are read-only otherwise. The easiest solution is to test on an emulator, but you can also root your phone.
+On an actual device, you need to give the WRITE_EXTERNAL_STORAGE permission to
+your app, and scripts will be updated using the SDCARD on the device/emulator.
+
+Alternatively, you can also root your phone.
 
 ### Updating Ruboto's Files
 
@@ -121,58 +168,70 @@ You can update various portions of your generated Ruboto app through the ruboto 
 
     $ ruboto update jruby
 
-* The ruboto.rb script:
+* The Ruboto library files and generated Java source:
 
 1) From the root directory of your app:
 
-    $ ruboto update ruboto
+    $ ruboto update app
 
-* The core classes (e.g., RubotoActivity):
-
-1) These classes are generated on your machine based on the SDKs (min and target) specified when you 'gen app' (stored in the AndroidManifest.xml)
-
-2) You many want to regenerate them if a new version of the SDK is released, if you change your targets, or if you want more control over the callbacks you receive.
-
-3) From the root directory of your app:
-
-    $ ruboto gen core Activity --method_base all-on-or-none --method_include specific-methods-to-include --method_include specific-methods-to-exclude
-
-4) The generator will load up the SDK information and find the specified methods. The generator will abort around methods that were added or deprecated based on the SDK levels. You can either use method_exclude to remove methods individually or add '--force exclude' to remove the all. You can also us '--force include' to create them anyway (added methods are created without calling super to avoid crashing on legacy hardware).
 
 Scripts
 -------
 
-The main thing Ruboto offers you is the ability to write Ruby scripts to define the behavior of Activities, BroadcastReceievers, and Services. (Eventually it'll be every class. It's setup such that adding in more classes should be trivial.)
+The main thing Ruboto offers you is the ability to write Ruby scripts to define
+the behavior of Activities, BroadcastReceievers, and Services. (Eventually it'll
+be every class. It's setup such that adding in more classes should be trivial.)
 
 Here's how it works:
 
-First of all, your scripts are found in `src/` and the script name is the same as the name of your class, only under_scored instead of CamelCased. Android classes have all of these methods that get called in certain situations. `Activity.onDestroy()` gets called when the activity gets killed, for example. Save weird cases (like the "launching" methods that need to setup JRuby), to script the method onFooBar, you call the Ruby method on_foo_bar on the Android object. That was really abstract, so here's an example.
+First of all, your scripts are found in the `src/` directory, and the script
+name is the same as the name of your class, only under_scored instead of
+CamelCased. Android classes have all of these methods that get called in certain
+situations. `Activity.onDestroy()` gets called when the activity gets killed,
+for example. Save weird cases (like the "launching" methods that need to setup
+JRuby), to script the method onFooBar, you call the Ruby method onFooBar on the
+Android object. That was really abstract, so here's an example.
 
-You generate an app with the option `--activity FooActivity`, which means that ruboto will generate a FooActivity for you. So you open `src/foo_activity.rb` in your favorite text editor. If you want an activity that does nothing but Log when it gets launched and when it gets destroyed (in the onCreate and onPause methods). You want your script to look like this:
-
-    require 'ruboto/activity' #scripts will not work without doing this
+You generate an app with the option `--activity FooActivity`, which means that
+Ruboto will generate a FooActivity for you. So you open `src/foo_activity.rb` in
+your favorite text editor. If you want an activity that does nothing but Log
+when it gets launched and when it gets destroyed (in the onCreate and onPause
+methods). You want your script to look like this:
 
     class FooActivity
-      include Ruboto::Activity
       def onCreate(bundle)
-        Log.v 'MYAPPNAME', 'onCreate got called!'
+        super
+        android.util.Log.v 'MYAPPNAME', 'onCreate got called!'
       end
 
       def onPause
-        Log.v 'MYAPPNAME', 'onPause got called!'
+        super
+        android.util.Log.v 'MYAPPNAME', 'onPause got called!'
       end
     end
 
-The arguments passed to the methods are the same as the arguments that the java methods take. Consult the Android documentation.
+The arguments passed to the methods are the same as the arguments that the java
+methods take. Consult the Android documentation.
 
-Activities also have some special methods defined to make things easier. The easiest way to get an idea of what they are is looking over the [demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/). You can also read the [ruboto.rb file](http://github.com/ruboto/ruboto-irb/blob/master/src/ruboto.rb) where everything is defined.
+Activities also have some special methods defined to make things easier. The
+easiest way to get an idea of what they are is looking over the
+[demo scripts](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/)
+and the
+[tests](http://github.com/ruboto/ruboto/tree/master/test/activity/).
+You can also read the
+[ruboto source](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto)
+where everything is defined.
+
+We also have many fine examples on the
+[WIKI](https://github.com/ruboto/ruboto/wiki).
 
 Testing
 -------
 
-For each generated class, a ruby test script is created in the test/src directory.
-For example if you generate a RubotoSampleAppActivity a file test/src/ruboto_sample_app_activity_test.rb
-file is created containing a sample test script:
+For each generated class, a Ruby test script is created in the test/src
+directory.  For example if you generate a RubotoSampleAppActivity a file
+"test/src/ruboto_sample_app_activity_test.rb" file is created containing a
+sample test script:
 
     activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
 
@@ -198,55 +257,92 @@ file is created containing a sample test script:
 
 You run the tests for your app using ant or rake
 
-    $ jruby -S rake test
+    $ rake test
 
     $ cd test ; ant run-tests
 
 Contributing
 ------------
 
-Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the project and start coding!
+Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the
+project and start coding!
 
-"But I don't understand it well enough to contribute by forking the project!" That's fine. Equally helpful:
+"But I don't understand it well enough to contribute by forking the project!"
+That's fine. Equally helpful:
 
 * Use Ruboto and tell us how it could be better.
-* As you gain wisdom, contribute it to [the wiki](http://github.com/ruboto/ruboto/wiki/)
+* Browse http://ruboto.org/ and the documentation, and let us know how to make
+  it better.
+* As you gain wisdom, contribute it to
+  [the wiki](http://github.com/ruboto/ruboto/wiki/)
 * When you gain enough wisdom, reconsider whether you could fork the project.
 
-If contributing code to the project, please run the existing tests and add tests for your changes.  You run the tests using rake
+If contributing code to the project, please run the existing tests and add tests
+for your changes.  You run the tests using rake
 
-    $ jruby -S rake test
+    $ rake test
+
+We have set up a matrix test that tests multiple configuations on the emulator:
+
+    $ ./matrix_tests.sh
+
+All branches and pull requests on GitHub are also testd on
+https://travis-ci.org/ruboto/ruboto
 
 Getting Help
 ------------
 
-* You'll need to be pretty familiar with the Android API. The [Developer Guide](http://developer.android.com/guide/index.html) and [Reference](http://developer.android.com/reference/packages.html) are very useful.
-* There is further documentation at the [wiki](http://github.com/ruboto/ruboto/wiki)
-* If you have bugs or feature requests, [open an issue on GitHub](http://github.com/ruboto/ruboto/issues)
-* You can ask questions in #ruboto on irc.freenode.net and on the [mailing list](http://groups.google.com/groups/ruboto)
-* There are some sample scripts (just Activities) [here](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/)
+* You'll need to be pretty familiar with the Android API. The
+  [Developer Guide](http://developer.android.com/guide/index.html) and
+  [Reference](http://developer.android.com/reference/packages.html) are very
+  useful.
+* There is further documentation at the
+  [wiki](http://github.com/ruboto/ruboto/wiki).
+* If you have bugs or feature requests, please
+  [open an issue on GitHub](http://github.com/ruboto/ruboto/issues).
+* You can ask questions in #ruboto on irc.freenode.net and on the
+  [mailing list](http://groups.google.com/groups/ruboto).
+* There are some sample scripts (just Activities)
+  [here](http://github.com/ruboto/ruboto-irb/tree/master/assets/demo-scripts/).
 
 Tips & Tricks
 -------------
 
 ### Emulators
 
-You can start an emulator corresponding to the api level of your project with `rake emulator`.  The emulator will be created for you and will be called after the android version of you rproject, like "Android_4.0.3".
+You can start an emulator corresponding to the api level of your project with
 
-If you're doing a lot of Android development, you'll probably find yourself typing `emulator -avd name_of_emulator` a lot to open emulators. It can be convenient to alias these to shorter commands.
+    $ ruboto emulator
+
+The emulator will be created for you and will be named after the android version
+of your project, like "Android_4.0.3".
+
+If you want to start an emulator for a specific API level use the "-t" option:
+
+    $ ruboto emulator -t 17
+
+If you're doing a lot of Android development, you'll probably find yourself
+starting emulators a lot. It can be convenient to alias these to shorter
+commands.
 
 For example, in your `~/.bashrc`, `~/.zshrc`, or similar file, you might put
-    alias ics="emulator -avd Android_4.0.3"
-    alias jellyb="emulator -avd Android_4.1.2"
-If you have an "Android_4.0.3" emulator that runs Android 4..0.1 and a "Android_4.1.2" one that runs Android 4.1.2.
+
+    alias ics="ruboto emulator -t 15"
+    alias jellyb="ruboto emulator -t 16"
+    alias jb17="ruboto emulator -t 17"
 
 
 Alternatives
 ------------
 
-If Ruboto's performance is a problem for you, check out [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
+If Ruboto's performance is a problem for you, check out
+[Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
 
-Mirah is a language with Ruby-like syntax that compiles to java files. This means that it adds no big runtime dependencies and has essentially the same performance as writing Java code because it essentially generates the same Java code that you would write. This makes it extremely well-suited for mobile devices where performance is a much bigger consideration.
+Mirah is a language with Ruby-like syntax that compiles to java files. This
+means that it adds no big runtime dependencies and has essentially the same
+performance as writing Java code because it essentially generates the same Java
+code that you would write. This makes it extremely well-suited for mobile
+devices where performance is a much bigger consideration.
 
 Garrett is a "playground for Mirah exploration on Android."
 
@@ -256,7 +352,12 @@ Domo Arigato
 
 Thanks go to:
 
-* Charles Nutter, a member of the JRuby core team, for mentoring this RSoC project and starting the Ruboto project in the first place with an [irb](http://github.com/ruboto/ruboto-irb)
+* Charles Nutter, a member of the JRuby core team, for mentoring this RSoC
+  project and starting the Ruboto project in the first place with an
+  [irb](http://github.com/ruboto/ruboto-irb)
 * All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors)
-* [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and heavily sponsoring JRuby, which is obviously critical to the project.
-* All [contributors](http://github.com/ruboto/ruboto/contributors) and [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors), as much of this code was taken from ruboto-irb.
+* [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and
+  heavily sponsoring JRuby, which is obviously critical to the project.
+* All [contributors](http://github.com/ruboto/ruboto/contributors) and
+  [contributors to the ruboto-irb project](http://github.com/ruboto/ruboto-irb/contributors),
+  as much of this code was taken from ruboto-irb.

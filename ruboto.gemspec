@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
   s.date = Date.today.strftime '%Y-%m-%d'
   s.authors = ['Daniel Jackoway', 'Charles Nutter', 'Scott Moyer', 'Uwe Kubosch']
   s.email = %q{ruboto@googlegroups.com}
-  s.summary = %q{A platform for developing apps using JRuby on Android.}
   s.homepage = %q{http://ruboto.org/}
+  s.summary = %q{A platform for developing apps using JRuby on Android.}
   s.description = Ruboto::DESCRIPTION
   s.rubyforge_project = 'ruboto/ruboto'
   s.license = 'MIT'
@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   s.default_executable = 'ruboto'
   s.add_dependency('main', '>=4.7.2')
   s.add_dependency('rake')
+  s.add_dependency('jruby-jars')
 end

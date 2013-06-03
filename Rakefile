@@ -15,6 +15,7 @@ PLATFORM_CURRENT_RELEASE_APK = File.expand_path('tmp/RubotoCore-release.apk', Fi
 MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
+README_FILE = 'README.md'
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -82,6 +83,11 @@ class String
   def wrap(indent = 0)
     scan(/\S.{0,72}\S(?=\s|$)|\S+/).join("\n" + ' ' * indent)
   end
+end
+
+desc 'Update the README with the Ruboto description.'
+file README_FILE => 'lib/ruboto/description.rb' do
+  File.write(README_FILE, File.read(README_FILE).sub(/(?<=\n\n).*(?=\nInstallation)/m, Ruboto::DESCRIPTION))
 end
 
 desc 'Generate release docs for a given milestone'
@@ -320,7 +326,7 @@ task :stats do
 end
 
 desc 'Push the gem to RubyGems'
-task :release => [:clean, :gem] do
+task :release => [:clean, README_FILE, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
