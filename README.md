@@ -27,7 +27,7 @@ Then run (possibly as root/administrator):
 Tools
 ---------------
 
-Before you use Ruboto, you need the following tools installed:
+Before you can use Ruboto, you need the following tools installed:
 
 * A Java Development Kit (JDK)
 * [The Android SDK](http://developer.android.com/sdk/index.html)

@@ -58,6 +58,10 @@ test('start ruboto activity without config', :ui => false) do |activity|
   assert_equal 'Ruboto Test App', a.title
 end
 
+test('start ruboto activity', :ui => false) do |activity|
+  button_activity_text 51, activity, 42, 'This is a Ruby file activity.'
+end
+
 def start_activity_by_button(activity, button_id, activity_class_name = 'org.ruboto.RubotoActivity')
   monitor = add_monitor(activity_class_name, nil, false)
   begin
