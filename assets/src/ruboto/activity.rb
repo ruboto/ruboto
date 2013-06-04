@@ -19,28 +19,46 @@ module Ruboto
       start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
     end
 
-    def start_ruboto_activity(global_variable_name = '$block_based_activity', klass=RubotoActivity, theme=nil, options = nil, &block)
-      # FIXME(uwe): Translate old positional signature to new options-based signature.
-      # FIXME(uwe): Remove when we stop supporting Ruboto 0.8.0 or older.
+    def start_ruboto_activity(class_name = nil, options = nil, &block)
+      # FIXME(uwe):  Deprecated.  Remove june 2014.
+      if options[:class_name]
+        puts "\nDEPRECATON: The ':class_name' option is deprecated.  Put the class name in the first argument instead."
+      end
+
       if options.nil?
-        if global_variable_name.is_a?(Hash)
-          options = global_variable_name
+        if class_name.is_a?(Hash)
+          options = class_name
         else
           options = {}
         end
       end
 
-      class_name = options[:class_name] || "#{klass.name.split('::').last}_#{source_descriptor(block)[0].split('/').last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
+      java_class = options.delete(:java_class) || RubotoActivity
+      theme = options.delete(:theme)
+
+      # FIXME(uwe):  Remove the use of the :class_name option in june 2014
+      class_name_option = options.delete(:class_name)
+      class_name ||= class_name_option
+      # EMXIF
+
+      script_name = options.delete(:script)
+      raise "Unknown options: #{options}" unless options.empty?
+
+      if class_name.nil? && block_given?
+        class_name =
+            "#{java_class.name.split('::').last}_#{source_descriptor(block)[0].split('/').last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
+      end
+
       if Object.const_defined?(class_name)
         Object.const_get(class_name).class_eval(&block) if block_given?
       else
         Object.const_set(class_name, Class.new(&block))
       end
       i = android.content.Intent.new
-      i.setClass self, klass.java_class
+      i.setClass self, java_class.java_class
       i.putExtra(Ruboto::THEME_KEY, theme) if theme
       i.putExtra(Ruboto::CLASS_NAME_KEY, class_name) if class_name
-      i.putExtra(Ruboto::SCRIPT_NAME_KEY, options[:script]) if options[:script]
+      i.putExtra(Ruboto::SCRIPT_NAME_KEY, script_name) if script_name
       startActivity i
       self
     end
