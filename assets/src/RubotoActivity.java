@@ -33,7 +33,16 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     @Override
     public void onCreate(Bundle bundle) {
         System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName());
-        if (ScriptLoader.isCalledFromJRuby()) {
+
+        // Shut this RubotoActivity down if it's not able to restart 
+				if (!(this instanceof EntryPointActivity) && !JRubyAdapter.isInitialized()) {
+            super.onCreate(bundle);
+	          System.out.println("Shutting down stale THE_RUBOTO_CLASS: " + getClass().getName());
+			  		finish();
+						return;
+				}
+				
+       if (ScriptLoader.isCalledFromJRuby()) {
             super.onCreate(bundle);
             return;
         }
