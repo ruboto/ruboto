@@ -34,7 +34,8 @@ View.class_eval do
   end
 
   def self.convert_constant(from)
-    @@convert_constants[from] or from
+    return from unless from.is_a?(Symbol)
+    @@convert_constants[from] or raise "Symbol #{from.inspect} doesn't have a corresponding View constant #{from.to_s.upcase}"
   end
 
   def self.setup_constant_conversion
@@ -168,7 +169,7 @@ def setup_list_view
   Java::android.widget.ListView.__persistent__ = true
   Java::android.widget.ListView.class_eval do
     def configure(context, params = {})
-      if list = params.delete(:list)
+      if (list = params.delete(:list))
         @adapter_list = Java::java.util.ArrayList.new
         @adapter_list.addAll(list)
         item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
