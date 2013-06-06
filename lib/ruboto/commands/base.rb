@@ -390,13 +390,14 @@ module Ruboto
           mode 'emulator' do
             require 'ruboto/util/emulator'
             include Ruboto::Util::Emulator
-            project_api_level = project_api_level
+            extend Ruboto::Util::Verify
+            api_level = project_api_level
 
             option('target', 't') {
               description 'sets the target Android API level for the emulator (example: -t android-15)'
-              required unless project_api_level
+              required unless api_level
               argument :required
-              default(project_api_level) if project_api_level
+              default(api_level) if api_level
               cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
               validate {|t| t =~ /^android-\d+$/}
             }
