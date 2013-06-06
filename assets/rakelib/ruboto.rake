@@ -95,9 +95,7 @@ APK_DEPENDENCIES = [MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR, CLASSES_CACHE
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
-#                   -rw-r--r-- system   system    7487556 2013-04-21 14:01 org.ruboto.example.gps-1.apk
-#                   -rw-r--r--    1 1000     1000         59252 Aug 15  2010 /data/app/org.update_test-1.apk
-#                   -rw-r--r--    1 1000     1000         59265 Aug 15 01:11 /data/app/org.update2_test-1.apk
+JRUBY_ADAPTER_FILE = "#{PROJECT_DIR}/src/org/ruboto/JRubyAdapter.java"
 
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
@@ -235,6 +233,30 @@ file MANIFEST_FILE => PROJECT_PROPS_FILE do
 end
 
 file RUBOTO_CONFIG_FILE
+
+file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
+  require 'yaml'
+  if (heap_alloc = YAML.load(File.read(RUBOTO_CONFIG_FILE))['heap_alloc'])
+  config = <<EOF
+            // BEGIN Ruboto HeapAlloc
+            @SuppressWarnings("unused")
+            byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
+            arrayForHeapAllocation = null;
+            // END Ruboto HeapAlloc
+EOF
+  else
+    config = <<EOF
+            // BEGIN Ruboto HeapAlloc
+            // @SuppressWarnings("unused")
+            // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
+            // arrayForHeapAllocation = null;
+            // END Ruboto HeapAlloc
+EOF
+  end
+  source = File.read(JRUBY_ADAPTER_FILE)
+  heap_alloc_pattern = %r{^\s*// BEGIN Ruboto HeapAlloc\n.*^\s*// END Ruboto HeapAlloc\n}m
+  File.open(JRUBY_ADAPTER_FILE, 'w'){|f| f << source.sub(heap_alloc_pattern, config)}
+end
 
 file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t, false)
