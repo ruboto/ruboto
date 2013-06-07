@@ -54,11 +54,24 @@ test('start ruby file activity again', :ui => false) do |activity|
 end
 
 test('start ruboto activity without config', :ui => false) do |activity|
-  a = start_activity_by_button activity, 50
-  assert_equal 'Ruboto Test App', a.title
+  begin
+    a = start_activity_by_button activity, 50
+    assert_equal 'Ruboto Test App', a.title
+  ensure
+    if a
+      finish_at = Time.now
+      finished = false
+      a.run_on_ui_thread { a.finish; finished = true }
+      loop do
+        break if finished || (Time.now - finish_at > 10)
+        puts 'wait for finish'
+        sleep 0.1
+      end
+    end
+  end
 end
 
-test('start ruboto activity', :ui => false) do |activity|
+test('start ruboto activity with class name', :ui => false) do |activity|
   button_activity_text 51, activity, 42, 'This is a Ruby file activity.'
 end
 
