@@ -20,17 +20,18 @@ module Ruboto
     end
 
     def start_ruboto_activity(class_name = nil, options = nil, &block)
-      # FIXME(uwe):  Deprecated.  Remove june 2014.
-      if options[:class_name]
-        puts "\nDEPRECATON: The ':class_name' option is deprecated.  Put the class name in the first argument instead."
-      end
-
       if options.nil?
         if class_name.is_a?(Hash)
           options = class_name
+          class_name = nil
         else
           options = {}
         end
+      end
+
+      # FIXME(uwe):  Deprecated.  Remove june 2014.
+      if options[:class_name]
+        puts "\nDEPRECATON: The ':class_name' option is deprecated.  Put the class name in the first argument instead."
       end
 
       java_class = options.delete(:java_class) || RubotoActivity
