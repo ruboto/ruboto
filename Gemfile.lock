@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (0.13.0.rc.1)
+    ruboto (0.13.0)
       jruby-jars
       main (>= 4.7.2)
       rake
