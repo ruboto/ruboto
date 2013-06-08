@@ -31,6 +31,7 @@ Before you can use Ruboto, you need the following tools installed:
 
 * A Java Development Kit (JDK)
 * [The Android SDK](http://developer.android.com/sdk/index.html)
+* [Apache ANT](http://ant.apache.org/)
 * [jruby-jars](https://rubygems.org/gems/jruby-jars)
 
 * Add the sdk to the "ANDROID_HOME" environment variable as an absolute path
