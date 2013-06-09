@@ -202,6 +202,8 @@ http://ruboto.org/
 EOF
 
   puts release_candidate_doc
+  File.write('RELEASE_CANDICATE_DOC', release_candidate_doc)
+
   puts
   puts '=' * 80
   puts
@@ -274,6 +276,7 @@ title : Ruboto #{Ruboto::VERSION}
 layout: post
 ---
 EOF
+    File.write('RELEASE_DOC', release_doc)
     Dir.chdir BLOG_DIR do
       output = `git status --porcelain`
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
