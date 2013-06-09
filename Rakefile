@@ -1,4 +1,5 @@
 $:.unshift('lib') unless $:.include?('lib')
+require 'date'
 require 'rake/clean'
 require 'rexml/document'
 require 'ruboto/version'
@@ -7,6 +8,7 @@ require 'ruboto/sdk_versions'
 require 'uri'
 require 'net/https'
 
+PROJECT_DIR = File.expand_path(File.dirname(__FILE__))
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_DEBUG_APK_BAK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk.bak"
@@ -16,6 +18,9 @@ MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 README_FILE = 'README.md'
+BLOG_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com/_posts"
+RELEASE_BLOG = "#{BLOG_DIR}/#{Date.today}-Ruboto-#{Ruboto::VERSION}-release-doc.md"
+RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -91,8 +96,8 @@ file README_FILE => 'lib/ruboto/description.rb' do
 end
 
 desc 'Generate release docs for a given milestone'
-task :release_docs do
-  raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
+
+def get_github_issues
   puts 'GitHub login:'
   begin
     require 'rubygems'
@@ -153,10 +158,16 @@ task :release_docs do
     cat ||= 'Other'
     cat
   end
+  return categories, grouped_issues, milestone, milestone_description, milestone_name
+end
+
+task :release_docs do
+  raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
+  categories, grouped_issues, milestone, milestone_description, milestone_name = get_github_issues
 
   puts '=' * 80
   puts
-  puts <<EOF
+  release_candidate_doc = <<EOF
 Subject: [ANN] Ruboto #{milestone_name} release candidate
 
 Hi all!
@@ -188,30 +199,33 @@ If you find a bug or have a suggestion, please file an issue in the issue tracke
 --
 The Ruboto Team
 http://ruboto.org/
-
 EOF
 
+  puts release_candidate_doc
+  puts
   puts '=' * 80
   puts
-  puts "Subject: [ANN] Ruboto #{milestone_name} released!"
-  puts
-  puts "The Ruboto team is pleased to announce the release of Ruboto #{milestone_name}."
-  puts
-  puts Ruboto::DESCRIPTION.gsub("\n", ' ').wrap
-  puts
-  puts "New in version #{milestone_name}:\n"
-  puts
-  puts milestone_description
-  puts
-  (categories.keys & grouped_issues.keys).each do |cat|
-    puts "#{cat}:\n\n"
-    grouped_issues[cat].each { |i| puts %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }
-    puts
-  end
-  puts "You can find a complete list of issues here:\n\n"
-  puts "* https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}\n\n"
-  puts
-  puts <<EOF
+  release_doc = <<EOF
+Subject: [ANN] Ruboto #{milestone_name} released!
+
+The Ruboto team is pleased to announce the release of Ruboto #{milestone_name}.
+
+#{Ruboto::DESCRIPTION.gsub("\n", ' ').wrap}
+
+New in version #{milestone_name}:
+
+#{milestone_description}
+
+#{(categories.keys & grouped_issues.keys).map do |cat|
+    "#{cat}:\n
+#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+"
+end.join("\n")}
+You can find a complete list of issues here:
+
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
+
+
 Installation:
 
 To use Ruboto, you need to install a Ruby implementation.  Then do
@@ -247,9 +261,32 @@ Enjoy!
 --
 The Ruboto Team
 http://ruboto.org/
-
 EOF
+
+  puts release_doc
+  puts
   puts '=' * 80
+
+  unless Gem::Version.new(Ruboto::VERSION).prerelease?
+    header = <<EOF
+---
+title : Ruboto #{Ruboto::VERSION}
+layout: post
+---
+EOF
+    Dir.chdir BLOG_DIR do
+      output = `git status --porcelain`
+      old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
+      sh "git rm -f #{old_blog_posts.join(' ')}" unless old_blog_posts.empty?
+      File.write(RELEASE_BLOG, header + release_doc)
+      sh "git add #{RELEASE_BLOG}"
+      if output.empty?
+        sh "git commit -p -m \"* Added release blog for Ruboto #{Ruboto::VERSION}\""
+      else
+        puts "Workspace not clean!\n#{output}"
+      end
+    end
+  end
 end
 
 desc 'Fetch download stats form rubygems.org'
@@ -330,7 +367,7 @@ task :stats do
 end
 
 desc 'Push the gem to RubyGems'
-task :release => [:clean, README_FILE, :gem] do
+task :release => [:clean, README_FILE, :release_docs, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   sh "git tag #{Ruboto::VERSION}"
