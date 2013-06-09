@@ -1,0 +1,110 @@
+Subject: [ANN] Ruboto 0.13.0 released!
+
+The Ruboto team is pleased to announce the release of Ruboto 0.13.0.
+
+Ruboto (JRuby on Android) is a platform for developing full stand-alone
+apps for Android using the Ruby language and libraries.  It includes
+support libraries and generators for creating projects, classes, tests,
+and more.  The complete APIs of Android, Java, and Ruby are available to
+you using the Ruby language.
+
+New in version 0.13.0:
+
+In this release we add support for Android API level 17 and the Android
+SDK r22.  There are improvements on the "ruboto setup" command, and
+general preparations for the 1.0 release.
+
+Features:
+
+* Issue #176 Add option to allocate large heap at startup
+* Issue #252 View constant conversion errors aren't very clear
+* Issue #333 Prettier design for the Ruboto platform apk
+* Issue #405 "ruboto setup" on Windows
+* Issue #408 Setup: Need to look up the latest Android tool version
+  (instead of hard coding it) if we can
+* Issue #409 Add support for Android SDK r22
+* Issue #410 Add -y option to "ruboto setup" to automatically install
+  components, accept licenses, and add to configuration
+* Issue #412 Enable starting the emulator without a project
+* Issue #414 Add -t --target parameter to "ruboto setup" to set up for a
+  specific api level
+* Issue #415 Update API xml file to cover android-17
+* Issue #416 Add code for generating the API xml file
+* Issue #422 Put RubotoActivity intent data directly in the Intent instead
+  of inside a Bundle
+* Issue #423 Focus the "start_ruboto_activity" API
+
+Bugfixes:
+
+* Issue #264 Force rebuild of (release) apk when jar file is removed from
+  the libs directory
+* Issue #268 Callback for Audio Focus
+* Issue #285 Look into pause/restart issues for secondary Activities
+* Issue #407 Process::Status#to_int not implemented (NotImplementedError)
+  with jruby 1.7.x and ruboto 0.11.0
+
+Support:
+
+* Issue #303 Ruboto should synchronise target in project.properties and
+  targetSdkVersion in AndroidManifest.xml
+* Issue #314 Tool confusion: ruboto vs rake
+* Issue #424 Initiliaze the new App
+
+Documentation:
+
+* Issue #258 Add welcome and information with links to RubotoCore
+* Issue #427 Add sidebar to the WIKI
+
+Internal:
+
+* Issue #411 Use "ruboto setup -y" to install components in travis-ci
+  automated testing
+
+Rejected:
+
+* Issue #175 Rename "update_scripts" rake task to "update" for less typing
+* Issue #259 Link RubotoCore platform apk version to JRuby version
+* Issue #261 Rename RubotoCore platform apk display name to Ruboto
+* Issue #337 Change default for "ruboto gen app" to include JRuby in the
+  app
+
+You can find a complete list of issues here:
+
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=25
+
+
+Installation:
+
+To use Ruboto, you need to install a Ruby implementation.  Then do
+(possibly as root/administrator)
+
+    gem install ruboto
+    ruboto setup
+
+To create a project do
+
+    ruboto gen app --package <your.package.name>
+    cd <project directory>
+    ruboto setup
+
+To run an emulator for your project
+
+    cd <project directory>
+    ruboto emulator
+
+To run your project
+
+    cd <project directory>
+    rake install start
+
+You can find an introductory tutorial at
+https://github.com/ruboto/ruboto/wiki
+
+If you have any problems or questions, come see us at http://ruboto.org/
+
+Enjoy!
+
+
+--
+The Ruboto Team
+http://ruboto.org/

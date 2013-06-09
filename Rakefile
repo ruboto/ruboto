@@ -282,9 +282,9 @@ EOF
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
       sh "git rm -f #{old_blog_posts.join(' ')}" unless old_blog_posts.empty?
       File.write(RELEASE_BLOG, header + release_doc)
-      sh "git add #{RELEASE_BLOG}"
+      sh "git add -f #{RELEASE_BLOG}"
       if output.empty?
-        sh "git commit -m \"* Added release blog for Ruboto #{Ruboto::VERSION}\""
+        `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`
         sh 'git push'
       else
         puts "Workspace not clean!\n#{output}"
