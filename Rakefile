@@ -282,6 +282,7 @@ EOF
       sh "git add #{RELEASE_BLOG}"
       if output.empty?
         sh "git commit -p -m \"* Added release blog for Ruboto #{Ruboto::VERSION}\""
+        sh 'git push'
       else
         puts "Workspace not clean!\n#{output}"
       end
