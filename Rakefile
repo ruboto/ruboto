@@ -281,7 +281,7 @@ EOF
       File.write(RELEASE_BLOG, header + release_doc)
       sh "git add #{RELEASE_BLOG}"
       if output.empty?
-        sh "git commit -p -m \"* Added release blog for Ruboto #{Ruboto::VERSION}\""
+        sh "git commit -m \"* Added release blog for Ruboto #{Ruboto::VERSION}\""
         sh 'git push'
       else
         puts "Workspace not clean!\n#{output}"
