@@ -39,24 +39,25 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     protected boolean appStarted = false;
     // EMXIF
 
-	public void onCreate(Bundle bundle) {
+    public void onCreate(Bundle bundle) {
         Log.d("EntryPointActivity onCreate:");
-		getScriptInfo().setRubyClassName(getClass().getSimpleName());
+        getScriptInfo().setRubyClassName(getClass().getSimpleName());
 
         localFile = new java.io.File(getFilesDir(), RUBOTO_APK);
-	    try {
-    		splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
-		} catch (Exception e) {
-		    splash = -1;
-		}
+        try {
+            splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
+            requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        } catch (Exception e) {
+            splash = -1;
+        }
 
         if (JRubyAdapter.isInitialized()) {
             appStarted = true;
-		} else {
+        } else {
             initJRuby(true);
-		}
-	    super.onCreate(bundle);
-	}
+        }
+        super.onCreate(bundle);
+    }
 
     public void onResume() {
         Log.d("onResume: ");
@@ -70,7 +71,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         Log.d("onResume: Checking JRuby");
         if (JRubyAdapter.isInitialized()) {
             Log.d("Already initialized");
-    	    fireRubotoActivity();
+            fireRubotoActivity();
         } else {
             Log.d("Not initialized");
             super.onResume();
@@ -82,8 +83,8 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         Log.d("onPause: ");
 
         if (receiver != null) {
-    	    unregisterReceiver(receiver);
-    	    receiver = null;
+            unregisterReceiver(receiver);
+            receiver = null;
         }
         super.onPause();
     }
@@ -140,8 +141,8 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         }).start();
     }
 
-	private static final String RUBOTO_APK = "RubotoCore-release.apk";
-	private static final String RUBOTO_URL = "http://ruboto.org/downloads/" + RUBOTO_APK;
+    private static final String RUBOTO_APK = "RubotoCore-release.apk";
+    private static final String RUBOTO_URL = "http://ruboto.org/downloads/" + RUBOTO_APK;
 
     // Called when the button is pressed.
     public void getRubotoCore(View view) {
@@ -199,7 +200,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         if (loadingDialog == null) {
             if (splash > 0) {
                 Log.i("Showing splash");
-                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
                 Log.i("Showing progress");
@@ -219,7 +219,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         if (loadingDialog == null) {
             if (splash > 0) {
                 Log.i("Showing splash");
-                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
                 Log.i("Showing progress");
@@ -286,8 +285,8 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                         Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_LONG).show();
                         deleteFile(RUBOTO_APK);
                         if (receiver != null) {
-        	                unregisterReceiver(receiver);
-        	                receiver = null;
+                            unregisterReceiver(receiver);
+                            receiver = null;
                         }
                         initJRuby(false);
                     } else {
