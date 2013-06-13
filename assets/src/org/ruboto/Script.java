@@ -49,61 +49,10 @@ public class Script {
         ).replace("__", "_").toLowerCase();
     }
 
-    // Private static methods
-
-    // private static void copyAssets(Context context, String directory) {
-    // 	File dest = new File(new File(scriptsDirFile).getParentFile(), directory);
-	// 	if (dest.exists() || dest.mkdir()) {
-    //         copyScripts(directory, dest, context.getAssets());
-	// 	} else {
-    //         throw new RuntimeException("Unable to create scripts directory: " + dest);
-	// 	}
-    // }
-
-    // private static void copyScripts(String from, File to, AssetManager assets) {
-    //     try {
-    //         byte[] buffer = new byte[8192];
-    //         for (String f : assets.list(from)) {
-    //             File dest = new File(to, f);
-    //
-    //             if (dest.exists()) {
-    //                 continue;
-    //             }
-    //
-    //             Log.d("copying file from " + from + "/" + f + " to " + dest);
-    //
-    //             if (assets.list(from + "/" + f).length == 0) {
-    //                 InputStream is = assets.open(from + "/" + f);
-    //                 OutputStream fos = new BufferedOutputStream(new FileOutputStream(dest), 8192);
-    //
-    //                 int n;
-    //                 while ((n = is.read(buffer, 0, buffer.length)) != -1) {
-    //                     fos.write(buffer, 0, n);
-    //                 }
-    //                 is.close();
-    //                 fos.close();
-    //             } else {
-    //                 dest.mkdir();
-    //                 copyScripts(from + "/" + f, dest, assets);
-    //             }
-    //         }
-    //     } catch (IOException iox) {
-    //         Log.e("error copying scripts", iox);
-    //     }
-    // }
-
-    /*************************************************************************************************
-     *
-     * Constructors
-     */
     public Script(String name) {
         this.name = name;
     }
 
-    /*************************************************************************************************
-     *
-     * Instance methods
-     */
     public String execute() throws IOException {
         return JRubyAdapter.runScriptlet(getContents()).toString();
     }

@@ -92,7 +92,8 @@ module Ruboto
             end
             avd_config_file_name = "#{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini"
             old_avd_config = File.read(avd_config_file_name)
-            heap_size = (File.read('AndroidManifest.xml') =~ /largeHeap/) ? 256 : 48
+            manifest_file = 'AndroidManifest.xml'
+            heap_size = (File.exists?(manifest_file) && File.read(manifest_file) =~ /largeHeap/) ? 256 : 48
             new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) { |m| p m; m.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
             File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
             new_snapshot = true
