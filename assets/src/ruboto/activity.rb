@@ -50,6 +50,8 @@ module Ruboto
             "#{java_class.name.split('::').last}_#{source_descriptor(block)[0].split('/').last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
       end
 
+      class_name = class_name.to_s
+
       if Object.const_defined?(class_name)
         Object.const_get(class_name).class_eval(&block) if block_given?
       else
