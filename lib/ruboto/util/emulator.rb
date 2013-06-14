@@ -83,14 +83,15 @@ module Ruboto
             abi_opt = '--abi armeabi'
           end
 
-          unless File.exists? "#{ENV['HOME']}/.android/avd/#{avd_name}.avd"
+          avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
+          unless File.exists? avd_home
             puts "Creating AVD #{avd_name}"
             puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
             if $? != 0
               puts 'Failed to create AVD.'
               exit 3
             end
-            avd_config_file_name = "#{ENV['HOME']}/.android/avd/#{avd_name}.avd/config.ini"
+            avd_config_file_name = "#{avd_home}/config.ini"
             old_avd_config = File.read(avd_config_file_name)
             manifest_file = 'AndroidManifest.xml'
             heap_size = (File.exists?(manifest_file) && File.read(manifest_file) =~ /largeHeap/) ? 256 : 48
