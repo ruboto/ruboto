@@ -363,7 +363,7 @@ module Ruboto
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
-              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.4.dev')
+              if Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.5.dev')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
                     '**/*Darwin*',
@@ -376,7 +376,7 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
-                    'jline', 'jni',
+                    'jni',
                     'jnr/constants/platform/darwin',
                     'jnr/constants/platform/fake',
                     'jnr/constants/platform/freebsd',
@@ -395,7 +395,6 @@ module Ruboto
                     'jnr/posix/OpenBSD*',
                     'jnr/x86asm',
                     'org/apache',
-                    'org/fusesource',
                     'org/jruby/ant',
                     'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
@@ -424,6 +423,8 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                     'org/yecht',
                 ]
+              elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.4')
+                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/ripper org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.3')
                 excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jline jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/apache org/fusesource org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht)
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.2')
