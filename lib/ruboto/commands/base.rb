@@ -394,12 +394,13 @@ module Ruboto
             api_level = project_api_level
 
             option('target', 't') {
+              extend Ruboto::Util::Emulator
               description 'sets the target Android API level for the emulator (example: -t android-15)'
               required unless api_level
               argument :required
               default(api_level) if api_level
               cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
-              validate {|t| t =~ /^android-\d+$/}
+              validate {|t| t =~ /^android-(\d+)$/ && sdk_level_name($1.to_i)}
             }
 
             def run
