@@ -395,7 +395,8 @@ module Ruboto
 
             option('target', 't') {
               extend Ruboto::Util::Emulator
-              description 'sets the target Android API level for the emulator (example: -t android-15)'
+              description "sets the target Android API level for the emulator"
+              examples Ruboto::Util::Emulator::API_LEVEL_TO_VERSION.keys.join(', ')
               required unless api_level
               argument :required
               default(api_level) if api_level
