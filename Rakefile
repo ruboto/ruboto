@@ -437,12 +437,13 @@ namespace :platform do
 
   desc 'Download the current RubotoCore platform release apk'
   file PLATFORM_CURRENT_RELEASE_APK do
+    FileUtils.mkdir_p File.dirname(PLATFORM_CURRENT_RELEASE_APK)
     puts 'Downloading the current RubotoCore platform release apk'
     uri = URI('http://ruboto.org/downloads/RubotoCore-release.apk')
     begin
       http = Net::HTTP.new(uri.host, uri.port)
       content = http.request(Net::HTTP::Get.new(uri.request_uri)).body
-      File.open(PLATFORM_CURRENT_RELEASE_APK, 'w') { |f| f << content }
+      File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << content }
     rescue Exception, SystemExit
       FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exists?(PLATFORM_CURRENT_RELEASE_APK)
       raise
@@ -483,7 +484,6 @@ namespace :platform do
       puts "Package #{package} already installed, but of different size.  Replacing package."
       output = `adb install -r #{PLATFORM_CURRENT_RELEASE_APK} 2>&1`
       if $? == 0 && output !~ failure_pattern && output =~ success_pattern
-        clear_update
         return
       end
       case $1
