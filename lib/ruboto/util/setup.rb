@@ -489,11 +489,6 @@ module Ruboto
               config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
               old_config = File.read(config_file_name)
               new_config = old_config.dup
-
-              # FIXME(uwe): Remove for Ruboto > 0.13.0
-              new_config.gsub! /\n*# BEGIN Ruboto PATH setup\n.*?\n# END Ruboto PATH setup\n*/m, ''
-              # EMXIF
-
               new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
               new_config << "\n\n# BEGIN Ruboto setup\n"
               new_config << "source #{rubotorc}\n"

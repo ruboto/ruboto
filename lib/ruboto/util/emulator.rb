@@ -52,6 +52,7 @@ module Ruboto
           puts 'No emulator is running.'
         end
 
+        # FIXME(uwe):  Change use of "killall" to use the Ruby Process API
         loop do
           `killall -0 #{emulator_cmd} 2> /dev/null`
           if $? == 0

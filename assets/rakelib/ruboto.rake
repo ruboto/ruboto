@@ -20,7 +20,7 @@ end
 #
 def which(cmd)
   exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
-  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+  ENV['PATH'].gsub('\\', '/').split(File::PATH_SEPARATOR).each do |path|
     exts.each do |ext|
       exe = File.join(path, "#{cmd}#{ext}")
       return exe if File.executable? exe
@@ -33,13 +33,19 @@ adb_version_str = `adb version`
 (puts 'Android SDK platform tools not in PATH (adb command not found).'; exit 1) unless $? == 0
 (puts "Unrecognized adb version: #$1"; exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
 (puts "adb version 1.0.31 or later required.  Version found: #$1"; exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
-if ENV['ANDROID_HOME'].nil? && (adb_path = which('adb'))
-  ENV['ANDROID_HOME'] = File.dirname(File.dirname(adb_path))
+android_home = ENV['ANDROID_HOME']
+if android_home.nil?
+  if (adb_path = which('adb'))
+    android_home = File.dirname(File.dirname(adb_path))
+  else
+    abort 'You need to set the ANDROID_HOME environment variable.'
+  end
+else
+  android_home.gsub! '\\', '/'
 end
-(puts 'You need to set the ANDROID_HOME environment variable.'; exit 1) unless ENV['ANDROID_HOME']
 
-# FIXME(uwe): Simplify when we stop supporting Android SDK < 22: Don't look in pltform-tools for dx
-dx_filename = Dir[File.join(ENV['ANDROID_HOME'], '{build-tools/*,platform-tools}', ON_WINDOWS ? 'dx.bat' : 'dx')][-1]
+# FIXME(uwe): Simplify when we stop supporting Android SDK < 22: Don't look in platform-tools for dx
+dx_filename = Dir[File.join(android_home, '{build-tools/*,platform-tools}', ON_WINDOWS ? 'dx.bat' : 'dx')][-1]
 # EMXIF
 
 unless dx_filename
@@ -55,16 +61,7 @@ if new_dx_content =~ xmx_pattern &&
   puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
   new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{MINIMUM_DX_HEAP_SIZE}M} : %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"}
   new_dx_content.sub!(xmx_pattern, new_xmx_value)
-
-  # FIXME(uwe): For travis debugging  Remove when travis is stable.
-  new_dx_content.sub!(/^exec/, "free\ncat /proc/meminfo\necho Virtual:\nps -e -ovsize=,args= | sort -b -k1,1n | tail -n10\necho RSS:\nps -e -orss=,args= | sort -b -k1,1n | tail -n10\necho $javaOpts\necho $@\njava -XX:+PrintFlagsFinal -version | grep InitialHeapSize\nexec") if RbConfig::CONFIG['host_os'] =~ /linux/
-  # EMXIF
-
   File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
-
-  # FIXME(uwe): For travis debugging  Remove when travis is stable.
-  puts new_dx_content.lines.grep(xmx_pattern)
-  # EMXIF
 end
 
 def manifest; @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
@@ -149,7 +146,7 @@ desc 'uninstall, build, and install the application'
 task :reinstall => [:uninstall, APK_FILE, :install]
 
 namespace :install do
-  # FIXME(uwe):  Remove in 2013
+  # FIXME(uwe):  Remove December 2013
   desc 'Deprecated:  use "reinstall" instead.'
   task :clean => :reinstall do
     puts '"rake install:clean" is deprecated.  Use "rake reinstall" instead.'
@@ -586,11 +583,6 @@ def build_apk(t, release)
   if release
     sh "#{ANT_CMD} release"
   else
-
-    # FIXME(uwe): For travis debugging  Remove when travis is stable.
-    sh 'free' if RbConfig::CONFIG['host_os'] =~ /linux/
-    # EMXIF
-
     sh "#{ANT_CMD} debug"
   end
   true
