@@ -47,7 +47,7 @@ script:
     - rake install
     - ruboto setup -y -t android-10 -t android-$ANDROID_TARGET
     - source ~/.rubotorc
-    - ./start_emulator.sh
+    - ruboto emulator -t $ANDROID_TARGET
     - ./run_tests.sh
 
 notifications:
