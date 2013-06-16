@@ -166,7 +166,7 @@ module Ruboto
   for i in 1 2 3 4 5 6 7 8 9 10 ; do
     sleep 6
     adb shell input keyevent 82 >/dev/null 2>&1
-    if [ "$?" == "0" ] ; then
+    if [ "$?" = "0" ] ; then
       set -e
       adb shell input keyevent 82 >/dev/null 2>&1
       adb shell input keyevent 4 >/dev/null 2>&1
