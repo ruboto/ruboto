@@ -114,25 +114,25 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
                             if (localFile.exists()) {
                                 installDownload();
                             } else {
-                            if (firstTime) {
-                                Log.d("onResume: Checking JRuby - IN UI thread");
-                                try {
-                                    setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
-                                    if (hasInternetPermission()) {
-                                        getRubotoCore(null);
-                                        return;
+                                if (firstTime) {
+                                    Log.d("onResume: Checking JRuby - IN UI thread");
+                                    try {
+                                        if (hasInternetPermission() && canInstallFromUnknownSources()) {
+                                            getRubotoCore(null);
+                                            return;
+                                        }
+                                        setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
+                                    } catch (Exception e) {
                                     }
-                                } catch (Exception e) {
+                                } else {
+                                    Toast.makeText(EntryPointActivity.this,"Failed to initialize Ruboto Core.",Toast.LENGTH_LONG).show();
+                                    try {
+                                        TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
+                                        textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
+                                    } catch (Exception e) {
+                                    }
                                 }
-                            } else {
-                                Toast.makeText(EntryPointActivity.this,"Failed to initialize Ruboto Core.",Toast.LENGTH_LONG).show();
-                                try {
-                                    TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
-                                    textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
-                                } catch (Exception e) {
                                 }
-                            }
-                            }
                             hideProgress();
                         }
                     });
@@ -218,10 +218,10 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private void showDownloadProgress(String message) {
         if (loadingDialog == null) {
             if (splash > 0) {
-                Log.i("Showing splash");
+                Log.i("Showing splash: " + splash);
                 setContentView(splash);
             } else {
-                Log.i("Showing progress");
+                Log.i("Showing download progress");
                 loadingDialog = new ProgressDialog(this);
                 loadingDialog.setTitle(null);
                 loadingDialog.setMessage(message);
