@@ -415,16 +415,11 @@ module Ruboto
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/ext/ripper',
                     'org/jruby/ext/tracepoint',
-                    #'org/jruby/ir/dataflow',
-                    #'org/jruby/ir/dataflow/analyses',
-                    #'org/jruby/ir/representations',
-                    #'org/jruby/ir/runtime',
-                    #'org/jruby/ir/targets',
-                    #'org/jruby/ir/transformations',
-                    #'org/jruby/ir/util',
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
+                    # 'org/jruby/runtime/opto',              # What is this?
+                    # 'org/jruby/runtime/opto/OptoFactory*', # What is this?
                     'org/yecht',
                 ]
               elsif Gem::Version.new(jruby_core_version) >= Gem::Version.new('1.7.4')

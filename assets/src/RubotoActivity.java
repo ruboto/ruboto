@@ -10,8 +10,10 @@ import android.os.Bundle;
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public static final String THEME_KEY = "RUBOTO_THEME";
     private final ScriptInfo scriptInfo = new ScriptInfo();
-    private String remoteVariable = null;
     Bundle[] args;
+
+    // FIXME(uwe):  What is this for?
+    private String remoteVariable = null;
 
     public THE_RUBOTO_CLASS setRemoteVariable(String var) {
         remoteVariable = var;
@@ -21,6 +23,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     public String getRemoteVariableCall(String call) {
         return (remoteVariable == null ? "" : (remoteVariable + ".")) + call;
     }
+    // EMXIF
 
     public ScriptInfo getScriptInfo() {
         return scriptInfo;
@@ -46,8 +49,7 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
             super.onCreate(bundle);
             return;
         }
-        args = new Bundle[1];
-        args[0] = bundle;
+        args = new Bundle[]{bundle};
 
         // FIXME(uwe):  Deprecated as of Ruboto 0.13.0.  Remove in june 2014 (twelve months).
         Bundle configBundle = getIntent().getBundleExtra("Ruboto Config");
