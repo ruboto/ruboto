@@ -329,6 +329,10 @@ module Ruboto
       end
 
       def update_ruboto(force=nil)
+        log_action('Deleting old scripts') do
+          FileUtils.rm_f  "./#{SCRIPTS_DIR}/ruboto.rb"
+          FileUtils.rm_rf "./#{SCRIPTS_DIR}/ruboto"
+        end
         log_action('Copying ruboto/version.rb') do
           from = File.expand_path(Ruboto::GEM_ROOT + '/lib/ruboto/version.rb')
           to = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
