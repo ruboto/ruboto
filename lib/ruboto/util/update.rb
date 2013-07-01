@@ -469,7 +469,7 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              android_jar = Dir["#{ANDROID_HOME}/platforms/*/android.jar"][0]
+              android_jar = Dir["#{ANDROID_HOME.gsub("\\", "/")}/platforms/*/android.jar"][0]
               unless android_jar
                 puts
                 puts '*' * 80
