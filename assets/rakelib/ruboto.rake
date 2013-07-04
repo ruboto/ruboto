@@ -352,7 +352,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
       $VERBOSE = old_verbose
     end
     Gem.platforms = platforms
-    Gem.paths = gem_paths
+    Gem.paths = gem_paths["GEM_PATH"]
   else
     # Bundler.settings[:platform] = Gem::Platform::DALVIK
     sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
@@ -363,7 +363,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   raise "Found multiple gem paths: #{gem_paths}" if gem_paths.size > 1
   gem_path = gem_paths[0]
   puts "Found gems in #{gem_path}"
-
+  
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
       Dir['{activerecord-jdbc-adapter,jruby-openssl}-*'].each do |g|
@@ -483,10 +483,9 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
     end
   end
 
-
   FileUtils.rm_f BUNDLE_JAR
   Dir["#{gem_path}/*"].each_with_index do |gem_dir, i|
-    `jar #{i == 0 ? 'c' : 'u'}f #{BUNDLE_JAR} -C #{gem_dir}/lib .`
+    `jar #{i == 0 ? 'c' : 'u'}f "#{BUNDLE_JAR}" -C "#{gem_dir}/lib" .`
   end
   FileUtils.rm_rf BUNDLE_PATH
 end
