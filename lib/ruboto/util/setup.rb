@@ -46,7 +46,7 @@ module Ruboto
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/ then
           'macosx'
-        when /^linux(.*)/ then
+        when /linux/ then
           'linux'
         when /^mswin32|windows(.*)/ then
           'windows'
@@ -68,7 +68,7 @@ module Ruboto
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/ then
           '.profile'
-        when /^linux(.*)/ then
+        when /linux/ then
           '.bashrc'
         when /^mswin32|windows(.*)/ then
           'windows'
@@ -183,7 +183,7 @@ module Ruboto
       def install_java(accept_all)
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/
-        when /^linux(.*)/
+        when /linux/
         when /^mswin32|windows(.*)/
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
@@ -238,7 +238,7 @@ module Ruboto
       def install_ant(accept_all)
         case RbConfig::CONFIG['host_os']
         when /^darwin(.*)/
-        when /^linux(.*)/
+        when /linux/
         when /^mswin32|windows(.*)/
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
@@ -357,7 +357,7 @@ module Ruboto
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "unzip #{'-o ' if accept_all}#{asdk_file_name}"
                 system "rm #{asdk_file_name}"
-              when /^linux(.*)/
+              when /linux/
                 asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.tgz"
                 system "wget http://dl.google.com/android/#{asdk_file_name}"
                 system "tar -xzf #{asdk_file_name}"
