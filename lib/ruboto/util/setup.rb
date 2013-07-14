@@ -389,7 +389,7 @@ module Ruboto
             end
           end
           check_for_android_sdk
-          unless @android_loc
+          unless @android_loc.nil?
             ENV['ANDROID_HOME'] = @android_loc.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
             system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
