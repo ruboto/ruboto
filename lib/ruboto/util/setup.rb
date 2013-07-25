@@ -172,6 +172,7 @@ module Ruboto
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
+        check_all(api_levels)
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
         if @android_loc
           api_levels.each do |api_level|
@@ -390,7 +391,7 @@ module Ruboto
           end
           check_for_android_sdk
           unless @android_loc.nil?
-            ENV['ANDROID_HOME'] = @android_loc.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+            ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+"/..").gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
             system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
             @missing_paths << "#{File.dirname(@android_loc)}"
