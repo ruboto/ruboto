@@ -60,7 +60,7 @@ module Ruboto
         if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
           'AppData/Local/Android/android-sdk'
         else
-          "android-sdk-#{android_package_os_id}"
+          ENV['ANDROID_HOME'] ? ENV['ANDROID_HOME'] : File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
         end
       end
 
@@ -118,22 +118,22 @@ module Ruboto
 
       def check_for_emulator
         @emulator_loc = check_for('emulator', 'Android Emulator',
-                                  File.join(File.expand_path('~'), android_package_directory, 'tools', 'emulator'))
+                                  File.join(android_package_directory, 'tools', 'emulator'))
       end
 
       def check_for_platform_tools
         @adb_loc = check_for('adb', 'Android SDK Command adb',
-                             File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
+                             File.join(android_package_directory, 'platform-tools', 'adb'))
       end
 
       def check_for_build_tools
         @dx_loc = check_for('dx', 'Android SDK Command dx',
-                            Dir[File.join(File.expand_path('~'), android_package_directory, 'build-tools', '*', 'dx')][-1])
+                            Dir[File.join(android_package_directory, 'build-tools', '*', 'dx')][-1])
       end
 
       def check_for_android_sdk
         @android_loc = check_for('android', 'Android Package Installer',
-                                 File.join(File.expand_path('~'), android_package_directory, 'tools', 'android'))
+                                 File.join(android_package_directory, 'tools', 'android'))
       end
 
       def check_for(cmd, pretty_name=nil, alt_dir=nil)
