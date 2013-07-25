@@ -407,7 +407,7 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool --force"
+            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool -a --force"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
