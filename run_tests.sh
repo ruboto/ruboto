@@ -50,10 +50,11 @@ if [ "$RUBY_IMPL" != "" ] ; then
 fi
 
 export NOEXEC_DISABLE=1
-rake --trace clean
-rake --trace test $*
-
+rake clean
+set +e
+rake test $*
 TEST_RC=$?
+set -e
 
 echo Tests exited with code $TEST_RC
 

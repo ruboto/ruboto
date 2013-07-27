@@ -15,8 +15,8 @@ Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
   example_archives = example_archives.last(example_limit) if example_limit
 
   # TODO(gf): Track APIs compatible with update examples
-  EXAMPLE_COMPATIBLE_APIS = { (Gem::Version.new("0.7.0")..Gem::Version.new("0.10.99")) => [8],
-                              (Gem::Version.new("0.11.0")..Gem::Version.new("0.13.0")) => [10,11,12,13,14,15,16,17] }
+  EXAMPLE_COMPATIBLE_APIS = { (Gem::Version.new('0.7.0')..Gem::Version.new('0.10.99')) => [8],
+                              (Gem::Version.new('0.11.0')..Gem::Version.new('0.13.0')) => [10,11,12,13,14,15,16,17] }
 
   installed_apis = `android list target --compact`.lines.grep(/^android-/) { |s| s.match(/\d+/).to_s.to_i }
   examples = example_archives.collect { |f| f.match /^#{RubotoTest::APP_NAME}_(?<ruboto_version>.*)_tools_r(?<tools_version>.*)\.tgz$/ }.compact

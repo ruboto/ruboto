@@ -55,6 +55,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo ""
 
       if [ "$TEST_RC" != "0" ] ; then
+        echo Tests exited with code $TEST_RC
         exit $TEST_RC
       fi
     done
