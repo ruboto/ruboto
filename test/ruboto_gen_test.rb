@@ -21,9 +21,9 @@ class RubotoGenTest < Test::Unit::TestCase
 
   def test_icons_are_updated
     Dir.chdir APP_DIR do
-      assert_equal 4032, File.size('res/drawable-hdpi/ic_launcher.png')
-      assert_equal 2548, File.size('res/drawable-mdpi/ic_launcher.png')
-      assert_equal 1748, File.size('res/drawable-ldpi/ic_launcher.png')
+      assert_equal 3834, File.size('res/drawable-hdpi/ic_launcher.png')
+      assert_equal 2513, File.size('res/drawable-mdpi/ic_launcher.png')
+      assert_equal 1689, File.size('res/drawable-ldpi/ic_launcher.png')
     end
   end
 
