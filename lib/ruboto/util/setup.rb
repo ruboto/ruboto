@@ -60,7 +60,7 @@ module Ruboto
         if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
           'AppData/Local/Android/android-sdk'
         else
-          "android-sdk-#{android_package_os_id}"
+          ENV['ANDROID_HOME'] ? ENV['ANDROID_HOME'] : File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
         end
       end
 
@@ -118,22 +118,22 @@ module Ruboto
 
       def check_for_emulator
         @emulator_loc = check_for('emulator', 'Android Emulator',
-                                  File.join(File.expand_path('~'), android_package_directory, 'tools', 'emulator'))
+                                  File.join(android_package_directory, 'tools', 'emulator'))
       end
 
       def check_for_platform_tools
         @adb_loc = check_for('adb', 'Android SDK Command adb',
-                             File.join(File.expand_path('~'), android_package_directory, 'platform-tools', 'adb'))
+                             File.join(android_package_directory, 'platform-tools', 'adb'))
       end
 
       def check_for_build_tools
         @dx_loc = check_for('dx', 'Android SDK Command dx',
-                            Dir[File.join(File.expand_path('~'), android_package_directory, 'build-tools', '*', 'dx')][-1])
+                            Dir[File.join(android_package_directory, 'build-tools', '*', 'dx')][-1])
       end
 
       def check_for_android_sdk
         @android_loc = check_for('android', 'Android Package Installer',
-                                 File.join(File.expand_path('~'), android_package_directory, 'tools', 'android'))
+                                 File.join(android_package_directory, 'tools', 'android'))
       end
 
       def check_for(cmd, pretty_name=nil, alt_dir=nil)
@@ -172,6 +172,7 @@ module Ruboto
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
+        check_all(api_levels)
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
         if @android_loc
           api_levels.each do |api_level|
@@ -390,7 +391,7 @@ module Ruboto
           end
           check_for_android_sdk
           unless @android_loc.nil?
-            ENV['ANDROID_HOME'] = @android_loc.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+            ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+"/..").gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
             system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
             @missing_paths << "#{File.dirname(@android_loc)}"
@@ -406,7 +407,7 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool --force"
+            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool -a --force"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
