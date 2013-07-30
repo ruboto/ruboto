@@ -33,7 +33,7 @@ adb_version_str = `adb version`
 (puts 'Android SDK platform tools not in PATH (adb command not found).'; exit 1) unless $? == 0
 (puts "Unrecognized adb version: #$1"; exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
 (puts "adb version 1.0.31 or later required.  Version found: #$1"; exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
-android_home = ENV['ANDROID_HOME']
+android_home = ENV['ANDROID_HOME'].dup
 android_home = android_home.gsub("\\", "/") unless android_home.nil?
 if android_home.nil?
   if (adb_path = which('adb'))
