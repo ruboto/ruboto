@@ -359,7 +359,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
   end
 
-  gem_paths = Dir["#{BUNDLE_PATH}/gems"]
+  gem_paths = Dir["#{BUNDLE_PATH}/bundler/gems"]
   raise 'Gem path not found' if gem_paths.empty?
   raise "Found multiple gem paths: #{gem_paths}" if gem_paths.size > 1
   gem_path = gem_paths[0]
