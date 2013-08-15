@@ -12,9 +12,7 @@ import android.os.Bundle;
  * this layout is displayed instead of the progress dialog.
  */
 public class EntryPointActivity extends org.ruboto.RubotoActivity {
-    private static final int INSTALL_REQUEST_CODE = 4242;
-    private static final String RUBOTO_APK = "RubotoCore-release.apk";
-    
+
     public void onCreate(Bundle bundle) {
         Log.d("EntryPointActivity onCreate:");
 	getScriptInfo().setRubyClassName(getClass().getSimpleName());
@@ -74,27 +72,6 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     private void showSplash() {
 	Intent splashIntent = new Intent(EntryPointActivity.this, SplashActivity.class);
 	startActivity(splashIntent);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult: " + requestCode + ", " + resultCode + ", " + data);
-        Log.d("onActivityResult: " + INSTALL_REQUEST_CODE + ", " + RESULT_OK + ", " + RESULT_CANCELED);
-        if (requestCode == INSTALL_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Log.d("onActivityResult: Install OK.");
-            } else if (resultCode == RESULT_CANCELED) {
-                Log.d("onActivityResult: Install canceled.");
-                // FIXME(uwe): Maybe show a dialog explaining that RubotoCore is needed and try again?
-                deleteFile(RUBOTO_APK);
-                if (!JRubyAdapter.isInitialized()) {
-                    finish();
-                }
-                // EMXIF
-            } else {
-                Log.e("onActivityResult: resultCode: " + resultCode);
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }
