@@ -301,6 +301,10 @@ module Ruboto
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}
           end
 
+          unless app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"]
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false'}
+          end
+
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoDialog', 'android:exported' => 'false', 'android:theme' => '@android:style/Theme.Dialog'}
           end
