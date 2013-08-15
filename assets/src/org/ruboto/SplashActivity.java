@@ -63,12 +63,6 @@ public class SplashActivity extends Activity {
 
     public void onDestroy() {
         Log.d("onDestroy: ");
-
-	if (receiver != null) {
-            unregisterReceiver(receiver);
-            receiver = null;
-	}
-
         super.onDestroy();
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
