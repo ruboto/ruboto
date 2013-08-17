@@ -150,6 +150,7 @@ public class JRubyAdapter {
 
             // Used to enable JRuby to generate proxy classes
             System.setProperty("jruby.ji.proxyClassFactory", "org.ruboto.DalvikProxyClassFactory");
+            System.setProperty("jruby.ji.upper.case.package.name.allowed", "true");
             System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
 
             ClassLoader classLoader;
