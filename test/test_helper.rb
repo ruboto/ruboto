@@ -164,6 +164,7 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
+    package = options.delete(:package) || PACKAGE
     example = options.delete(:example) || false
     update = options.delete(:update) || false
     # FIXME(uwe): Remove exclusion feature
@@ -207,7 +208,7 @@ class Test::Unit::TestCase
       else
         uninstall_jruby_jars_gem unless standalone
         puts "Generating app #{APP_DIR}"
-        system "#{RUBOTO_CMD} gen app --package #{PACKAGE} --path #{APP_DIR} --name #{APP_NAME} --target android-#{ANDROID_TARGET}"
+        system "#{RUBOTO_CMD} gen app --package #{package} --path #{APP_DIR} --name #{APP_NAME} --target android-#{ANDROID_TARGET}"
         if $? != 0
           FileUtils.rm_rf APP_DIR
           raise "gen app failed with return code #$?"
