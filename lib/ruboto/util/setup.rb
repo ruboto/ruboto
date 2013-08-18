@@ -393,7 +393,9 @@ module Ruboto
           unless @android_loc.nil?
             ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+"/..").gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
-            system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
+            if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+              system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
+            end
             @missing_paths << "#{File.dirname(@android_loc)}"
           end
         end
