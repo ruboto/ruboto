@@ -76,9 +76,9 @@ class RubotoGenTest < Test::Unit::TestCase
     else
       upper_limit = {
           10 => 58.0,
-          15 => 59.0,
-          16 => 74.0,
-      }[ANDROID_TARGET] || 74.0
+          15 => 59.1,
+          16 => 74.2,
+      }[ANDROID_TARGET] || 74.2
     end
     lower_limit = upper_limit * 0.9
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
