@@ -128,11 +128,11 @@ module Ruboto
       end
 
       def update_jruby(force=nil, explicit = false)
-        jruby_core = Dir.glob('libs/jruby-core-*.jar')[0]
-        jruby_stdlib = Dir.glob('libs/jruby-stdlib-*.jar')[0]
+        installed_jruby_core = Dir.glob('libs/jruby-core-*.jar')[0]
+        installed_jruby_stdlib = Dir.glob('libs/jruby-stdlib-*.jar')[0]
 
         unless force
-          if !jruby_core || !jruby_stdlib
+          if !installed_jruby_core || !installed_jruby_stdlib
             puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app." if explicit
             return false
           end
@@ -147,7 +147,7 @@ module Ruboto
         new_jruby_version = JRubyJars::VERSION
 
         unless force
-          current_jruby_version = jruby_core ? jruby_core[16..-5] : 'None'
+          current_jruby_version = installed_jruby_core ? installed_jruby_core[16..-5] : 'None'
           if current_jruby_version == new_jruby_version
             puts "JRuby is up to date at version #{new_jruby_version}. Make sure you 'gem update jruby-jars' if there is a new version."
             return false
@@ -158,10 +158,10 @@ module Ruboto
         end
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path('.')
-        log_action("Removing #{jruby_core}") { File.delete *Dir.glob('libs/jruby-core-*.jar') } if jruby_core
-        log_action("Removing #{jruby_stdlib}") { File.delete *Dir.glob('libs/jruby-stdlib-*.jar') } if jruby_stdlib
-        log_action("Copying #{JRubyJars::core_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::core_jar_path, 'libs' }
-        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { copier.copy_from_absolute_path JRubyJars::stdlib_jar_path, 'libs' }
+        log_action("Removing #{installed_jruby_core}") { File.delete *Dir.glob('libs/jruby-core-*.jar') } if installed_jruby_core
+        log_action("Removing #{installed_jruby_stdlib}") { File.delete *Dir.glob('libs/jruby-stdlib-*.jar') } if installed_jruby_stdlib
+        log_action("Copying #{JRubyJars::core_jar_path} to libs") { FileUtils.cp JRubyJars::core_jar_path, "libs/jruby-core-#{new_jruby_version}.jar" }
+        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{new_jruby_version}.jar" }
 
         unless File.read('project.properties') =~ /^dex.force.jumbo=/
           log_action('Setting JUMBO dex file format') do
@@ -334,7 +334,7 @@ module Ruboto
 
       def update_ruboto(force=nil)
         log_action('Deleting old scripts') do
-          FileUtils.rm_f  "./#{SCRIPTS_DIR}/ruboto.rb"
+          FileUtils.rm_f "./#{SCRIPTS_DIR}/ruboto.rb"
           FileUtils.rm_rf "./#{SCRIPTS_DIR}/ruboto"
         end
         log_action('Copying ruboto/version.rb') do
@@ -361,8 +361,8 @@ module Ruboto
       # - Removes unneeded code from jruby-core
       # - Split into smaller jars that can be used separately
       def reconfigure_jruby_core(jruby_core_version)
-        jruby_core = JRubyJars::core_jar_path.split('/')[-1]
         Dir.chdir 'libs' do
+          jruby_core = Dir['jruby-core-*.jar'][-1]
           log_action("Removing unneeded classes from #{jruby_core}") do
             FileUtils.rm_rf 'tmp'
             Dir.mkdir 'tmp'
@@ -402,7 +402,6 @@ module Ruboto
                     'jnr/posix/MacOS*',
                     'jnr/posix/OpenBSD*',
                     'jnr/x86asm',
-                    'org/apache',
                     'org/jruby/ant',
                     'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
@@ -417,7 +416,6 @@ module Ruboto
                     'org/jruby/ext/ffi/AbstractMemory*',
                     'org/jruby/ext/ffi/io',
                     'org/jruby/ext/ffi/jffi',
-                    'org/jruby/ext/ripper',
                     'org/jruby/ext/tracepoint',
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
@@ -504,7 +502,7 @@ module Ruboto
         included_stdlibs = verify_ruboto_config[:included_stdlibs]
         excluded_stdlibs = [*verify_ruboto_config[:excluded_stdlibs]].compact
         Dir.chdir 'libs' do
-          jruby_stdlib = JRubyJars::stdlib_jar_path.split('/')[-1]
+          jruby_stdlib = Dir['jruby-stdlib-*.jar'][-1]
           log_action("Reformatting #{jruby_stdlib}") do
             FileUtils.mkdir_p 'tmp'
             Dir.chdir 'tmp' do
@@ -517,8 +515,7 @@ module Ruboto
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
               FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
-              raise "Unrecognized JRuby stdlib jar: #{jruby_stdlib}" unless jruby_stdlib =~ /jruby-stdlib-(.*).jar/
-              jruby_stdlib_version = Gem::Version.new($1)
+              jruby_stdlib_version = Gem::Version.new(JRubyJars::VERSION)
 
               if included_stdlibs
                 lib_dirs = %w(1.8 1.9 2.0 shared)
