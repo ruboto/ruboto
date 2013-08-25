@@ -103,10 +103,10 @@ module Ruboto
                   update_assets
                   update_ruboto true
                   update_icons true
-                  update_classes nil, true
+                  update_classes nil, 'exclude'
                   update_jruby true if with_jruby
                   update_dx_jar true if with_jruby
-                  update_core_classes 'include'
+                  update_core_classes 'exclude'
 
                   log_action('Generating the default Activity and script') do
                     generate_inheriting_file 'Activity', activity, package
@@ -351,7 +351,7 @@ module Ruboto
                 update_jruby force
                 update_manifest nil, nil, force
                 update_icons force
-                update_core_classes 'include'
+                update_core_classes 'exclude'
                 update_bundle
               when 'jruby' then
                 update_jruby(params['force'].value, true) || abort
