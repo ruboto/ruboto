@@ -577,7 +577,7 @@ module Ruboto
                   # EMXIF
 
                   # FIXME(uwe): These should be included but break the 64K method count limit
-                  if j =~ /bcpkix-jdk15on-147|bcprov-jdk15on-147|jopenssl|kryptcore|kryptproviderjdk/
+                  if j =~ /bcpkix-jdk15on-1\.?47|bcprov-jdk15on-1\.?47|jopenssl|kryptcore|kryptproviderjdk/
                     FileUtils.rm j
                     next
                   end
@@ -620,6 +620,11 @@ module Ruboto
                   File.open("#{j}.rb", 'w') { |f| f << jar_load_code }
                   File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
                 end
+
+                # FIXME(uwe): Displicated in jruby-core and jruby-stdlib in mavenized build of JRuby 1.7.5.dev
+                # https://github.com/jruby/jruby/issues/972
+                FileUtils.rm_rf 'jay/yydebug'
+                # EMXIF
 
                 `jar -cf ../../#{jruby_stdlib} .`
                 raise "Creating repackaged jruby-stdlib jar failed: #$?" unless $? == 0

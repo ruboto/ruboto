@@ -1,6 +1,12 @@
 #!/bin/bash -e
 
-if test `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ; then
+if [ ! `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
+    echo JRuby-jars master is missing.
+    rake get_jruby_jars_snapshot
+fi
+
+if [ `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ] ; then
+    echo jruby-jars master is old.
     rake get_jruby_jars_snapshot
 fi
 
@@ -9,6 +15,7 @@ PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | cut -f1-4 -d'.'`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.4"
 RUBOTO_UPDATE_EXAMPLES=1
+# export STRIP_INVOKERS=1
 
 export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 
