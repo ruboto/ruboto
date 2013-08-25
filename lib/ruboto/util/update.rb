@@ -621,11 +621,6 @@ module Ruboto
                   File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
                 end
 
-                # FIXME(uwe): Displicated in jruby-core and jruby-stdlib in mavenized build of JRuby 1.7.5.dev
-                # https://github.com/jruby/jruby/issues/972
-                FileUtils.rm_rf 'jay/yydebug'
-                # EMXIF
-
                 `jar -cf ../../#{jruby_stdlib} .`
                 raise "Creating repackaged jruby-stdlib jar failed: #$?" unless $? == 0
               end
