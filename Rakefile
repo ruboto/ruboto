@@ -562,10 +562,9 @@ end
 
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshot do
-  `wget http://ci.jruby.org/snapshots/master/jruby-jars-1.7.5.dev.gem`
-  jars = Dir['jruby-jars-1.7.5.dev.gem*']
-  if jars.size > 1
-    jars[0..-2].each{|j| FileUtils.rm_f j}
-  end
-  FileUtils.mv jars[-1], 'jruby-jars-1.7.5.dev.gem'
+  current_gem = 'jruby-jars-1.7.5.dev.gem'
+  `wget http://ci.jruby.org/snapshots/master/#{current_gem}`
+  jars = Dir["#{current_gem}.*"]
+  jars[0..-2].each { |j| FileUtils.rm_f j } if jars.size > 1
+  FileUtils.mv(jars[-1], current_gem) if jars[-1]
 end

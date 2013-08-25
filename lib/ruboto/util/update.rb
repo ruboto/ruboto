@@ -577,7 +577,7 @@ module Ruboto
                   # EMXIF
 
                   # FIXME(uwe): These should be included but break the 64K method count limit
-                  if j =~ /bcpkix-jdk15on-147|bcprov-jdk15on-147|jopenssl|kryptcore|kryptproviderjdk/
+                  if j =~ /bcpkix-jdk15on-1\.?47|bcprov-jdk15on-1\.?47|jopenssl|kryptcore|kryptproviderjdk/
                     FileUtils.rm j
                     next
                   end
