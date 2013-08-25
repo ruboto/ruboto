@@ -12,19 +12,6 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     private final ScriptInfo scriptInfo = new ScriptInfo();
     Bundle[] args;
 
-    // FIXME(uwe):  What is this for?
-    private String remoteVariable = null;
-
-    public THE_RUBOTO_CLASS setRemoteVariable(String var) {
-        remoteVariable = var;
-        return this;
-    }
-
-    public String getRemoteVariableCall(String call) {
-        return (remoteVariable == null ? "" : (remoteVariable + ".")) + call;
-    }
-    // EMXIF
-
     public ScriptInfo getScriptInfo() {
         return scriptInfo;
     }
@@ -38,9 +25,9 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
         System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName());
 
         // Shut this RubotoActivity down if it's not able to restart 
-        if (!(this instanceof EntryPointActivity) && !JRubyAdapter.isInitialized()) {
+        if (this.getClass().getName().equals("org.ruboto.THE_RUBOTO_CLASS") && !JRubyAdapter.isInitialized()) {
             super.onCreate(bundle);
-	        System.out.println("Shutting down stale THE_RUBOTO_CLASS: " + getClass().getName());
+	          System.out.println("Shutting down stale THE_RUBOTO_CLASS: " + getClass().getName());
             finish();
             return;
         }
