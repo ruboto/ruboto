@@ -302,7 +302,7 @@ module Ruboto
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"]
-            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:screenOrientation' => 'portrait'}
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => 'orientation|screenSize'}
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
