@@ -14,9 +14,24 @@ require 'ruboto/package'
 #
 module Ruboto
   module Context
-    def start_ruboto_dialog(remote_variable, theme=Java::android.R.style::Theme_Dialog, &block)
-      java_import 'org.ruboto.RubotoDialog'
-      start_ruboto_activity(remote_variable, RubotoDialog, theme, &block)
+    def start_ruboto_dialog(class_name = nil, options = nil, &block)
+      if options.nil?
+        if class_name.is_a?(Hash)
+          options = class_name
+          class_name = nil
+        else
+          options = {}
+        end
+      end
+
+      unless options.key?(:java_class)
+        java_import 'org.ruboto.RubotoDialog'
+        options[:java_class] = RubotoDialog
+      end
+ 
+      options[:theme] = android.R.style::Theme_Dialog unless options.key?(:theme)
+
+      start_ruboto_activity(class_name, options, &block)
     end
 
     def start_ruboto_activity(class_name = nil, options = nil, &block)
