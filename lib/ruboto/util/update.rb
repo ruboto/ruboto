@@ -338,8 +338,8 @@ module Ruboto
         new_sources = Dir.chdir(new_sources_dir) { Dir[source_files_pattern] }.
             select { |f| !(File.directory?("#{new_sources_dir}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }
         old_sources = Dir.chdir("#{SCRIPTS_DIR}") { Dir[source_files_pattern] }.
-            select { |f| !(File.directory?(f) || File.basename(f) == '.' || File.basename(f) == '..') }
-        obsolete_sources = old_sources - new_sources
+            select { |f| !(File.directory?("#{SCRIPTS_DIR}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }
+        obsolete_sources = old_sources - new_sources - %w(ruboto/version.rb)
         obsolete_sources.each do |f|
           log_action("Deleting obsolete script #{f}") do
             FileUtils.rm_f f
@@ -353,7 +353,7 @@ module Ruboto
         end
         log_action('Copying additional ruboto script components') do
           new_sources.each do |from|
-            to = File.expand_path(from)
+            to = File.expand_path(from, SCRIPTS_DIR)
             FileUtils.mkdir_p File.dirname(to)
             FileUtils.cp "#{new_sources_dir}/#{from}", to
           end
