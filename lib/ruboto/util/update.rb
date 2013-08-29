@@ -333,9 +333,17 @@ module Ruboto
       end
 
       def update_ruboto(force=nil)
-        log_action('Deleting old scripts') do
-          FileUtils.rm_f "./#{SCRIPTS_DIR}/ruboto.rb"
-          FileUtils.rm_rf "./#{SCRIPTS_DIR}/ruboto"
+        source_files_pattern = 'ruboto{.rb,/**/*}'
+        new_sources_dir = Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}"
+        new_sources = Dir.chdir(new_sources_dir) { Dir[source_files_pattern] }.
+            select { |f| !(File.directory?("#{new_sources_dir}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }
+        old_sources = Dir.chdir("#{SCRIPTS_DIR}") { Dir[source_files_pattern] }.
+            select { |f| !(File.directory?(f) || File.basename(f) == '.' || File.basename(f) == '..') }
+        obsolete_sources = old_sources - new_sources
+        obsolete_sources.each do |f|
+          log_action("Deleting obsolete script #{f}") do
+            FileUtils.rm_f f
+          end
         end
         log_action('Copying ruboto/version.rb') do
           from = File.expand_path(Ruboto::GEM_ROOT + '/lib/ruboto/version.rb')
@@ -344,10 +352,10 @@ module Ruboto
           FileUtils.cp from, to
         end
         log_action('Copying additional ruboto script components') do
-          Dir.glob(Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}/ruboto/**/*.rb").each do |from|
-            to = File.expand_path("./#{from.slice /#{SCRIPTS_DIR}\/ruboto\/.*\.rb/}")
+          new_sources.each do |from|
+            to = File.expand_path(from)
             FileUtils.mkdir_p File.dirname(to)
-            FileUtils.cp from, to
+            FileUtils.cp "#{new_sources_dir}/#{from}", to
           end
         end
       end
