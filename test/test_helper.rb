@@ -239,6 +239,10 @@ class Test::Unit::TestCase
         Dir.chdir APP_DIR do
           system 'rake debug'
           assert_equal 0, $?
+          Dir.chdir 'test' do
+            system 'ant instrument'
+            assert_equal 0, $?
+          end
         end
       end
       puts "Storing app as template #{template_dir}"
