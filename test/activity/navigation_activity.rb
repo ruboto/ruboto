@@ -23,6 +23,7 @@ class NavigationActivity
               button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
               button :text => 'RubotoActivity no config', :width => :match_parent, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
               button :text => 'RubotoActivity', :width => :match_parent, :id => 51, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity') }
+              button :text => 'RubotoActivity with Extras', :width => :match_parent, :id => 52, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity', :extras => {:extra_string => 'Started with string extra.'}) }
             end
           end
         end

@@ -75,6 +75,10 @@ test('start ruboto activity with class name', :ui => false) do |activity|
   button_activity_text 51, activity, 42, 'This is a Ruby file activity.'
 end
 
+test('start ruboto activity with extras', :ui => false) do |activity|
+  button_activity_text 52, activity, 42, 'Started with string extra.'
+end
+
 def start_activity_by_button(activity, button_id, activity_class_name = 'org.ruboto.RubotoActivity')
   monitor = add_monitor(activity_class_name, nil, false)
   begin
