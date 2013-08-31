@@ -79,11 +79,8 @@ task :example => :install do
   Dir.chdir File.dirname(EXAMPLE_FILE) do
     FileUtils.rm_rf app_name
     sh "ruboto gen app --package org.ruboto.test_app --name #{app_name} --path #{app_name}"
-    Dir.chdir File.basename(EXAMPLE_FILE) do
-      sh 'rake debug'
-      Dir.chdir 'test' do
-        sh 'ant instrument'
-      end
+    Dir.chdir "#{app_name}/test" do
+      sh 'ant instrument' # This will also build the main project.
     end
     sh "tar czf #{EXAMPLE_FILE} #{app_name}"
     FileUtils.rm_rf app_name

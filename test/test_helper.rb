@@ -170,7 +170,7 @@ class Test::Unit::TestCase
     # FIXME(uwe): Remove exclusion feature
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     included_stdlibs = options.delete(:included_stdlibs)
-    standalone = options.delete(:standalone) || !!included_stdlibs  || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
+    standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     bundle = options.delete(:bundle)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -236,13 +236,9 @@ class Test::Unit::TestCase
       # EMXIF
 
       unless example && !update
-        Dir.chdir APP_DIR do
-          system 'rake debug'
+        Dir.chdir "#{APP_DIR}/test" do
+          system 'ant instrument' # This will also build the main project.
           assert_equal 0, $?
-          Dir.chdir 'test' do
-            system 'ant instrument'
-            assert_equal 0, $?
-          end
         end
       end
       puts "Storing app as template #{template_dir}"
@@ -298,7 +294,7 @@ class Test::Unit::TestCase
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'https://rubygems.org/'\n\n"
-      gems.each{|g| f << "gem '#{g}'\n"}
+      gems.each { |g| f << "gem '#{g}'\n" }
     end
   end
 
