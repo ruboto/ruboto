@@ -289,11 +289,10 @@ namespace :test do
   task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
-      sh "#{ANT_CMD} instrument"
       install_retry_count = 0
       begin
         timeout 120 do
-          sh "#{ANT_CMD} installi"
+          sh "#{ANT_CMD} instrument install"
         end
       rescue TimeoutError
         puts 'Installing package timed out.'
