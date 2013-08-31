@@ -15,13 +15,13 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
 
     public void onCreate(Bundle bundle) {
         Log.d("EntryPointActivity onCreate:");
-	getScriptInfo().setRubyClassName(getClass().getSimpleName());
+        getScriptInfo().setRubyClassName(getClass().getSimpleName());
 
         if (!JRubyAdapter.isInitialized()) {
-	    showSplash();
-	    finish();
-	}
-	super.onCreate(bundle);
+          showSplash();
+          finish();
+        }
+        super.onCreate(bundle);
     }
 
     public void onResume() {
@@ -70,8 +70,14 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     }
 
     private void showSplash() {
-	Intent splashIntent = new Intent(EntryPointActivity.this, SplashActivity.class);
-	startActivity(splashIntent);
+        Intent splashIntent = new Intent(this, SplashActivity.class);
+        splashIntent.putExtra(Intent.EXTRA_INTENT, futureIntent());
+        startActivity(splashIntent);
     }
-
+    
+    // The Intent to to call when done. Defaults to calling this Activity again.
+    // Override to change.
+    protected Intent futureIntent() {
+        return new Intent(this, this.getClass());
+    }
 }
