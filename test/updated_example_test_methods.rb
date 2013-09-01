@@ -25,7 +25,10 @@ module UpdatedExampleTestMethods
     Dir.chdir APP_DIR do
       icon_file = Dir['res/drawable-hdpi/{icon,ic_launcher}.png'][0]
       icon_file_size = File.size(icon_file)
-      assert_equal 4032, icon_file_size
+      # FIXME(uwe): Simplify when we stop support for updating from Ruboto 0.12.0 and older
+      assert_equal (Gem::Version.new(@old_ruboto_version) <= Gem::Version.new('0.12.0') ? 4032 : 3834),
+                   icon_file_size
+      # EMXIF
     end
   end
 

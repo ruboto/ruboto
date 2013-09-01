@@ -11,7 +11,7 @@ require File.expand_path('update_test_methods', File.dirname(__FILE__))
 # TODO(uwe): Delete obsolete examples when we stop supporting updating from them.
 Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
   example_archives = Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"]
-  example_archives = example_archives.sort_by{|a| Gem::Version.new a[RubotoTest::APP_NAME.size + 1..-1].slice(/(.*)(?=_tools_)/)}
+  example_archives = example_archives.sort_by{|a| Gem::Version.new(a[RubotoTest::APP_NAME.size + 1..-1].slice(/(.*)(?=_tools_)/).gsub('_', '.'))}
   example_archives = example_archives.last(example_limit) if example_limit
 
   # TODO(gf): Track APIs compatible with update examples
@@ -28,7 +28,7 @@ Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
     compatible_apis = EXAMPLE_COMPATIBLE_APIS[ EXAMPLE_COMPATIBLE_APIS.keys.detect { |gem_range| gem_range.cover? example_gem_version } ]
     if compatible_apis
       if ( installed_apis & compatible_apis ).empty?
-        puts "Update test #{examples[i]} needs a missing compatible API: #{compatible_apis.join(',')}"
+        puts "Update test #{example_archives[i]} needs a missing compatible API: #{compatible_apis.join(',')}"
         missing_apis = true
       end
     end

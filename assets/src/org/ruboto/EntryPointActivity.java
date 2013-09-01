@@ -16,11 +16,11 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     public void onCreate(Bundle bundle) {
         Log.d("EntryPointActivity onCreate:");
 
-        if (!JRubyAdapter.isInitialized()) {
+        if (JRubyAdapter.isInitialized()) {
+            getScriptInfo().setRubyClassName(getClass().getSimpleName());
+        } else {
             showSplash();
             finish();
-        } else {
-            getScriptInfo().setRubyClassName(getClass().getSimpleName());
         }
 
         super.onCreate(bundle);

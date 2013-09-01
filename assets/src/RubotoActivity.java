@@ -22,17 +22,19 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
      */
     @Override
     public void onCreate(Bundle bundle) {
-        System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName());
+        System.out.println("THE_RUBOTO_CLASS onCreate(): " + getClass().getName() + ", finishing: " + isFinishing());
 
+        // FIXME(uwe):  Is this still needed?
         // Shut this RubotoActivity down if it's not able to restart 
         if (this.getClass().getName().equals("org.ruboto.THE_RUBOTO_CLASS") && !JRubyAdapter.isInitialized()) {
             super.onCreate(bundle);
-	          System.out.println("Shutting down stale THE_RUBOTO_CLASS: " + getClass().getName());
+            System.out.println("Shutting down stale THE_RUBOTO_CLASS: " + getClass().getName());
             finish();
             return;
         }
+        // EMXIF
 				
-       if (ScriptLoader.isCalledFromJRuby()) {
+       if (isFinishing() || ScriptLoader.isCalledFromJRuby()) {
             super.onCreate(bundle);
             return;
         }
