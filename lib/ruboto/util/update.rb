@@ -302,7 +302,7 @@ module Ruboto
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"]
-            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation')}
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation'), 'android:noHistory' => 'true'}
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
@@ -479,7 +479,7 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              android_jar = Dir["#{ANDROID_HOME.gsub("\\", "/")}/platforms/*/android.jar"][0]
+              android_jar = Dir["#{ANDROID_HOME.gsub("\\", '/')}/platforms/*/android.jar"][0]
               unless android_jar
                 puts
                 puts '*' * 80
