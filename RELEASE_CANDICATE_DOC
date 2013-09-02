@@ -1,12 +1,11 @@
-Subject: [ANN] Ruboto 0.13.0 release candidate
+Subject: [ANN] Ruboto 0.14.0 release candidate
 
 Hi all!
 
-The Ruboto 0.13.0 release candidate is now available.
+The Ruboto 0.14.0 release candidate is now available.
 
-In this release we add support for Android API level 17 and the Android
-SDK r22.  There are improvements on the "ruboto setup" command, and
-general preparations for the 1.0 release.
+In this release we change the startup to use a separate SplashActivity.
+This simplifies the startup and makes it more robust.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 

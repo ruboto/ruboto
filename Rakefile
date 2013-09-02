@@ -130,13 +130,9 @@ def get_github_issues
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
-  puts milestones.map { |m| "#{'%2d' % m['number']} #{m['title']}" }.join("\n")
-
-  if defined? ask
-    milestone = ask('milestone: ', Integer) { |q| q.echo = true }
-  else
-    print 'milestone: '; milestone = STDIN.gets.chomp
-  end
+  milestone_entry = milestones.find{|m| m['title'] == Ruboto::VERSION}
+  raise "Milestone for version #{} not found." unless milestone_entry
+  milestone = milestone_entry['number']
 
   uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)

@@ -28,6 +28,37 @@ $stdout.sync = true
 
 ###############################################################################
 #
+# Calculate the Platform URL
+#
+
+class Api
+  API_URL_BASE = "https://raw.github.com/android/platform_frameworks_base/%s/api/%s"
+
+  def self.platform_url(level_int)
+    branch  = case level_int
+              when 1..17 then "jb-mr1.1-release"
+              ################################
+              #
+              # Add new api branches
+              #
+              when 18    then "jb-mr2-release"
+              #
+              ################################
+              else       return nil
+              end
+
+    file_name = case level_int
+              when 1..13  then "#{level_int}.xml"
+              when 14..17 then "#{level_int}.txt"
+              else             "current.txt"
+              end
+
+    API_URL_BASE % [branch, file_name]
+  end
+end
+
+###############################################################################
+#
 # Tag and CoreTag classes: These do most of the work for the children
 #
 
@@ -286,15 +317,13 @@ class ApiTag < CoreTag
     elsif File.exists?("apis/#{@number}.xml")
       read_platform_from_xml(IO.read("apis/#{@number}.xml"))
     else
-      base = 'https://raw.github.com/android/platform_frameworks_base/master/api'
-      begin
-        read_platform_from_xml(open("#{base}/#{number}.xml").read)
-      rescue
-        begin
-          read_platform_from_txt(open("#{base}/#{number}.txt").read)
-        rescue
-          return nil
-        end
+      url = Api.platform_url(number)
+      return nil if url.nil?
+      
+      if url[-3..-1] == "xml"
+        read_platform_from_xml(open(url).read)
+      else
+        read_platform_from_txt(open(url).read)
       end
 
     end

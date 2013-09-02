@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 0.13.0 released!
+Subject: [ANN] Ruboto 0.14.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 0.13.0.
+The Ruboto team is pleased to announce the release of Ruboto 0.14.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,69 +8,73 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 0.13.0:
+New in version 0.14.0:
 
-In this release we add support for Android API level 17 and the Android
-SDK r22.  There are improvements on the "ruboto setup" command, and
-general preparations for the 1.0 release.
+In this release we change the startup to use a separate SplashActivity.
+This simplifies the startup and makes it more robust.
 
 Features:
 
-* Issue #176 Add option to allocate large heap at startup
-* Issue #252 View constant conversion errors aren't very clear
-* Issue #333 Prettier design for the Ruboto platform apk
-* Issue #405 "ruboto setup" on Windows
-* Issue #408 Setup: Need to look up the latest Android tool version
-  (instead of hard coding it) if we can
-* Issue #409 Add support for Android SDK r22
-* Issue #410 Add -y option to "ruboto setup" to automatically install
-  components, accept licenses, and add to configuration
-* Issue #412 Enable starting the emulator without a project
-* Issue #414 Add -t --target parameter to "ruboto setup" to set up for a
-  specific api level
-* Issue #415 Update API xml file to cover android-17
-* Issue #416 Add code for generating the API xml file
-* Issue #422 Put RubotoActivity intent data directly in the Intent instead
-  of inside a Bundle
-* Issue #423 Focus the "start_ruboto_activity" API
+* Issue #433 Tests: add support for individual/matrix tests in Windows
+* Issue #460 New startup sequence with SplashActivity
+* Issue #471 Allow sending Intent extras with start_ruboto_activity
+* Issue #473 Modify EntryPointActivity to send an Intent to SplashActivity
 
 Bugfixes:
 
-* Issue #264 Force rebuild of (release) apk when jar file is removed from
-  the libs directory
-* Issue #268 Callback for Audio Focus
-* Issue #285 Look into pause/restart issues for secondary Activities
-* Issue #407 Process::Status#to_int not implemented (NotImplementedError)
-  with jruby 1.7.x and ruboto 0.11.0
+* Issue #428 Splash requests window feature too late
+* Issue #429 ruboto emulator -t android-17 fails
+* Issue #432 'ruboto update app' leaves some old files behind
+* Issue #434 After JRuby is loaded, check the activity state before
+  calling onCreate
+* Issue #442 Adding splash.xml crashes app.
+* Issue #443 onCreateOptionsMenu (and other callbacks) not called on first
+  time startup
+* Issue #449 Change ruboto setup to use /linux/ instead of /^linux(.*)/
+* Issue #451 Changing device orientation during splash causes exception
+* Issue #453 Builds but fails to load ruby scripts on uppercase package
+  name
+* Issue #455 Rake install fails in ruboto-0.14.0-dev
+* Issue #468 Using the EntryPointActivity check in the RubotoActivity
+  template doesn't work for other activities like PreferencesActivity
+* Issue #470 "ruboto update app" deletes "src/ruboto/.svn" subversion
+  directory
 
 Support:
 
-* Issue #303 Ruboto should synchronise target in project.properties and
-  targetSdkVersion in AndroidManifest.xml
-* Issue #314 Tool confusion: ruboto vs rake
-* Issue #424 Initiliaze the new App
+* Issue #446 Bad call from ruboto setup
+* Issue #450 Application aborts prematurely, when I add a Gemfile.apk
 
 Documentation:
 
-* Issue #258 Add welcome and information with links to RubotoCore
-* Issue #427 Add sidebar to the WIKI
+* Issue #225 Investigate AIDE
+* Issue #430 Add Downloads page to ruboto.org
+
+Pull requests:
+
+* Issue #439 Fixes #432
+* Issue #440 Added check for compatible APIs for update examples: re issue
+  #437
+* Issue #444 Fix building on Windows caused by mixed file separators. Also
+  pre-compressed the included PNGs with optipng, despite included pngcrush
+  during rake for increased loseless file compression.
+* Issue #454 Fix android_package_directory for ones already installed
+  android sdk
+* Issue #457 Allow uppercase package name
+* Issue #462 Add SplashActivity for new startup sequence
+* Issue #463 New APK size upper limit in test/ruboto_gen_test
+* Issue #464 Fix #451 by locking screen orientation of SplashActivity
 
 Internal:
 
-* Issue #411 Use "ruboto setup -y" to install components in travis-ci
-  automated testing
-
-Rejected:
-
-* Issue #175 Rename "update_scripts" rake task to "update" for less typing
-* Issue #259 Link RubotoCore platform apk version to JRuby version
-* Issue #261 Rename RubotoCore platform apk display name to Ruboto
-* Issue #337 Change default for "ruboto gen app" to include JRuby in the
-  app
+* Issue #436 Use "ruboto emulator" instead of start_emulator.sh when
+  running tests on travis-ci
+* Issue #437 test ruboto_update_test fails for old versions < 0.11.0
+* Issue #465 Adjust update scripts to the new JRuby mavenized packaging
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=25
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=26
 
 
 Installation:

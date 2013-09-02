@@ -73,45 +73,43 @@ public class SplashActivity extends Activity {
     private void initJRuby(final boolean firstTime) {
         showProgress();
         new Thread(new Runnable() {
-		public void run() {
-		    final boolean jrubyOk = JRubyAdapter.setUpJRuby(SplashActivity.this);
-		    if (jrubyOk) {
-			Log.d("onResume: JRuby OK");
-			startUserActivity();
-			hideProgress();
-			finish();
-		    } else {
-			registerPackageInstallReceiver();
-			runOnUiThread(new Runnable() {
-				public void run() {
-				    if (localFile.exists()) {
-					installDownload();
-				    } else {
-					if (firstTime) {
-					    Log.d("onResume: Checking JRuby - IN UI thread");
-					    try {
-						setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
-						if (hasInternetPermission()) {
-						    getRubotoCore(null);
-						    return;
-						}
-					    } catch (Exception e) {
-					    }
-					} else {
-					    Toast.makeText(SplashActivity.this,"Failed to initialize Ruboto Core.",Toast.LENGTH_LONG).show();
-					    try {
-						TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
-						textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
-					    } catch (Exception e) {
-					    }
-					}
-				    }
-				    hideProgress();
-				}
-			    });
-		    }
-		}
-	    }).start();
+            public void run() {
+                final boolean jrubyOk = JRubyAdapter.setUpJRuby(SplashActivity.this);
+                if (jrubyOk) {
+                    Log.d("onResume: JRuby OK");
+                    startUserActivity();
+                } else {
+                    registerPackageInstallReceiver();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            if (localFile.exists()) {
+                                installDownload();
+                            } else {
+                                if (firstTime) {
+                                    Log.d("onResume: Checking JRuby - IN UI thread");
+                                    try {
+                                        setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
+                                        if (hasInternetPermission()) {
+                                            getRubotoCore(null);
+                                            return;
+                                        }
+                                    } catch (Exception e) {
+                                    }
+                                } else {
+                                    Toast.makeText(SplashActivity.this,"Failed to initialize Ruboto Core.",Toast.LENGTH_LONG).show();
+                                    try {
+                                        TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
+                                        textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
+                                    } catch (Exception e) {
+                                    }
+                                }
+                            }
+                            hideProgress();
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     private static final String RUBOTO_APK = "RubotoCore-release.apk";
@@ -128,18 +126,18 @@ public class SplashActivity extends Activity {
                     hideProgress();
                     showDownloadProgress("Downloading RubotoCore...");
                     new Thread(new Runnable() {
-			    public void run() {
-				while (loadingDialog != null && enqueue > 0) {
-				    // FIXME(uwe):  Also set total bytes and bytes downloaded.
-				    loadingDialog.setProgress(getProgressPercentage());
-				    try {
-					Thread.sleep(1000);
-				    } catch (InterruptedException ie) {
-					Log.e("Interupted!");
-				    }
-				}
-			    }
-			}).start();
+                        public void run() {
+                            while (loadingDialog != null && enqueue > 0) {
+                                // FIXME(uwe):  Also set total bytes and bytes downloaded.
+                                loadingDialog.setProgress(getProgressPercentage());
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ie) {
+                                    Log.e("Interupted!");
+                                }
+                            }
+                        }
+                    }).start();
                 }
                 return;
             }
