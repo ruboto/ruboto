@@ -35,12 +35,13 @@ namespace :apis do
       print "Getting #{number} (#{i.elements['sdk:version'].text})..."
 
       url = Api.platform_url(number)
-      continue if url.nil?
-
-      file = open(url)
-      File.open("apis/#{number}.#{url[-3..-1]}", 'w'){|f| f << file.read}
-
-      puts "done."
+      if url.nil?
+        puts "branch unknown (set branch for current.txt)."
+      else
+        file = open(url)
+        File.open("apis/#{number}.#{url[-3..-1]}", 'w'){|f| f << file.read}
+        puts "done."
+      end
     end
   end
 end
