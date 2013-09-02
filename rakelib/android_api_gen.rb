@@ -320,7 +320,7 @@ class ApiTag < CoreTag
       url = Api.platform_url(number)
       return nil if url.nil?
       
-      if url[-3..-1] = "xml"
+      if url[-3..-1] == "xml"
         read_platform_from_xml(open(url).read)
       else
         read_platform_from_txt(open(url).read)
