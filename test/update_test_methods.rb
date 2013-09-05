@@ -1,5 +1,4 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
-require 'test/app_test_methods'
 
 module UpdateTestMethods
   include RubotoTest

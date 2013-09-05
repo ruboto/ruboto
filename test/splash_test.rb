@@ -1,8 +1,5 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
-require 'bigdecimal'
-require 'test/app_test_methods'
-
 class SplashTest < Test::Unit::TestCase
   def setup
     generate_app

@@ -3,9 +3,6 @@ require File.expand_path('test_helper', File.dirname(__FILE__))
 # FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
 if RubotoTest::ANDROID_OS >= 15 || RubotoTest::RUBOTO_PLATFORM != 'STANDALONE'
 
-require 'bigdecimal'
-require 'test/app_test_methods'
-
 class SqldroidTest < Test::Unit::TestCase
   def setup
     generate_app :bundle => :sqldroid

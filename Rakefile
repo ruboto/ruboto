@@ -447,6 +447,7 @@ namespace :platform do
       content = http.request(Net::HTTP::Get.new(uri.request_uri)).body
       File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << content }
     rescue Exception, SystemExit
+      puts "Download failed: #{$!}"
       FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exists?(PLATFORM_CURRENT_RELEASE_APK)
       raise
     end
