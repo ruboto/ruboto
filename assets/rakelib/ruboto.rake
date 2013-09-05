@@ -294,7 +294,7 @@ namespace :test do
       install_retry_count = 0
       begin
         timeout 120 do
-          sh "#{ANT_CMD} instrument install"
+          sh "#{ANT_CMD} installi"
         end
       rescue TimeoutError
         puts 'Installing package timed out.'
