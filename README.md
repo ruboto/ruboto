@@ -199,17 +199,19 @@ your favorite text editor. If you want an activity that does nothing but Log
 when it gets launched and when it gets destroyed (in the onCreate and onPause
 methods). You want your script to look like this:
 
-    class FooActivity
-      def onCreate(bundle)
-        super
-        android.util.Log.v 'MYAPPNAME', 'onCreate got called!'
-      end
+```ruby
+class FooActivity
+  def onCreate(bundle)
+    super
+    android.util.Log.v 'MYAPPNAME', 'onCreate got called!'
+  end
 
-      def onPause
-        super
-        android.util.Log.v 'MYAPPNAME', 'onPause got called!'
-      end
-    end
+  def onPause
+    super
+    android.util.Log.v 'MYAPPNAME', 'onPause got called!'
+  end
+end
+```
 
 The arguments passed to the methods are the same as the arguments that the java
 methods take. Consult the Android documentation.
@@ -234,27 +236,29 @@ directory.  For example if you generate a RubotoSampleAppActivity a file
 "test/src/ruboto_sample_app_activity_test.rb" file is created containing a
 sample test script:
 
-    activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
+```ruby
+activity Java::org.ruboto.sample_app.RubotoSampleAppActivity
 
-    setup do |activity|
-      start = Time.now
-      loop do
-        @text_view = activity.findViewById(42)
-        break if @text_view || (Time.now - start > 60)
-        sleep 1
-      end
-      assert @text_view
-    end
+setup do |activity|
+  start = Time.now
+  loop do
+    @text_view = activity.findViewById(42)
+    break if @text_view || (Time.now - start > 60)
+    sleep 1
+  end
+  assert @text_view
+end
 
-    test('initial setup') do |activity|
-      assert_equal "What hath Matz wrought?", @text_view.text
-    end
+test('initial setup') do |activity|
+  assert_equal "What hath Matz wrought?", @text_view.text
+end
 
-    test('button changes text') do |activity|
-      button = activity.findViewById(43)
-      button.performClick
-      assert_equal "What hath Matz wrought!", @text_view.text
-    end
+test('button changes text') do |activity|
+  button = activity.findViewById(43)
+  button.performClick
+  assert_equal "What hath Matz wrought!", @text_view.text
+end
+```
 
 You run the tests for your app using ant or rake
 
@@ -328,10 +332,11 @@ commands.
 
 For example, in your `~/.bashrc`, `~/.zshrc`, or similar file, you might put
 
-    alias ics="ruboto emulator -t 15"
-    alias jellyb="ruboto emulator -t 16"
-    alias jb17="ruboto emulator -t 17"
-
+```sh
+alias ics="ruboto emulator -t 15"
+alias jellyb="ruboto emulator -t 16"
+alias jb17="ruboto emulator -t 17"
+```
 
 Alternatives
 ------------
