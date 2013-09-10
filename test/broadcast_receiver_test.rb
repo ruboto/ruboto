@@ -13,6 +13,8 @@ class BroadcastReceiverTest < Test::Unit::TestCase
   end
 
   def test_generated_broadcast_receiver
+    run_app_tests
+
     action_name = 'org.ruboto.example.click_broadcast'
     message = 'Broadcast received!'
     Dir.chdir APP_DIR do
@@ -92,7 +94,6 @@ EOF
       File.open(test_filename, 'w') { |f| f << test_content }
     end
 
-    run_app_tests
   end
 
 end
