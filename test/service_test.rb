@@ -13,6 +13,7 @@ class ServiceTest < Test::Unit::TestCase
   end
 
   def test_service_startup
+    run_app_tests
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Service --name RubotoTestService"
 
@@ -126,7 +127,6 @@ end
 EOF
 
     end
-    run_app_tests
   end
 
 end

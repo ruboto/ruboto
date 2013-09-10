@@ -13,6 +13,8 @@ class SqldroidTest < Test::Unit::TestCase
   end
 
   def test_sqldroid
+    run_app_tests
+
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
 require 'ruboto/activity'
@@ -72,7 +74,6 @@ EOF
 
     end
 
-    run_app_tests
   end
 
 end

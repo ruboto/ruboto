@@ -10,6 +10,8 @@ class RakeTest < Test::Unit::TestCase
   end
 
   def test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
+    run_app_tests
+
     Dir.chdir APP_DIR do
       activity_filename = 'src/ruboto_test_app_activity.rb'
       s = File.read(activity_filename)
@@ -23,7 +25,6 @@ class RakeTest < Test::Unit::TestCase
 
       apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
     end
-    run_app_tests
 
     # FIXME(uwe): Uncomment this when we can build the test package without building the main package
     # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
