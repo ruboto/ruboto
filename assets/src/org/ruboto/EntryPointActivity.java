@@ -35,7 +35,7 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
     // The Intent to to call when done. Defaults to calling this Activity again.
     // Override to change.
     protected Intent futureIntent() {
-        if (getIntent().getAction() == Intent.ACTION_MAIN) {
+        if (getIntent().getAction().equals(Intent.ACTION_MAIN)) {
             return new Intent(getIntent()).setAction(Intent.ACTION_VIEW);
         } else {
             return getIntent();
