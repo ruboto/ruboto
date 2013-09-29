@@ -31,25 +31,25 @@ public class SplashActivity extends Activity {
     private static final int INSTALL_REQUEST_CODE = 4242;
 
     public void onCreate(Bundle bundle) {
-	Log.d("SplashActivity onCreate:");
+        Log.d("SplashActivity onCreate:");
         localFile = new java.io.File(getFilesDir(), RUBOTO_APK);
-	try {
-	    splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
-	} catch (Exception e) {
-	    splash = -1;
-	}
+        try {
+            splash = Class.forName(getPackageName() + ".R$layout").getField("splash").getInt(null);
+        } catch (Exception e) {
+            splash = -1;
+        }
         if (!JRubyAdapter.isInitialized()) {
-	    initJRuby(true);
-	}
-	super.onCreate(bundle);
+            initJRuby(true);
+        }
+        super.onCreate(bundle);
     }
 
     public void onResume() {
         Log.d("onResume: ");
         if (!JRubyAdapter.isInitialized() && receiver == null) {
-	    registerPackageInstallReceiver();
+            registerPackageInstallReceiver();
         }
-	super.onResume();
+        super.onResume();
     }
     
     public void onPause() {
@@ -163,11 +163,11 @@ public class SplashActivity extends Activity {
                 loadingDialog = ProgressDialog.show(this, null, "Starting...", true, true);
                 loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-			    dialogCancelled = true;
-			    finish();
-			}
-		    });
+                    public void onCancel(DialogInterface dialog) {
+                        dialogCancelled = true;
+                        finish();
+                    }
+                });
             }
         }
     }
@@ -189,11 +189,11 @@ public class SplashActivity extends Activity {
                 loadingDialog.setCancelable(true);
                 loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-			    dialogCancelled = true;
-			    finish();
-			}
-		    });
+                    public void onCancel(DialogInterface dialog) {
+                        dialogCancelled = true;
+                        finish();
+                    }
+                });
                 loadingDialog.show();
             }
         } else {
@@ -211,48 +211,48 @@ public class SplashActivity extends Activity {
 
     private void registerPackageInstallReceiver() {
         receiver = new BroadcastReceiver(){
-		public void onReceive(Context context, Intent intent) {
-		    Log.d("Received intent: " + intent + " (" + intent.getExtras() + ")");
-		    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
-			long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-			if (downloadId == enqueue) {
-			    if (localFile.exists()) {
-				return;
-			    }
-			    Query query = new Query();
-			    query.setFilterById(enqueue);
-			    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-			    Cursor c = dm.query(query);
-			    if (c.moveToFirst()) {
-				hideProgress();
-				int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
-				if (DownloadManager.STATUS_SUCCESSFUL == status) {
-				    storeDownload(dm, downloadId);
-				    installDownload();
-				} else {
-				    int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
-				    Toast.makeText(context,"Download failed (" + status + "): " + reason, Toast.LENGTH_LONG).show();
-				}
-			    } else {
-				Toast.makeText(context,"Download diappeared!", Toast.LENGTH_LONG).show();
-			    }
-			    c.close();
-			}
-		    } else if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
-			if (intent.getData().toString().equals("package:org.ruboto.core")) {
-			    Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_LONG).show();
-			    deleteFile(RUBOTO_APK);
-			    if (receiver != null) {
-        	                unregisterReceiver(receiver);
-        	                receiver = null;
-			    }
-			    initJRuby(false);
-			} else {
-			    Toast.makeText(context,"Installed: " + intent.getData().toString(),Toast.LENGTH_LONG).show();
-			}
-		    }
-		}
-	    };
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Received intent: " + intent + " (" + intent.getExtras() + ")");
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    if (downloadId == enqueue) {
+                        if (localFile.exists()) {
+                            return;
+                        }
+                        Query query = new Query();
+                        query.setFilterById(enqueue);
+                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                        Cursor c = dm.query(query);
+                        if (c.moveToFirst()) {
+                            hideProgress();
+                            int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                            if (DownloadManager.STATUS_SUCCESSFUL == status) {
+                                storeDownload(dm, downloadId);
+                                installDownload();
+                            } else {
+                                int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
+                                Toast.makeText(context,"Download failed (" + status + "): " + reason, Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Toast.makeText(context,"Download diappeared!", Toast.LENGTH_LONG).show();
+                        }
+                        c.close();
+                    }
+                } else if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
+                    if (intent.getData().toString().equals("package:org.ruboto.core")) {
+                        Toast.makeText(context,"Ruboto Core is now installed.",Toast.LENGTH_LONG).show();
+                        deleteFile(RUBOTO_APK);
+                        if (receiver != null) {
+                            unregisterReceiver(receiver);
+                            receiver = null;
+                        }
+                        initJRuby(false);
+                    } else {
+                        Toast.makeText(context,"Installed: " + intent.getData().toString(),Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+            };
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addDataScheme("package");
         registerReceiver(receiver, filter);
@@ -357,7 +357,7 @@ public class SplashActivity extends Activity {
         // EMXIF
 
         Cursor query = getContentResolver().query(settingsUri, projection,
-						  selection, selectionArgs, null);
+                                                  selection, selectionArgs, null);
         return query.getCount() == 1;
     }
 
@@ -374,7 +374,7 @@ public class SplashActivity extends Activity {
                 totalBytes = (int) c.getLong(totalSizeIndex);
             }
             System.out.println("PERCEN ------" + downloadedBytesSoFar
-			       + " ------ " + totalBytes + "****" + percentage);
+                               + " ------ " + totalBytes + "****" + percentage);
             percentage = (downloadedBytesSoFar * 100 / totalBytes);
             System.out.println("percentage % " + percentage);
         } catch (Exception e) {
