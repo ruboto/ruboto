@@ -84,9 +84,18 @@ module RubotoTest
   end
 
   def uninstall_jruby_jars_gem
-    `gem query --no-installed -n jruby-jars`
-    system 'gem uninstall jruby-jars --all' if $? != 0
-    assert_equal 0, $?, "uninstall of jruby-jars failed with return code #$?"
+    uninstall_ruboto_gem
+    uninstall_gem('jruby-jars')
+  end
+
+  def uninstall_ruboto_gem
+    uninstall_gem('ruboto')
+  end
+
+  def uninstall_gem(name)
+    `gem query --no-installed -n #{name}`
+    system "gem uninstall -x --all #{name}" if $? != 0
+    assert_equal 0, $?, "uninstall of #{name} failed with return code #$?"
   end
 
   def install_ruboto_gem(version)
@@ -113,7 +122,7 @@ module RubotoTest
   install_jruby_jars_gem unless RUBOTO_PLATFORM == 'CURRENT'
 
   if RUBOTO_PLATFORM == 'CURRENT'
-    JRUBY_JARS_VERSION = Gem::Version.new('1.7.3')
+    JRUBY_JARS_VERSION = Gem::Version.new('1.7.4')
   else
     # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
