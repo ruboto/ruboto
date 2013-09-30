@@ -62,6 +62,7 @@ def app_files_path; @app_files_path ||= "/data/data/#{package}/files" end
 
 PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
+LAST_APK_TIMESTAMP_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_APK_TIMESTAMP_FILE')
 BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
 BUNDLE_PATH = File.expand_path 'bin/bundle'
 MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
@@ -224,7 +225,7 @@ file RUBOTO_CONFIG_FILE
 file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
   require 'yaml'
   if (heap_alloc = YAML.load(File.read(RUBOTO_CONFIG_FILE))['heap_alloc'])
-  config = <<EOF
+    config = <<EOF
             // BEGIN Ruboto HeapAlloc
             @SuppressWarnings("unused")
             byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
@@ -242,7 +243,7 @@ EOF
   end
   source = File.read(JRUBY_ADAPTER_FILE)
   heap_alloc_pattern = %r{^\s*// BEGIN Ruboto HeapAlloc\n.*^\s*// END Ruboto HeapAlloc\n}m
-  File.open(JRUBY_ADAPTER_FILE, 'w'){|f| f << source.sub(heap_alloc_pattern, config)}
+  File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source.sub(heap_alloc_pattern, config) }
 end
 
 file APK_FILE => APK_DEPENDENCIES do |t|
@@ -509,6 +510,10 @@ def clear_update
     sh "adb shell rm -r #{scripts_path}"
     puts "Deleted scripts directory #{scripts_path}"
   end
+  `adb shell mkdir -p #{scripts_path}`
+  puts "Created scripts directory #{scripts_path}"
+
+  File.open(LAST_APK_TIMESTAMP_FILE, 'w') { |f| f << installed_apk_timestamp_and_size(false)[0].iso8601 }
 end
 
 def strings(name)
@@ -534,11 +539,7 @@ def device_path_exists?(path)
   path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
 end
 
-# Determine if the package is installed.
-# Return true if the package is installed and is identical to the local package.
-# Return false if the package is installed, but differs from the local package.
-# Return nil if the package is not installed.
-def package_installed?(test = false)
+def installed_apk_timestamp_and_size(test)
   package_name = "#{package}#{'.tests' if test}"
   loop do
     path_line = `adb shell pm path #{package_name}`.chomp
@@ -549,11 +550,30 @@ def package_installed?(test = false)
   path = $1
   o = `adb shell ls -l #{path}`.chomp
   raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
-  installed_apk_size = $1.to_i
-  installed_timestamp = Time.parse($2)
+  return Time.parse($2), $1.to_i
+end
+
+def read_last_apk_timestamp(apk_file)
+  if File.exists?(LAST_APK_TIMESTAMP_FILE)
+    Time.parse(File.read(LAST_APK_TIMESTAMP_FILE))
+  elsif File.exists?(apk_file)
+    File.mtime(apk_file)
+  else
+    nil
+  end
+end
+
+# Determine if the package is installed.
+# Return true if the package is installed and is identical to the local package.
+# Return false if the package is installed, but differs from the local package.
+# Return nil if the package is not installed.
+def package_installed?(test = false)
   apk_file = test ? TEST_APK_FILE : APK_FILE
-  !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
-      installed_timestamp >= File.mtime(apk_file))
+  installed_timestamp, installed_apk_size = installed_apk_timestamp_and_size(test)
+  return nil unless installed_timestamp
+  last_apk_timestamp = read_last_apk_timestamp(apk_file)
+  !last_apk_timestamp || (installed_apk_size == File.size(apk_file) &&
+      last_apk_timestamp == File.mtime(apk_file))
 end
 
 def replace_faulty_code(faulty_file, faulty_code)
