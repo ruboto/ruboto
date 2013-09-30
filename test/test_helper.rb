@@ -6,10 +6,12 @@ require 'fileutils'
 require 'yaml'
 require 'ruboto/sdk_versions'
 require 'ruboto/sdk_locations'
+require 'ruboto/util/update'
 
 module RubotoTest
   include Ruboto::SdkVersions
   include Ruboto::SdkLocations
+  include Ruboto::Util::Update
 
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
@@ -53,36 +55,6 @@ module RubotoTest
     raise 'Unable to read device/emulator apilevel'
   end
 
-  def self.install_jruby_jars_gem
-    jars_version_from_env = ENV['JRUBY_JARS_VERSION'] unless RUBOTO_PLATFORM == 'CURRENT'
-    version_requirement = " -v #{jars_version_from_env}" if jars_version_from_env
-    `gem query -i -n jruby-jars#{version_requirement}`
-    unless $? == 0
-      local_gem_file = "jruby-jars-#{jars_version_from_env}.gem"
-      if File.exists?(local_gem_file)
-        system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
-      else
-        Dir.chdir('tmp') do
-          system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
-        end
-      end
-    end
-    raise "install of jruby-jars failed with return code #$?" unless $? == 0
-    if jars_version_from_env
-      exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
-      `gem query -i -n jruby-jars #{exclusion_clause}`
-      if $? == 0
-        system %Q{gem uninstall jruby-jars --all #{exclusion_clause}}
-        raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
-      end
-    end
-    Gem.refresh
-  end
-
-  def install_jruby_jars_gem
-    RubotoTest::install_jruby_jars_gem
-  end
-
   def uninstall_jruby_jars_gem
     uninstall_ruboto_gem
     uninstall_gem('jruby-jars')
@@ -119,10 +91,10 @@ module RubotoTest
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
 
-  install_jruby_jars_gem unless RUBOTO_PLATFORM == 'CURRENT'
-
   if RUBOTO_PLATFORM == 'CURRENT'
     JRUBY_JARS_VERSION = Gem::Version.new('1.7.4')
+  elsif ENV['JRUBY_JARS_VERSION']
+    JRUBY_JARS_VERSION = Gem::Version.new(ENV['JRUBY_JARS_VERSION'])
   else
     # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
@@ -137,6 +109,8 @@ module RubotoTest
   end
 
   puts "JRUBY_JARS_VERSION: #{JRUBY_JARS_VERSION}"
+  ENV['JRUBY_JARS_VERSION'] = JRUBY_JARS_VERSION.to_s
+  ENV['LOCAL_GEM_DIR'] = Dir.getwd
 end
 
 class Test::Unit::TestCase
@@ -197,8 +171,6 @@ class Test::Unit::TestCase
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
-      install_jruby_jars_gem
-
       if example
         Dir.chdir TMP_DIR do
           system "tar xzf #{PROJECT_DIR}/examples/#{APP_NAME}_#{example}.tgz"
@@ -210,13 +182,18 @@ class Test::Unit::TestCase
             exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
+            install_jruby_jars_gem
           else
             FileUtils.rm(Dir['libs/{jruby-*.jar,dx.jar}'])
           end
           update_app if update
         end
       else
-        uninstall_jruby_jars_gem unless standalone
+        if standalone
+          install_jruby_jars_gem
+        else
+          uninstall_jruby_jars_gem
+        end
         puts "Generating app #{APP_DIR}"
         system "#{RUBOTO_CMD} gen app --package #{package} --path #{APP_DIR} --name #{APP_NAME} --target android-#{ANDROID_TARGET}"
         if $? != 0

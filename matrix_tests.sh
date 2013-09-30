@@ -10,7 +10,7 @@ if [ `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ] ; then
     rake get_jruby_jars_snapshot
 fi
 
-ANDROID_TARGETS="10 15 16" # We should cover at least 80% of the market
+ANDROID_TARGETS="16 10 15" # We should cover at least 80% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | cut -f1-4 -d'.'`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.4"

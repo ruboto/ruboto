@@ -1,3 +1,5 @@
+require 'rexml/formatters/pretty'
+
 class REXML::Formatters::OrderedAttributes < REXML::Formatters::Pretty
   def write_element(elm, out)
     att = elm.attributes

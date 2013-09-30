@@ -1,6 +1,7 @@
 require 'ruboto/version'
 require 'ruboto/core_ext/rexml'
 require 'ruboto/sdk_locations'
+require 'ruboto/util/build'
 
 module Ruboto
   module Util
@@ -138,6 +139,7 @@ module Ruboto
           end
         end
 
+        install_jruby_jars_gem
         begin
           require 'jruby-jars'
         rescue LoadError
@@ -177,6 +179,32 @@ module Ruboto
 
         puts "JRuby version is now: #{new_jruby_version}"
         true
+      end
+
+      def install_jruby_jars_gem
+        if (jars_version_from_env = ENV['JRUBY_JARS_VERSION'])
+          version_requirement = " -v #{jars_version_from_env}"
+        end
+        `gem query -i -n jruby-jars#{version_requirement}`
+        unless $? == 0
+          local_gem_dir = ENV['LOCAL_GEM_DIR'] || Dir.getwd
+          local_gem_file = "#{local_gem_dir}/jruby-jars-#{jars_version_from_env}.gem"
+          if File.exists?(local_gem_file)
+            system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
+          else
+            system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
+          end
+        end
+        raise "install of jruby-jars failed with return code #$?" unless $? == 0
+        if jars_version_from_env
+          exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
+          `gem query -i -n jruby-jars #{exclusion_clause}`
+          if $? == 0
+            system %Q{gem uninstall jruby-jars --all #{exclusion_clause}}
+            raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
+          end
+        end
+        Gem.refresh
       end
 
       def update_dx_jar(force=nil)

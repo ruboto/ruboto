@@ -21,5 +21,8 @@ Gem::Specification.new do |s|
   s.default_executable = 'ruboto'
   s.add_dependency('main', '>=4.7.2')
   s.add_dependency('rake')
-  s.add_dependency('jruby-jars')
+
+  # jruby-jars is only necessary for standalone apps.
+  # It will be installed on demand.
+  # s.add_dependency('jruby-jars')
 end
