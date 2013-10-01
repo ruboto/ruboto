@@ -54,15 +54,28 @@ unless DX_FILENAME
   exit 1
 end
 
-def manifest; @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE)) end
-def package; manifest.root.attribute('package') end
-def build_project_name; @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value end
-def scripts_path; @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts" end
-def app_files_path; @app_files_path ||= "/data/data/#{package}/files" end
+def manifest;
+  @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE))
+end
+
+def package;
+  manifest.root.attribute('package')
+end
+
+def build_project_name;
+  @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value
+end
+
+def scripts_path;
+  @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts"
+end
+
+def app_files_path;
+  @app_files_path ||= "/data/data/#{package}/files"
+end
 
 PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
-LAST_APK_TIMESTAMP_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_APK_TIMESTAMP_FILE')
 BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
 BUNDLE_PATH = File.expand_path 'bin/bundle'
 MANIFEST_FILE = File.expand_path 'AndroidManifest.xml'
@@ -271,23 +284,22 @@ end
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
   task :restart => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
-    if build_apk(t, false)
+    if build_apk(t, false) || !stop_app
       install_apk
     else
       update_scripts
-      install_apk(true) unless stop_app
     end
     start_app
   end
 
-  desc 'Copy scripts to emulator and start the app'
+  desc 'Copy scripts to emulator and restart the app'
   task :start => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
     if build_apk(t, false)
       install_apk
     else
       update_scripts
     end
-    start_app # FIXME(uwe): Should trigger reload of updated scripts and restart of the current activity
+    start_app # FIXME(uwe): Should trigger reload of updated scripts
   end
 
   desc 'Copy scripts to emulator and reload'
@@ -296,8 +308,8 @@ namespace :update_scripts do
       install_apk
       start_app
     else
-      update_scripts
-# FIXME(uwe): Should trigger reload of updated scripts and restart of the current activity
+      scripts = update_scripts
+      reload_scripts(scripts) if scripts
     end
   end
 end
@@ -532,10 +544,6 @@ def clear_update
     sh "adb shell rm -r #{scripts_path}"
     puts "Deleted scripts directory #{scripts_path}"
   end
-  `adb shell mkdir -p #{scripts_path}`
-  puts "Created scripts directory #{scripts_path}"
-
-  File.open(LAST_APK_TIMESTAMP_FILE, 'w') { |f| f << installed_apk_timestamp_and_size(false)[0].iso8601 }
 end
 
 def strings(name)
@@ -561,7 +569,11 @@ def device_path_exists?(path)
   path_output.chomp !~ /No such file or directory|opendir failed, Permission denied/
 end
 
-def installed_apk_timestamp_and_size(test)
+# Determine if the package is installed.
+# Return true if the package is installed and is identical to the local package.
+# Return false if the package is installed, but differs from the local package.
+# Return nil if the package is not installed.
+def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   loop do
     path_line = `adb shell pm path #{package_name}`.chomp
@@ -572,30 +584,11 @@ def installed_apk_timestamp_and_size(test)
   path = $1
   o = `adb shell ls -l #{path}`.chomp
   raise "Unexpected ls output: #{o}" if o !~ APK_FILE_REGEXP
-  return Time.parse($2), $1.to_i
-end
-
-def read_last_apk_timestamp(apk_file)
-  if File.exists?(LAST_APK_TIMESTAMP_FILE)
-    Time.parse(File.read(LAST_APK_TIMESTAMP_FILE))
-  elsif File.exists?(apk_file)
-    File.mtime(apk_file)
-  else
-    nil
-  end
-end
-
-# Determine if the package is installed.
-# Return true if the package is installed and is identical to the local package.
-# Return false if the package is installed, but differs from the local package.
-# Return nil if the package is not installed.
-def package_installed?(test = false)
+  installed_apk_size = $1.to_i
+  installed_timestamp = Time.parse($2)
   apk_file = test ? TEST_APK_FILE : APK_FILE
-  installed_timestamp, installed_apk_size = installed_apk_timestamp_and_size(test)
-  return nil unless installed_timestamp
-  last_apk_timestamp = read_last_apk_timestamp(apk_file)
-  !last_apk_timestamp || (installed_apk_size == File.size(apk_file) &&
-      last_apk_timestamp == File.mtime(apk_file))
+  !File.exists?(apk_file) || (installed_apk_size == File.size(apk_file) &&
+      installed_timestamp >= File.mtime(apk_file))
 end
 
 def replace_faulty_code(faulty_file, faulty_code)
@@ -631,10 +624,10 @@ def build_apk(t, release)
   true
 end
 
-def install_apk(force = false)
+def install_apk
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
-  case package_installed? && (force && nil)
+  case package_installed?
   when true
     puts "Package #{package} already installed."
     return
@@ -713,21 +706,28 @@ def update_scripts
     changed_files = source_files.select { |f| !File.directory?(f) && File.mtime(f) >= last_update && f !~ /~$/ }
     unless changed_files.empty?
       puts 'Pushing files to apk public file area.'
-      source_files.each do |script_file|
+      changed_files.each do |script_file|
         print "#{script_file}: "; $stdout.flush
         `adb push #{script_file} #{scripts_path}/#{script_file}`
       end
       mark_update
+      return changed_files
     end
   end
+  return nil
 end
 
 def start_app
   `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
 end
 
+# Triggers reload of updated scripts and restart of the current activity
 def reload_scripts(scripts)
-  `adb shell am broadcast "intent:#Intent;action=org.ruboto.action.RELOAD_SCRIPTS;i.status=5;i.voltage=4155;i.level=100;end"`
+  scripts.each.with_index do |s, i|
+    cmd = "adb shell am broadcast -a android.intent.action.VIEW -e file #{s} #{'-e restart YES' if i == (scripts.size - 1)}"
+    puts cmd
+    system cmd
+  end
 end
 
 def stop_app
