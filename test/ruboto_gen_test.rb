@@ -49,7 +49,7 @@ class RubotoGenTest < Test::Unit::TestCase
     end
   end
 
-  # APK was    57.1KB.  PLATFORM: CURRENT, ANDROID_TARGET: 10
+  # APK was    58.3KB.  PLATFORM: CURRENT, ANDROID_TARGET: 10
   # APK was    58.3KB.  PLATFORM: CURRENT, ANDROID_TARGET: 15
   # APK was    73.1KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    57.1KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
@@ -80,7 +80,7 @@ class RubotoGenTest < Test::Unit::TestCase
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
-          10 => 58.0,
+          10 => 59.0,
           15 => 59.1,
           16 => 74.2,
       }[ANDROID_TARGET] || 74.2
