@@ -270,13 +270,35 @@ end
 
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
-  task :restart => APK_DEPENDENCIES do |t|
-    if build_apk(t, false) || !stop_app
+  task :restart => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+    if build_apk(t, false)
+      install_apk
+    else
+      update_scripts
+      install_apk(true) unless stop_app
+    end
+    start_app
+  end
+
+  desc 'Copy scripts to emulator and start the app'
+  task :start => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+    if build_apk(t, false)
       install_apk
     else
       update_scripts
     end
-    start_app
+    start_app # FIXME(uwe): Should trigger reload of updated scripts and restart of the current activity
+  end
+
+  desc 'Copy scripts to emulator and reload'
+  task :reload => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+    if build_apk(t, false)
+      install_apk
+      start_app
+    else
+      update_scripts
+# FIXME(uwe): Should trigger reload of updated scripts and restart of the current activity
+    end
   end
 end
 
@@ -609,10 +631,10 @@ def build_apk(t, release)
   true
 end
 
-def install_apk
+def install_apk(force = false)
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
-  case package_installed?
+  case package_installed? && (force && nil)
   when true
     puts "Package #{package} already installed."
     return
@@ -685,22 +707,27 @@ end
 
 def update_scripts
   `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
-  puts 'Pushing files to apk public file area.'
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('src') do
-    Dir['**/*.rb'].each do |script_file|
-      next if File.directory? script_file
-      next if File.mtime(script_file) < last_update
-      next if script_file =~ /~$/
-      print "#{script_file}: "; $stdout.flush
-      `adb push #{script_file} #{scripts_path}/#{script_file}`
+    source_files = Dir['**/*.rb']
+    changed_files = source_files.select { |f| !File.directory?(f) && File.mtime(f) >= last_update && f !~ /~$/ }
+    unless changed_files.empty?
+      puts 'Pushing files to apk public file area.'
+      source_files.each do |script_file|
+        print "#{script_file}: "; $stdout.flush
+        `adb push #{script_file} #{scripts_path}/#{script_file}`
+      end
+      mark_update
     end
   end
-  mark_update
 end
 
 def start_app
   `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
+end
+
+def reload_scripts(scripts)
+  `adb shell am broadcast "intent:#Intent;action=org.ruboto.action.RELOAD_SCRIPTS;i.status=5;i.voltage=4155;i.level=100;end"`
 end
 
 def stop_app
