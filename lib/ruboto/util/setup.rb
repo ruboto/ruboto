@@ -5,7 +5,7 @@ module Ruboto
   module Util
     module Setup
       include Ruboto::Util::Verify
-      REPOSITORY_BASE = 'https://dl-ssl.google.com/android/repository'
+      REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
 
       #########################################
@@ -79,17 +79,20 @@ module Ruboto
         end
       end
 
-      def get_tools_version(type="tool")
+      def get_tools_version(type='tool')
         require 'rexml/document'
         require 'open-uri'
 
         doc = REXML::Document.new(open(REPOSITORY_URL))
-        version = doc.root.elements["sdk:#{type}/sdk:revision/sdk:major"].text
-        minor = doc.root.elements["sdk:#{type}/sdk:revision/sdk:minor"]
-        micro = doc.root.elements["sdk:#{type}/sdk:revision/sdk:micro"]
-        version += ".#{minor.text}" if minor
-        version += ".#{micro.text}" if micro
-        version
+        doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
+          major = t.elements['sdk:major']
+          minor = t.elements['sdk:minor']
+          micro = t.elements['sdk:micro']
+          version = major.text
+          version += ".#{minor.text}" if minor
+          version += ".#{micro.text}" if micro
+          version
+        end.sort_by{|v| Gem::Version.new(v)}.last
       end
 
       #########################################
@@ -391,7 +394,7 @@ module Ruboto
           end
           check_for_android_sdk
           unless @android_loc.nil?
-            ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+"/..").gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+            ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+'/..').gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
             if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
               system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}

@@ -35,10 +35,10 @@ file GEM_FILE => GEM_SPEC_FILE do
 end
 
 task :install => :gem do
-  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  `RUBYOPT= gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? != 0
     puts 'Installing gem'
-    cmd = "gem install ruboto-#{Ruboto::VERSION}.gem"
+    cmd = "RUBYOPT= gem install ruboto-#{Ruboto::VERSION}.gem"
     output = `#{cmd}`
     if $? == 0
       puts output
@@ -51,10 +51,10 @@ task :install => :gem do
 end
 
 task :uninstall do
-  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  `RUBYOPT= gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? == 0
     puts 'Uninstalling gem'
-    cmd = "gem uninstall -x ruboto -v #{Ruboto::VERSION}"
+    cmd = "RUBYOPT= gem uninstall -x ruboto -v #{Ruboto::VERSION}"
     output = `#{cmd}`
     if $? == 0
       puts output
