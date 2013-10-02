@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
-if [ ! `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
+# FIXME(uwe):  How to negate the condition?
+if [ `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
+  echo JRuby master gem found
+else
     echo JRuby-jars master is missing.
     rake get_jruby_jars_snapshot
 fi

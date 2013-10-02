@@ -283,7 +283,7 @@ class Test::Unit::TestCase
     gems = [*bundle]
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
-      f << "source 'https://rubygems.org/'\n\n"
+      f << "source 'http://rubygems.org/'\n\n"
       gems.each{|g| f << "gem '#{g}'\n"}
     end
   end
