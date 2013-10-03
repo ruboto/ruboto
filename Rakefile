@@ -21,6 +21,8 @@ README_FILE = 'README.md'
 BLOG_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com/_posts"
 RELEASE_BLOG = "#{BLOG_DIR}/#{Date.today}-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
+RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC'
+RELEASE_DOC = 'RELEASE_DOC'
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -204,7 +206,8 @@ http://ruboto.org/
 EOF
 
   puts release_candidate_doc
-  File.write('RELEASE_CANDICATE_DOC', release_candidate_doc)
+  File.write(RELEASE_CANDIDATE_DOC, release_candidate_doc)
+  sh "git add -f #{RELEASE_CANDIDATE_DOC}"
 
   puts
   puts '=' * 80
@@ -278,7 +281,9 @@ title : Ruboto #{Ruboto::VERSION}
 layout: post
 ---
 EOF
-    File.write('RELEASE_DOC', release_doc)
+    File.write(RELEASE_DOC, release_doc)
+    sh "git add -f #{RELEASE_DOC}"
+    `git commit -m "* Added release doc for Ruboto #{Ruboto::VERSION}"`
     Dir.chdir BLOG_DIR do
       output = `git status --porcelain`
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
