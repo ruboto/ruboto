@@ -345,6 +345,10 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     definition = Bundler.definition
     definition.validate_ruby!
     Bundler::Installer.install(Bundler.root, definition)
+    unless Dir["#{BUNDLE_PATH}/bundler/gems/"].empty?
+      system("mkdir -p '#{BUNDLE_PATH}/gems'")
+      system("mv #{BUNDLE_PATH}/bundler/gems/* #{BUNDLE_PATH}/gems/")
+    end
 
     # Restore RUBY_ENGINE (limit the scope of this hack)
     old_verbose, $VERBOSE = $VERBOSE, nil
