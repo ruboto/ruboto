@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 0.14.0 released!
+Subject: [ANN] Ruboto 0.15.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 0.14.0.
+The Ruboto team is pleased to announce the release of Ruboto 0.15.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,73 +8,52 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 0.14.0:
+New in version 0.15.0:
 
-In this release we change the startup to use a separate SplashActivity.
-This simplifies the startup and makes it more robust.
+In this release we stabilize the new SplashActivity feature and introduce
+a new rapid development cycle.
+
+Using "rake update_scripts:reload" changed Ruby scripts are pushed to the
+device/emulator and an intent is broadcasted to reload the files inside
+the running app, and the currently displayed activity is restarted.
+
+The process should take just a few seconds and avoids the full
+build->transfer->restart cycle.
 
 Features:
 
-* Issue #433 Tests: add support for individual/matrix tests in Windows
-* Issue #460 New startup sequence with SplashActivity
-* Issue #471 Allow sending Intent extras with start_ruboto_activity
-* Issue #473 Modify EntryPointActivity to send an Intent to SplashActivity
+* Issue #12 Fast development with "rake update_scripts:reload"
+* Issue #461 Old API level files removed from repository as of 4.3
+* Issue #475 Reuse the original Intent when relaunching the user activity
+  after the SplashActivity has completed.
+* Issue #482 Better handling of "update_scripts" apk timestamp
+* Issue #486 Let "ruboto setup" download the latest version of a tool if
+  multiple versions exist.
 
 Bugfixes:
 
-* Issue #428 Splash requests window feature too late
-* Issue #429 ruboto emulator -t android-17 fails
-* Issue #432 'ruboto update app' leaves some old files behind
-* Issue #434 After JRuby is loaded, check the activity state before
-  calling onCreate
-* Issue #442 Adding splash.xml crashes app.
-* Issue #443 onCreateOptionsMenu (and other callbacks) not called on first
-  time startup
-* Issue #449 Change ruboto setup to use /linux/ instead of /^linux(.*)/
-* Issue #451 Changing device orientation during splash causes exception
-* Issue #453 Builds but fails to load ruby scripts on uppercase package
-  name
-* Issue #455 Rake install fails in ruboto-0.14.0-dev
-* Issue #468 Using the EntryPointActivity check in the RubotoActivity
-  template doesn't work for other activities like PreferencesActivity
-* Issue #470 "ruboto update app" deletes "src/ruboto/.svn" subversion
-  directory
+* Issue #174 Ensure APK is not rebuilt if only Ruby source has changed
+* Issue #452 Android SDK command dx Not found
+* Issue #481 New Splash fails to start on Android 2.3
+* Issue #490 ruboto setup
 
 Support:
 
-* Issue #446 Bad call from ruboto setup
-* Issue #450 Application aborts prematurely, when I add a Gemfile.apk
-
-Documentation:
-
-* Issue #225 Investigate AIDE
-* Issue #430 Add Downloads page to ruboto.org
+* Issue #469 Missing step in "Getting started": 1'. install GEMS
 
 Pull requests:
 
-* Issue #439 Fixes #432
-* Issue #440 Added check for compatible APIs for update examples: re issue
-  #437
-* Issue #444 Fix building on Windows caused by mixed file separators. Also
-  pre-compressed the included PNGs with optipng, despite included pngcrush
-  during rake for increased loseless file compression.
-* Issue #454 Fix android_package_directory for ones already installed
-  android sdk
-* Issue #457 Allow uppercase package name
-* Issue #462 Add SplashActivity for new startup sequence
-* Issue #463 New APK size upper limit in test/ruboto_gen_test
-* Issue #464 Fix #451 by locking screen orientation of SplashActivity
+* Issue #474 Longer 'Timeout' time of BOSS process
+* Issue #477 Add readme.MD syntax highlight.
 
 Internal:
 
-* Issue #436 Use "ruboto emulator" instead of start_emulator.sh when
-  running tests on travis-ci
-* Issue #437 test ruboto_update_test fails for old versions < 0.11.0
-* Issue #465 Adjust update scripts to the new JRuby mavenized packaging
+* Issue #487 Start testing against JRuby 9000
+* Issue #488 Start testing against JRuby 1.7.5
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=26
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=29
 
 
 Installation:

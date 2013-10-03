@@ -1,11 +1,18 @@
-Subject: [ANN] Ruboto 0.14.0 release candidate
+Subject: [ANN] Ruboto 0.15.0 release candidate
 
 Hi all!
 
-The Ruboto 0.14.0 release candidate is now available.
+The Ruboto 0.15.0 release candidate is now available.
 
-In this release we change the startup to use a separate SplashActivity.
-This simplifies the startup and makes it more robust.
+In this release we stabilize the new SplashActivity feature and introduce
+a new rapid development cycle.
+
+Using "rake update_scripts:reload" changed Ruby scripts are pushed to the
+device/emulator and an intent is broadcasted to reload the files inside
+the running app, and the currently displayed activity is restarted.
+
+The process should take just a few seconds and avoids the full
+build->transfer->restart cycle.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
