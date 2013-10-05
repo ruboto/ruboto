@@ -1,24 +1,20 @@
 #!/bin/bash -e
 
-# FIXME(uwe):  How to negate the condition?
-if [ `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
-  echo JRuby master gem found
+if [ -z `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
+  echo JRuby-jars master gem is missing.
+  rake get_jruby_jars_snapshot
 else
-    echo JRuby-jars master is missing.
-    rake get_jruby_jars_snapshot
-fi
-
-if [ `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ] ; then
+  if [ `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ] ; then
     echo jruby-jars master is old.
     rake get_jruby_jars_snapshot
+  fi
 fi
 
-ANDROID_TARGETS="16 10 15" # We should cover at least 80% of the market
+ANDROID_TARGETS="16 10 15" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
-PLATFORM_MODES="CURRENT STANDALONE"
-MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | cut -f1-4 -d'.'`
+MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.5 1.7.4"
-STANDALONE_JRUBY_VERSIONS="1.7.4"
+STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.4"
 RUBOTO_UPDATE_EXAMPLES=1
 # export STRIP_INVOKERS=1
 
