@@ -527,6 +527,35 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
   FileUtils.rm_rf BUNDLE_PATH
 end
 
+desc 'Log activity execution, accepts optional logcat filter'
+task :logcat, [:filter] do |t,args|
+  puts "--- clearing logcat"
+  `adb logcat -c`
+  filter = args[:filter] ? args[:filter] : ''          # filter log with filter-specs like TAG:LEVEL TAG:LEVEL ... '*:S'
+  logcat_cmd = "adb logcat ActivityManager #{filter}"  # we always need ActivityManager logging to catch activity start
+  puts "--- starting logcat: #{logcat_cmd}"
+  IO.popen logcat_cmd do |logcat|
+    puts "--- waiting for activity #{package}/.#{main_activity} ..."
+    activity_started = false
+    started_regex   = Regexp.new "^\\I/ActivityManager.+Start proc #{package} for activity #{package}/\\.#{main_activity}: pid=(?<pid>\\d+)"
+    restarted_regex = Regexp.new "^\\I/ActivityManager.+START u0 {cmp=#{package}/org.ruboto.RubotoActivity.+} from pid (?<pid>\\d+)"
+    related_regex   = Regexp.new "#{package}|#{main_activity}"
+    pid_regex = nil
+    logcat.each_line do |line|
+      if activity_start_match = started_regex.match( line ) || restarted_regex.match( line )
+        activity_started = true
+        pid = activity_start_match[:pid]
+        pid_regex = Regexp.new "\\( *#{pid}\\): "
+        puts "--- activity PID=#{pid}"
+      end
+      if activity_started && ( line =~ pid_regex || line =~ related_regex )
+        puts "#{Time.now.strftime('%Y%m%d %H%M%S.%6N')} #{line}"
+      end
+    end
+    puts '--- logcat closed'
+  end
+end
+
 # Methods
 
 def sdk_level
@@ -734,3 +763,4 @@ def stop_app
   output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
   output !~ /Operation not permitted/
 end
+
