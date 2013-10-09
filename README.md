@@ -56,10 +56,10 @@ version (api-level) of Android.
 Command-line Tools
 -------
 
-* [Application generator](#application_generator) (like the rails application generator)
+* [Application generator](#application_generator) (like the Rails application generator)
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
-* [Callback generator](#class_generator) to generate specific subclasses to open up access (callbacks) for various portions of the Android API.
-* [Packaging task](#packaging_task) to generate an apk file
+* [Callback generator](#class_generator) to generate specific subclasses to open up access (callbacks) for various portions of the Android API
+* [Packaging task](#packaging_task) to generate an .apk file
 * [Release task](#release_task) to deploy a generated package to an emulator or connected device
 * [Develop without having to compile to try every change](#update_scripts)
 
@@ -68,38 +68,39 @@ Command-line Tools
 ### Application generator
 
     $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min-sdk another-android-version --activity MainActivityName
-Version values must be specified using'android-' and the sdk level number (e.g., android-10 is gingerbread).
+Version values must be specified using `android-` and the sdk level number (e.g., android-10 is Gingerbread.)
 
 <a name="class_generator"></a>
 ### Class generator
 
-Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific ruboto script.  The generator also generates a corresponding test script.
+Generates a Java class (Activity, Service, or BroadcastReceiver) associated with a specific Ruboto script.  The generator also generates a corresponding test script.
 
     $ ruboto gen class ClassName --name YourObjectName
-Ex:
+For example:
+
     $ ruboto gen class BroadcastReceiver --name AwesomenessReceiver
 
 <a name="callback_generator"></a>
 ### Callback generator
 
-You can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to ruboto.
+You can subclass any part of the Android API to pass control over to a script when the specified methods are called. You can also create classes that implement a single Android interface to pass control over to Ruboto.
 
 Starting with Ruboto 0.6.0 there are easy ways to do this within your scripts.
-The new way of generating interfaces and subclasses is described in the wiki
+The new way of generating interfaces and subclasses is described in the wiki page
 [Generating classes for callbacks](https://github.com/ruboto/ruboto/wiki/Generating-classes-for-callbacks).
 
 <a name="packaging_task"></a>
 ### Packaging task
 
-This will generate an apk file.
+This will generate an .apk file:
 
     $ rake debug
 
-To generate an apk and install it to a connected device (or emulator) all in one go, run
+To generate an .apk and install it to a connected device (or emulator) all in one go, run:
 
     $ rake install
 
-To start the installed app, run
+To start the installed app, run:
 
     $ rake start
 
@@ -122,7 +123,7 @@ Also make sure to keep your key backed up (if you lose it, you won't be able to
 release updates to your app that can install right over the old versions), but
 secure.
 
-Now get that `.apk` to the market!
+Now get that .apk to the market!
 
 <a name="update_scripts"></a>
 ### Updating Your Scripts on a Device
@@ -137,7 +138,7 @@ compiled Java files. So if your changes are Ruby-only, you can just run
     $ rake update_scripts
 
 to have it copy the current version of your scripts to your device.
-To update the scripts and restart the app in one go, run
+To update the scripts and restart the app in one go, run:
 
     $ rake update_scripts:restart
 
@@ -150,16 +151,16 @@ Caveats:
 This only works if your changes are all Ruby. If you have Java changes (which
 would generally just mean generating new classes) or changes to the xml, you
 will need to recompile your app.  The `update_scripts` task will revert to
-build the complete apk and install it if it detects non-Ruby source changes.
+build the complete .apk and install it if it detects non-Ruby source changes.
 
-On an actual device, you need to give the WRITE_EXTERNAL_STORAGE permission to
+On an actual device, you need to give the `WRITE_EXTERNAL_STORAGE` permission to
 your app, and scripts will be updated using the SDCARD on the device/emulator.
 
 Alternatively, you can also root your phone.
 
 ### Updating Ruboto's Files
 
-You can update various portions of your generated Ruboto app through the ruboto command:
+You can update various portions of your generated Ruboto app through the `ruboto` command:
 
 * JRuby:
 
@@ -180,24 +181,24 @@ Scripts
 -------
 
 The main thing Ruboto offers you is the ability to write Ruby scripts to define
-the behavior of Activities, BroadcastReceievers, and Services. (Eventually it'll
-be every class. It's setup such that adding in more classes should be trivial.)
+the behavior of Activities, BroadcastReceivers, and Services. (Eventually, it'll
+be every class. It's set up such that adding in more classes should be trivial.)
 
 Here's how it works:
 
 First of all, your scripts are found in the `src/` directory, and the script
 name is the same as the name of your class, only under_scored instead of
-CamelCased. Android classes have all of these methods that get called in certain
+CamelCased. Android classes have some standard methods that get called in certain
 situations. `Activity.onDestroy()` gets called when the activity gets killed,
-for example. Save weird cases (like the "launching" methods that need to setup
-JRuby), to script the method onFooBar, you call the Ruby method onFooBar on the
-Android object. That was really abstract, so here's an example.
+for example. Save weird cases (like the "launching" methods that are needed to set up
+JRuby), to call the method `onFooBar()`, you call the Ruby method `onFooBar` on the
+Android object. 
 
-You generate an app with the option `--activity FooActivity`, which means that
+That was really abstract, so here's an example. You generate an app with the option `--activity FooActivity`, which means that
 Ruboto will generate a FooActivity for you. So you open `src/foo_activity.rb` in
 your favorite text editor. If you want an activity that does nothing but Log
-when it gets launched and when it gets destroyed (in the onCreate and onPause
-methods). You want your script to look like this:
+when it gets launched and when it gets destroyed (in the `onCreate` and `onPause`
+methods,) you want your script to look like this:
 
 ```ruby
 class FooActivity
@@ -213,8 +214,8 @@ class FooActivity
 end
 ```
 
-The arguments passed to the methods are the same as the arguments that the java
-methods take. Consult the Android documentation.
+The arguments passed to the methods are the same as the arguments that the Java
+methods take. Consult the Android documentation for more information.
 
 Activities also have some special methods defined to make things easier. The
 easiest way to get an idea of what they are is looking over the
@@ -222,18 +223,18 @@ easiest way to get an idea of what they are is looking over the
 and the
 [tests](http://github.com/ruboto/ruboto/tree/master/test/activity/).
 You can also read the
-[ruboto source](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto)
+[Ruboto source](http://github.com/ruboto/ruboto/blob/master/assets/src/ruboto)
 where everything is defined.
 
 We also have many fine examples on the
-[WIKI](https://github.com/ruboto/ruboto/wiki).
+[Wiki](https://github.com/ruboto/ruboto/wiki).
 
 Testing
 -------
 
-For each generated class, a Ruby test script is created in the test/src
-directory.  For example if you generate a RubotoSampleAppActivity a file
-"test/src/ruboto_sample_app_activity_test.rb" file is created containing a
+For each generated class, a Ruby test script is created in the `test/src`
+directory.  For example, if you generate a RubotoSampleAppActivity, the file
+`test/src/ruboto_sample_app_activity_test.rb` is created containing a
 sample test script:
 
 ```ruby
@@ -260,7 +261,7 @@ test('button changes text') do |activity|
 end
 ```
 
-You run the tests for your app using ant or rake
+You can run the tests for your app using ant or rake:
 
     $ rake test
 
@@ -283,7 +284,7 @@ That's fine. Equally helpful:
 * When you gain enough wisdom, reconsider whether you could fork the project.
 
 If contributing code to the project, please run the existing tests and add tests
-for your changes.  You run the tests using rake
+for your changes.  You run the tests using rake:
 
     $ rake test
 
@@ -291,8 +292,8 @@ We have set up a matrix test that tests multiple configuations on the emulator:
 
     $ ./matrix_tests.sh
 
-All branches and pull requests on GitHub are also testd on
-https://travis-ci.org/ruboto/ruboto
+All branches and pull requests on GitHub are also tested on
+[https://travis-ci.org/ruboto/ruboto](https://travis-ci.org/ruboto/ruboto).
 
 Getting Help
 ------------
@@ -315,14 +316,14 @@ Tips & Tricks
 
 ### Emulators
 
-You can start an emulator corresponding to the api level of your project with
+You can start an emulator corresponding to the api level of your project with:
 
     $ ruboto emulator
 
-The emulator will be created for you and will be named after the android version
+The emulator will be created for you and will be named after the Android version
 of your project, like "Android_4.0.3".
 
-If you want to start an emulator for a specific API level use the "-t" option:
+If you want to start an emulator for a specific API level use the `-t` option:
 
     $ ruboto emulator -t 17
 
@@ -344,9 +345,9 @@ Alternatives
 If Ruboto's performance is a problem for you, check out
 [Mirah](http://mirah.org/) and [Garrett](http://github.com/technomancy/Garrett).
 
-Mirah is a language with Ruby-like syntax that compiles to java files. This
+Mirah is a language with Ruby-like syntax that compiles to Java files. This
 means that it adds no big runtime dependencies and has essentially the same
-performance as writing Java code because it essentially generates the same Java
+performance as writing Java code, as it essentially generates the same Java
 code that you would write. This makes it extremely well-suited for mobile
 devices where performance is a much bigger consideration.
 
@@ -360,8 +361,8 @@ Thanks go to:
 
 * Charles Nutter, a member of the JRuby core team, for mentoring this RSoC
   project and starting the Ruboto project in the first place with an
-  [irb](http://github.com/ruboto/ruboto-irb)
-* All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors)
+  [irb](http://github.com/ruboto/ruboto-irb).
+* All of Ruby Summer of Code's [sponsors](http://rubysoc.org/sponsors).
 * [Engine Yard](http://engineyard.com/) in particular for sponsoring RSoC and
   heavily sponsoring JRuby, which is obviously critical to the project.
 * All [contributors](http://github.com/ruboto/ruboto/contributors) and
