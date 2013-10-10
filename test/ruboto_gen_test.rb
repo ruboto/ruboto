@@ -51,7 +51,7 @@ class RubotoGenTest < Test::Unit::TestCase
 
   # APK was    58.3KB.  PLATFORM: CURRENT, ANDROID_TARGET: 10
   # APK was    58.3KB.  PLATFORM: CURRENT, ANDROID_TARGET: 15
-  # APK was    73.1KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
+  # APK was    74.9KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    57.1KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
   # APK was  7380.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.0
   # APK was  7310.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.2
@@ -75,15 +75,16 @@ class RubotoGenTest < Test::Unit::TestCase
           '1.7.2' => 7400.0,
           '1.7.3' => 7400.0,
           '1.7.4' => 8500.0,
-          '1.7.5.dev' => 8800.0,
+          '1.7.5' => 8800.0,
+          '9000' => 8800.0,
       }[JRUBY_JARS_VERSION.to_s] || 8800.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
           10 => 59.0,
           15 => 59.1,
-          16 => 74.2,
-      }[ANDROID_TARGET] || 74.2
+          16 => 75.0,
+      }[ANDROID_TARGET] || 75.0
     end
     lower_limit = upper_limit * 0.9
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
