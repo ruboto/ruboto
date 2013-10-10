@@ -299,7 +299,7 @@ namespace :update_scripts do
     else
       update_scripts
     end
-    start_app # FIXME(uwe): Should trigger reload of updated scripts
+    start_app
   end
 
   desc 'Copy scripts to emulator and reload'
@@ -309,7 +309,13 @@ namespace :update_scripts do
       start_app
     else
       scripts = update_scripts
-      reload_scripts(scripts) if scripts
+      if scripts
+        if app_running?
+          reload_scripts(scripts)
+        else
+          start_app
+        end
+      end
     end
   end
 end
@@ -528,27 +534,27 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
 end
 
 desc 'Log activity execution, accepts optional logcat filter'
-task :logcat, [:filter] do |t,args|
+task :logcat, [:filter] do |t, args|
   puts "--- clearing logcat"
   `adb logcat -c`
-  filter = args[:filter] ? args[:filter] : ''          # filter log with filter-specs like TAG:LEVEL TAG:LEVEL ... '*:S'
-  logcat_cmd = "adb logcat ActivityManager #{filter}"  # we always need ActivityManager logging to catch activity start
+  filter = args[:filter] ? args[:filter] : '' # filter log with filter-specs like TAG:LEVEL TAG:LEVEL ... '*:S'
+  logcat_cmd = "adb logcat ActivityManager #{filter}" # we always need ActivityManager logging to catch activity start
   puts "--- starting logcat: #{logcat_cmd}"
   IO.popen logcat_cmd do |logcat|
     puts "--- waiting for activity #{package}/.#{main_activity} ..."
     activity_started = false
-    started_regex   = Regexp.new "^\\I/ActivityManager.+Start proc #{package} for activity #{package}/\\.#{main_activity}: pid=(?<pid>\\d+)"
+    started_regex = Regexp.new "^\\I/ActivityManager.+Start proc #{package} for activity #{package}/\\.#{main_activity}: pid=(?<pid>\\d+)"
     restarted_regex = Regexp.new "^\\I/ActivityManager.+START u0 {cmp=#{package}/org.ruboto.RubotoActivity.+} from pid (?<pid>\\d+)"
-    related_regex   = Regexp.new "#{package}|#{main_activity}"
+    related_regex = Regexp.new "#{package}|#{main_activity}"
     pid_regex = nil
     logcat.each_line do |line|
-      if activity_start_match = started_regex.match( line ) || restarted_regex.match( line )
+      if (activity_start_match = started_regex.match(line) || restarted_regex.match(line))
         activity_started = true
         pid = activity_start_match[:pid]
         pid_regex = Regexp.new "\\( *#{pid}\\): "
         puts "--- activity PID=#{pid}"
       end
-      if activity_started && ( line =~ pid_regex || line =~ related_regex )
+      if activity_started && (line =~ pid_regex || line =~ related_regex)
         puts "#{Time.now.strftime('%Y%m%d %H%M%S.%6N')} #{line}"
       end
     end
@@ -746,6 +752,10 @@ def update_scripts
   return nil
 end
 
+def app_running?
+  `adb shell ps | egrep -e " #{package}\r$"`.size > 0
+end
+
 def start_app
   `adb shell am start -a android.intent.action.MAIN -n #{package}/.#{main_activity}`
 end
@@ -763,4 +773,3 @@ def stop_app
   output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
   output !~ /Operation not permitted/
 end
-
