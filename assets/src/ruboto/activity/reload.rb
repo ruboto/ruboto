@@ -1,14 +1,16 @@
+require 'ruboto/activity'
+
 module Ruboto::Activity::Reload
   import org.ruboto.Log
 
   def onResume
-    Log.d "Ruboto::Activity::Reload onResume"
+    Log.d 'Ruboto::Activity::Reload onResume'
     super
 
     @ruboto_activity_reload_receiver = ReloadReceiver.new(self)
     filter = android.content.IntentFilter.new(android.content.Intent::ACTION_VIEW)
     registerReceiver(@ruboto_activity_reload_receiver, filter)
-    Log.d "Ruboto::Activity::Reload registered reload receiver"
+    Log.d 'Ruboto::Activity::Reload registered reload receiver'
   rescue Exception
     Log.e "Exception registering reload listener: #{$!.message}"
     Log.e $!.backtrace.join("\n")
@@ -18,7 +20,7 @@ module Ruboto::Activity::Reload
     super
     unregisterReceiver(@ruboto_activity_reload_receiver)
     @ruboto_activity_reload_receiver = nil
-    Log.d "Ruboto::Activity::Reload unregistered reload receiver"
+    Log.d 'Ruboto::Activity::Reload unregistered reload receiver'
   rescue Exception
     Log.e "Exception unregistering reload listener: #{$!.message}"
     Log.e $!.backtrace.join("\n")
@@ -43,7 +45,7 @@ module Ruboto::Activity::Reload
         Log.d "load file: #{file.inspect}"
         load file
       end
-      if (reload_intent.get_string_extra('restart'))
+      if reload_intent.get_string_extra('restart')
         Log.d 'restart activity'
         if @activity.intent.action == android.content.Intent::ACTION_MAIN
            restart_intent = android.content.Intent.new(@activity.intent).setAction(android.content.Intent::ACTION_VIEW)
