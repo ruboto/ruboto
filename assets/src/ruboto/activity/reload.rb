@@ -40,17 +40,20 @@ module Ruboto::Activity::Reload
     #              but have not found a way to do that.
     def onReceive(context, reload_intent)
       Log.d "Got reload intent: #{reload_intent.inspect}"
-      file = reload_intent.get_string_extra('file')
-      if file
-        Log.d "load file: #{file.inspect}"
-        load file
-      end
-      if reload_intent.get_string_extra('restart')
+      file_string = reload_intent.get_string_extra('reload')
+      if file_string
+        files = file_string.split(/(?<!&);/).map { |f| f.gsub(/&(.)/) { |m| m[1] } }
+        files.each do |file|
+          Log.d "load file: #{file.inspect}"
+          load file
+        end
         Log.d 'restart activity'
-        if @activity.intent.action == android.content.Intent::ACTION_MAIN
-           restart_intent = android.content.Intent.new(@activity.intent).setAction(android.content.Intent::ACTION_VIEW)
+        if @activity.intent.action == android.content.Intent::ACTION_MAIN ||
+            @activity.intent.action == android.hardware.usb.UsbManager::ACTION_USB_DEVICE_ATTACHED
+          restart_intent = android.content.Intent.new(@activity.intent).
+              setAction(android.content.Intent::ACTION_VIEW)
         else
-           restart_intent = @activity.intent
+          restart_intent = @activity.intent
         end
         @activity.startActivity(restart_intent)
         @activity.finish

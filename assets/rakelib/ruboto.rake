@@ -34,7 +34,7 @@ adb_version_str = `adb version`
 (puts "Unrecognized adb version: #$1"; exit 1) unless adb_version_str =~ /Android Debug Bridge version (\d+\.\d+\.\d+)/
 (puts "adb version 1.0.31 or later required.  Version found: #$1"; exit 1) unless Gem::Version.new($1) >= Gem::Version.new('1.0.31')
 android_home = ENV['ANDROID_HOME']
-android_home = android_home.gsub("\\", "/") unless android_home.nil?
+android_home = android_home.gsub("\\", '/') unless android_home.nil?
 if android_home.nil?
   if (adb_path = which('adb'))
     android_home = File.dirname(File.dirname(adb_path))
@@ -399,7 +399,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
       $VERBOSE = old_verbose
     end
     Gem.platforms = platforms
-    Gem.paths = gem_paths["GEM_PATH"]
+    Gem.paths = gem_paths['GEM_PATH']
   else
     # Bundler.settings[:platform] = Gem::Platform::DALVIK
     sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
@@ -539,7 +539,7 @@ end
 
 desc 'Log activity execution, accepts optional logcat filter'
 task :logcat, [:filter] do |t, args|
-  puts "--- clearing logcat"
+  puts '--- clearing logcat'
   `adb logcat -c`
   filter = args[:filter] ? args[:filter] : '' # filter log with filter-specs like TAG:LEVEL TAG:LEVEL ... '*:S'
   logcat_cmd = "adb logcat ActivityManager #{filter}" # we always need ActivityManager logging to catch activity start
@@ -766,11 +766,10 @@ end
 
 # Triggers reload of updated scripts and restart of the current activity
 def reload_scripts(scripts)
-  scripts.each.with_index do |s, i|
-    cmd = "adb shell am broadcast -a android.intent.action.VIEW -e file #{s} #{'-e restart YES' if i == (scripts.size - 1)}"
-    puts cmd
-    system cmd
-  end
+  s = scripts.map{|s| s.gsub(/[&;]/){|m| "&#{m[0]}"}}.join(';')
+  cmd = "adb shell am broadcast -a android.intent.action.VIEW -e reload #{s}"
+  puts cmd
+  system cmd
 end
 
 def stop_app
