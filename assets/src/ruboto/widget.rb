@@ -135,7 +135,12 @@ def ruboto_import_widget(class_name, package_name='android.widget')
      end
    "
   RubotoActivity.class_eval method_str
-  android.app.Fragment.class_eval method_str.gsub('self', 'activity')
+
+  # FIXME(uwe): Remove condition when we stop support for api level < 11
+  if android.os.Build::VERSION::SDK_INT >= 11
+    android.app.Fragment.class_eval method_str.gsub('self', 'activity')
+  end
+  # EMXIF
 
   setup_list_view if class_name == :ListView
   setup_spinner if class_name == :Spinner
