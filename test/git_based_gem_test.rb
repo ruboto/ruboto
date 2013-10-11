@@ -12,7 +12,7 @@ class GitBasedGemTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       File.open('Gemfile.apk', 'w') do |f|
         f << "source 'https://rubygems.org/'\n\n"
-        f << "gem 'gosu_android', :git => 'git@github.com:Garoe/gosu-android.git'"
+        f << "gem 'gosu_android', :git => 'https://github.com/ruboto/ruboto.git'"
       end
     end
   end
