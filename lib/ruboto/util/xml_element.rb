@@ -44,12 +44,12 @@ module Ruboto
       def find_class_or_interface(klass, a_type)
         abort "ERROR: Can't parse package from #{klass}" unless klass.match(/([a-z.]+)\.([A-Z][A-Za-z.]+)/)
 
-        package = self['package'].find{|i| i.attribute('name') == $1}
+        package = self['package'].find { |i| i.attribute('name') == $1 }
         abort "ERROR: Can't find package #{$1}" unless package
         if a_type == 'either'
-          package['class'].find{|i| i.attribute('name') == $2} or package['interface'].find{|i| i.attribute('name') == $2}
+          package['class'].find { |i| i.attribute('name') == $2 } or package['interface'].find { |i| i.attribute('name') == $2 }
         else
-          package[a_type].find{|i| i.attribute('name') == $2}
+          package[a_type].find { |i| i.attribute('name') == $2 }
         end
       end
 
@@ -63,37 +63,37 @@ module Ruboto
 
       def all_methods(method_base='all', method_include='', method_exclude='', implements='')
         # get all the methogs
-        all_methods = get_elements('method').select{|m| m.attribute('static') != 'true'}
+        all_methods = get_elements('method').select { |m| m.attribute('static') != 'true' }
 
         # establish the base set of methods
         working_methods = case method_base.to_s
-        when 'all' then
-          all_methods
-        when 'none' then
-          []
-        when 'abstract' then
-          all_methods.select{|i| i.attribute('abstract') == 'true'}
-        when 'on' then
-          all_methods.select{|i| i.attribute('name').match(/^on[A-Z]/)}
-        end
+                          when 'all' then
+                            all_methods
+                          when 'none' then
+                            []
+                          when 'abstract' then
+                            all_methods.select { |i| i.attribute('abstract') == 'true' }
+                          when 'on' then
+                            all_methods.select { |i| i.attribute('name').match(/^on[A-Z]/) }
+                          end
 
         # make sure to include requested methods
         include_methods = method_include.split(',') if method_include.is_a?(String)
-        all_methods.each{|i| working_methods << i if include_methods.include?(i.attribute('name'))}
+        all_methods.each { |i| working_methods << i if include_methods.include?(i.attribute('name')) }
 
         # make sure to exclude rejected methods
         exclude_methods = method_exclude.split(',') if method_exclude.is_a?(String)
-        working_methods = working_methods.select{|i| not exclude_methods.include?(i.attribute('name'))}
+        working_methods = working_methods.select { |i| not exclude_methods.include?(i.attribute('name')) }
 
         # remove methods marked final
-        working_methods = working_methods.select{|i| (not i.attribute('final')) or i.attribute('final') == 'false'}
+        working_methods = working_methods.select { |i| (not i.attribute('final')) or i.attribute('final') == 'false' }
 
         # get additional methods from parent
         if name =='class' and attribute('extends')
           parent = root.find_class(attribute('extends'))
           parent_methods = parent.all_methods(method_base, method_include, method_exclude)
           working_signatures = working_methods.map(&:method_signature)
-          working_methods += parent_methods.select{|i| not working_signatures.include?(i.method_signature)}
+          working_methods += parent_methods.select { |i| not working_signatures.include?(i.method_signature) }
         end
 
         # get additional methods from interfaces
@@ -102,7 +102,7 @@ module Ruboto
             interface = root.find_interface(i)
             abort("Unkown interface: #{i}") unless interface
             working_signatures = working_methods.map(&:method_signature)
-            working_methods += interface.all_methods.select{|j| not working_signatures.include?(j.method_signature)}
+            working_methods += interface.all_methods.select { |j| not working_signatures.include?(j.method_signature) }
           end
         end
 
@@ -110,37 +110,40 @@ module Ruboto
       end
 
       def parameters
-        get_elements('parameter').map {|p| [p.attribute('name'), p.attribute('type').gsub('&lt;', '<').gsub('&gt;', '>')]}
+        get_elements('parameter').map { |p| [p.attribute('name'), p.attribute('type').gsub('&lt;', '<').gsub('&gt;', '>')] }
       end
 
       def method_signature
-        "#{attribute('name')}(#{parameters.map{|i| i[1]}.join(',')})"
+        "#{attribute('name')}(#{parameters.map { |i| i[1] }.join(',')})"
       end
 
       def constant_string
-        'CB_' + attribute('name').gsub(/[A-Z]/) {|i| "_#{i}"}.upcase.gsub(/^ON_/, '')
+        'CB_' + attribute('name').gsub(/[A-Z]/) { |i| "_#{i}" }.upcase.gsub(/^ON_/, '')
       end
 
       def super_string
         if attribute('api_added') and
-          attribute('api_added').to_i > verify_min_sdk.to_i and
-          attribute('api_added').to_i <= verify_target_sdk.to_i
+            attribute('api_added').to_i > verify_min_sdk.to_i and
+            attribute('api_added').to_i <= verify_target_sdk.to_i
           nil
         elsif attribute('abstract') == 'true'
           nil
         elsif name == 'method'
-          "super.#{attribute('name')}(#{parameters.map{|i| i[0]}.join(', ')});"
+          "super.#{attribute('name')}(#{parameters.map { |i| i[0] }.join(', ')});"
         elsif name == 'constructor'
-          "super(#{parameters.map{|i| i[0]}.join(', ')});"
+          "super(#{parameters.map { |i| i[0] }.join(', ')});"
         end
       end
 
       def default_return
         return nil unless attribute('return')
         case attribute('return')
-        when 'boolean' then 'return false;'
-        when 'int' then 'return 0;'
-        when 'void' then nil
+        when 'boolean' then
+          'return false;'
+        when 'int' then
+          'return 0;'
+        when 'void' then
+          nil
         else
           'return null;'
         end
@@ -152,7 +155,7 @@ module Ruboto
         rv ? "return #{rv}" : default_return
       end
 
-      def ruby_call(camelize = false)
+      def ruby_call(snake_case = false)
         params = parameters
         args = ''
         if params.size > 1
@@ -175,7 +178,7 @@ module Ruboto
           convert_return = "#{return_class.sub(/<.*>$/, '')}.class, "
         end
 
-        method_name = camelize ? attribute('name') : snake_case_attribute
+        method_name = snake_case ? snake_case_attribute : attribute('name')
         ["#{return_cast}JRubyAdapter.runRubyMethod(#{convert_return}scriptInfo.getRubyInstance(), \"#{method_name}\"#{args});"]
       end
 
@@ -188,19 +191,29 @@ module Ruboto
             (attribute('return') ? attribute('return') : 'void'),
             attribute('name'), parameters,
             get_elements('exception').map { |m| m.attribute('type') },
-            ["if (ScriptLoader.isCalledFromJRuby()) #{super_return}",
+            [%Q{boolean isCalledFromJRuby = ScriptLoader.isCalledFromJRuby(); System.out.println("Called #{attribute('name')}: " + isCalledFromJRuby);},
+             "if (isCalledFromJRuby) #{super_return}",
              if_else('!JRubyAdapter.isInitialized()',
                      [%Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
                       super_return]),
              'String rubyClassName = scriptInfo.getRubyClassName();',
              "if (rubyClassName == null) #{super_return}",
              if_else(
-                 "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                 "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
                  ruby_call,
                  if_else(
-                     "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                     "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
                      ruby_call(true),
-                     [super_return]
+                     if_else(
+                         "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                         ruby_call(true),
+                         # FIXME(uwe):  Can the method be unimplemented?  Is the Ruby instance always an instance of this class?
+                         #if_else(
+                         #    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                             ruby_call,
+                         #    [super_return]
+                         #)
+                     )
                  )
              )
             ]

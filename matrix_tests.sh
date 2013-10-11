@@ -14,7 +14,6 @@ ANDROID_TARGETS="16 10 15" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.5 1.7.4"
-STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.4"
 RUBOTO_UPDATE_EXAMPLES=1
 # export STRIP_INVOKERS=1
 
