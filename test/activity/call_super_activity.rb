@@ -20,7 +20,7 @@ class CallSuperActivity
   end
 
   # FIXME(uwe):  We should test that super is not called implicitly
-  # def on_resume
+  # def onResume
   #   super
   # end
 

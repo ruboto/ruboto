@@ -109,7 +109,7 @@ def ruboto_import_widget(class_name, package_name='android.widget')
 
   return unless klass
 
-  RubotoActivity.class_eval "
+  method_str = "
      def #{(class_name.to_s.gsub(/([A-Z])/) { '_' + $1.downcase })[1..-1]}(params={})
         if force_style = params.delete(:default_style)
           rv = #{class_name}.new(self, nil, force_style)
@@ -134,6 +134,8 @@ def ruboto_import_widget(class_name, package_name='android.widget')
         rv
      end
    "
+  RubotoActivity.class_eval method_str
+  android.app.Fragment.class_eval method_str.gsub('self', 'activity')
 
   setup_list_view if class_name == :ListView
   setup_spinner if class_name == :Spinner
