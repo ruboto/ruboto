@@ -46,7 +46,7 @@ module Ruboto
                 argument :required
                 description 'Path to where you want your app.  Defaults to the last part of the package name.'
               }
-              option('target') {
+              option('target', 't') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
                 description "Android version to target. Must begin with 'android-' (e.g., 'android-10' for gingerbread)"
