@@ -448,10 +448,6 @@ module Ruboto
                     'org/jruby/embed/bsf',
                     'org/jruby/embed/jsr223',
                     'org/jruby/embed/osgi',
-                    # 'org/jruby/ext/ffi', # Used by several JRuby core classes, but should not be needed unless we add FFI support
-                    'org/jruby/ext/ffi/AbstractMemory*',
-                    'org/jruby/ext/ffi/io',
-                    'org/jruby/ext/ffi/jffi',
                     # 'org/jruby/ext/tracepoint',
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
