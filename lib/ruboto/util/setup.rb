@@ -42,22 +42,34 @@ module Ruboto
       # Utility Methods
       #
 
+      MAC_OS_X = 'macosx'
+      WINDOWS = 'windows'
+      LINUX = 'linux'
+
       def android_package_os_id
         case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then
-          'macosx'
-        when /linux/ then
-          'linux'
-        when /^mswin32|windows(.*)/ then
-          'windows'
+        when /^darwin(.*)/
+          MAC_OS_X
+        when /linux/
+          LINUX
+        when /^mswin32|windows(.*)/
+          WINDOWS
         else
           ## Error
           nil
         end
       end
 
+      def mac_os_x?
+        android_package_os_id == MAC_OS_X
+      end
+
+      def windows?
+        android_package_os_id == WINDOWS
+      end
+
       def android_package_directory
-        if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+        if windows?
           'AppData/Local/Android/android-sdk'
         else
           ENV['ANDROID_HOME'] ? ENV['ANDROID_HOME'] : File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
@@ -65,14 +77,14 @@ module Ruboto
       end
 
       def path_setup_file
-        case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/ then
+        case android_package_os_id
+        when MAC_OS_X
           '.profile'
-        when /linux/ then
+        when LINUX
           '.bashrc'
-        when /^mswin32|windows(.*)/ then
-          'windows'
+        when WINDOWS
           ## Error
+          'windows'
         else
           ## Error
           nil
@@ -92,7 +104,7 @@ module Ruboto
           version += ".#{minor.text}" if minor
           version += ".#{micro.text}" if micro
           version
-        end.sort_by{|v| Gem::Version.new(v)}.last
+        end.sort_by { |v| Gem::Version.new(v) }.last
       end
 
       #########################################
@@ -109,12 +121,13 @@ module Ruboto
         @ant_loc = check_for('ant', 'Apache ANT')
         check_for_android_sdk
         check_for_emulator
+        check_for_haxm
         check_for_platform_tools
         check_for_build_tools
         api_levels.each { |api_level| check_for_android_platform(api_level) }
 
         puts
-        ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
+        ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @haxm_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
         puts "    #{ok ? '*** Ruboto setup is OK! ***' : '!!! Ruboto setup is NOT OK !!!'}\n\n"
         ok
       end
@@ -122,6 +135,33 @@ module Ruboto
       def check_for_emulator
         @emulator_loc = check_for('emulator', 'Android Emulator',
                                   File.join(android_package_directory, 'tools', 'emulator'))
+      end
+
+      def check_for_haxm
+        case android_package_os_id
+        when MAC_OS_X
+          kext_path = '/System/Library/Extensions/intelhaxm.kext'
+          found = File.exists?(kext_path)
+
+          unless found
+            dmg_path = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM.dmg')
+            if File.exists?(dmg_path)
+              system "hdiutil attach #{dmg_path}"
+              # FIXME(uwe): Detect volume
+              # FIXME(uwe): Detect mpkg file with correct version.
+              system 'sudo -S installer -pkg /Volumes/IntelHAXM_1.0.6/IntelHAXM_1.0.6.mpkg -target /'
+              found = File.exists?(kext_path)
+            end
+          end
+          puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
+          @haxm_loc = kext_path if found
+        when LINUX
+          @haxm_loc = 'Not supported, yet.'
+          return
+        when WINDOWS
+          @haxm_loc = 'Not supported, yet.'
+          return
+        end
       end
 
       def check_for_platform_tools
@@ -176,7 +216,10 @@ module Ruboto
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
         check_all(api_levels)
-        install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc # build-tools, platform-tools and tools
+
+        # build-tools, platform-tools, tools, and haxm
+        install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_loc
+
         if @android_loc
           api_levels.each do |api_level|
             install_platform(accept_all, api_level) unless @platform_sdk_loc[api_level]
@@ -405,18 +448,19 @@ module Ruboto
       end
 
       def install_android_tools(accept_all)
-        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil?)
+        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil? || @haxm_loc.nil?)
           puts 'Android tools not found.'
           unless accept_all
-            print 'Would you like to download and install it? (Y/n): '
+            print 'Would you like to download and install them? (Y/n): '
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},platform-tool,tool -a --force"
+            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
             check_for_emulator
+            check_for_haxm
           end
         end
       end

@@ -87,7 +87,7 @@ def start_activity_by_button(activity, button_id, activity_class_name = 'org.rub
       btn.request_focus
       btn.perform_click
     end
-    current_activity = wait_for_monitor_with_timeout(monitor, 5000)
+    current_activity = wait_for_monitor_with_timeout(monitor, 10000)
   ensure
     removeMonitor(monitor)
   end

@@ -4,6 +4,7 @@ module Ruboto
   module Util
     module Emulator
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
+      ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin(.*)/
 
       API_LEVEL_TO_VERSION = {
           10 => '2.3.3', 11 => '3.0', 12 => '3.1', 13 => '3.2', 14 => '4.0',
@@ -18,7 +19,11 @@ module Ruboto
         sdk_level = sdk_level.gsub(/^android-/, '').to_i
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
-          emulator_cmd = 'emulator64-arm'
+          if ON_MAC_OS_X
+            emulator_cmd = '-m "emulator64-(arm|x86)"'
+          else
+            emulator_cmd = 'emulator64-arm'
+          end
         else
           emulator_cmd = 'emulator-arm'
         end
@@ -87,7 +92,12 @@ module Ruboto
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
           unless File.exists? avd_home
             puts "Creating AVD #{avd_name}"
-            puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
+            if ON_MAC_OS_X
+              abis = `android list target`.split(/----------\n/).
+                  find{ |l| l =~ /android-#{sdk_level}/ }.slice(/(?<=ABIs : ).*/).split(', ')
+              abi = abis.find { |a| a =~ /x86/ }
+            end
+            puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA #{"--abi #{abi}" if abi}`
             if $? != 0
               puts 'Failed to create AVD.'
               exit 3
