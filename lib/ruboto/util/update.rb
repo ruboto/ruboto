@@ -553,45 +553,37 @@ module Ruboto
               FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
               FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
-              jruby_stdlib_version = Gem::Version.new(JRubyJars::VERSION)
-
-              if included_stdlibs
-                lib_dirs = %w(1.8 1.9 2.0 shared)
-
-                # FIXME(uwe): Remove when we stop testing JRuby < 1.7.4.dev
-                lib_dirs.delete('2.0') if jruby_stdlib_version < Gem::Version.new('1.7.4.dev')
-                # EMXIF
-
-                print 'excluded...'
-                lib_dirs.each do |ld|
-                  Dir.chdir "new/jruby.home/lib/ruby/#{ld}" do
-                    libs = Dir['*'].map { |d| d.sub /\.(rb|jar)$/, '' }.uniq
-                    libs.each do |d|
-                      next if included_stdlibs.include? d
-                      FileUtils.rm_rf d if File.exists? d
-                      file = "#{d}.rb"
-                      FileUtils.rm_rf file if File.exists? file
-                      jarfile = "#{d}.jar"
-                      FileUtils.rm_rf jarfile if File.exists? jarfile
-                      print "#{d}..."
+              Dir.chdir 'new/jruby.home/lib/ruby' do
+                ruby_stdlib_versions = Dir['*'] - %w(gems)
+                if included_stdlibs
+                  print 'excluded...'
+                  ruby_stdlib_versions.each do |ld|
+                    Dir.chdir ld do
+                      libs = Dir['*'].map { |d| d.sub /\.(rb|jar)$/, '' }.uniq
+                      libs.each do |d|
+                        next if included_stdlibs.include? d
+                        FileUtils.rm_rf d if File.exists? d
+                        file = "#{d}.rb"
+                        FileUtils.rm_rf file if File.exists? file
+                        jarfile = "#{d}.jar"
+                        FileUtils.rm_rf jarfile if File.exists? jarfile
+                        print "#{d}..."
+                      end
                     end
                   end
                 end
-              end
 
-              if excluded_stdlibs.any?
-                %w(1.8 1.9 2.0 shared).each do |ld|
-                  # FIXME(uwe): Remove when we stop testing JRuby < 1.7.4.dev
-                  next if ld == '2.0' && jruby_stdlib_version < Gem::Version.new('1.7.4.dev')
-                  # EMXIF
-                  excluded_stdlibs.each do |d|
-                    dir = "new/jruby.home/lib/ruby/#{ld}/#{d}"
-                    FileUtils.rm_rf dir if File.exists? dir
-                    file = "#{dir}.rb"
-                    FileUtils.rm_rf file if File.exists? file
+                if excluded_stdlibs.any?
+                  ruby_stdlib_versions.each do |ld|
+                    excluded_stdlibs.each do |d|
+                      dir = "#{ld}/#{d}"
+                      FileUtils.rm_rf dir if File.exists? dir
+                      file = "#{dir}.rb"
+                      FileUtils.rm_rf file if File.exists? file
+                    end
                   end
+                  print "excluded #{excluded_stdlibs.join(' ')}..."
                 end
-                print "excluded #{excluded_stdlibs.join(' ')}..."
               end
 
               Dir.chdir 'new' do
