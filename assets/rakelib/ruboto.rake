@@ -281,6 +281,9 @@ task :update_scripts => %w(install:quick) do
   update_scripts
 end
 
+desc 'Copy scripts to emulator or device and reload'
+task :boing => %w(update_scripts:reload)
+
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
   task :restart => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
@@ -538,7 +541,7 @@ Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
 end
 
 desc 'Log activity execution, accepts optional logcat filter'
-task :logcat, [:filter] do |t, args|
+task :log, [:filter] do |t, args|
   puts '--- clearing logcat'
   `adb logcat -c`
   filter = args[:filter] ? args[:filter] : '' # filter log with filter-specs like TAG:LEVEL TAG:LEVEL ... '*:S'
