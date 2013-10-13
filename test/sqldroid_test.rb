@@ -15,7 +15,6 @@ class SqldroidTest < Test::Unit::TestCase
   def test_sqldroid
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
-require 'ruboto/activity'
 require 'ruboto/widget'
 require 'sqldroid'
 
