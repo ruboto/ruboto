@@ -62,8 +62,9 @@ module Ruboto
       raise "Unknown options: #{options}" unless options.empty?
 
       if class_name.nil? && block_given?
+        src_desc = source_descriptor(block)
         class_name =
-            "#{java_class.name.split('::').last}_#{source_descriptor(block)[0].split('/').last.gsub(/[.-]+/, '_')}_#{source_descriptor(block)[1]}"
+            "#{java_class.name.split('::').last}_#{src_desc[0].split('/').last.gsub(/[.-]+/, '_')}_#{src_desc[1]}"
       end
 
       class_name = class_name.to_s
@@ -85,8 +86,8 @@ module Ruboto
 
     private
 
-    def source_descriptor(proc)
-      if md = /^#<Proc:0x[0-9A-Fa-f]+@(.+):(\d+)(?: \(lambda\))?>$/.match(proc.inspect)
+    def source_descriptor(src_proc)
+      if (md = /^#<Proc:0x[0-9A-Fa-f-]+@(.+):(\d+)(?: \(lambda\))?>$/.match(src_proc.inspect))
         filename, line = md.captures
         return filename, line.to_i
       end
