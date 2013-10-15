@@ -153,7 +153,7 @@ class Test::Unit::TestCase
     # FIXME(uwe): Remove exclusion feature
     excluded_stdlibs = options.delete(:excluded_stdlibs)
     included_stdlibs = options.delete(:included_stdlibs)
-    standalone = options.delete(:standalone) || !!included_stdlibs  || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
+    standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     bundle = options.delete(:bundle)
     raise "Unknown options: #{options.inspect}" unless options.empty?
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -247,10 +247,19 @@ class Test::Unit::TestCase
 
   def run_app_tests
     check_platform_installation
+    test_completed = false
+    Thread.start do
+      loop do
+        sleep 60
+        break if test_completed
+        print '-'
+      end
+    end
     Dir.chdir APP_DIR do
       system 'rake test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
     end
+    test_completed = true
   end
 
   def check_platform_installation
@@ -284,7 +293,7 @@ class Test::Unit::TestCase
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'http://rubygems.org/'\n\n"
-      gems.each{|g| f << "gem '#{g}'\n"}
+      gems.each { |g| f << "gem '#{g}'\n" }
     end
   end
 
