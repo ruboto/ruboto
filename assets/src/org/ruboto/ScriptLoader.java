@@ -1,6 +1,7 @@
 package org.ruboto;
 
 import java.io.IOException;
+import java.util.Map;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -52,7 +53,6 @@ public class ScriptLoader {
                                 JRubyAdapter.put("$java_instance", component);
                                 rubyClass = JRubyAdapter.runScriptlet("class << $java_instance; self; end");
                             } else if (JRubyAdapter.isRubyOneNine()) {
-                                JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
                                 rubyClass = JRubyAdapter.runRubyMethod(component, "singleton_class");
                             } else {
                                 throw new RuntimeException("Unknown Ruby version: " + JRubyAdapter.get("RUBY_VERSION"));
@@ -67,7 +67,6 @@ public class ScriptLoader {
                             Log.d("Script contains class definition");
                             if (rubyClass == null && hasBackingJavaClass) {
                                 Log.d("Script has separate Java class");
-                                JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
                                 rubyClass = JRubyAdapter.runScriptlet("Java::" + component.getClass().getName());
                             }
                             Log.d("Set class: " + rubyClass);
@@ -116,16 +115,40 @@ public class ScriptLoader {
     }
 
     public static final void callOnCreate(final RubotoComponent component, Object... args) {
+        persistObjectProxy(component);
         if (component instanceof android.content.Context) {
             Log.d("Call onCreate on: " + component.getScriptInfo().getRubyInstance());
             // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
             if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onCreate}")) {
                 JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onCreate", args);
-            } else if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_create}")) {
+            } else if ((Boolean)JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + ".instance_methods(true).any?{|m| m.to_sym == :on_create}")) {
                 JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "on_create", args);
+            } else {
+                JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onCreate", args);
             }
             // EMXIF
         }
+    }
+
+    public static final void callOnDestroy(final RubotoComponent component) {
+        String rubyClassName = component.getScriptInfo().getRubyClassName();
+        if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(false).any?{|m| m.to_sym == :onDestroy}")) {
+            JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onDestroy");
+        } else if ((Boolean)JRubyAdapter.runScriptlet(rubyClassName + ".instance_methods(true).any?{|m| m.to_sym == :on_destroy}")) {
+            JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "on_destroy");
+        } else {
+            JRubyAdapter.runRubyMethod(component.getScriptInfo().getRubyInstance(), "onDestroy");
+        }
+        releaseObjectProxy(component);
+    }
+
+    private static void persistObjectProxy(RubotoComponent component) {
+        JRubyAdapter.runScriptlet("Java::" + component.getClass().getName() + ".__persistent__ = true");
+        ((Map)JRubyAdapter.get("RUBOTO_JAVA_PROXIES")).put(component.getScriptInfo().getRubyInstance(), component.getScriptInfo().getRubyInstance());
+    }
+
+    private static void releaseObjectProxy(RubotoComponent component) {
+        ((Map)JRubyAdapter.get("RUBOTO_JAVA_PROXIES")).remove(component.getScriptInfo().getRubyInstance());
     }
 
 }

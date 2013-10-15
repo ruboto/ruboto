@@ -86,6 +86,24 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     }
   }
 
+    public void onDestroy() {
+        if (ScriptLoader.isCalledFromJRuby()) {
+            super.onDestroy();
+            return;
+        }
+        if (!JRubyAdapter.isInitialized()) {
+            Log.i("Method called before JRuby runtime was initialized: RubotoActivity#onDestroy");
+            super.onDestroy();
+            return;
+        }
+        String rubyClassName = scriptInfo.getRubyClassName();
+        if (rubyClassName == null) {
+            super.onDestroy();
+            return;
+        }
+        ScriptLoader.callOnDestroy(this);
+    }
+
 
   /****************************************************************************************
    * 

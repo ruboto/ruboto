@@ -135,7 +135,7 @@ module Ruboto
       def generate_core_classes(params)
         hash = {:package => 'org.ruboto'}
         %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
-        hash[:method_exclude] = params[:method_exclude].split(',').push('onCreate').push('onBind').push('onStartCommand').join(',')
+        hash[:method_exclude] = params[:method_exclude].split(',').push('onCreate').push('onDestroy').push('onBind').push('onStartCommand').join(',')
 
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver).each do |i|
           name = i.split('.')[-1]

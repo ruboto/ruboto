@@ -272,6 +272,8 @@ public class JRubyAdapter {
                 addLoadPath(scriptsDirName(appContext));
                 put("$package_name", appContext.getPackageName());
 
+                runScriptlet("::RUBOTO_JAVA_PROXIES = {}");
+
                 initialized = true;
             } catch (ClassNotFoundException e) {
                 handleInitException(e);

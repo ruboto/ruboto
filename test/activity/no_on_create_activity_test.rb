@@ -1,4 +1,4 @@
-activity org.ruboto.test_app.StartupExceptionActivity
+activity org.ruboto.test_app.NoOnCreateActivity
 
 setup do |activity|
   start = Time.now
@@ -10,6 +10,6 @@ setup do |activity|
   assert @text_view
 end
 
-test('activity starts with caught exception') do |activity|
-  assert_equal 'Startup OK', @text_view.text.to_s
+test('activity starts without onCreate implemented') do |activity|
+  assert_equal 'No On Create', @text_view.text.to_s
 end
