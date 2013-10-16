@@ -8,7 +8,7 @@ class GitBasedGemTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       File.open('Gemfile.apk', 'w') do |f|
         f << "source 'http://rubygems.org/'\n\n"
-        f << "gem 'gosu_android', :git => 'https://github.com/Garoe/gosu-android.git'"
+        f << "gem 'uri_shortener', :git => 'https://github.com/Nyangawa/UriShortener.git'"
       end
     end
   end
@@ -21,7 +21,7 @@ class GitBasedGemTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/widget'
-require 'gosu'
+require 'uri_shortener'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
