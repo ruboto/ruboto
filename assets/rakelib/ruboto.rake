@@ -237,25 +237,22 @@ file RUBOTO_CONFIG_FILE
 
 file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
   require 'yaml'
-  if (heap_alloc = YAML.load(File.read(RUBOTO_CONFIG_FILE))['heap_alloc'])
-    config = <<EOF
-            // BEGIN Ruboto HeapAlloc
-            @SuppressWarnings("unused")
-            byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
-            arrayForHeapAllocation = null;
-            // END Ruboto HeapAlloc
-EOF
-  else
-    config = <<EOF
-            // BEGIN Ruboto HeapAlloc
-            // @SuppressWarnings("unused")
-            // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
-            // arrayForHeapAllocation = null;
-            // END Ruboto HeapAlloc
-EOF
+  marker_topic ='Ruboto HeapAlloc'
+  begin_marker = "// BEGIN #{marker_topic}"
+  end_marker = "// END #{marker_topic}"
+  unless (heap_alloc = YAML.load(File.read(RUBOTO_CONFIG_FILE))['heap_alloc'])
+    heap_alloc = 13
+    comment = '// '
   end
+  config = <<EOF
+            #{begin_marker}
+            #{comment}@SuppressWarnings("unused")
+            #{comment}byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
+            #{comment}arrayForHeapAllocation = null;
+            #{end_marker}
+EOF
   source = File.read(JRUBY_ADAPTER_FILE)
-  heap_alloc_pattern = %r{^\s*// BEGIN Ruboto HeapAlloc\n.*^\s*// END Ruboto HeapAlloc\n}m
+  heap_alloc_pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
   File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source.sub(heap_alloc_pattern, config) }
 end
 
@@ -770,7 +767,7 @@ end
 # Triggers reload of updated scripts and restart of the current activity
 def reload_scripts(scripts)
   s = scripts.map{|s| s.gsub(/[&;]/){|m| "&#{m[0]}"}}.join(';')
-  cmd = "adb shell am broadcast -a android.intent.action.VIEW -e reload #{s}"
+  cmd = %Q{adb shell am broadcast -a android.intent.action.VIEW -e reload "#{s}"}
   puts cmd
   system cmd
 end
