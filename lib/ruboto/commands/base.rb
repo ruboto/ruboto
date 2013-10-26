@@ -50,6 +50,8 @@ module Ruboto
                 argument :required
                 defaults DEFAULT_TARGET_SDK
                 description "Android version to target. Must begin with 'android-' (e.g., 'android-10' for gingerbread)"
+                cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
+                validate {|t| t =~ /^android-\d+$/}
               }
               option('min-sdk') {
                 argument :required
@@ -355,10 +357,6 @@ module Ruboto
                 update_bundle
               when 'jruby' then
                 update_jruby(params['force'].value, true) || abort
-                # FIXME(uwe): Deprecated in Ruboto 0.8.1.  Remove september 2013.
-              when 'ruboto' then
-                puts "\nThe 'ruboto update ruboto' command has been deprecated.  Use\n\n    ruboto update app\n\ninstead.\n\n"
-                update_ruboto(params['force'].value) || abort
               else
                 raise "Unknown update target: #{params['what'].value.inspect}"
               end
