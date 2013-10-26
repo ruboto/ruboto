@@ -1,4 +1,5 @@
 $:.unshift('lib') unless $:.include?('lib')
+require 'time'
 require 'date'
 require 'rake/clean'
 require 'rexml/document'
@@ -6,7 +7,10 @@ require 'ruboto/version'
 require 'ruboto/description'
 require 'ruboto/sdk_versions'
 require 'uri'
+require 'net/http'
 require 'net/https'
+require 'openssl'
+require 'yaml'
 
 PROJECT_DIR = File.expand_path(File.dirname(__FILE__))
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
@@ -116,11 +120,6 @@ def get_github_issues
     print 'user name: '; user = STDIN.gets.chomp
     print ' password: '; pass = STDIN.gets.chomp
   end
-  require 'uri'
-  require 'net/http'
-  require 'net/https'
-  require 'openssl'
-  require 'yaml'
   host = 'api.github.com'
   base_uri = "https://#{host}/repos/ruboto/ruboto"
   https = Net::HTTP.new(host, 443)
@@ -132,7 +131,7 @@ def get_github_issues
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
-  milestone_entry = milestones.find{|m| m['title'] == Ruboto::VERSION}
+  milestone_entry = milestones.find { |m| m['title'] == Ruboto::VERSION }
   raise "Milestone for version #{} not found." unless milestone_entry
   milestone = milestone_entry['number']
 
@@ -223,11 +222,11 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-#{(categories.keys & grouped_issues.keys).map do |cat|
+  #{(categories.keys & grouped_issues.keys).map do |cat|
     "#{cat}:\n
-#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
-"
-end.join("\n")}
+    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+    "
+  end.join("\n")}
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
@@ -302,14 +301,6 @@ end
 
 desc 'Fetch download stats form rubygems.org'
 task :stats do
-  require 'time'
-  require 'date'
-  require 'rubygems'
-  require 'uri'
-  require 'net/http'
-  require 'net/https'
-  require 'openssl'
-  require 'yaml'
   host = 'rubygems.org'
   base_uri = "https://#{host}/api/v1"
   https = Net::HTTP.new(host, 443)
@@ -571,7 +562,21 @@ end
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshot do
   current_gem = 'jruby-jars-9000.dev.gem'
-  `wget http://ci.jruby.org/snapshots/master/#{current_gem}`
+  print "Downloading #{current_gem}: \r"
+  uri = URI("http://ci.jruby.org/snapshots/master/#{current_gem}")
+  done = 0
+  body = ''
+  Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
+    length = response['Content-Length'].to_i
+    response.read_body do |fragment|
+      body << fragment
+      done += fragment.length
+      progress = (done * 100) / length
+      print "Downloading #{current_gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+    end
+    puts
+  end
+  File.open(current_gem, 'wb') { |f| f << body }
   jars = Dir["#{current_gem}.*"]
   jars[0..-2].each { |j| FileUtils.rm_f j } if jars.size > 1
   FileUtils.mv(jars[-1], current_gem) if jars[-1]
