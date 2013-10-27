@@ -577,7 +577,4 @@ task :get_jruby_jars_snapshot do
     puts
   end
   File.open(current_gem, 'wb') { |f| f << body }
-  jars = Dir["#{current_gem}.*"]
-  jars[0..-2].each { |j| FileUtils.rm_f j } if jars.size > 1
-  FileUtils.mv(jars[-1], current_gem) if jars[-1]
 end

@@ -401,14 +401,14 @@ module Ruboto
               case RbConfig::CONFIG['host_os']
               when /^darwin(.*)/
                 asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.zip"
-                system "wget http://dl.google.com/android/#{asdk_file_name}"
-                system "unzip #{'-o ' if accept_all}#{asdk_file_name}"
-                system "rm #{asdk_file_name}"
+                download(asdk_file_name)
+                unzip(accept_all, asdk_file_name)
+                FileUtils.rm_f asdk_file_name
               when /linux/
                 asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.tgz"
-                system "wget http://dl.google.com/android/#{asdk_file_name}"
+                download asdk_file_name
                 system "tar -xzf #{asdk_file_name}"
-                system "rm #{asdk_file_name}"
+                FileUtils.rm_f asdk_file_name
               when /^mswin32|windows(.*)/
                 # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
                 #set IS_ELEVATED=0
@@ -419,12 +419,7 @@ module Ruboto
                 #)
 
                 asdk_file_name = "installer_r#{get_tools_version}-#{android_package_os_id}.exe"
-                require 'net/http'
-                Net::HTTP.start('dl.google.com') do |http|
-                  puts 'Downloading...'
-                  resp = http.get("/android/#{asdk_file_name}")
-                  open(asdk_file_name, 'wb') { |file| file.write(resp.body) }
-                end
+                download(asdk_file_name)
                 puts "Installing #{asdk_file_name}..."
                 system asdk_file_name
                 raise "Unexpected exit code while installing the Android SDK: #{$?}" unless $? == 0
@@ -443,6 +438,31 @@ module Ruboto
               system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
             end
             @missing_paths << "#{File.dirname(@android_loc)}"
+          end
+        end
+      end
+
+      def download(asdk_file_name)
+        print "Downloading #{asdk_file_name}: \r"
+        uri = URI("http://dl.google.com/android/#{asdk_file_name}")
+        body = ''
+        Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
+          length = response['Content-Length'].to_i
+          response.read_body do |fragment|
+            body << fragment
+            print "Downloading #{asdk_file_name}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
+          end
+          puts
+        end
+        File.open(asdk_file_name, 'wb') { |f| f << body }
+      end
+
+      def unzip(accept_all, asdk_file_name)
+        require 'zip'
+        Zip::File.open(asdk_file_name) do |zipfile|
+          zipfile.each do |f|
+            f.restore_permissions = true
+            f.extract { accept_all }
           end
         end
       end
