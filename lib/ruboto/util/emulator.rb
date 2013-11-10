@@ -8,11 +8,11 @@ module Ruboto
 
       API_LEVEL_TO_VERSION = {
           10 => '2.3.3', 11 => '3.0', 12 => '3.1', 13 => '3.2', 14 => '4.0',
-          15 => '4.0.3', 16 => '4.1.2', 17 => '4.2.2', 18 => '4.3',
+          15 => '4.0.3', 16 => '4.1.2', 17 => '4.2.2', 18 => '4.3', 19 => '4.4',
       }
 
       def sdk_level_name(sdk_level)
-        API_LEVEL_TO_VERSION[sdk_level]
+        API_LEVEL_TO_VERSION[sdk_level] || "api_#{sdk_level}"
       end
 
       def start_emulator(sdk_level)

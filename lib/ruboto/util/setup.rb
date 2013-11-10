@@ -92,6 +92,10 @@ module Ruboto
       end
 
       def get_tools_version(type='tool')
+        # FIXME(uwe): Temporary fix for bug in build-tools 19.0.0
+        return '18.1.1' if type == 'build-tool'
+        # EMXIF
+
         require 'rexml/document'
         require 'open-uri'
 
