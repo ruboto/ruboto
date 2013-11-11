@@ -17,7 +17,7 @@ class GitBasedGemTest < Test::Unit::TestCase
     cleanup_app
   end
 
-  def test_gosu
+  def test_uri_shortener
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/widget'
@@ -28,7 +28,7 @@ ruboto_import_widgets :LinearLayout, :ListView, :TextView
 class RubotoTestAppActivity
   def onCreate(bundle)
     super
-    setTitle 'Gosu loaded OK!'
+    setTitle 'uri_shortener loaded OK!'
 
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center do
@@ -52,7 +52,7 @@ setup do |activity|
 end
 
 test("activity starts") do |activity|
-  assert_equal 'Gosu loaded OK!', @text_view.text.to_s
+  assert_equal 'uri_shortener loaded OK!', @text_view.text.to_s
 end
 EOF
 

@@ -173,14 +173,12 @@ def setup_image_button
 end
 
 def setup_list_view
-  Java::android.widget.ListView.__persistent__ = true
-  Java::android.widget.ListView.class_eval do
+  android.widget.ListView.__persistent__ = true
+  android.widget.ListView.class_eval do
     def configure(context, params = {})
       if (list = params.delete(:list))
-        @adapter_list = Java::java.util.ArrayList.new
-        @adapter_list.addAll(list)
         item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
-        params[:adapter] = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
+        params[:adapter] = android.widget.ArrayAdapter.new(context, item_layout, list)
       end
       super(context, params)
     end
@@ -195,19 +193,14 @@ def setup_list_view
 end
 
 def setup_spinner
-  Java::android.widget.Spinner.__persistent__ = true
-  Java::android.widget.Spinner.class_eval do
-    attr_reader :adapter, :adapter_list
-
+  android.widget.Spinner.__persistent__ = true
+  android.widget.Spinner.class_eval do
     def configure(context, params = {})
-      if params.has_key? :list
-        @adapter_list = Java::java.util.ArrayList.new
-        @adapter_list.addAll(params[:list])
-        item_layout = params.delete(:item_layout) || R::layout::simple_spinner_item
-        @adapter = Java::android.widget.ArrayAdapter.new(context, item_layout, @adapter_list)
-        @adapter.setDropDownViewResource(params.delete(:dropdown_layout) || R::layout::simple_spinner_dropdown_item)
-        setAdapter @adapter
-        params.delete :list
+      if (list = params.delete(:list))
+        item_layout = params.delete(:item_layout)
+        params[:adapter] = android.widget.ArrayAdapter.new(context, item_layout || R::layout::simple_spinner_item, list)
+        dropdown_layout = params.delete(:dropdown_layout)
+        params[:adapter].setDropDownViewResource(dropdown_layout) if dropdown_layout
       end
       super(context, params)
     end

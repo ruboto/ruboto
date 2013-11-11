@@ -22,7 +22,8 @@ export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
 
-  ruboto setup -y -t $ANDROID_OS
+  ruboto setup -y -t 10 -t $ANDROID_OS
+  source ~/.rubotorc
   ruboto emulator -t $ANDROID_OS
 
   for RUBOTO_PLATFORM in $PLATFORM_MODES ; do
