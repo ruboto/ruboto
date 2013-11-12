@@ -11,23 +11,23 @@ require File.expand_path('update_test_methods', File.dirname(__FILE__))
 # TODO(uwe): Delete obsolete examples when we stop supporting updating from them.
 Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
   example_archives = Dir["#{RubotoTest::APP_NAME}_*_tools_r*.tgz"]
-  example_archives = example_archives.sort_by{|a| Gem::Version.new(a[RubotoTest::APP_NAME.size + 1..-1].slice(/(.*)(?=_tools_)/).gsub('_', '.'))}
+  example_archives = example_archives.sort_by { |a| Gem::Version.new(a[RubotoTest::APP_NAME.size + 1..-1].slice(/(.*)(?=_tools_)/).gsub('_', '.')) }
   example_archives = example_archives.last(example_limit) if example_limit
 
   # TODO(gf): Track APIs compatible with update examples
-  EXAMPLE_COMPATIBLE_APIS = { (Gem::Version.new('0.7.0')..Gem::Version.new('0.10.99')) => [8],
-                              (Gem::Version.new('0.11.0')..Gem::Version.new('0.13.0')) => [10,11,12,13,14,15,16,17] }
+  EXAMPLE_COMPATIBLE_APIS = {(Gem::Version.new('0.7.0')..Gem::Version.new('0.10.99')) => [8],
+                             (Gem::Version.new('0.11.0')..Gem::Version.new('0.13.0')) => [10, 11, 12, 13, 14, 15, 16, 17]}
 
   installed_apis = `android list target --compact`.lines.grep(/^android-/) { |s| s.match(/\d+/).to_s.to_i }
   examples = example_archives.collect { |f| f.match /^#{RubotoTest::APP_NAME}_(?<ruboto_version>.*)_tools_r(?<tools_version>.*)\.tgz$/ }.compact
 
   missing_apis = false
   puts "Backward compatibility update tests: #{examples.size}"
-  examples.each_with_index do |m,i|
+  examples.each_with_index do |m, i|
     example_gem_version = Gem::Version.new m[:ruboto_version]
-    compatible_apis = EXAMPLE_COMPATIBLE_APIS[ EXAMPLE_COMPATIBLE_APIS.keys.detect { |gem_range| gem_range.cover? example_gem_version } ]
+    compatible_apis = EXAMPLE_COMPATIBLE_APIS[EXAMPLE_COMPATIBLE_APIS.keys.detect { |gem_range| gem_range.cover? example_gem_version }]
     if compatible_apis
-      if ( installed_apis & compatible_apis ).empty?
+      if (installed_apis & compatible_apis).empty?
         puts "Update test #{example_archives[i]} needs a missing compatible API: #{compatible_apis.join(',')}"
         missing_apis = true
       end
@@ -65,4 +65,21 @@ end
 EOF
   end
 
+end
+
+class RubotoUpdateTest < Test::Unit::TestCase
+  def setup
+    generate_app :heap_alloc => 16, :update => true
+  end
+
+  def teardown
+    cleanup_app
+  end
+
+  def test_jruby_adapter_heap_alloc
+    Dir.chdir APP_DIR do
+      assert_match /^\s*byte\[\] arrayForHeapAllocation = new byte\[16 \* 1024 \* 1024\];/,
+                     File.read('src/org/ruboto/JRubyAdapter.java')
+    end
+  end
 end

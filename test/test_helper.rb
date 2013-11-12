@@ -147,20 +147,28 @@ class Test::Unit::TestCase
   end
 
   def generate_app(options = {})
-    package = options.delete(:package) || PACKAGE
+    bundle = options.delete(:bundle)
     example = options.delete(:example) || false
-    update = options.delete(:update) || false
+
     # FIXME(uwe): Remove exclusion feature
     excluded_stdlibs = options.delete(:excluded_stdlibs)
+    # EMXIF
+
+    heap_alloc = options.delete(:heap_alloc)
     included_stdlibs = options.delete(:included_stdlibs)
+    package = options.delete(:package) || PACKAGE
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
-    bundle = options.delete(:bundle)
+    update = options.delete(:update) || false
     raise "Unknown options: #{options.inspect}" unless options.empty?
+
+    raise "Inclusion/exclusion of libs requires standalone mode." if (included_stdlibs || excluded_stdlibs) && !standalone
+
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
     FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_package_#{package}" if package != PACKAGE
+    template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
     template_dir << "_example_#{example}" if example
     template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
@@ -179,14 +187,13 @@ class Test::Unit::TestCase
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
+            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc) if included_stdlibs || excluded_stdlibs || heap_alloc
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
             install_jruby_jars_gem
           else
             FileUtils.rm(Dir['libs/{jruby-*.jar,dx.jar}'])
           end
-          update_app if update
         end
       else
         if standalone
@@ -202,9 +209,8 @@ class Test::Unit::TestCase
         end
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
+          write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc) if included_stdlibs || excluded_stdlibs || heap_alloc
           if standalone
-            include_stdlibs(included_stdlibs) if included_stdlibs
-            exclude_stdlibs(excluded_stdlibs) if excluded_stdlibs
             system "#{RUBOTO_CMD} gen jruby"
             raise "update jruby failed with return code #$?" if $? != 0
           end
@@ -221,8 +227,10 @@ class Test::Unit::TestCase
       #end
       # EMXIF
 
-      unless example && !update
-        Dir.chdir APP_DIR do
+      Dir.chdir APP_DIR do
+        if update
+          update_app
+        elsif example
           system 'rake patch_dex' # Ensure dx heap space is sufficient.
           assert_equal 0, $?
           Dir.chdir 'test' do
@@ -278,14 +286,14 @@ class Test::Unit::TestCase
     end
   end
 
-  def include_stdlibs(included_stdlibs)
-    puts "Adding ruboto.yml: #{included_stdlibs.join(' ')}"
-    File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:included_stdlibs => included_stdlibs}) }
-  end
-
-  def exclude_stdlibs(excluded_stdlibs)
-    puts "Adding ruboto.yml: #{excluded_stdlibs.join(' ')}"
-    File.open('ruboto.yml', 'w') { |f| f << YAML.dump({:excluded_stdlibs => excluded_stdlibs}) }
+  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc)
+    yml = YAML.dump({'included_stdlibs' => included_stdlibs,
+                     'excluded_stdlibs' => excluded_stdlibs,
+                     'heap_alloc' => heap_alloc})
+    puts "Adding ruboto.yml:\n#{yml}"
+    File.open('ruboto.yml', 'w') do |f|
+      f << yml
+    end
   end
 
   def write_gemfile(bundle)

@@ -235,6 +235,7 @@ end
 
 file RUBOTO_CONFIG_FILE
 
+task :jruby_adapter => JRUBY_ADAPTER_FILE
 file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
   require 'yaml'
   marker_topic ='Ruboto HeapAlloc'
