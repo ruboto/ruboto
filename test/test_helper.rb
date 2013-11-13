@@ -230,7 +230,8 @@ class Test::Unit::TestCase
       Dir.chdir APP_DIR do
         if update
           update_app
-        elsif example
+        end
+        if update || !example
           system 'rake patch_dex' # Ensure dx heap space is sufficient.
           assert_equal 0, $?
           Dir.chdir 'test' do
