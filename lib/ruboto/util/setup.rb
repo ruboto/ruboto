@@ -148,13 +148,17 @@ module Ruboto
           found = File.exists?(@haxm_kext_loc)
           @haxm_kext_loc = nil unless found
           puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
-          @haxm_dmg_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM.dmg')
-          @haxm_dmg_loc = nil unless File.exists?(@haxm_dmg_loc)
+          @haxm_installer_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM.dmg')
+          @haxm_installer_loc = nil unless File.exists?(@haxm_installer_loc)
         when LINUX
+          @haxm_installer_loc = 'Not supported, yet.'
           @haxm_kext_loc = 'Not supported, yet.'
           return
         when WINDOWS
+          # How to detect if HAXM is installed?
           @haxm_kext_loc = 'Not supported, yet.'
+          @haxm_installer_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHaxm.exe')
+          @haxm_installer_loc = nil unless File.exists?(@haxm_installer_loc)
           return
         end
       end
@@ -213,7 +217,7 @@ module Ruboto
         check_all(api_levels)
 
         # build-tools, platform-tools, tools, and haxm
-        install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_dmg_loc
+        install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
         install_haxm(accept_all) unless @haxm_kext_loc
 
         if @android_loc
@@ -464,7 +468,7 @@ module Ruboto
       end
 
       def install_android_tools(accept_all)
-        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil? || @haxm_dmg_loc.nil?)
+        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil? || @haxm_installer_loc.nil?)
           puts 'Android tools not found.'
           unless accept_all
             print 'Would you like to download and install them? (Y/n): '
@@ -483,17 +487,26 @@ module Ruboto
       end
 
       def install_haxm(accept_all)
-        if @haxm_dmg_loc && @haxm_kext_loc.nil?
+        if @haxm_installer_loc && @haxm_kext_loc.nil?
           puts 'HAXM not installed.'
           unless accept_all
             print 'Would you like to install HAXM? (Y/n): '
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            system "hdiutil attach #{@haxm_dmg_loc}"
-            # FIXME(uwe): Detect volume
-            # FIXME(uwe): Detect mpkg file with correct version.
-            system 'sudo -S installer -pkg /Volumes/IntelHAXM_1.0.6/IntelHAXM_1.0.6.mpkg -target /'
+            case android_package_os_id
+            when MAC_OS_X
+              system "hdiutil attach #{@haxm_installer_loc}"
+              # FIXME(uwe): Detect volume
+              # FIXME(uwe): Detect mpkg file with correct version.
+              system 'sudo -S installer -pkg /Volumes/IntelHAXM_1.0.6/IntelHAXM_1.0.6.mpkg -target /'
+            when LINUX
+              puts 'HAXM installation on Linux is not supported, yet.'
+              return
+            when WINDOWS
+              puts 'HAXM installation on Windows is not supported, yet.'
+              return
+            end
           end
         end
       end
