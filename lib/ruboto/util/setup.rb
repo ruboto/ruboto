@@ -8,6 +8,9 @@ module Ruboto
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
 
+      RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
+      WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
+
       #########################################
       #
       # Core Set up Method
@@ -29,7 +32,10 @@ module Ruboto
         ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
           exts.each do |ext|
             exe = File.join(path, "#{cmd}#{ext}")
-            return exe if File.executable? exe
+            if File.executable? exe
+              exe.gsub!('\\', '/') if windows?
+              return exe
+            end
           end
         end
         nil
@@ -52,7 +58,7 @@ module Ruboto
           MAC_OS_X
         when /linux/
           LINUX
-        when /^mswin32|windows(.*)/
+        when /^mswin32|windows|mingw32/
           WINDOWS
         else
           ## Error
@@ -69,11 +75,8 @@ module Ruboto
       end
 
       def android_package_directory
-        if windows?
-          'AppData/Local/Android/android-sdk'
-        else
-          ENV['ANDROID_HOME'] ? ENV['ANDROID_HOME'] : File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
-        end
+        return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
+        File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
       end
 
       def path_setup_file
@@ -92,15 +95,11 @@ module Ruboto
       end
 
       def get_tools_version(type='tool')
-        # FIXME(uwe): Temporary fix for bug in build-tools 19.0.0
-        return '18.1.1' if type == 'build-tool'
-        # EMXIF
-
         require 'rexml/document'
         require 'open-uri'
 
         doc = REXML::Document.new(open(REPOSITORY_URL))
-        doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
+        version = doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
           micro = t.elements['sdk:micro']
@@ -109,6 +108,12 @@ module Ruboto
           version += ".#{micro.text}" if micro
           version
         end.sort_by { |v| Gem::Version.new(v) }.last
+
+        # FIXME(uwe): Temporary fix for bug in build-tools 19.0.0
+        return '18.1.1' if type == 'build-tool' && version == '19.0.0'
+        # EMXIF
+
+        version
       end
 
       #########################################
@@ -120,8 +125,8 @@ module Ruboto
         @existing_paths = []
         @missing_paths = []
 
-        @java_loc = check_for('java', 'Java runtime')
-        @javac_loc = check_for('javac', 'Java Compiler')
+        @java_loc = check_for('java', 'Java runtime', ENV['JAVA_HOME'] && "#{ENV['JAVA_HOME']}/bin/java")
+        @javac_loc = check_for('javac', 'Java Compiler', ENV['JAVA_HOME'] && "#{ENV['JAVA_HOME']}/bin/javac")
         @ant_loc = check_for('ant', 'Apache ANT')
         check_for_android_sdk
         check_for_emulator
@@ -155,8 +160,10 @@ module Ruboto
           @haxm_kext_loc = 'Not supported, yet.'
           return
         when WINDOWS
-          # How to detect if HAXM is installed?
-          @haxm_kext_loc = 'Not supported, yet.'
+          @haxm_kext_loc = `sc query intelhaxm`
+          found = ($? == 0)
+          @haxm_kext_loc = nil unless found
+          puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
           @haxm_installer_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHaxm.exe')
           @haxm_installer_loc = nil unless File.exists?(@haxm_installer_loc)
           return
@@ -170,7 +177,7 @@ module Ruboto
 
       def check_for_build_tools
         @dx_loc = check_for('dx', 'Android SDK Command dx',
-                            Dir[File.join(android_package_directory, 'build-tools', '*', 'dx')][-1])
+                            Dir[File.join android_package_directory, 'build-tools', '*', windows? ? 'dx.bat' : 'dx'][-1])
       end
 
       def check_for_android_sdk
@@ -180,7 +187,7 @@ module Ruboto
 
       def check_for(cmd, pretty_name=nil, alt_dir=nil)
         rv = which(cmd)
-        rv = nil if rv.empty?
+        rv = nil if rv && rv.empty?
 
         if rv
           @existing_paths << File.dirname(rv)
@@ -214,7 +221,6 @@ module Ruboto
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
-        check_all(api_levels)
 
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
@@ -225,13 +231,14 @@ module Ruboto
             install_platform(accept_all, api_level) unless @platform_sdk_loc[api_level]
           end
         end
+        check_all(api_levels)
       end
 
       def install_java(accept_all)
-        case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/
-        when /linux/
-        when /^mswin32|windows(.*)/
+        case android_package_os_id
+        when MAC_OS_X
+        when LINUX
+        when WINDOWS
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
           #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
@@ -260,7 +267,7 @@ module Ruboto
             open(java_installer_file_name, 'wb') { |file| file.write(resp.body) }
             puts "Installing #{java_installer_file_name}..."
             system java_installer_file_name
-            raise "Unexpected exit code while installing Java: #{$?}" unless $? == 0
+            raise "Unexpected exit code while installing Java: #{$?.exitstatus}" unless $? == 0
             FileUtils.rm_f java_installer_file_name
           else
             puts
@@ -278,15 +285,15 @@ module Ruboto
             end
           end
         else
-          raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+          raise "Unknown host os: #{android_package_os_id}"
         end
       end
 
       def install_ant(accept_all)
-        case RbConfig::CONFIG['host_os']
-        when /^darwin(.*)/
-        when /linux/
-        when /^mswin32|windows(.*)/
+        case android_package_os_id
+        when MAC_OS_X
+        when LINUX
+        when WINDOWS
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
           #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
@@ -398,18 +405,18 @@ module Ruboto
           end
           if accept_all || a == 'Y' || a.empty?
             Dir.chdir File.expand_path('~/') do
-              case RbConfig::CONFIG['host_os']
-              when /^darwin(.*)/
+              case android_package_os_id
+              when MAC_OS_X
                 asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.zip"
                 download(asdk_file_name)
                 unzip(accept_all, asdk_file_name)
                 FileUtils.rm_f asdk_file_name
-              when /linux/
+              when LINUX
                 asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.tgz"
                 download asdk_file_name
                 system "tar -xzf #{asdk_file_name}"
                 FileUtils.rm_f asdk_file_name
-              when /^mswin32|windows(.*)/
+              when WINDOWS
                 # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
                 #set IS_ELEVATED=0
                 #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
@@ -421,8 +428,8 @@ module Ruboto
                 asdk_file_name = "installer_r#{get_tools_version}-#{android_package_os_id}.exe"
                 download(asdk_file_name)
                 puts "Installing #{asdk_file_name}..."
-                system "elevate -c -w #{asdk_file_name}"
-                raise "Unexpected exit code while installing the Android SDK: #{$?}" unless $? == 0
+                system "#{WINDOWS_ELEVATE_CMD} #{asdk_file_name}"
+                raise "Unexpected exit code while installing the Android SDK: #{$?.exitstatus}" unless $? == 0
                 FileUtils.rm_f asdk_file_name
                 return
               else
@@ -434,7 +441,7 @@ module Ruboto
           unless @android_loc.nil?
             ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+'/..').gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
             puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
-            if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+            if windows?
               system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
             end
             @missing_paths << "#{File.dirname(@android_loc)}"
@@ -501,10 +508,13 @@ module Ruboto
               # FIXME(uwe): Detect mpkg file with correct version.
               system 'sudo -S installer -pkg /Volumes/IntelHAXM_1.0.6/IntelHAXM_1.0.6.mpkg -target /'
             when LINUX
-              puts 'HAXM installation on Linux is not supported, yet.'
+              puts '    HAXM installation on Linux is not supported, yet.'
               return
             when WINDOWS
-              puts 'HAXM installation on Windows is not supported, yet.'
+              cmd = @haxm_installer_loc.gsub('/', "\\")
+              puts "Running the HAXM installer"
+              system %Q{#{WINDOWS_ELEVATE_CMD} "#{cmd}"}
+              raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
               return
             end
           end
@@ -556,12 +566,20 @@ module Ruboto
 
       def config_path(accept_all)
         unless @missing_paths.empty?
-          if RbConfig::CONFIG['host_os'] =~ /^mswin32|windows(.*)/
+          if windows?
             puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
             @missing_paths.each do |path|
               puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
             end
-            system %Q{setx PATH "%PATH%;#{@missing_paths.map { |path| path.gsub '/', '\\' }.join(';')}"}
+            old_path = ENV['PATH'].split(';')
+            new_path = (@missing_paths.map { |path| path.gsub '/', '\\' } + old_path).uniq.join(';')
+            if new_path.size <= 1024
+              system %Q{setx PATH "#{new_path}"}
+            else
+              puts "\nYour path is HUGE:  #{new_path.size} characters.  It cannot be saved permanently:\n\n"
+              puts new_path.gsub(';', "\n")
+              puts
+            end
           else
             puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
             @missing_paths.each do |path|
