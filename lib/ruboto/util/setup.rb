@@ -176,7 +176,7 @@ module Ruboto
 
       def check_for(cmd, pretty_name=nil, alt_dir=nil)
         rv = which(cmd)
-        rv = nil if rv.nil? or rv.empty?
+        rv = nil if rv.empty?
 
         if rv
           @existing_paths << File.dirname(rv)
