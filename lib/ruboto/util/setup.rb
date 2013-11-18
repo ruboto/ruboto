@@ -417,7 +417,7 @@ module Ruboto
                 asdk_file_name = "installer_r#{get_tools_version}-#{android_package_os_id}.exe"
                 download(asdk_file_name)
                 puts "Installing #{asdk_file_name}..."
-                system asdk_file_name
+                system "elevate -c -w #{asdk_file_name}"
                 raise "Unexpected exit code while installing the Android SDK: #{$?}" unless $? == 0
                 FileUtils.rm_f asdk_file_name
                 return
@@ -471,7 +471,8 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            update_cmd = "android --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
+            android_cmd = windows? ? 'android.bat' : 'android'
+            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
@@ -504,7 +505,8 @@ module Ruboto
           a = STDIN.gets.chomp.upcase
         end
         if accept_all || a == 'Y' || a.empty?
-          update_cmd = "android update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
+          android_cmd = windows? ? 'android.bat' : 'android'
+          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
           update_sdk(update_cmd, accept_all)
           check_for_android_platform(api_level)
         end

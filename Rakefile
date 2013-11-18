@@ -41,10 +41,12 @@ file GEM_FILE => GEM_SPEC_FILE do
 end
 
 task :install => :gem do
-  `RUBYOPT= gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  old_rubyopt = ENV['RUBYOPT']
+  ENV['RUBYOPT'] = nil
+  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? != 0
     puts 'Installing gem'
-    cmd = "RUBYOPT= gem install ruboto-#{Ruboto::VERSION}.gem"
+    cmd = "gem install ruboto-#{Ruboto::VERSION}.gem"
     output = `#{cmd}`
     if $? == 0
       puts output
@@ -54,13 +56,16 @@ task :install => :gem do
   else
     puts "ruboto-#{Ruboto::VERSION} is already installed."
   end
+  ENV['RUBYOPT'] = old_rubyopt
 end
 
 task :uninstall do
-  `RUBYOPT= gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  old_rubyopt = ENV['RUBYOPT']
+  ENV['RUBYOPT'] = nil
+  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
   if $? == 0
     puts 'Uninstalling gem'
-    cmd = "RUBYOPT= gem uninstall -x ruboto -v #{Ruboto::VERSION}"
+    cmd = "gem uninstall -x ruboto -v #{Ruboto::VERSION}"
     output = `#{cmd}`
     if $? == 0
       puts output
@@ -70,6 +75,7 @@ task :uninstall do
   else
     puts "ruboto-#{Ruboto::VERSION} is not installed."
   end
+  ENV['RUBYOPT'] = old_rubyopt
 end
 
 task :reinstall => [:uninstall, :clean, :install]
