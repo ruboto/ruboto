@@ -1,6 +1,7 @@
 namespace :apis do
   desc 'Generate a new android_api.xml from the current api descriptions.'
   task :compile do
+    $: << "." unless $:.include?(".")
     require 'rakelib/android_api_gen'
 
     all = ApiTag.compile_platforms
@@ -11,6 +12,7 @@ namespace :apis do
 
   desc 'Pull a version of the API descriptions onto the local drive.'
   task :get do
+    $: << "." unless $:.include?(".")
     require 'rakelib/android_api_gen'
     require 'rexml/document'
     require 'open-uri'
