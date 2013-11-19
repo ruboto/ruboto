@@ -42,6 +42,7 @@ class Api
               # Add new api branches
               #
               when 18    then "jb-mr2-release"
+              when 19    then "kitkat-release"
               #
               ################################
               else       return nil
