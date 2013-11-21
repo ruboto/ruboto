@@ -3,24 +3,32 @@
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
-TIMEOUT=2700 # 45 minutes
+if [ "$TRAVIS" == "true" ] ; then
+  TIMEOUT=2700 # 45 minutes
+else
+  TIMEOUT=5400 # 90 minutes
+fi
+
 BOSSPID=$$
 (
   sleep $TIMEOUT
   echo
   echo "Test timed out after $TIMEOUT seconds."
   echo
-  kill -9 $BOSSPID
+  kill -SIGINT $BOSSPID
   echo
   echo Emulator log:
   echo
   cat adb_logcat.log
   echo
   echo "Test timed out after $TIMEOUT seconds."
+  sleep 60 # Allow the main process to kill us
+  kill -9 $BOSSPID # Kill the main process and signal failure.
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
+trap "exit" SIGINT
 trap "kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
