@@ -72,6 +72,7 @@ class RakeTest < Test::Unit::TestCase
       system 'adb kill-server'
       system 'rake install'
       raise "'rake install' exited with code #$?" unless $? == 0
+      system 'adb logcat >> adb_logcat.log&' if File.exists?('adb_logcat.log')
     end
   end
 
