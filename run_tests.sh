@@ -3,7 +3,6 @@
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
-echo "TRAVIS: '$TRAVIS'"
 if [ "$TRAVIS" == "true" ] ; then
   echo "Travis-CI detected."
   TIMEOUT=2700 # 45 minutes
