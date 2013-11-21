@@ -122,8 +122,8 @@ module Ruboto
       #
 
       def check_all(api_levels)
-        @existing_paths = []
-        @missing_paths = []
+        @existing_paths ||= []
+        @missing_paths ||= []
 
         @java_loc = check_for('java', 'Java runtime', ENV['JAVA_HOME'] && "#{ENV['JAVA_HOME']}/bin/java")
         @javac_loc = check_for('javac', 'Java Compiler', ENV['JAVA_HOME'] && "#{ENV['JAVA_HOME']}/bin/javac")
@@ -134,6 +134,9 @@ module Ruboto
         check_for_platform_tools
         check_for_build_tools
         api_levels.each { |api_level| check_for_android_platform(api_level) }
+
+        @existing_paths.uniq!
+        @missing_paths.uniq!
 
         puts
         ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @haxm_kext_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
@@ -191,7 +194,7 @@ module Ruboto
 
         if rv
           @existing_paths << File.dirname(rv)
-        elsif alt_dir and File.exists?(alt_dir)
+        elsif alt_dir && File.exists?(alt_dir)
           rv = alt_dir
           ENV['PATH'] = "#{File.dirname(rv)}:#{ENV['PATH']}"
           @missing_paths << "#{File.dirname(rv)}"
@@ -566,8 +569,8 @@ module Ruboto
 
       def config_path(accept_all)
         unless @missing_paths.empty?
+          puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
           if windows?
-            puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
             @missing_paths.each do |path|
               puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
             end
@@ -581,7 +584,6 @@ module Ruboto
               puts
             end
           else
-            puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
             @missing_paths.each do |path|
               puts %Q{    export PATH="#{path}:$PATH"}
             end
