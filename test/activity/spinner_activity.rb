@@ -18,7 +18,17 @@ class SpinnerActivity
           plain_spinner = spinner :width => :match_parent, :id => 43,
                                   :on_item_selected_listener => click_handler
           plain_spinner.adapter = android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item)
-          plain_spinner.adapter.add_all(['Plain Spinner', 'Plain Item'])
+
+          # FIXME(uwe): Simplify when we stop supporting Android < 4.0.3
+          if android.os.Build::VERSION::SDK_INT < 11
+            ['Plain Spinner', 'Plain Item'].each do |i|
+              plain_spinner.adapter.add(i)
+            end
+          else
+            plain_spinner.adapter.add_all(['Plain Spinner', 'Plain Item'])
+          end
+          # EMXIF
+
           spinner :width => :match_parent, :id => 44,
                   :on_item_selected_listener => click_handler,
                   :adapter => android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item, ['Adapter Spinner', 'Adapter Item'])
