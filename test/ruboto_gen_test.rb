@@ -64,6 +64,7 @@ class RubotoGenTest < Test::Unit::TestCase
   # APK was  8755.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.5
   # APK was  8770.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.5
   # APK was  8766.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.6
+  # APK was  8781.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.8
   # APK was  6337.3KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
   # APK was  6556.7KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 9000.dev
   def test_new_apk_size_is_within_limits
@@ -79,6 +80,7 @@ class RubotoGenTest < Test::Unit::TestCase
           '1.7.4' => 8500.0,
           '1.7.5' => 8800.0,
           '1.7.6' => 8800.0,
+          '1.7.8' => 8800.0,
           '9000.dev' => 6600.0,
       }[JRUBY_JARS_VERSION.to_s] || 6600.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
