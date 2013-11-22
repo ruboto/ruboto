@@ -443,7 +443,6 @@ module Ruboto
                     'jnr/posix/OpenBSD*',
                     'jnr/x86asm',
                     'org/jruby/ant',
-                    'org/jruby/cext',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
                     'org/jruby/compiler/impl/BaseBodyCompiler*',
