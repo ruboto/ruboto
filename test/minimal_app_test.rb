@@ -18,6 +18,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
     # APK was 4.3MB.  JRuby: 1.7.3, ANDROID_TARGET: 10
     # APK was 4.2MB.  JRuby: 1.7.3, ANDROID_TARGET: 15
     # APK was 4.4MB.  JRuby: 1.7.4, ANDROID_TARGET: 10
+    # APK was 8.2MB.  JRuby: 1.7.4, ANDROID_TARGET: 16
     # APK was 4.3MB.  JRuby: 1.7.5.dev, ANDROID_TARGET: 10
     # APK was 4.2MB.  JRuby: 1.7.5.dev, ANDROID_TARGET: 15
     # APK was 4.3MB.  JRuby: 1.7.5.dev, ANDROID_TARGET: 16
@@ -30,8 +31,8 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.1' => ANDROID_TARGET < 15 ? 4.7 : 4.9,
           '1.7.2' => ANDROID_TARGET < 15 ? 4.6 : 4.9,
           '1.7.3' => ANDROID_TARGET < 15 ? 4.3 : 4.4,
-          '1.7.4' => 4.4,
-          '1.7.8' => 8.6,
+          '1.7.4' => ANDROID_TARGET < 15 ? 4.4 : 8.2,
+          '1.7.8' => ANDROID_TARGET < 15 ? 4.4 : 8.6,
           '9000.dev' => 6.4,
       }[JRUBY_JARS_VERSION.to_s] || 4.3
       lower_limit = upper_limit * 0.9
