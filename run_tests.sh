@@ -24,13 +24,14 @@ BOSSPID=$$
   echo
   echo "Test timed out after $TIMEOUT seconds."
   sleep 60 # Allow the main process to kill us
+  echo KILL THE BOSS!
   kill -9 $BOSSPID # Kill the main process and signal failure.
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
 trap "exit" SIGINT
-trap "kill -9 $TIMERPID" EXIT
+trap "echo 'Kill timer.' ; kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
 if [ ! $(command -v ant) ] ; then
