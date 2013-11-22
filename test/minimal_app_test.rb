@@ -33,7 +33,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.4' => 4.4,
           '1.7.8' => 8.6,
           '9000.dev' => 6.4,
-      }[JRUBY_JARS_VERSION.to_s] || {10 => 4.3, 16 => 4.3}[ANDROID_TARGET] || 4.3
+      }[JRUBY_JARS_VERSION.to_s] || 4.3
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"
       assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB.  #{version_message}"

@@ -5,7 +5,7 @@ echo "Starting tests..."
 # BEGIN TIMEOUT #
 if [ "$TRAVIS" == "true" ] ; then
   echo "Travis-CI detected."
-  TIMEOUT=2700 # 45 minutes
+  TIMEOUT=2640 # 44 minutes
 else
   TIMEOUT=5400 # 90 minutes
 fi
