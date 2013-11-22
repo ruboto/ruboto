@@ -175,7 +175,7 @@ module Ruboto
 
       def check_for_platform_tools
         @adb_loc = check_for('adb', 'Android SDK Command adb',
-                             File.join(android_package_directory, 'platform-tools', 'adb'))
+                             File.join(android_package_directory, 'platform-tools', windows? ? 'adb.exe' : 'adb'))
       end
 
       def check_for_build_tools
@@ -185,7 +185,7 @@ module Ruboto
 
       def check_for_android_sdk
         @android_loc = check_for('android', 'Android Package Installer',
-                                 File.join(android_package_directory, 'tools', 'android'))
+                                 File.join(android_package_directory, 'tools', windows? ? 'android.bat' : 'android'))
       end
 
       def check_for(cmd, pretty_name=nil, alt_dir=nil)
@@ -196,7 +196,11 @@ module Ruboto
           @existing_paths << File.dirname(rv)
         elsif alt_dir && File.exists?(alt_dir)
           rv = alt_dir
-          ENV['PATH'] = "#{File.dirname(rv)}:#{ENV['PATH']}"
+          if windows?
+            ENV['PATH'] = "#{File.dirname(rv).gsub('/', '\\')};#{ENV['PATH']}"
+          else
+            ENV['PATH'] = "#{File.dirname(rv)}:#{ENV['PATH']}"
+          end
           @missing_paths << "#{File.dirname(rv)}"
         end
 
