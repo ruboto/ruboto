@@ -3,35 +3,25 @@
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
-if [ "$TRAVIS" == "true" ] ; then
-  echo "Travis-CI detected."
-  TIMEOUT=300 # 2640 # 44 minutes
-else
-  TIMEOUT=5400 # 90 minutes
-fi
-
+TIMEOUT=2700 # 45 minutes
 BOSSPID=$$
 (
   sleep $TIMEOUT
   echo
   echo "Test timed out after $TIMEOUT seconds."
   echo
-  kill -SIGINT $BOSSPID
+  kill -9 $BOSSPID
   echo
   echo Emulator log:
   echo
   cat adb_logcat.log
   echo
   echo "Test timed out after $TIMEOUT seconds."
-  sleep 60 # Allow the main process to kill us
-  echo KILL THE BOSS!
-  kill -9 $BOSSPID # Kill the main process and signal failure.
 )&
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
-trap "echo 'Got timeout signal' ; exit" SIGINT
-trap "echo 'Kill timer.' ; kill -9 $TIMERPID" EXIT
+trap "kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
 if [ ! $(command -v ant) ] ; then

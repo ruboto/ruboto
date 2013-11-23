@@ -394,7 +394,18 @@ task :test do
   ARGV.delete_if { |a| test_pattern.include? a }
   test_pattern.map! { |t| t[5..-1] }
   $: << File.expand_path('test', File.dirname(__FILE__))
-  (test_pattern.any? ? test_pattern : %w(test/*_test.rb)).map { |d| Dir[d] }.flatten.each do |f|
+  test_files = (test_pattern.any? ? test_pattern : %w(test/*_test.rb)).map { |d| Dir[d] }.flatten
+  if /(\d+)OF(\d+)/i =~ ENV['TEST_PART']
+    part_index = $1.to_i - 1
+    parts = $2.to_i
+    total_tests = test_files.size
+    files_in_part = total_tests.to_f / parts
+    start_index = (files_in_part * part_index).round
+    end_index = (files_in_part * (part_index + 1)).round - 1
+    test_files = test_files[start_index..end_index]
+    puts "Running tests #{start_index}-#{end_index} of #{total_tests}"
+  end
+  test_files.each do |f|
     require f.chomp('.rb')[5..-1]
   end
 end
