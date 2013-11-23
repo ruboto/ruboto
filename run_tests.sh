@@ -5,7 +5,7 @@ echo "Starting tests..."
 # BEGIN TIMEOUT #
 if [ "$TRAVIS" == "true" ] ; then
   echo "Travis-CI detected."
-  TIMEOUT=2640 # 44 minutes
+  TIMEOUT=300 # 2640 # 44 minutes
 else
   TIMEOUT=5400 # 90 minutes
 fi
@@ -30,7 +30,7 @@ BOSSPID=$$
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
-trap "exit" SIGINT
+trap "echo 'Got timeout signal' ; exit" SIGINT
 trap "echo 'Kill timer.' ; kill -9 $TIMERPID" EXIT
 # END TIMEOUT #
 
