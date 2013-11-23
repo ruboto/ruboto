@@ -4,7 +4,13 @@ Hi all!
 
 The Ruboto 0.16.0 release candidate is now available.
 
-
+In this release we add support for Android 4.4 KitKat!  You can also use
+git-based gems in your Gemfile.apk, and implement framework methods like
+onCreate in a Ruby Module and share them across Ruby classes.  We have
+expanded the Android Fragment support to allow the use of the Ruboto
+Widget DSL.  On the testing side, "ruboto setup" now downloads and
+installs HAXM which gives a 10 times speedup of the emulator!  For early
+adopters we now support Ruby 2.1 when using JRuby 9000 builds.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
