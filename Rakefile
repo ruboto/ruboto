@@ -404,7 +404,7 @@ task :test do
     start_index = (files_in_part * part_index).round
     end_index = (files_in_part * (part_index + 1)).round - 1
     test_files = test_files[start_index..end_index]
-    puts "Running tests #{start_index}-#{end_index} of #{total_tests}"
+    puts "Running tests #{start_index + 1}-#{end_index + 1} of #{total_tests}"
   end
   test_files.each do |f|
     require f.chomp('.rb')[5..-1]
