@@ -394,7 +394,8 @@ task :test do
   ARGV.delete_if { |a| test_pattern.include? a }
   test_pattern.map! { |t| t[5..-1] }
   $: << File.expand_path('test', File.dirname(__FILE__))
-  test_files = (test_pattern.any? ? test_pattern : %w(test/*_test.rb)).map { |d| Dir[d] }.flatten
+  test_files = (test_pattern.any? ? test_pattern : %w(test/*_test.rb)).
+      map { |d| Dir[d] }.flatten.sort
   if /(\d+)OF(\d+)/i =~ ENV['TEST_PART']
     part_index = $1.to_i - 1
     parts = $2.to_i
