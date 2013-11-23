@@ -25,8 +25,8 @@ README_FILE = 'README.md'
 BLOG_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com/_posts"
 RELEASE_BLOG = "#{BLOG_DIR}/#{Date.today}-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
-RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC'
-RELEASE_DOC = 'RELEASE_DOC'
+RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC.md'
+RELEASE_DOC = 'RELEASE_DOC.md'
 
 CLEAN.include('ruboto-*.gem', 'tmp')
 
@@ -228,11 +228,11 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-  #{(categories.keys & grouped_issues.keys).map do |cat|
-    "#{cat}:\n
-    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
-    "
-  end.join("\n")}
+#{(categories.keys & grouped_issues.keys).map do |cat|
+"#{cat}:\n
+#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+"
+end.join("\n")}
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
@@ -287,20 +287,11 @@ layout: post
 ---
 EOF
     File.write(RELEASE_DOC, release_doc)
-    sh "git add -f #{RELEASE_DOC}"
-    `git commit -m "* Added release doc for Ruboto #{Ruboto::VERSION}"`
     Dir.chdir BLOG_DIR do
       output = `git status --porcelain`
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
       sh "git rm -f #{old_blog_posts.join(' ')}" unless old_blog_posts.empty?
       File.write(RELEASE_BLOG, header + release_doc)
-      sh "git add -f #{RELEASE_BLOG}"
-      if output.empty?
-        `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`
-        sh 'git push'
-      else
-        puts "Workspace not clean!\n#{output}"
-      end
     end
   end
 end
@@ -378,6 +369,13 @@ desc 'Push the gem to RubyGems'
 task :release => [:clean, README_FILE, :release_docs, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
+  Dir.chdir BLOG_DIR do
+    output = `git status --porcelain`
+    raise "Web workspace not clean!\n#{output}" unless output.empty?
+    sh "git add -f #{RELEASE_BLOG}"
+    `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`
+    sh 'git push'
+  end
   sh "git tag #{Ruboto::VERSION}"
   sh 'git push --tags'
   sh "gem push #{GEM_FILE}"

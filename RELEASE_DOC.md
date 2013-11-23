@@ -18,9 +18,9 @@ Widget DSL.  On the testing side, "ruboto setup" now downloads and
 installs HAXM which gives a 10 times speedup of the emulator!  For early
 adopters we now support Ruby 2.1 when using JRuby 9000 builds.
 
-  Features:
+Features:
 
-    * Issue #479 rake log
+* Issue #479 rake log
 * Issue #491 Add support for git-based gems
 * Issue #495 Send all script names to be reloaded in one intent to speed
   up reload
@@ -36,10 +36,10 @@ adopters we now support Ruby 2.1 when using JRuby 9000 builds.
 * Issue #521 Add support for running emulator with Android 4.4 api level
   19
 * Issue #526 Add KitKat (4.4) support
-    
+
 Bugfixes:
 
-    * Issue #438 Updating android_api.xml breaks test ruboto_gen_test
+* Issue #438 Updating android_api.xml breaks test ruboto_gen_test
 * Issue #448 Gems added from git repositories with the Gemfile.apk go
   unrecognized.
 * Issue #484 "ruboto setup" doesn't work on mac
@@ -54,35 +54,35 @@ Bugfixes:
 * Issue #516 Spinner#adapter returns nil when used with the :adapter
   option
 * Issue #519 Spinner should have prettier layout
-    
+
 Support:
 
-    * Issue #522 rake BUILD FAILED - Windows and Linux
-    
+* Issue #522 rake BUILD FAILED - Windows and Linux
+
 Documentation:
 
-    * Issue #492 Add tutorial for using fragments
+* Issue #492 Add tutorial for using fragments
 * Issue #493 README proofreading changes
 * Issue #508 Add AppSurfer as a sponsor.
 * Issue #514 Remove the 'ruboto update ruboto' command.  Use 'ruboto
   update app' instead.
 * Issue #515 Add a "Contributors Wanted!" banner to the home page.
 * Issue #518 Sqlite_ar tutorial no longer works?
-    
+
 Pull requests:
 
-    * Issue #458 Changed gem_paths to work with a gem pointing to repository
+* Issue #458 Changed gem_paths to work with a gem pointing to repository
   git in Gemfile.apk
-    
+
 Internal:
 
-    * Issue #466 Need faster tests for Travis-CI
-    
+* Issue #466 Need faster tests for Travis-CI
+
 Other:
 
-    * Issue #478 rake debug problem on Windows
+* Issue #478 rake debug problem on Windows
 * Issue #510 Ruboto setup on Windows fails to set path to dx
-    
+
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=30
