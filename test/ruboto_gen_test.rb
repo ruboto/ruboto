@@ -53,11 +53,6 @@ class RubotoGenTest < Test::Unit::TestCase
   # APK was    60.2KB.  PLATFORM: CURRENT, ANDROID_TARGET: 15
   # APK was    74.9KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    57.1KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
-  # APK was  7380.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.0
-  # APK was  7310.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.2
-  # APK was  7337.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.2
-  # APK was  7317.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.3
-  # APK was  7332.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.3
   # APK was  8428.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.4
   # APK was  7405.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.4
   # APK was  7420.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.4
@@ -65,7 +60,7 @@ class RubotoGenTest < Test::Unit::TestCase
   # APK was  8770.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.5
   # APK was  8766.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.6
   # APK was  8781.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.8
-  # APK was  6337.3KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
+  # APK was  6689.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
   # APK was  6556.7KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 9000.dev
   def test_new_apk_size_is_within_limits
     apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / 1024
@@ -73,16 +68,12 @@ class RubotoGenTest < Test::Unit::TestCase
     version << ", ANDROID_TARGET: #{ANDROID_TARGET}"
     if RUBOTO_PLATFORM == 'STANDALONE'
       upper_limit = {
-          '1.7.0' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
-          '1.7.1' => ANDROID_TARGET < 15 ? 7400.0 : 7600.0,
-          '1.7.2' => 7400.0,
-          '1.7.3' => 7400.0,
           '1.7.4' => 8500.0,
           '1.7.5' => 8800.0,
           '1.7.6' => 8800.0,
           '1.7.8' => 8800.0,
-          '9000.dev' => 6600.0,
-      }[JRUBY_JARS_VERSION.to_s] || 6600.0
+          '9000.dev' => 6700.0,
+      }[JRUBY_JARS_VERSION.to_s] || 0.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
