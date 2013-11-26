@@ -46,7 +46,7 @@ module Ruboto
 
       # FIXME(uwe):  Deprecated.  Remove june 2014.
       if options[:class_name]
-        puts "\nDEPRECATON: The ':class_name' option is deprecated.  Put the class name in the first argument instead."
+        puts "\nDEPRECATION: The ':class_name' option is deprecated.  Put the class name in the first argument instead."
       end
 
       java_class = options.delete(:java_class) || RubotoActivity
