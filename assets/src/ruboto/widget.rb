@@ -47,26 +47,29 @@ View.class_eval do
   def configure(context, params = {})
     if width = params.delete(:width)
       getLayoutParams.width = View.convert_constant(width)
+      puts "\nDEPRECATION: The ':width' option is deprecated.  Use :layout => {:width => XX} instead."
     end
 
     if height = params.delete(:height)
       getLayoutParams.height = View.convert_constant(height)
+      puts "\nDEPRECATION: The ':height' option is deprecated.  Use :height => {:width => XX} instead."
     end
 
     if margins = params.delete(:margins)
       getLayoutParams.set_margins(*margins)
+      puts "\nDEPRECATION: The ':margins' option is deprecated.  Use :layout => {:margins => XX} instead."
     end
 
     if layout = params.delete(:layout)
       lp = getLayoutParams
       layout.each do |k, v|
-        method_name = k.to_s.gsub(/_([a-z])/) { $1.upcase }
+        method_name = lp.respond_to?("#{k}=") ? "#{k}=" : k
         invoke_with_converted_arguments(lp, method_name, v)
       end
     end
 
     params.each do |k, v|
-      method_name = "set#{k.to_s.gsub(/(^|_)([a-z])/) { $2.upcase }}"
+      method_name = self.respond_to?("#{k}=") ? "#{k}=" : k
       invoke_with_converted_arguments(self, method_name, v)
     end
   end
