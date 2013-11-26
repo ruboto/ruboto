@@ -386,6 +386,7 @@ public class SplashActivity extends Activity {
     private void startUserActivity() {
         if (getIntent().hasExtra(Intent.EXTRA_INTENT)) {
             startActivity((Intent)getIntent().getParcelableExtra(Intent.EXTRA_INTENT));
+            finish();
         }
     }
 
