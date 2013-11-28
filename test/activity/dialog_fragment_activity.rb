@@ -28,7 +28,7 @@ class ExampleDialogFragment < android.app.DialogFragment
     dialog.title = @some_var
 
     linear_layout :orientation => :vertical do
-      linear_layout :gravity => :center, :layout => {:width= => :fill_parent} do
+      linear_layout :gravity => :center, :layout => {:width => :fill_parent} do
         text_view :text => @some_var, :id => 43, :text_size => 40.0,
                   :gravity => :center
       end

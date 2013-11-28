@@ -10,20 +10,20 @@ class NavigationActivity
 
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-          text_view :text => 'Navigation', :id => 42, :width => :match_parent,
+          text_view :text => 'Navigation', :id => 42, :layout => {:width => :match_parent},
                     :gravity => :center, :text_size => 48.0
           scroll_view :layout => {:weight= => 1} do
             linear_layout :orientation => :vertical do
-              button :text => 'Java backed by Java class', :width => :match_parent, :id => 43, :on_click_listener => proc { java_backed_by_java_class }
-              button :text => 'Java backed by Ruby class', :width => :match_parent, :id => 44, :on_click_listener => proc { java_backed_by_ruby_class }
-              button :text => 'Java backed by script name', :width => :match_parent, :id => 45, :on_click_listener => proc { java_backed_by_script_name }
-              button :text => 'Inline block', :width => :match_parent, :id => 46, :on_click_listener => proc { start_inline_activity }
-              button :text => 'Inline block with options', :width => :match_parent, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
-              button :text => 'Infile class', :width => :match_parent, :id => 48, :on_click_listener => proc { start_infile_activity }
-              button :text => 'Ruby file activity', :width => :match_parent, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
-              button :text => 'RubotoActivity no config', :width => :match_parent, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
-              button :text => 'RubotoActivity', :width => :match_parent, :id => 51, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity') }
-              button :text => 'RubotoActivity with Extras', :width => :match_parent, :id => 52, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity', :extras => {:extra_string => 'Started with string extra.'}) }
+              button :text => 'Java backed by Java class', :layout => {:width => :match_parent}, :id => 43, :on_click_listener => proc { java_backed_by_java_class }
+              button :text => 'Java backed by Ruby class', :layout => {:width => :match_parent}, :id => 44, :on_click_listener => proc { java_backed_by_ruby_class }
+              button :text => 'Java backed by script name', :layout => {:width => :match_parent}, :id => 45, :on_click_listener => proc { java_backed_by_script_name }
+              button :text => 'Inline block', :layout => {:width => :match_parent}, :id => 46, :on_click_listener => proc { start_inline_activity }
+              button :text => 'Inline block with options', :layout => {:width => :match_parent}, :id => 47, :on_click_listener => proc { start_inline_activity_with_options }
+              button :text => 'Infile class', :layout => {:width => :match_parent}, :id => 48, :on_click_listener => proc { start_infile_activity }
+              button :text => 'Ruby file activity', :layout => {:width => :match_parent}, :id => 49, :on_click_listener => proc { start_ruby_file_activity }
+              button :text => 'RubotoActivity no config', :layout => {:width => :match_parent}, :id => 50, :on_click_listener => proc { start_ruboto_activity_no_config }
+              button :text => 'RubotoActivity', :layout => {:width => :match_parent}, :id => 51, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity') }
+              button :text => 'RubotoActivity with Extras', :layout => {:width => :match_parent}, :id => 52, :on_click_listener => proc { start_ruboto_activity('RubyFileActivity', :extras => {:extra_string => 'Started with string extra.'}) }
             end
           end
         end
@@ -58,7 +58,8 @@ class NavigationActivity
         set_title 'Inline Activity'
         self.content_view =
             linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-              text_view :text => 'This is an inline activity.', :id => 42, :width => :match_parent,
+              text_view :text => 'This is an inline activity.', 
+                        :id => 42, :layout => {:width => :match_parent},
                         :gravity => :center, :text_size => 48.0
             end
       end
@@ -72,7 +73,8 @@ class NavigationActivity
         set_title 'Inline Activity'
         self.content_view =
             linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-              text_view :text => 'This is an inline activity.', :id => 42, :width => :match_parent,
+              text_view :text => 'This is an inline activity.', 
+                        :id => 42, :layout => {:width => :match_parent},
                         :gravity => :center, :text_size => 48.0
             end
       end
@@ -107,7 +109,8 @@ class InfileActivity
     set_title 'Infile Activity'
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-          text_view :text => 'This is an infile activity.', :id => 42, :width => :match_parent,
+          text_view :text => 'This is an infile activity.', 
+                    :id => 42, :layout => {:width => :match_parent},
                     :gravity => :center, :text_size => 48.0
         end
   end

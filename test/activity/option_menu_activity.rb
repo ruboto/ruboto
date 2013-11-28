@@ -11,7 +11,7 @@ class OptionMenuActivity
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do
           text_view :text => 'What hath Matz wrought?', :id => 42, :text_size => 48.0,
-                    :width => :fill_parent, :gravity => android.view.Gravity::CENTER
+                    :layout => {:width => :fill_parent}, :gravity => android.view.Gravity::CENTER
         end
   end
 

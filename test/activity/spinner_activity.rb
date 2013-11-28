@@ -14,8 +14,8 @@ class SpinnerActivity
 
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center_horizontal do
-          spinner :width => :match_parent, :id => 42
-          plain_spinner = spinner :width => :match_parent, :id => 43,
+          spinner :layout => {:width => :match_parent}, :id => 42
+          plain_spinner = spinner :layout => {:width => :match_parent}, :id => 43,
                                   :on_item_selected_listener => click_handler
           plain_spinner.adapter = android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item)
 
@@ -29,22 +29,23 @@ class SpinnerActivity
           end
           # EMXIF
 
-          spinner :width => :match_parent, :id => 44,
+          spinner :layout => {:width => :match_parent}, :id => 44,
                   :on_item_selected_listener => click_handler,
                   :adapter => android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item, ['Adapter Spinner', 'Adapter Item'])
-          spinner :width => :match_parent, :id => 45  ,
+          spinner :layout => {:width => :match_parent}, :id => 45  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item']
-          spinner :width => :match_parent, :id => 46  ,
+          spinner :layout => {:width => :match_parent}, :id => 46  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item'],
                   :item_layout => R::layout::simple_spinner_dropdown_item
-          spinner :width => :match_parent, :id => 47  ,
+          spinner :layout => {:width => :match_parent}, :id => 47  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item'],
                   :item_layout => R::layout::simple_spinner_dropdown_item,
                   :dropdown_layout => R::layout::simple_spinner_item
-          @text_view = text_view :text => 'Spinning?', :id => 69, :width => :match_parent,
+          @text_view = text_view :text => 'Spinning?', :id => 69, 
+                                 :layout => {:width => :match_parent},
                                  :gravity => :center, :text_size => 48.0
         end
   end
