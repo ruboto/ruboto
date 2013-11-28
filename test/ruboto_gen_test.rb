@@ -131,7 +131,8 @@ class RubotoTestAppActivity
 puts "adapter: \#{adapter.inspect}"
     self.content_view =
         linear_layout :orientation => :vertical do
-          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42, :width => :match_parent,
+          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42, 
+                    :layout => {:width => :match_parent},
                     :gravity => :center, :text_size => 48.0
           list_view :adapter => adapter, :id => 43,
                     :on_item_click_listener => proc{|parent, view, position, id| @text_view.text = 'List item clicked!'}
