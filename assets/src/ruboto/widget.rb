@@ -63,7 +63,14 @@ View.class_eval do
     if layout = params.delete(:layout)
       lp = getLayoutParams
       layout.each do |k, v|
-        method_name = lp.respond_to?("#{k}=") ? "#{k}=" : k
+        method_name = k.to_s
+        if lp.respond_to?("#{k}=")
+          method_name = "#{k}="
+        elsif method_name.include?("_")
+          method_name = method_name.gsub(/_([a-z])/){$1.upcase}
+          lp.respond_to?("#{method_name}=") ? "#{method_name}=" : method_name  
+        end
+          
         invoke_with_converted_arguments(lp, method_name, v)
       end
     end
