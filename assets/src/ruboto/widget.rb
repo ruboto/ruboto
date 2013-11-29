@@ -68,7 +68,7 @@ View.class_eval do
           method_name = "#{k}="
         elsif method_name.include?("_")
           method_name = method_name.gsub(/_([a-z])/){$1.upcase}
-          lp.respond_to?("#{method_name}=") ? "#{method_name}=" : method_name  
+          method_name = "#{method_name}=" if lp.respond_to?("#{method_name}=")
         end
           
         invoke_with_converted_arguments(lp, method_name, v)
