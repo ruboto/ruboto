@@ -29,7 +29,7 @@ module Ruboto
         end
 
         emulator_opts = '-partition-size 256'
-        if !ON_WINDOWS && ENV['DISPLAY'].nil?
+        if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
           emulator_opts << ' -no-window -no-audio'
         end
 
