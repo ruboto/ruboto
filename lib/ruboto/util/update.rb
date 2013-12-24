@@ -17,7 +17,11 @@ module Ruboto
       def update_android
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
-        name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
+        if File.exists? build_xml_file
+          name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
+        else
+          name = File.basename(root)
+        end
 
         prop_file = "#{root}/project.properties"
         version_regexp = /^(target=android-)(\d+)$/
@@ -286,14 +290,14 @@ module Ruboto
             puts "Regenerating subclass #{package}.#{subclass_name}"
             generate_inheriting_file 'Class', subclass_name
             generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
-                                           :name => subclass_name, :method_base => method_base, :force => force)
+                :name => subclass_name, :method_base => method_base, :force => force)
             # FIXME(uwe): Remove when we stop updating from Ruboto 0.7.0 and older
           elsif source_code =~ /^\s*package\s+(\S+?)\s*;.*public\s+class\s+(\S+?)\s+extends\s+(.*?)\s\{.*^\s*private Object\[\] callbackProcs = new Object\[\d+\];/m
             package, subclass_name, class_name = $1, $2, $3
             puts "Regenerating subclass #{package}.#{subclass_name}"
             generate_inheriting_file 'Class', subclass_name
             generate_subclass_or_interface(:package => package, :template => 'InheritingClass', :class => class_name,
-                                           :name => subclass_name, :method_base => 'on', :force => force)
+                :name => subclass_name, :method_base => 'on', :force => force)
             # EMXIF
           end
         end

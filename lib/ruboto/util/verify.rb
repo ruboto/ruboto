@@ -67,8 +67,7 @@ module Ruboto
       end
 
       def verify_strings
-        abort "cannot find your strings.xml to extract info from it. Make sure you're in the root directory of your app" unless
-        File.exists? 'res/values/strings.xml'
+        abort "cannot find your strings.xml to extract info from it. Make sure you're in the root directory of your app" unless File.exists? 'res/values/strings.xml'
         @strings ||= REXML::Document.new(File.read('res/values/strings.xml'))
       end
 
