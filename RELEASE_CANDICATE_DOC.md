@@ -1,16 +1,23 @@
-Subject: [ANN] Ruboto 0.16.0 release candidate
+Subject: [ANN] Ruboto 1.0.0 release candidate
 
 Hi all!
 
-The Ruboto 0.16.0 release candidate is now available.
+The Ruboto 1.0.0 release candidate is now available.
 
-In this release we add support for Android 4.4 KitKat!  You can also use
-git-based gems in your Gemfile.apk, and implement framework methods like
-onCreate in a Ruby Module and share them across Ruby classes.  We have
-expanded the Android Fragment support to allow the use of the Ruboto
-Widget DSL.  On the testing side, "ruboto setup" now downloads and
-installs HAXM which gives a 10 times speedup of the emulator!  For early
-adopters we now support Ruby 2.1 when using JRuby 9000 builds.
+The main motivation for the 1.0 release is to announce that Ruboto is
+ready for general consumption!
+
+* All important parts of the Android API are available.
+* The API has stabilised.
+* Performance is reasonable. (Best case startup 4 seconds or less).
+* Home page/Wiki/Tutorials and other docs are of high enough quality that
+new developers have a low threshold to get going, and more advanced
+developers can find how to do more advanced apps.
+
+Notable features this release is RubyGems support for the "dalvik"
+platform and support for using Android utility projects.  This means you
+can release gems for dalvik only and consume in-house or third-party
+utility projects.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 

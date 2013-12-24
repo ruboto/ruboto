@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 0.16.0 released!
+Subject: [ANN] Ruboto 1.0.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 0.16.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.0.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,84 +8,64 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 0.16.0:
+New in version 1.0.0:
 
-In this release we add support for Android 4.4 KitKat!  You can also use
-git-based gems in your Gemfile.apk, and implement framework methods like
-onCreate in a Ruby Module and share them across Ruby classes.  We have
-expanded the Android Fragment support to allow the use of the Ruboto
-Widget DSL.  On the testing side, "ruboto setup" now downloads and
-installs HAXM which gives a 10 times speedup of the emulator!  For early
-adopters we now support Ruby 2.1 when using JRuby 9000 builds.
+The main motivation for the 1.0 release is to announce that Ruboto is
+ready for general consumption!
+
+* All important parts of the Android API are available.
+* The API has stabilised.
+* Performance is reasonable. (Best case startup 4 seconds or less).
+* Home page/Wiki/Tutorials and other docs are of high enough quality that
+new developers have a low threshold to get going, and more advanced
+developers can find how to do more advanced apps.
+
+Notable features this release is RubyGems support for the "dalvik"
+platform and support for using Android utility projects.  This means you
+can release gems for dalvik only and consume in-house or third-party
+utility projects.
 
 Features:
 
-* Issue #479 rake log
-* Issue #491 Add support for git-based gems
-* Issue #495 Send all script names to be reloaded in one intent to speed
-  up reload
-* Issue #497 Allow implementing framework methods like onCreate and
-  onResume in a Ruby module only.
-* Issue #498 Allow use of Ruboto Widget in fragments
-* Issue #499 Add shortcut "-t" for the "--target" option for "ruboto gen
-  app"
-* Issue #502 Use "ruboto emulator" to set up HAXM
-* Issue #503 Add "rake boing" as alias for "rake update_scripts:reload"
-* Issue #512 Ruby 2.1 support
-* Issue #517 Generate AVD with new format when running "ruboto emulator"
-* Issue #521 Add support for running emulator with Android 4.4 api level
-  19
-* Issue #526 Add KitKat (4.4) support
+* Issue #75 Faster startup
+* Issue #392 Establish a specialized RubyGems platform for JRuby on
+  Android
+* Issue #524 Use "ruboto emulator" to setup HAXM
+* Issue #530 Shift all layout parameters into :layout = {} and remove the
+  need for "=" in setting instance variables
+* Issue #544 Add support for using utility projects
 
 Bugfixes:
 
-* Issue #438 Updating android_api.xml breaks test ruboto_gen_test
-* Issue #448 Gems added from git repositories with the Gemfile.apk go
-  unrecognized.
-* Issue #484 "ruboto setup" doesn't work on mac
-* Issue #494 Ensure that the app is running before triggering reload of
-  scripts on device/emulator
-* Issue #496 require 'ruboto/activity' from 'ruboto/activity/reload' since
-  we depend on it.
-* Issue #504 Sporadically missing instance variable
-* Issue #509 Ruboto setup fails on windows with -y option
-* Issue #511 "ruboto update app" should rebuild JRubyAdapter.java based on
-  "ruboto.yml"
-* Issue #516 Spinner#adapter returns nil when used with the :adapter
-  option
-* Issue #519 Spinner should have prettier layout
+* Issue #431 Error running Ruboto test suites
+* Issue #483 The Tutorial: adding a startup splash builds but crashes
+  starting in the emulator
+* Issue #534 ruboto emulator -t does not show emulator window though it
+  says Emulator started OK
+* Issue #542 please install the jdbcsqlite3 adapter
 
 Support:
 
-* Issue #522 rake BUILD FAILED - Windows and Linux
+* Issue #520 ruboto setup - "Android SDK command adb : Not found"
+* Issue #539 "rake install start" returns "rake aborted! No such file or
+  directory - adb"
 
 Documentation:
 
-* Issue #492 Add tutorial for using fragments
-* Issue #493 README proofreading changes
-* Issue #508 Add AppSurfer as a sponsor.
-* Issue #514 Remove the 'ruboto update ruboto' command.  Use 'ruboto
-  update app' instead.
-* Issue #515 Add a "Contributors Wanted!" banner to the home page.
-* Issue #518 Sqlite_ar tutorial no longer works?
+* Issue #506 Add barcode scanning example
+* Issue #528 Fix formatting errors in the RELEASE_DOC
+* Issue #535 Mac kernel freezes when ruboto emulator start under MacOS
+  10.9 with Virtualbox 4.3.x installed.
 
 Pull requests:
 
-* Issue #458 Changed gem_paths to work with a gem pointing to repository
-  git in Gemfile.apk
-
-Internal:
-
-* Issue #466 Need faster tests for Travis-CI
-
-Other:
-
-* Issue #478 rake debug problem on Windows
-* Issue #510 Ruboto setup on Windows fails to set path to dx
+* Issue #527 Add weight to widget.rb
+* Issue #536 Update emulator.rb (Fix no emulator window shows in MacOS
+  10.9 with Virtualbox 4.3, when $DISPLAY variable is empty)
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=30
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=17
 
 
 Installation:
