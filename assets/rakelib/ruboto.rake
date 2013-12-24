@@ -42,7 +42,7 @@ if android_home.nil?
     abort 'You need to set the ANDROID_HOME environment variable.'
   end
 else
-  android_home.gsub! '\\', '/'
+  android_home = android_home.gsub('\\', '/')
 end
 
 # FIXME(uwe): Simplify when we stop supporting Android SDK < 22: Don't look in platform-tools for dx
