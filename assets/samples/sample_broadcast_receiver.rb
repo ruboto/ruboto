@@ -1,4 +1,4 @@
-import android.util.Log
+import org.ruboto.Log
 
 class SampleBroadcastReceiver
   # Will get called whenever the BroadcastReceiver receives an intent.
