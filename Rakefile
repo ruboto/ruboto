@@ -463,7 +463,7 @@ namespace :platform do
           break
         elsif response.code == '302'
           uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
-          puts "Following redirect to #{uri.inspect}."
+          puts "Following redirect to #{uri}."
         else
           puts "Got an unexpected response (#{response.code}).  Retrying download."
           puts response.inspect
