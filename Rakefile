@@ -455,9 +455,21 @@ namespace :platform do
     puts 'Downloading the current RubotoCore platform release apk'
     uri = URI('http://ruboto.org/downloads/RubotoCore-release.apk')
     begin
-      http = Net::HTTP.new(uri.host, uri.port)
-      content = http.request(Net::HTTP::Get.new(uri.request_uri)).body
-      File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << content }
+      loop do
+        http = Net::HTTP.new(uri.host, uri.port)
+        response = http.request(Net::HTTP::Get.new(uri.request_uri))
+        if response.code == '200'
+          File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') {|f| f << response.body}
+          break
+        elsif response.code == '302'
+          uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
+          puts "Following redirect to #{uri.inspect}."
+        else
+          puts "Got an unexpected response (#{response.code}).  Retrying download."
+          puts response.inspect
+          sleep 1
+        end
+      end
     rescue Exception, SystemExit
       puts "Download failed: #{$!}"
       FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exists?(PLATFORM_CURRENT_RELEASE_APK)
