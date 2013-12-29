@@ -38,7 +38,7 @@ env:
     - ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=3of3 JRUBY_JARS_VERSION=1.7.4
 
 allow_failures:
-    - global: RUBOTO_PLATFORM=CURRENT
+    - env: RUBOTO_PLATFORM=CURRENT
 
 script:
     - rake install
