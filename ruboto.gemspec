@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
   s.add_dependency('main', '~>5.0')
-  s.add_dependency('rake', '~>0')
+  s.add_dependency('rake', '~>10.0')
   s.add_dependency('rubyzip', '~>1.0')
 
   # jruby-jars is only necessary for standalone apps.
