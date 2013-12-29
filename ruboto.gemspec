@@ -19,9 +19,9 @@ Gem::Specification.new do |s|
   s.files = FileList['[A-Z]*', 'assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
   s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
-  s.add_dependency('main', '>=4.7.2')
-  s.add_dependency('rake')
-  s.add_dependency('rubyzip', '>=1.0.0')
+  s.add_dependency('main', '~>5.0')
+  s.add_dependency('rake', '~>0')
+  s.add_dependency('rubyzip', '~>1.0')
 
   # jruby-jars is only necessary for standalone apps.
   # It will be installed on demand.
