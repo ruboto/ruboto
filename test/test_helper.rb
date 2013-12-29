@@ -161,7 +161,7 @@ class Test::Unit::TestCase
     update = options.delete(:update) || false
     raise "Unknown options: #{options.inspect}" unless options.empty?
 
-    raise "Inclusion/exclusion of libs requires standalone mode." if (included_stdlibs || excluded_stdlibs) && !standalone
+    raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
 
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
 
@@ -302,7 +302,7 @@ class Test::Unit::TestCase
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'http://rubygems.org/'\n\n"
-      gems.each { |g| f << "gem '#{g}'\n" }
+      gems.each { |g| f << "gem #{[*g].map{|gp|"'#{gp}'"}.join(', ')}\n" }
     end
   end
 
