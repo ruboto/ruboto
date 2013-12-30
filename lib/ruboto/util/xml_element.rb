@@ -187,36 +187,66 @@ module Ruboto
       end
 
       def method_definition(class_name)
+        entry_point_guard = (activity_super_guard(class_name, attribute('name')) ||
+            service_super_guard(class_name, attribute('name')))
         method_call(
             (attribute('return') ? attribute('return') : 'void'),
             attribute('name'), parameters,
             get_elements('exception').map { |m| m.attribute('type') },
             ["if (ScriptLoader.isCalledFromJRuby()) #{super_return}",
-             if_else('!JRubyAdapter.isInitialized()',
-                     [%Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
-                      super_return]),
-             'String rubyClassName = scriptInfo.getRubyClassName();',
-             "if (rubyClassName == null) #{super_return}",
-             if_else(
-                 "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                 ruby_call,
-                 if_else(
-                     "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                     ruby_call(true),
-                     if_else(
-                         "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                         ruby_call(true),
-                         # FIXME(uwe):  Can the method be unimplemented?  Is the Ruby instance always an instance of this class?
-                         #if_else(
-                         #    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                             ruby_call,
-                         #    [super_return]
-                         #)
-                     )
-                 )
-             )
+                (entry_point_guard && (entry_point_guard + load_script)) ||
+                    if_else('!JRubyAdapter.isInitialized()',
+                        [%Q{Log.i("Method called before JRuby runtime was initialized: #{class_name}##{attribute('name')}");},
+                            super_return]),
+                'String rubyClassName = scriptInfo.getRubyClassName();',
+                "if (rubyClassName == null) #{super_return}",
+                if_else(
+                    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                    ruby_call,
+                    if_else(
+                        "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                        ruby_call(true),
+                        if_else(
+                            "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                            ruby_call(true),
+                            # FIXME(uwe):  Can the method be unimplemented?  Is the Ruby instance always an instance of this class?
+                            #if_else(
+                            #    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                            ruby_call,
+                        #    [super_return]
+                        #)
+                        )
+                    )
+                ),
+                ('ScriptLoader.unloadScript(this);' if attribute('name') == 'onDestroy'),
             ]
         ).indent.join("\n")
+      end
+
+      def activity_super_guard(class_name, method_name)
+        if class_name == 'RubotoActivity' && method_name == 'onCreate'
+          "if (preOnCreate(#{parameters.map { |i| i[0] }.join(', ')})) #{super_return};"
+        end
+      end
+
+      def service_super_guard(class_name, method_name)
+        if class_name == 'RubotoService'
+          if method_name == 'onCreate'
+            'preOnCreate();'
+          elsif method_name == 'onStartCommand' || method_name == 'onBind'
+            '' # Trigger adding of load_script
+          end
+        end
+      end
+
+      def load_script
+        <<EOF
+if (JRubyAdapter.isInitialized() && scriptInfo.isReadyToLoad()) {
+        ScriptLoader.loadScript(this);
+    } else {
+        #{super_return}
+    }
+EOF
       end
 
       def constructor_definition(class_name)

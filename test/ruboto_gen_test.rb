@@ -177,7 +177,6 @@ class RubotoArrayAdapter
   import android.content.Context
 
   def getView(position, convert_view, parent)
-    puts "IN get_view!!!"
     @inflater = context.getSystemService(Context::LAYOUT_INFLATER_SERVICE) unless @inflater
     if convert_view
       row = convert_view

@@ -3,7 +3,7 @@ module Ruboto
     module Build
       include Verify
       SCRIPTS_DIR = 'src'
-      
+
       ###########################################################################
       #
       # Build Subclass or Interface:
@@ -19,9 +19,9 @@ module Ruboto
         Dir.mkdir(to) unless File.directory?(to)
 
         text = File.read(File.expand_path(Ruboto::GEM_ROOT + "/assets/src/#{src}.java"))
-        substitutions.each {|k,v| text.gsub!(k, v)}
+        substitutions.each { |k, v| text.gsub!(k, v) }
 
-        File.open(File.join(to, "#{name}.java"), 'w') {|f| f << text}
+        File.open(File.join(to, "#{name}.java"), 'w') { |f| f << text }
       end
 
       #
@@ -35,14 +35,11 @@ module Ruboto
         abort "ERROR: #{klass} not found" unless element
 
         unless force == 'include'
-          abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use '--force include' to create it" if
-            element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
-          abort "#{klass} deprecated for targetSdkVersion, deprecated in #{element.attribute('deprecated')}; use '--force include' to create it" if
-            element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
+          abort "#{klass} not available in minSdkVersion, added in #{element.attribute('api_added')}; use '--force include' to create it" if element.attribute('api_added') and element.attribute('api_added').to_i > verify_min_sdk.to_i
+          abort "#{klass} deprecated for targetSdkVersion, deprecated in #{element.attribute('deprecated')}; use '--force include' to create it" if element.attribute('deprecated') and element.attribute('deprecated').to_i <= verify_target_sdk.to_i
         end
 
-        abort "#{klass} removed for targetSdkVersion, removed in #{element.attribute('api_removed')}" if
-          element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_sdk.to_i
+        abort "#{klass} removed for targetSdkVersion, removed in #{element.attribute('api_removed')}" if element.attribute('api_removed') and element.attribute('api_removed').to_i <= verify_target_sdk.to_i
 
         element
       end
@@ -55,9 +52,9 @@ module Ruboto
         target_api = verify_target_sdk.to_i
 
         # Remove methods changed outside of the scope of the sdk versions
-        methods = methods.select{|i| !i.attribute('api_added') || (i.attribute('api_added').to_i <= target_api)}
+        methods = methods.select { |i| !i.attribute('api_added') || (i.attribute('api_added').to_i <= target_api) }
         # methods = methods.select{|i| !i.attribute('deprecated') || (i.attribute('deprecated').to_i > min_api)}
-        methods = methods.select{|i| !i.attribute('api_removed') || (i.attribute('api_removed').to_i > min_api)}
+        methods = methods.select { |i| !i.attribute('api_removed') || (i.attribute('api_removed').to_i > min_api) }
 
         # Inform and remove methods that do not exist in one of the sdk versions
         methods = methods.select do |i|
@@ -124,7 +121,7 @@ module Ruboto
             'THE_RUBOTO_CLASS' => params[:name],
             'THE_CONSTRUCTORS' => class_desc.name == 'class' ?
                 class_desc.get_elements('constructor').map { |i| i.constructor_definition(params[:name]) }.join("\n\n") : '',
-            'THE_METHODS' => methods.map { |i| i.method_definition(params[:name]) }.join("\n\n")
+            'THE_METHODS' => methods_header + methods.map { |i| i.method_definition(params[:name]) }.join("\n\n")
         }
       end
 
@@ -134,8 +131,8 @@ module Ruboto
       #
       def generate_core_classes(params)
         hash = {:package => 'org.ruboto'}
-        %w(method_base method_include implements force).inject(hash) {|h, i| h[i.to_sym] = params[i.to_sym]; h}
-        hash[:method_exclude] = params[:method_exclude].split(',').push('onCreate').push('onDestroy').push('onBind').push('onStartCommand').join(',')
+        %w(method_base method_include implements force).inject(hash) { |h, i| h[i.to_sym] = params[i.to_sym]; h }
+        hash[:method_exclude] = params[:method_exclude]
 
         %w(android.app.Activity android.app.Service android.content.BroadcastReceiver).each do |i|
           name = i.split('.')[-1]
@@ -193,6 +190,21 @@ module Ruboto
           puts "Added file #{test_file}."
         end
       end
+
+      def methods_header
+        <<EOF
+    private final ScriptInfo scriptInfo = new ScriptInfo();
+    public ScriptInfo getScriptInfo() {
+        return scriptInfo;
+    }
+
+    /****************************************************************************************
+     *
+     *  Generated Methods
+     */
+EOF
+      end
+
     end
   end
 end

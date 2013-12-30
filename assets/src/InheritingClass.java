@@ -9,18 +9,13 @@ import org.ruboto.ScriptInfo;
 import org.ruboto.ScriptLoader;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
-    private final ScriptInfo scriptInfo = new ScriptInfo();
+THE_CONSTRUCTORS
+
+THE_METHODS
+
     {
 		scriptInfo.setRubyClassName(getClass().getSimpleName());
 		ScriptLoader.loadScript(this);
     }
-
-THE_CONSTRUCTORS
-
-    public ScriptInfo getScriptInfo() {
-        return scriptInfo;
-    }
-
-THE_METHODS
 
 }

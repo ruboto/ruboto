@@ -4,7 +4,6 @@ ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
 class SubclassOfArrayAdapter < Java::AndroidWidget::ArrayAdapter
   def getView(position, convert_view, parent)
-    puts 'IN get_view!!!'
     @inflater ||= context.getSystemService(Context::LAYOUT_INFLATER_SERVICE)
     row = convert_view ? convert_view : @inflater.inflate(mResource, nil)
     row.findViewById(mFieldId).text = "[#{get_item(position)}]"
