@@ -93,8 +93,14 @@ module Ruboto
           unless File.exists? avd_home
             puts "Creating AVD #{avd_name}"
             if ON_MAC_OS_X
-              abis = `android list target`.split(/----------\n/).
-                  find { |l| l =~ /android-#{sdk_level}/ }.slice(/(?<=ABIs : ).*/).split(', ')
+              target = `android list target`.split(/----------\n/).
+                  find { |l| l =~ /android-#{sdk_level}/ }
+              if target.nil?
+                puts "Target android-#{sdk_level} not found.  You should run"
+                puts "\n    ruboto setup -y -t #{sdk_level}\n\nto install it."
+                exit 3
+              end
+              abis = target.slice(/(?<=ABIs : ).*/).split(', ')
               abi = abis.find { |a| a =~ /x86/ }
             end
             puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA #{"--abi #{abi}" if abi}`
