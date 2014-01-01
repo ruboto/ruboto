@@ -42,6 +42,16 @@ class RakeTest < Test::Unit::TestCase
     end
   end
 
+  def test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed
+    Dir.chdir APP_DIR do
+      system 'rake debug'
+      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+      FileUtils.touch 'src/not_ruby_source.properties'
+      system 'rake debug'
+      assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
+    end
+  end
+
   def test_that_manifest_is_updated_when_project_properties_are_changed
     Dir.chdir APP_DIR do
       manifest = File.read('AndroidManifest.xml')
