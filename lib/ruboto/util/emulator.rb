@@ -97,11 +97,13 @@ module Ruboto
               exit 3
             end
 
-            abis = target.slice(/(?<=ABIs : ).*/).split(', ')
-            has_haxm = abis.find { |a| a =~ /x86/ }
+            if ON_MAC_OS_X || ON_WINDOWS
+              abis = target.slice(/(?<=ABIs : ).*/).split(', ')
+              has_haxm = abis.find { |a| a =~ /x86/ }
+            end
 
             if has_haxm
-              abi_opt = "--abi x86"
+              abi_opt = '--abi x86'
             else
               if [17, 16, 15, 13, 11].include? sdk_level
                 abi_opt = '--abi armeabi-v7a'
