@@ -12,17 +12,10 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
     }
 
     public THE_RUBOTO_CLASS() {
-        this(null);
-    }
-
-    public THE_RUBOTO_CLASS(String name) {
         super();
-
-        if (name != null) {
-            scriptInfo.setScriptName(name);
-            if (JRubyAdapter.isInitialized()) {
-                ScriptLoader.loadScript(this);
-            }
+        scriptInfo.setRubyClassName(getClass().getSimpleName());
+        if (JRubyAdapter.isInitialized()) {
+            ScriptLoader.loadScript(this);
         }
     }
 
