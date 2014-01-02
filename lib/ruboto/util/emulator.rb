@@ -83,27 +83,35 @@ module Ruboto
             end
           end
 
-          if [17, 16, 15, 13, 11].include? sdk_level
-            abi_opt = '--abi armeabi-v7a'
-          elsif sdk_level == 10
-            abi_opt = '--abi armeabi'
-          end
-
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
+
           unless File.exists? avd_home
             puts "Creating AVD #{avd_name}"
-            if ON_MAC_OS_X
-              target = `android list target`.split(/----------\n/).
-                  find { |l| l =~ /android-#{sdk_level}/ }
-              if target.nil?
-                puts "Target android-#{sdk_level} not found.  You should run"
-                puts "\n    ruboto setup -y -t #{sdk_level}\n\nto install it."
-                exit 3
-              end
-              abis = target.slice(/(?<=ABIs : ).*/).split(', ')
-              abi = abis.find { |a| a =~ /x86/ }
+
+            target = `android list target`.split(/----------\n/).
+                find { |l| l =~ /android-#{sdk_level}/ }
+
+            if target.nil?
+              puts "Target android-#{sdk_level} not found.  You should run"
+              puts "\n    ruboto setup -y -t #{sdk_level}\n\nto install it."
+              exit 3
             end
-            puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA #{"--abi #{abi}" if abi}`
+
+            abis = target.slice(/(?<=ABIs : ).*/).split(', ')
+            has_haxm = abis.find { |a| a =~ /x86/ }
+
+            if has_haxm
+              abi_opt = "--abi x86"
+            else
+              if [17, 16, 15, 13, 11].include? sdk_level
+                abi_opt = '--abi armeabi-v7a'
+              elsif sdk_level == 10
+                abi_opt = '--abi armeabi'
+              end
+            end
+
+            puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
+
             if $? != 0
               puts 'Failed to create AVD.'
               exit 3
