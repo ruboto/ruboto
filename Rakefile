@@ -228,11 +228,11 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-#{(categories.keys & grouped_issues.keys).map do |cat|
-"#{cat}:\n
-#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
-"
-end.join("\n")}
+  #{(categories.keys & grouped_issues.keys).map do |cat|
+    "#{cat}:\n
+    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+    "
+  end.join("\n")}
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
@@ -455,19 +455,25 @@ namespace :platform do
     puts 'Downloading the current RubotoCore platform release apk'
     uri = URI('http://ruboto.org/downloads/RubotoCore-release.apk')
     begin
-      loop do
-        http = Net::HTTP.new(uri.host, uri.port)
-        response = http.request(Net::HTTP::Get.new(uri.request_uri))
-        if response.code == '200'
-          File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') {|f| f << response.body}
-          break
-        elsif response.code == '302'
-          uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
-          puts "Following redirect to #{uri}."
-        else
-          puts "Got an unexpected response (#{response.code}).  Retrying download."
-          puts response.inspect
-          sleep 1
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        headers = {'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'}
+        loop do
+          response = http.get(uri.request_uri, headers)
+          if response.code == '200'
+            File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << response.body }
+            break
+          elsif response.code == '302'
+            headers.update('Referer' => uri.to_s)
+            if (cookie = response.response['set-cookie'])
+              headers.update('Cookie' => cookie.split('; ')[0])
+            end
+            uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
+            puts "Following redirect to #{uri}."
+          else
+            puts "Got an unexpected response (#{response.code}).  Retrying download."
+            puts response.inspect
+            sleep 1
+          end
         end
       end
     rescue Exception, SystemExit
