@@ -228,11 +228,11 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-  #{(categories.keys & grouped_issues.keys).map do |cat|
-    "#{cat}:\n
-    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
-    "
-  end.join("\n")}
+#{(categories.keys & grouped_issues.keys).map do |cat|
+  "#{cat}:\n
+  #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+  "
+end.join("\n")}
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
@@ -453,9 +453,10 @@ namespace :platform do
   file PLATFORM_CURRENT_RELEASE_APK do
     FileUtils.mkdir_p File.dirname(PLATFORM_CURRENT_RELEASE_APK)
     puts 'Downloading the current RubotoCore platform release apk'
-    uri = URI('http://ruboto.org/downloads/RubotoCore-release.apk')
+    uri = URI('https://raw.github.com/ruboto/ruboto.github.com/master/downloads/RubotoCore-release.apk')
     begin
-      Net::HTTP.start(uri.host, uri.port) do |http|
+      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https',
+          :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
         headers = {'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'}
         loop do
           response = http.get(uri.request_uri, headers)
@@ -465,7 +466,7 @@ namespace :platform do
           elsif response.code == '302'
             headers.update('Referer' => uri.to_s)
             if (cookie = response.response['set-cookie'])
-              headers.update('Cookie' => cookie.split('; ')[0])
+              headers.update('Cookie' => cookie)
             end
             uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
             puts "Following redirect to #{uri}."
