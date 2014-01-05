@@ -225,7 +225,7 @@ module Ruboto
 
       def activity_super_guard(class_name, method_name)
         if class_name == 'RubotoActivity' && method_name == 'onCreate'
-          "if (preOnCreate(#{parameters.map { |i| i[0] }.join(', ')})) #{super_return};"
+          "if (preOnCreate(#{parameters.map { |i| i[0] }.join(', ')})) #{super_return};\n"
         end
       end
 

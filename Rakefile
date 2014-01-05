@@ -22,7 +22,8 @@ MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 README_FILE = 'README.md'
-BLOG_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com/_posts"
+WEB_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com"
+BLOG_DIR = '_posts'
 RELEASE_BLOG = "#{BLOG_DIR}/#{Date.today}-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC.md'
@@ -290,7 +291,7 @@ layout: post
 category: news
 ---
 EOF
-    Dir.chdir BLOG_DIR do
+    Dir.chdir WEB_DIR do
       output = `git status --porcelain`
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
       sh "git rm -f #{old_blog_posts.join(' ')}" unless old_blog_posts.empty?
@@ -372,8 +373,8 @@ desc 'Push the gem to RubyGems'
 task :release => [:clean, README_FILE, :release_docs, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
-  Dir.chdir BLOG_DIR do
-    output = `git status --porcelain`
+  Dir.chdir WEB_DIR do
+    output = `git status --porcelain` - [RELEASE_BLOG]
     raise "Web workspace not clean!\n#{output}" unless output.empty?
     sh "git add -f #{RELEASE_BLOG}"
     `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`

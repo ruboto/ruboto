@@ -1,7 +1,8 @@
 .bundle
 .DS_Store
 .idea
+adb_logcat.log
 bin
 gen
-tmp
 local.properties
+tmp

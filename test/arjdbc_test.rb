@@ -1,9 +1,9 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
 # FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
-if RubotoTest::ANDROID_OS >= 15 || RubotoTest::RUBOTO_PLATFORM != 'STANDALONE'
+if RubotoTest::ANDROID_OS >= 15
 
-class SqldroidTest < Test::Unit::TestCase
+class ArjdbcTest < Test::Unit::TestCase
   def setup
     generate_app :bundle => [['activerecord', '<4.0.0'], 'activerecord-jdbcsqlite3-adapter', :sqldroid]
   end
@@ -12,7 +12,7 @@ class SqldroidTest < Test::Unit::TestCase
     cleanup_app
   end
 
-  def test_sqldroid
+  def test_arjdbc
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
 require 'ruboto/widget'
@@ -80,9 +80,7 @@ class RubotoTestAppActivity
       ActiveRecord::Base.connection.execute "INSERT INTO companions VALUES (8, 'Aragorn')"
       ActiveRecord::Base.connection.execute "INSERT INTO companions VALUES (9, 'Boromir')"
       companions = ActiveRecord::Base.connection.execute "SELECT name FROM companions"
-      run_on_ui_thread do
-        @adapter.add_all companions
-      end
+      run_on_ui_thread { @adapter.add_all companions }
     end
   end
 end
