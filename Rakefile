@@ -137,8 +137,8 @@ def get_github_issues
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
-  milestone_entry = milestones.find { |m| m['title'] == Ruboto::VERSION }
-  raise "Milestone for version #{} not found." unless milestone_entry
+  milestone_entry = milestones.find { |m| m['title'] == Ruboto::VERSION.chomp('.dev') }
+  raise "Milestone for version #{Ruboto::VERSION} not found." unless milestone_entry
   milestone = milestone_entry['number']
 
   uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
@@ -150,9 +150,11 @@ def get_github_issues
   milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
   milestone_description = milestone_description.split("\r\n").map(&:wrap).join("\r\n")
   categories = {
-      'Features' => 'feature', 'Bugfixes' => 'bug', 'Support' => 'support',
-      'Documentation' => 'documentation', 'Pull requests' => nil,
-      'Internal' => 'internal', 'Rejected' => 'rejected', 'Other' => nil
+      'Features' => 'feature', 'Bugfixes' => 'bug',
+      'Documentation' => 'documentation', 'Support' => 'support',
+      'Community' => 'community',
+      'Pull requests' => nil, 'Internal' => 'internal',
+      'Rejected' => 'rejected', 'Other' => nil
   }
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name'] }
@@ -230,8 +232,8 @@ New in version #{milestone_name}:
 
 #{(categories.keys & grouped_issues.keys).map do |cat|
   "#{cat}:\n
-  #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
-  "
+#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title']}}.wrap(2) }.join("\n")}
+"
 end.join("\n")}
 You can find a complete list of issues here:
 
@@ -278,15 +280,16 @@ EOF
   puts release_doc
   puts
   puts '=' * 80
+  File.write(RELEASE_DOC, release_doc)
 
   unless Gem::Version.new(Ruboto::VERSION).prerelease?
     header = <<EOF
 ---
 title : Ruboto #{Ruboto::VERSION}
 layout: post
+category: news
 ---
 EOF
-    File.write(RELEASE_DOC, release_doc)
     Dir.chdir BLOG_DIR do
       output = `git status --porcelain`
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]

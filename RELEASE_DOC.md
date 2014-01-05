@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.0.0 released!
+Subject: [ANN] Ruboto 1.0.1 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.0.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.0.1.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,64 +8,63 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.0.0:
+New in version 1.0.1:
 
-The main motivation for the 1.0 release is to announce that Ruboto is
-ready for general consumption!
-
-* All important parts of the Android API are available.
-* The API has stabilised.
-* Performance is reasonable. (Best case startup 4 seconds or less).
-* Home page/Wiki/Tutorials and other docs are of high enough quality that
-new developers have a low threshold to get going, and more advanced
-developers can find how to do more advanced apps.
-
-Notable features this release is RubyGems support for the "dalvik"
-platform and support for using Android utility projects.  This means you
-can release gems for dalvik only and consume in-house or third-party
-utility projects.
+This release focuses on bug fixes and documentation.
 
 Features:
 
-* Issue #75 Faster startup
-* Issue #392 Establish a specialized RubyGems platform for JRuby on
-  Android
-* Issue #524 Use "ruboto emulator" to setup HAXM
-* Issue #530 Shift all layout parameters into :layout = {} and remove the
-  need for "=" in setting instance variables
-* Issue #544 Add support for using utility projects
+* Issue #546 Better stack traces using "jruby.rewrite.java.trace" = "true"
+* Issue #548 Allow using snapshot versions of jruby-jars
 
 Bugfixes:
 
-* Issue #431 Error running Ruboto test suites
-* Issue #483 The Tutorial: adding a startup splash builds but crashes
-  starting in the emulator
-* Issue #534 ruboto emulator -t does not show emulator window though it
-  says Emulator started OK
-* Issue #542 please install the jdbcsqlite3 adapter
-
-Support:
-
-* Issue #520 ruboto setup - "Android SDK command adb : Not found"
-* Issue #539 "rake install start" returns "rake aborted! No such file or
-  directory - adb"
+* Issue #505 Trigger rebuild of the package if non-ruby source has changed
+  in the "src" directory
+* Issue #507 Undefined method `__ruby_object' when implementing a Java
+  interface
+* Issue #537 Generated BroadcastReceiver has incorrect number of argument
+  for Log.e
+* Issue #541 Gem errors with activerecord-jdbc-sqlite3
+* Issue #545 JRuby use of javax.annotation.processing breaks use of ARJDBC
+* Issue #554 Better error message when trying to run an emulator for a
+  target that is not installed
+* Issue #556 "ruboto emulator" ignores HAXM installation on Windows
 
 Documentation:
 
-* Issue #506 Add barcode scanning example
-* Issue #528 Fix formatting errors in the RELEASE_DOC
-* Issue #535 Mac kernel freezes when ruboto emulator start under MacOS
-  10.9 with Virtualbox 4.3.x installed.
+* Issue #532 Environment setup for windows
+* Issue #538 Complete the "What is Ruboto?" WIKI article
+* Issue #553 The number of stars for the Ruboto project has disappeared
+  from the ruboto.org front page
+* Issue #560 Add a tutorial for detecting incoming phone calls
+
+Support:
+
+* Issue #480 Could not locate Gemfile
+* Issue #549 How can I view output?
+* Issue #551 rake install start problem on windows
+* Issue #552 Problem with rake install start on windows
+* Issue #555 Ruboto command not found after installation
+
+Community:
+
+* Issue #531 How can I help?
 
 Pull requests:
 
-* Issue #527 Add weight to widget.rb
-* Issue #536 Update emulator.rb (Fix no emulator window shows in MacOS
-  10.9 with Virtualbox 4.3, when $DISPLAY variable is empty)
+* Issue #550 Fix Log import
+
+Internal:
+
+* Issue #513 Refactor to generate special
+  onCreate/onDestroy/onBind/onStartCommand instead of hard coding
+* Issue #559 Remove redundant script file reference in
+  InheritingBroadcastReceiver
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=17
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=31
 
 
 Installation:

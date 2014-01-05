@@ -1,23 +1,10 @@
-Subject: [ANN] Ruboto 1.0.0 release candidate
+Subject: [ANN] Ruboto 1.0.1 release candidate
 
 Hi all!
 
-The Ruboto 1.0.0 release candidate is now available.
+The Ruboto 1.0.1 release candidate is now available.
 
-The main motivation for the 1.0 release is to announce that Ruboto is
-ready for general consumption!
-
-* All important parts of the Android API are available.
-* The API has stabilised.
-* Performance is reasonable. (Best case startup 4 seconds or less).
-* Home page/Wiki/Tutorials and other docs are of high enough quality that
-new developers have a low threshold to get going, and more advanced
-developers can find how to do more advanced apps.
-
-Notable features this release is RubyGems support for the "dalvik"
-platform and support for using Android utility projects.  This means you
-can release gems for dalvik only and consume in-house or third-party
-utility projects.
+This release focuses on bug fixes and documentation.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
