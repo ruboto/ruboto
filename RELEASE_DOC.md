@@ -21,7 +21,7 @@ Bugfixes:
 
 * Issue #505 Trigger rebuild of the package if non-ruby source has changed
   in the "src" directory
-* Issue #507 Undefined method `__ruby_object' when implementing a Java
+* Issue #507 Undefined method '__ruby_object' when implementing a Java
   interface
 * Issue #537 Generated BroadcastReceiver has incorrect number of argument
   for Log.e
@@ -59,6 +59,7 @@ Internal:
 
 * Issue #513 Refactor to generate special
   onCreate/onDestroy/onBind/onStartCommand instead of hard coding
+* Issue #540 Release 1.0.1 gem
 * Issue #559 Remove redundant script file reference in
   InheritingBroadcastReceiver
 
