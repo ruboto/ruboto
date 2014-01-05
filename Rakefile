@@ -105,7 +105,8 @@ end
 
 class String
   def wrap(indent = 0)
-    scan(/\S.{0,72}\S(?=\s|$)|\S+/).join("\n" + ' ' * indent)
+    line_length = 72-indent
+    scan(/\S.{0,#{line_length}}\S(?=\s|$)|\S+/).join("\n" + ' ' * indent)
   end
 end
 

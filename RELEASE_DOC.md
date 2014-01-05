@@ -14,19 +14,21 @@ This release focuses on bug fixes and documentation.
 
 Features:
 
-* Issue #546 Better stack traces using "jruby.rewrite.java.trace" = "true"
+* Issue #546 Better stack traces using "jruby.rewrite.java.trace" =
+  "true"
 * Issue #548 Allow using snapshot versions of jruby-jars
 
 Bugfixes:
 
-* Issue #505 Trigger rebuild of the package if non-ruby source has changed
-  in the "src" directory
+* Issue #505 Trigger rebuild of the package if non-ruby source has
+  changed in the "src" directory
 * Issue #507 Undefined method '__ruby_object' when implementing a Java
   interface
-* Issue #537 Generated BroadcastReceiver has incorrect number of argument
-  for Log.e
+* Issue #537 Generated BroadcastReceiver has incorrect number of
+  argument for Log.e
 * Issue #541 Gem errors with activerecord-jdbc-sqlite3
-* Issue #545 JRuby use of javax.annotation.processing breaks use of ARJDBC
+* Issue #545 JRuby use of javax.annotation.processing breaks use of
+  ARJDBC
 * Issue #554 Better error message when trying to run an emulator for a
   target that is not installed
 * Issue #556 "ruboto emulator" ignores HAXM installation on Windows
