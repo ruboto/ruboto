@@ -79,6 +79,16 @@ module Ruboto
         File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
       end
 
+      def package_installer
+        case android_package_os_id
+        when LINUX
+          which('apt-get') or which('yum')
+        else
+          ## Error
+          nil
+        end
+      end
+
       def path_setup_file
         case android_package_os_id
         when MAC_OS_X
@@ -241,10 +251,38 @@ module Ruboto
         check_all(api_levels)
       end
 
+      def install_package(accept_all, package_name, pretty_name)
+        case android_package_os_id
+        when LINUX
+          puts "#{pretty_name} was not found."
+          installer = package_installer
+          if installer
+	          unless accept_all
+	            print 'Would you like to and install it? (Y/n): '
+	            a = STDIN.gets.chomp.upcase
+	          end
+	          if accept_all || a == 'Y' || a.empty?
+	            puts "sudo #{installer} install -y #{package_name}"
+	            `sudo #{installer} install -y #{package_name}`
+	          else
+	            puts
+	            puts 'You can install #{pretty_name} manually by:'
+	            puts "sudo #{installer} install #{package_name}"
+	            puts
+	          end
+          else
+            puts "Package installer not found. You'll need to install #{pretty_name} manually."
+          end
+        else
+          raise "Unknown host os for package install: #{RbConfig::CONFIG['host_os']}"
+        end
+      end
+
       def install_java(accept_all)
         case android_package_os_id
         when MAC_OS_X
         when LINUX
+          install_package(accept_all, 'default-jdk', 'Default Java Development Kit')
         when WINDOWS
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
@@ -300,6 +338,7 @@ module Ruboto
         case android_package_os_id
         when MAC_OS_X
         when LINUX
+          install_package(accept_all, 'ant', 'Apache ANT')
         when WINDOWS
           # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
           #set IS_ELEVATED=0
