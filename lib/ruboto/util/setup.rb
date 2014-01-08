@@ -32,7 +32,7 @@ module Ruboto
         ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
           exts.each do |ext|
             exe = File.join(path, "#{cmd}#{ext}")
-            if File.executable? exe
+            if File.executable?(exe) and not File.directory?(exe)
               exe.gsub!('\\', '/') if windows?
               return exe
             end
