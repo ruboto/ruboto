@@ -494,7 +494,7 @@ Java::arjdbc.jdbc.AdapterJavaService.new.basicLoad(JRuby.runtime)
             # ODOT
 
             # FIXME(uwe): Extract files with case sensitive names for ARJDBC 1.2.7-1.3.x
-            puts `jar xf #{jar} arjdbc/mssql/MSSQLRubyJdbcConnection.class arjdbc/sqlite3/SQLite3RubyJdbcConnection.class`
+            puts `jar xf #{jar} arjdbc/postgresql/PostgreSQLRubyJdbcConnection.class arjdbc/mssql/MSSQLRubyJdbcConnection.class arjdbc/sqlite3/SQLite3RubyJdbcConnection.class`
             # EMXIF
 
           elsif jar =~ /shared\/jopenssl.jar$/

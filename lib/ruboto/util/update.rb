@@ -462,6 +462,7 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                     # 'org/jruby/runtime/opto',              # What is this?
                     # 'org/jruby/runtime/opto/OptoFactory*', # What is this?
+                    'org/jruby/truffle',
                     'org/yecht',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.5')
