@@ -364,7 +364,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
   require 'bundler'
-  # Issue #547 https://github.com/ruboto/ruboto/issues/547
+  # FIXME(uwe): Issue #547 https://github.com/ruboto/ruboto/issues/547
   if true || Gem::Version.new(Bundler::VERSION) <= Gem::Version.new('1.5.0')
     require 'bundler/vendored_thor'
 

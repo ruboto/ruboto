@@ -146,6 +146,7 @@ public class JRubyAdapter {
             System.setProperty("jruby.thread.pooling", "true");
 
             // Uncomment these to debug/profile Ruby source loading
+            // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'
             // System.setProperty("jruby.debug.loadService", "true");
             // System.setProperty("jruby.debug.loadService.timing", "true");
 
