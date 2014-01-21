@@ -54,23 +54,23 @@ unless DX_FILENAME
   exit 1
 end
 
-def manifest;
+def manifest
   @manifest ||= REXML::Document.new(File.read(MANIFEST_FILE))
 end
 
-def package;
+def package
   manifest.root.attribute('package')
 end
 
-def build_project_name;
+def build_project_name
   @build_project_name ||= REXML::Document.new(File.read('build.xml')).elements['project'].attribute(:name).value
 end
 
-def scripts_path;
+def scripts_path
   @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts"
 end
 
-def app_files_path;
+def app_files_path
   @app_files_path ||= "/data/data/#{package}/files"
 end
 
