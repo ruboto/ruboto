@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/ruboto/ruboto.png)](https://codeclimate.com/github/ruboto/ruboto)
+
 Ruboto - JRuby On Android
 =========================
 
