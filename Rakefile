@@ -375,7 +375,7 @@ task :release => [:clean, README_FILE, :release_docs, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   Dir.chdir WEB_DIR do
-    output = `git status --porcelain` - [RELEASE_BLOG]
+    output = `git status --porcelain`
     raise "Web workspace not clean!\n#{output}" unless output.empty?
     sh "git add -f #{RELEASE_BLOG}"
     `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`
