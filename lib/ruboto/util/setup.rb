@@ -113,16 +113,14 @@ module Ruboto
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
           micro = t.elements['sdk:micro']
+          prev = t.elements['sdk:preview']
+          next if prev
           version = major.text
           version += ".#{minor.text}" if minor
           version += ".#{micro.text}" if micro
+          version += "_rc#{prev.text}" if prev
           version
-        end.sort_by { |v| Gem::Version.new(v) }.last
-
-        # FIXME(uwe): Temporary fix for bug in build-tools 19.0.0
-        return '18.1.1' if type == 'build-tool' && version == '19.0.0'
-        # EMXIF
-
+        end.compact.sort_by { |v| Gem::Version.new(v.gsub('_', '.')) }.last
         version
       end
 
