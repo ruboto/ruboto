@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.0.1 released!
+Subject: [ANN] Ruboto 1.0.2 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.0.1.
+The Ruboto team is pleased to announce the release of Ruboto 1.0.2.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,66 +8,37 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.0.1:
+New in version 1.0.2:
 
-This release focuses on bug fixes and documentation.
+This releases updates to JRuby 1.7.10 and improves installation with
+automated setup of Apache ANT on Windows and Linux.
 
 Features:
 
-* Issue #546 Better stack traces using "jruby.rewrite.java.trace" =
-  "true"
-* Issue #548 Allow using snapshot versions of jruby-jars
+* Issue #447 Use "ruboto setup" to flag and install ant
+* Issue #564 Update to JRuby 1.7.10
 
 Bugfixes:
 
-* Issue #505 Trigger rebuild of the package if non-ruby source has
-  changed in the "src" directory
-* Issue #507 Undefined method '__ruby_object' when implementing a Java
-  interface
-* Issue #537 Generated BroadcastReceiver has incorrect number of
-  argument for Log.e
-* Issue #541 Gem errors with activerecord-jdbc-sqlite3
-* Issue #545 JRuby use of javax.annotation.processing breaks use of
-  ARJDBC
-* Issue #554 Better error message when trying to run an emulator for a
-  target that is not installed
-* Issue #556 "ruboto emulator" ignores HAXM installation on Windows
+* Issue #525 Quick Start : "Unfortunately, Browser has stopped"
+* Issue #565 Odd behaviour when changing orientation with Fragments
+* Issue #575 Gemfile.lock contains references to gems that are not part
+  of the dependencies
 
 Documentation:
 
-* Issue #532 Environment setup for windows
-* Issue #538 Complete the "What is Ruboto?" WIKI article
-* Issue #553 The number of stars for the Ruboto project has disappeared
-  from the ruboto.org front page
-* Issue #560 Add a tutorial for detecting incoming phone calls
-
-Support:
-
-* Issue #480 Could not locate Gemfile
-* Issue #549 How can I view output?
-* Issue #551 rake install start problem on windows
-* Issue #552 Problem with rake install start on windows
-* Issue #555 Ruboto command not found after installation
+* Issue #568 Error with tutorial on "Example: Open a web page"
 
 Community:
 
-* Issue #531 How can I help?
-
-Pull requests:
-
-* Issue #550 Fix Log import
-
-Internal:
-
-* Issue #513 Refactor to generate special
-  onCreate/onDestroy/onBind/onStartCommand instead of hard coding
-* Issue #540 Release 1.0.1 gem
-* Issue #559 Remove redundant script file reference in
-  InheritingBroadcastReceiver
+* Issue #533 How can I help? (di3z )
+* Issue #562 How can I help? (lucasallan)
+* Issue #563 How can I help? (pedroandrade)
+* Issue #572 How can I help? (iamrahulroy)
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=31
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=27
 
 
 Installation:

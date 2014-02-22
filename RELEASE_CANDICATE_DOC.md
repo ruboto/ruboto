@@ -1,10 +1,11 @@
-Subject: [ANN] Ruboto 1.0.1 release candidate
+Subject: [ANN] Ruboto 1.0.2 release candidate
 
 Hi all!
 
-The Ruboto 1.0.1 release candidate is now available.
+The Ruboto 1.0.2 release candidate is now available.
 
-This release focuses on bug fixes and documentation.
+This releases updates to JRuby 1.7.10 and improves installation with
+automated setup of Apache ANT on Windows and Linux.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
