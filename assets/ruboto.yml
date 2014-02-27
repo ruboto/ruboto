@@ -1,0 +1,21 @@
+###################################
+#
+# heap_alloc
+#   
+#    Forces the heap to grow by a number of megabytes.
+#    Can result in improved start-up performance because
+#      it prevents the heap from growing through smaller 
+#      increments.
+#
+# heap_alloc: 13
+
+###################################
+#
+# ruby_version
+#   
+#    Sets the jruby.compat.version property of JRuby
+#    If you include the jruby jars, this is used to
+#      trim away unused versions of the stdlib.
+#
+# ruby_version: 1.9
+
