@@ -134,7 +134,9 @@ public class JRubyAdapter {
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
             System.setProperty("jruby.bytecode.version", "1.6");
-            // System.setProperty("jruby.compat.version", "RUBY2_0"); // RUBY1_9 is the default in JRuby 1.7
+            // BEGIN Ruboto RubyVersion
+            // System.setProperty("jruby.compat.version", "RUBY1_9"); // RUBY1_9 is the default in JRuby 1.7
+            // END Ruboto RubyVersion
             // System.setProperty("jruby.compile.backend", "DALVIK");
             System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCE FORCEIR
             System.setProperty("jruby.interfaces.useProxy", "true");
