@@ -77,7 +77,7 @@ module Ruboto
 
       def verify_ruboto_config
         if File.exists? 'ruboto.yml'
-          @ruboto_config ||= YAML::load_file('ruboto.yml')
+          @ruboto_config ||= (YAML::load_file('ruboto.yml') || {})
         else
           @ruboto_config = {}
         end
