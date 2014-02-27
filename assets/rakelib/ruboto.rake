@@ -239,10 +239,18 @@ file RUBOTO_CONFIG_FILE
 task :jruby_adapter => JRUBY_ADAPTER_FILE
 file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
   require 'yaml'
+
+  ruboto_yml = (YAML.load(File.read(RUBOTO_CONFIG_FILE)) || {})
+  source = File.read(JRUBY_ADAPTER_FILE)
+
+  #
+  # HeapAlloc
+  #
+  comment = ''
   marker_topic ='Ruboto HeapAlloc'
   begin_marker = "// BEGIN #{marker_topic}"
   end_marker = "// END #{marker_topic}"
-  unless (heap_alloc = YAML.load(File.read(RUBOTO_CONFIG_FILE))['heap_alloc'])
+  unless (heap_alloc = ruboto_yml['heap_alloc'])
     heap_alloc = 13
     comment = '// '
   end
@@ -253,9 +261,31 @@ file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
             #{comment}arrayForHeapAllocation = null;
             #{end_marker}
 EOF
-  source = File.read(JRUBY_ADAPTER_FILE)
-  heap_alloc_pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
-  File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source.sub(heap_alloc_pattern, config) }
+  pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
+  source = source.sub(pattern, config)
+
+  #
+  # RubyVersion
+  #
+  comment = ''
+  marker_topic ='Ruboto RubyVersion'
+  begin_marker = "// BEGIN #{marker_topic}"
+  end_marker = "// END #{marker_topic}"
+  unless (ruby_version = ruboto_yml['ruby_version'])
+    ruby_version = 2.0
+    comment = '// '
+  end
+  ruby_version = ruby_version.to_s
+  ruby_version['.'] = '_'
+  config = <<EOF
+            #{begin_marker}
+            #{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
+            #{end_marker}
+EOF
+  pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
+  source = source.sub(pattern, config)
+
+  File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source }
 end
 
 file APK_FILE => APK_DEPENDENCIES do |t|
