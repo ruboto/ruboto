@@ -232,7 +232,7 @@ module Ruboto
       def update_assets
         puts "\nCopying files:"
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
-        %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
+        %w{.gitignore Rakefile ruboto.yml}.each { |f| log_action(f) { weak_copier.copy f } }
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         %w{assets rakelib res/layout test}.each do |f|
@@ -542,6 +542,7 @@ module Ruboto
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
         min_sdk_version = verify_manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
+        ruby_version = verify_ruboto_config['ruby_version']
         included_stdlibs = verify_ruboto_config['included_stdlibs']
         excluded_stdlibs = [*verify_ruboto_config['excluded_stdlibs']].compact
         Dir.chdir 'libs' do
@@ -560,6 +561,21 @@ module Ruboto
 
               Dir.chdir 'new/jruby.home/lib/ruby' do
                 ruby_stdlib_versions = Dir['*'] - %w(gems)
+
+                #
+                # Add ruby_version (e.g., 1.8, 1.9, 2.0) to ruboto.yml
+                # to trim unused versions from stdlib
+                #
+                if ruby_version
+                  print "ruby version = #{ruby_version}..."
+                  (ruby_stdlib_versions - %w(shared)).each do |ld|
+                    unless ld == ruby_version.to_s
+                      print "removing #{ld}..."
+                      FileUtils.rm_rf ld
+                    end
+                  end
+                end
+
                 if included_stdlibs
                   print 'excluded...'
                   ruby_stdlib_versions.each do |ld|
