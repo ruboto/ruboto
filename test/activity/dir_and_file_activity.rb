@@ -11,7 +11,7 @@ class DirAndFileActivity
         linear_layout :orientation => :vertical do
           text_view :id => 42, :text => __FILE__
           text_view :id => 43, :text => File.dirname(__FILE__)
-          text_view :id => 44, :text => Dir["#{File.dirname(__FILE__)}/*"][0].to_s
+          text_view :id => 44, :text => Dir["#{File.dirname(__FILE__)}/*"].sort[0].to_s
           text_view :id => 45, :text => Dir.foreach(File.dirname(__FILE__)).to_a[2].to_s
         end
   end
