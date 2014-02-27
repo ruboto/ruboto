@@ -61,6 +61,11 @@ module Ruboto
                 description 'Generate the JRuby jars jar'
                 cast :boolean
               }
+              option('ruby-version') {
+                description 'Using what version of Ruby? (e.g., 1.8, 1.9, 2.0)'
+                argument :required
+                cast :float
+              }
               option('force') {
                 description 'Force creation of project even if the path exists'
                 cast :boolean
@@ -75,6 +80,7 @@ module Ruboto
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
                 with_jruby = params['with-jruby'].value
+                ruby_version = params['ruby-version'].value
                 force = params['force'].value
 
                 abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if !force && File.exists?(path)
@@ -103,6 +109,13 @@ module Ruboto
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_test true
                   update_assets
+
+                  if ruby_version
+                    source = File.read('ruboto.yml')
+                    pattern = %r{^# ruby_version: 1.9$}
+                    File.open('ruboto.yml', 'w') { |f| f << source.sub(pattern, "ruby_version: #{ruby_version}") }
+                  end
+
                   update_ruboto true
                   update_icons true
                   update_classes nil, 'exclude'
