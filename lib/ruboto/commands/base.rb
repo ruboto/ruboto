@@ -65,6 +65,7 @@ module Ruboto
                 description 'Using what version of Ruby? (e.g., 1.8, 1.9, 2.0)'
                 argument :required
                 cast :float
+                validate {|rv| [1.8, 1.9, 2.0].include?(rv)}
               }
               option('force') {
                 description 'Force creation of project even if the path exists'
@@ -112,7 +113,7 @@ module Ruboto
 
                   if ruby_version
                     source = File.read('ruboto.yml')
-                    pattern = %r{^# ruby_version: 1.9$}
+                    pattern = %r{^#? ?ruby_version: 1.9$}
                     File.open('ruboto.yml', 'w') { |f| f << source.sub(pattern, "ruby_version: #{ruby_version}") }
                   end
 
