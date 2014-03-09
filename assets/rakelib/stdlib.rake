@@ -1,7 +1,6 @@
 require 'yaml'
 require 'fileutils'
 require 'rexml/document'
-require 'jruby-jars'
 
 namespace :libs do
   desc 'take a fresh copy of the stdlib and rebuild it for use with this project'
@@ -48,6 +47,8 @@ end
 # - Moves ruby stdlib to the root of the jruby-stdlib jar
 def reconfigure_jruby_stdlib
   abort "cannot find jruby library in libs" if Dir["libs/jruby*"].empty?
+
+  require 'jruby-jars'
 
   log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{JRubyJars::VERSION}.jar" }
   StdlibDependencies.load('rakelib/stdlib.yml')
