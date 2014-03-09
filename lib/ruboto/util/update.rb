@@ -541,6 +541,7 @@ module Ruboto
 
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
       def reconfigure_jruby_stdlib
+        abort "cannot find rakelib/stdlib.rake; make sure you update your app (ruboto update app)" unless File.exists?("rakelib/stdlib.rake")
         system 'rake libs:reconfigure_stdlib'
       end
 
