@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'jruby-jars'
 
 def log_action(initial_text, final_text="Done.", &block)
   $stdout.sync = true
@@ -14,6 +13,8 @@ end
 namespace :libs do
   desc 'rebuild the stdlib dependencies file (stdlib.yml)'
   task :generate_stdlib_dependencies do
+    require 'jruby-jars'
+
     require_relative '../assets/rakelib/stdlib_dependencies'
 
     log_action("Creating temporary directory"){FileUtils.mkdir_p 'tmp_stdlib'}
