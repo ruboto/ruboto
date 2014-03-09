@@ -6,7 +6,27 @@ require 'jruby-jars'
 namespace :libs do
   desc 'take a fresh copy of the stdlib and rebuild it for use with this project'
   task :reconfigure_stdlib do
+    require_relative 'stdlib_dependencies'
     reconfigure_jruby_stdlib
+  end
+
+  desc 'check the stdlib dependencies and store them in auto_dependencies.yml'
+  task :check_dependencies do
+    require_relative 'stdlib_dependencies'
+
+    if File.exists? 'auto_dependencies.yml'
+      old_dep = (YAML::load_file('auto_dependencies.yml') || {})
+    end
+
+    new_dep = find_dependencies
+    if new_dep == old_dep
+      puts "Dependencies haven't changed: #{new_dep.join(', ')}"
+    else
+      puts "New dependencies: #{new_dep.join(', ')}"
+      File.open( "auto_dependencies.yml", 'w' ) do |out|
+        YAML.dump( new_dep, out )
+      end
+    end
   end
 end
 
@@ -20,11 +40,17 @@ def log_action(initial_text, final_text="Done.", &block)
   result
 end
 
+############################################################################
+#
+# Support for reconfigure_jruby_stdlib
+#
+
 # - Moves ruby stdlib to the root of the jruby-stdlib jar
 def reconfigure_jruby_stdlib
   abort "cannot find jruby library in libs" if Dir["libs/jruby*"].empty?
 
   log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{JRubyJars::VERSION}.jar" }
+  StdlibDependencies.load('rakelib/stdlib.yml')
 
   Dir.chdir 'libs' do
     jruby_stdlib = Dir['jruby-stdlib-*.jar'][-1]
@@ -40,10 +66,7 @@ def reconfigure_jruby_stdlib
         FileUtils.move 'old/META-INF/jruby.home/lib', 'new/jruby.home/lib'
         FileUtils.rm_rf 'new/jruby.home/lib/ruby/gems'
 
-        Dir.chdir 'new/jruby.home/lib/ruby' do
-          remove_unneeded_parts_of_stdlib
-        end
-
+        remove_unneeded_parts_of_stdlib
         cleanup_jars
 
         Dir.chdir 'new' do
@@ -58,8 +81,8 @@ def reconfigure_jruby_stdlib
 end
 
 def remove_unneeded_parts_of_stdlib
-  if File.exists? '../../../../../../ruboto.yml'
-    ruboto_config = (YAML::load_file('../../../../../../ruboto.yml') || {})
+  if File.exists? '../../ruboto.yml'
+    ruboto_config = (YAML::load_file('../../ruboto.yml') || {})
   else
     ruboto_config = {}
   end
@@ -68,51 +91,68 @@ def remove_unneeded_parts_of_stdlib
   included_stdlibs = ruboto_config['included_stdlibs']
   excluded_stdlibs = [*ruboto_config['excluded_stdlibs']].compact
 
-  #
-  # Add ruby_version (e.g., 1.8, 1.9, 2.0) to ruboto.yml
-  # to trim unused versions from stdlib
-  #
-  if ruby_version
-    ruby_stdlib_versions = Dir['*'] - %w(gems shared)
-    print "ruby version = #{ruby_version}..."
-    ruby_stdlib_versions.each do |ld|
-      unless ld == ruby_version.to_s
-        print "removing #{ld}..."
-        FileUtils.rm_rf ld
-      end
+  if included_stdlibs and included_stdlibs == "auto"
+    if File.exists? '../../auto_dependencies.yml'
+      included_stdlibs = (YAML::load_file('../../auto_dependencies.yml') || {})
     end
   end
 
-  if included_stdlibs
-    ruby_stdlib_versions = Dir['*'] - %w(gems)
-    print 'excluded...'
-    ruby_stdlib_versions.each do |ld|
-      Dir.chdir ld do
-        libs = Dir['*'].map { |d| d.sub /\.(rb|jar)$/, '' }.uniq
-        libs.each do |d|
-          next if included_stdlibs.include? d
-          FileUtils.rm_rf d if File.exists? d
-          file = "#{d}.rb"
-          FileUtils.rm_rf file if File.exists? file
-          jarfile = "#{d}.jar"
-          FileUtils.rm_rf jarfile if File.exists? jarfile
-          print "#{d}..."
+  Dir.chdir 'new/jruby.home/lib/ruby' do
+    #
+    # Add ruby_version (e.g., 1.8, 1.9, 2.0) to ruboto.yml
+    # to trim unused versions from stdlib
+    #
+    if ruby_version
+      ruby_stdlib_versions = Dir['*'] - %w(gems shared)
+      print "ruby version = #{ruby_version}..."
+      ruby_stdlib_versions.each do |ld|
+        unless ld == ruby_version.to_s
+          print "removing #{ld}..."
+          FileUtils.rm_rf ld
         end
       end
     end
-  end
 
-  if excluded_stdlibs.any?
-    ruby_stdlib_versions = Dir['*'] - %w(gems)
-    ruby_stdlib_versions.each do |ld|
-      excluded_stdlibs.each do |d|
-        dir = "#{ld}/#{d}"
-        FileUtils.rm_rf dir if File.exists? dir
-        file = "#{dir}.rb"
-        FileUtils.rm_rf file if File.exists? file
+    if included_stdlibs
+      ruby_version ||= 1.9
+      ruby_version = ruby_version.to_s
+
+      # Require jruby and java
+      included_stdlibs = (included_stdlibs + %w(java jruby)).uniq
+
+      ruby_stdlib_versions = Dir['*'] - %w(gems)
+      print 'excluded...'
+      ruby_stdlib_versions.each do |ld|
+        Dir.chdir ld do
+          libs = Dir['*'].map { |d| d.sub /\.(rb|jar)$/, '' }.uniq
+          libs.each do |d|
+            next if included_stdlibs.include? d
+            FileUtils.rm_rf d if File.exists? d
+            file = "#{d}.rb"
+            FileUtils.rm_rf file if File.exists? file
+            jarfile = "#{d}.jar"
+            FileUtils.rm_rf jarfile if File.exists? jarfile
+            print "#{d} "
+          end
+        end
       end
     end
-    print "excluded #{excluded_stdlibs.join(' ')}..."
+
+    if included_stdlibs.nil? and excluded_stdlibs.any?
+      # Don't allow jruby and java to be removed
+      excluded_stdlibs = excluded_stdlibs - %w(jruby java)
+
+      ruby_stdlib_versions = Dir['*'] - %w(gems)
+      ruby_stdlib_versions.each do |ld|
+        excluded_stdlibs.each do |d|
+          dir = "#{ld}/#{d}"
+          FileUtils.rm_rf dir if File.exists? dir
+          file = "#{dir}.rb"
+          FileUtils.rm_rf file if File.exists? file
+        end
+      end
+      print "excluded #{excluded_stdlibs.join(' ')}..."
+    end
   end
 end
 
@@ -187,4 +227,36 @@ def cleanup_jars
   end
 end
 
+############################################################################
+#
+# Support for check_dependencies
+#
+
+def find_dependencies
+  if File.exists? 'rakefile/ruboto.yml'
+    ruboto_config = (YAML::load_file('rakefile/ruboto.yml') || {})
+  else
+    ruboto_config = {}
+  end
+  ruby_version = ruboto_config['ruby_version'] || "1.9"
+
+  local = StdlibDependencies.collect("src").dependencies
+  stdlib = StdlibDependencies.load('rakelib/stdlib.yml')[ruby_version]
+
+  dependencies = local.values.flatten
+  new_values = []
+  check_values = local.values.flatten
+
+  while check_values.any?
+    check_values.each do |j|
+      new_values += stdlib[j] if stdlib[j] 
+    end
+
+    check_values = new_values - dependencies
+    dependencies = dependencies + new_values
+    new_values = []
+  end
+
+  dependencies.map{|d| d.split("/")[0]}.uniq.sort
+end
 
