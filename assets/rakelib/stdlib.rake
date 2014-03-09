@@ -93,7 +93,10 @@ def remove_unneeded_parts_of_stdlib
 
   if included_stdlibs and included_stdlibs == "auto"
     if File.exists? '../../auto_dependencies.yml'
-      included_stdlibs = (YAML::load_file('../../auto_dependencies.yml') || {})
+      included_stdlibs = YAML::load_file('../../auto_dependencies.yml')
+    else
+      puts "No auto_dependencies.yml file found. Use 'rake libs:check_dependencies' to create one."
+      included_stdlibs = nil
     end
   end
 
