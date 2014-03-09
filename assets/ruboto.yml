@@ -17,5 +17,46 @@
 #    If you include the jruby jars, this is used to
 #      trim away unused versions of the stdlib.
 #
-# ruby_version: 1.9
+ruby_version: 1.9
+
+###################################
+#
+# included_stdlibs
+#
+#    Specify parts of the stdlib that are needed.
+#    If you specify a list, all other components
+#    will be removed. If you specify "auto,"
+#    dependencies will be determined from
+#    auto_dependencies.yml. Running 
+#    "rake libs:check_dependencies' will build
+#    auto_dependencies.yml.
+#
+# included_stdlibs: auto
+#
+# included_stdlibs:
+# - fileutils
+
+###################################
+#
+# excluded_stdlibs
+#
+#    Remove unneeded files from stdlib.
+#    Note: If you specify included_stdlibs above,
+#    this information will be ingnored. 
+#
+excluded_stdlibs:
+- ant
+- cgi
+- drb
+- erb
+- gauntlet_rdoc
+- minitest
+- profiler
+- rake
+- rdoc
+- shell
+- test
+- webrick
+- win32
+- Win32API
 
