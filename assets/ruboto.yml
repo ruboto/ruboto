@@ -17,7 +17,7 @@
 #    If you include the jruby jars, this is used to
 #      trim away unused versions of the stdlib.
 #
-ruby_version: 1.9
+#ruby_version: 1.9
 
 ###################################
 #
@@ -44,19 +44,19 @@ ruby_version: 1.9
 #    Note: If you specify included_stdlibs above,
 #    this information will be ingnored. 
 #
-excluded_stdlibs:
-- ant
-- cgi
-- drb
-- erb
-- gauntlet_rdoc
-- minitest
-- profiler
-- rake
-- rdoc
-- shell
-- test
-- webrick
-- win32
-- Win32API
+#excluded_stdlibs:
+#- ant
+#- cgi
+#- drb
+#- erb
+#- gauntlet_rdoc
+#- minitest
+#- profiler
+#- rake
+#- rdoc
+#- shell
+#- test
+#- webrick
+#- win32
+#- Win32API
 
