@@ -1,3 +1,8 @@
+############################################################################
+#
+# Use to build dependencies within stdlib.
+#
+
 class StdlibDependencies
   attr_reader :dependencies, :version
 
