@@ -28,8 +28,8 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.4' => 4.4,
           '1.7.8' => 4.3,
           '1.7.9' => 4.3,
-          '1.7.10' => 4.3,
-          '1.7.11' => 4.3,
+          '1.7.10' => 4.4,
+          '1.7.11' => 4.4,
           '9000.dev' => 4.5,
       }[JRUBY_JARS_VERSION.to_s] || 4.3
       lower_limit = upper_limit * 0.9
