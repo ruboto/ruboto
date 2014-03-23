@@ -5,7 +5,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
 
   class MinimalAppTest < Test::Unit::TestCase
     def setup
-      generate_app :included_stdlibs => []
+      generate_app # :included_stdlibs => []
     end
 
     def teardown
