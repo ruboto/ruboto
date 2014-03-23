@@ -89,7 +89,7 @@ class RubotoGenTest < Test::Unit::TestCase
           16 => 75.0,
       }[ANDROID_TARGET] || 75.0
     end
-    lower_limit = upper_limit * 0.9
+    lower_limit = upper_limit * 0.7
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
     assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}KB: #{'%.1f' % apk_size.floor(1)}KB.  You should lower the limit.#{version}"
   end
