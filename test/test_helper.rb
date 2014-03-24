@@ -211,7 +211,7 @@ class Test::Unit::TestCase
         end
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
-          write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc) if included_stdlibs || excluded_stdlibs || heap_alloc
+          write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version) if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
           if standalone
             system "#{RUBOTO_CMD} gen jruby"
             raise "update jruby failed with return code #$?" if $? != 0
