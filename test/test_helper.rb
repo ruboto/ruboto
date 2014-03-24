@@ -159,6 +159,7 @@ class Test::Unit::TestCase
     package = options.delete(:package) || PACKAGE
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     update = options.delete(:update) || false
+    ruby_version = options.delete(:ruby_version) || 1.9
     raise "Unknown options: #{options.inspect}" unless options.empty?
 
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
@@ -169,6 +170,7 @@ class Test::Unit::TestCase
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_package_#{package}" if package != PACKAGE
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
+    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
     template_dir << "_example_#{example}" if example
     template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
@@ -187,7 +189,7 @@ class Test::Unit::TestCase
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc) if included_stdlibs || excluded_stdlibs || heap_alloc
+            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version) if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
             install_jruby_jars_gem
@@ -287,10 +289,11 @@ class Test::Unit::TestCase
     end
   end
 
-  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc)
+  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
     yml = YAML.dump({'included_stdlibs' => included_stdlibs,
                      'excluded_stdlibs' => excluded_stdlibs,
-                     'heap_alloc' => heap_alloc})
+                     'heap_alloc' => heap_alloc,
+                     'ruby_version' => ruby_version})
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') do |f|
       f << yml
