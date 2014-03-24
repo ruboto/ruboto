@@ -5,7 +5,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
 
   class MinimalAppTest < Test::Unit::TestCase
     def setup
-      generate_app :ruby_version => (JRUBY_JARS_VERSION.to_s[0..0] == "9" ? 2.1 : 1.9) # :included_stdlibs => []
+      generate_app :included_stdlibs => []
     end
 
     def teardown
