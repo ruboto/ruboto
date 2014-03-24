@@ -159,7 +159,7 @@ class Test::Unit::TestCase
     package = options.delete(:package) || PACKAGE
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     update = options.delete(:update) || false
-    ruby_version = options.delete(:ruby_version) || 1.9
+    ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == "9" ? 2.1 : 1.9)
     raise "Unknown options: #{options.inspect}" unless options.empty?
 
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
