@@ -645,6 +645,11 @@ module Ruboto
                 end
               end
               config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
+              unless File.exist? config_file_name
+                puts "Your path configuration script (#{config_file_name}) does not exist, Ruboto will create a new one."
+                system "touch #{config_file_name}"
+              end
+
               old_config = File.read(config_file_name)
               new_config = old_config.dup
               new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
