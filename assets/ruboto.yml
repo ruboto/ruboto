@@ -17,7 +17,7 @@
 #    If you include the jruby jars, this is used to
 #      trim away unused versions of the stdlib.
 #
-ruby_version: 1.9
+#ruby_version: 1.9
 
 ###################################
 #
