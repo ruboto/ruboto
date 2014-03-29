@@ -170,7 +170,7 @@ class Test::Unit::TestCase
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_package_#{package}" if package != PACKAGE
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
-    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
+#    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
     template_dir << "_example_#{example}" if example
     template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
@@ -292,8 +292,8 @@ class Test::Unit::TestCase
   def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
     yml = YAML.dump({'included_stdlibs' => included_stdlibs,
                      'excluded_stdlibs' => excluded_stdlibs,
-                     'heap_alloc' => heap_alloc,
-                     'ruby_version' => ruby_version})
+ #                    'ruby_version' => ruby_version,
+                     'heap_alloc' => heap_alloc})
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') do |f|
       f << yml
