@@ -32,11 +32,13 @@ class RakeTest < Test::Unit::TestCase
     assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
   end
 
+  # FIXME(uwe):  This is actually a case where we want to just update the Ruby
+  # source file instead of rebuilding the apk.
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
       system 'rake debug'
       apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
-      FileUtils.touch 'src/ruboto_test_app_activity.rb'
+      File.open('src/ruboto_test_app_activity.rb', 'a'){|f| f << "\n"}
       system 'rake debug'
       assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
