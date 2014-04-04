@@ -123,21 +123,10 @@ module Ruboto
             manifest_file = 'AndroidManifest.xml'
             heap_size = (File.exists?(manifest_file) && File.read(manifest_file) =~ /largeHeap/) ? 256 : 48
             new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-            unless new_avd_config =~ /^hw.device.manufacturer=/
-              device_manufacturer_prop = 'hw.device.manufacturer=Generic'
-              new_avd_config << "#{device_manufacturer_prop}\n"
-              puts "Added #{device_manufacturer_prop} property"
-            end
-            unless new_avd_config =~ /^hw.device.name=/
-              device_name_prop = 'hw.device.name=3.2in HVGA slider (ADP1)'
-              new_avd_config << "#{device_name_prop}\n"
-              puts "Added #{device_name_prop} property"
-            end
-            unless new_avd_config =~ /^hw.mainKeys=/
-              main_keys_prop = 'hw.mainKeys=yes'
-              new_avd_config << "#{main_keys_prop}\n"
-              puts "Added #{main_keys_prop} property"
-            end
+            add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
+            add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
+            add_property(new_avd_config, 'hw.mainKeys', 'yes')
+            add_property(new_avd_config, 'hw.sdCard', 'yes')
 
             File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
             new_snapshot = true
@@ -223,6 +212,18 @@ EOF
         system 'adb logcat > adb_logcat.log &'
 
         puts "Emulator #{avd_name} started OK."
+      end
+
+      def add_property(new_avd_config, property_name, value)
+        pattern = /^#{property_name}=.*$/
+        property = "#{property_name}=#{value}"
+        if new_avd_config =~ pattern
+          new_avd_config.gsub! pattern, property
+          puts "Changed property: #{property}"
+        else
+          new_avd_config << "#{property}\n"
+          puts "Added property: #{property}"
+        end
       end
     end
   end
