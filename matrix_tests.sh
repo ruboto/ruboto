@@ -10,7 +10,7 @@ else
   fi
 fi
 
-ANDROID_TARGETS="16 10 17 15" # We should cover at least 90% of the market
+ANDROID_TARGETS="16 17 15 18 19" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.11 1.7.10 1.7.4"
@@ -52,9 +52,9 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
       set +e
 
-      ./run_tests.sh
+      # ./run_tests.sh
       # ./run_tests.sh TEST=test/ruboto_update_test.rb
-      # testrb test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
+      testrb test/rake_test.rb -n test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
       # ACTIVITY_TEST_PATTERN=subclass testrb test/ruboto_gen_test.rb -n test_activity_tests
 
       TEST_RC=$?

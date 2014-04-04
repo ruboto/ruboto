@@ -771,7 +771,8 @@ def uninstall_apk
 end
 
 def update_scripts
-  `adb shell mkdir -p #{scripts_path}` if !device_path_exists?(scripts_path)
+  puts(`adb shell mkdir -p #{scripts_path}`) unless device_path_exists?(scripts_path)
+  raise "Unable to create device scripts dir: #{scripts_path}" unless device_path_exists?(scripts_path)
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('src') do
     source_files = Dir['**/*.rb']
