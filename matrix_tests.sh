@@ -52,9 +52,9 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
       set +e
 
-      # ./run_tests.sh
+      ./run_tests.sh
       # ./run_tests.sh TEST=test/ruboto_update_test.rb
-      testrb test/rake_test.rb -n test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
+      # testrb test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ACTIVITY_TEST_PATTERN=subclass testrb test/ruboto_gen_test.rb -n test_activity_tests
 
       TEST_RC=$?

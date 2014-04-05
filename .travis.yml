@@ -1,17 +1,18 @@
-# http://rkistner.github.com/android/2013/02/05/android-builds-on-travis-ci/
-language: ruby
+language: android
+sdk_components: android
+
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
-  - sudo apt-get update -qq
-  - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
+#  - sudo apt-get update -qq
+#  - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
   - wget http://ci.jruby.org/snapshots/master/jruby-jars-${MASTER}.gem
   - if [ "$JRUBY_JARS_VERSION" == "" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
 
 rvm:
-  - "2.1.0"
+  - "ruby"
 
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
 env:
   global:
