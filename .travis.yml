@@ -1,5 +1,4 @@
-language: android
-#sdk_components: android
+language: ruby
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
