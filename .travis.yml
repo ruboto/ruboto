@@ -1,5 +1,5 @@
 language: android
-sdk_components: android
+#sdk_components: android
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
