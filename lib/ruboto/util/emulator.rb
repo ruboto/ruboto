@@ -172,16 +172,12 @@ module Ruboto
           if $? == 0
             print 'Emulator started: '
             50.times do
-              if `adb get-state`.chomp == 'device'
-                break
-              end
+              break if device_ready?
               print '.'
               sleep 1
             end
             puts
-            if `adb get-state`.chomp == 'device'
-              break
-            end
+            break if device_ready?
           end
           puts 'Unable to start the emulator.'
         end
@@ -212,6 +208,10 @@ EOF
         system 'adb logcat > adb_logcat.log &'
 
         puts "Emulator #{avd_name} started OK."
+      end
+
+      def device_ready?
+        `adb get-state`.gsub(/^WARNING:.*$/, '').chomp == 'device'
       end
 
       def add_property(new_avd_config, property_name, value)
