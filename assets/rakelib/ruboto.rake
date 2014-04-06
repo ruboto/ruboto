@@ -649,8 +649,10 @@ def package_installed?(test = false)
   package_name = "#{package}#{'.tests' if test}"
   loop do
     path_line = `adb shell pm path #{package_name}`.chomp
+    path_line.gsub! /^WARNING:.*$/, ''
     return nil if $? == 0 && path_line.empty?
     break if $? == 0 && path_line =~ /^package:(.*)$/
+    puts path_line
     sleep 0.5
   end
   path = $1
