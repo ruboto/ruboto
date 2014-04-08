@@ -698,7 +698,17 @@ def build_apk(t, release)
   true
 end
 
+def wait_for_valid_device
+  while `adb shell echo "ping"`.strip != 'ping'
+    `adb kill-server`
+    `adb devices`
+    sleep 5
+  end
+end
+
 def install_apk
+  wait_for_valid_device
+
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
   case package_installed?
