@@ -379,14 +379,19 @@ public class JRubyAdapter {
         File storageDir = null;
         if (isDebugBuild()) {
             storageDir = context.getExternalFilesDir(null);
-            if (storageDir == null || (!storageDir.exists() && !storageDir.mkdirs())) {
+            if (storageDir == null) {
                 Log.e("Development mode active, but sdcard is not available.  Make sure you have added\n<uses-permission android:name='android.permission.WRITE_EXTERNAL_STORAGE' />\nto your AndroidManifest.xml file.");
                 storageDir = context.getFilesDir();
             }
         } else {
             storageDir = context.getFilesDir();
         }
-        return storageDir.getAbsolutePath() + "/scripts";
+        File scriptsDir = new File(storageDir, "scripts");
+        if ((!scriptsDir.exists() && !scriptsDir.mkdirs())) {
+            Log.e("Unable to create the scripts dir.");
+            scriptsDir = new File(context.getFilesDir(), "scripts");
+        }
+        return scriptsDir.getAbsolutePath();
     }
 
     private static void setDebugBuild(Context context) {
