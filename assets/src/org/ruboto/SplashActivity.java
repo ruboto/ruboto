@@ -140,13 +140,21 @@ public class SplashActivity extends Activity {
                     }).start();
                 }
                 return;
+            } else {
+                Log.e("Permission missing for direct download: Internet: " +
+                        hasInternetPermission() + ", non-market install: " +
+                        canInstallFromUnknownSources());
             }
         } catch (Exception e) {
             Log.e("Exception in direct RubotoCore download: " + e);
+            e.printStackTrace();
         }
         try {
+            Log.i("Download RubotoCore using the market");
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=org.ruboto.core")));
         } catch (android.content.ActivityNotFoundException anfe) {
+            Log.e("Exception in market RubotoCore download: " + anfe);
+            Log.i("Download RubotoCore using the download manager");
             Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(RUBOTO_URL));
             startActivity(intent);
         }
@@ -347,18 +355,11 @@ public class SplashActivity extends Activity {
     }
 
     private boolean canInstallFromUnknownSources() {
-        Uri settingsUri = Settings.Secure.CONTENT_URI;
-        String[] projection = new String[]{Settings.System.VALUE};
-        String selection = Settings.Secure.NAME + " = ? AND " + Settings.Secure.VALUE + " = ?";
-
-        // FIXME(uwe): Use android.provider.Settings.Global.INSTALL_NON_MARKET_APPS
-        //             when we stop supporting Android api level < 17
-        String[] selectionArgs = {Settings.Secure.INSTALL_NON_MARKET_APPS, String.valueOf(1)};
+        // FIXME(uwe): Use Settings.Global when we stop supporting Android api level < 17
+        // return Settings.Global.getInt(getContentResolver(), Settings.Global.INSTALL_NON_MARKET_APPS, 0) == 1;
         // EMXIF
 
-        Cursor query = getContentResolver().query(settingsUri, projection,
-                                                  selection, selectionArgs, null);
-        return query.getCount() == 1;
+        return Settings.Secure.getInt(getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1;
     }
 
     // Get the downloaded percent
