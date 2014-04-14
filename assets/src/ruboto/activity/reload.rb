@@ -42,10 +42,10 @@ module Ruboto::Activity::Reload
       Log.d "Got reload intent: #{reload_intent.inspect}"
       file_string = reload_intent.get_string_extra('reload')
       if file_string
-        files = file_string.split(/(?<!&);/).map { |f| f.gsub(/&(.)/) { |m| m[1] } }
+        scripts_dir = @activity.getExternalFilesDir(nil).absolute_path + '/scripts'
         files.each do |file|
-          Log.d "load file: #{file.inspect}"
-          load file
+          Log.d "load file: #{scripts_dir}/#{file}"
+          load "#{scripts_dir}/#{file}"
         end
         Log.d 'restart activity'
         if @activity.intent.action == android.content.Intent::ACTION_MAIN ||
