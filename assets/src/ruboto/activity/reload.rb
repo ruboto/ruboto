@@ -55,8 +55,8 @@ module Ruboto::Activity::Reload
         else
           restart_intent = @activity.intent
         end
-        @activity.startActivity(restart_intent)
         @activity.finish
+        @activity.startActivity(restart_intent)
         Log.d 'activity restarted'
       end
       Log.d 'reload complete.'
