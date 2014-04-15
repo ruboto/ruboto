@@ -21,12 +21,12 @@ class RakeTest < Test::Unit::TestCase
       s2.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
       File.open(test_filename, 'w') { |f| f << s2 }
 
-      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
     end
     run_app_tests
 
     # FIXME(uwe): Uncomment this when we can build the test package without building the main package
-    # assert_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
+    # assert_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
     # EMXIF
 
     assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
@@ -37,20 +37,20 @@ class RakeTest < Test::Unit::TestCase
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
       system 'rake debug'
-      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       File.open('src/ruboto_test_app_activity.rb', 'a'){|f| f << "\n"}
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
+      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
   end
 
   def test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
       system 'rake debug'
-      apk_timestamp = File.ctime("bin/#{APP_NAME}-debug.apk")
+      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       FileUtils.touch 'src/not_ruby_source.properties'
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.ctime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
+      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
     end
   end
 
