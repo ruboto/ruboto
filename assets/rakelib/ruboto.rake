@@ -683,8 +683,8 @@ end
 def build_apk(t, release)
   apk_file = release ? RELEASE_APK_FILE : APK_FILE
   if File.exist?(apk_file)
-    changed_prereqs = t.prerequisites.select do |p|
-      File.file?(p) && !Dir[p].empty? && Dir[p].map { |f| File.mtime(f) }.max > File.mtime(apk_file)
+    changed_prereqs = t.prerequisites.select do |pr|
+      File.file?(pr) && !Dir[pr].empty? && Dir[pr].map { |f| File.mtime(f) }.max >= File.mtime(apk_file)
     end
     return false if changed_prereqs.empty?
     changed_prereqs.each { |f| puts "#{f} changed." }
