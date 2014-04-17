@@ -1,11 +1,14 @@
-Subject: [ANN] Ruboto 1.0.2 release candidate
+Subject: [ANN] Ruboto 1.0.3 release candidate
 
 Hi all!
 
-The Ruboto 1.0.2 release candidate is now available.
+The Ruboto 1.0.3 release candidate is now available.
 
-This releases updates to JRuby 1.7.10 and improves installation with
-automated setup of Apache ANT on Windows and Linux.
+This release focuses on stability and introduces a new mechanism for
+reducing the footprint of your app using the ruboto.yml config file.  You
+can now specify the Ruby compatibility level of your app (1.8/1.9/2.0) and
+which parts of the Ruby Standard Library you want to use.  Ruboto will now
+strip the parts you don't need, making your app a bit smaller.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 

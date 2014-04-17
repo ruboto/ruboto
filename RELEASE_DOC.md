@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.0.2 released!
+Subject: [ANN] Ruboto 1.0.3 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.0.2.
+The Ruboto team is pleased to announce the release of Ruboto 1.0.3.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,37 +8,43 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.0.2:
+New in version 1.0.3:
 
-This releases updates to JRuby 1.7.10 and improves installation with
-automated setup of Apache ANT on Windows and Linux.
+This release focuses on stability and introduces a new mechanism for
+reducing the footprint of your app using the ruboto.yml config file.  You
+can now specify the Ruby compatibility level of your app (1.8/1.9/2.0) and
+which parts of the Ruby Standard Library you want to use.  Ruboto will now
+strip the parts you don't need, making your app a bit smaller.
 
 Features:
 
-* Issue #447 Use "ruboto setup" to flag and install ant
-* Issue #564 Update to JRuby 1.7.10
+* Issue #418 Dynamic Ruboto runtime sizing and inclusion
+* Issue #576 Make Android 4.0 the default target.
+* Issue #592 Update to JRuby 1.7.12
 
 Bugfixes:
 
-* Issue #525 Quick Start : "Unfortunately, Browser has stopped"
-* Issue #565 Odd behaviour when changing orientation with Fragments
-* Issue #575 Gemfile.lock contains references to gems that are not part
-  of the dependencies
+* Issue #529 rake install start fails on windows
+* Issue #566 ruboto emulator -t android-19 failed
+* Issue #580 Ruboto setup fails if the path configuration script doesn't
+  exist
+* Issue #582 JRuby 9000 tests fail
+* Issue #583 'ruboto setup' crashes when config file does not exist.
+* Issue #585 rake install start does not power up app in Android 4.4
+  Kitkat emulator and sleeps at build successful
+* Issue #587 warning breaks is_installed?
 
-Documentation:
+Support:
 
-* Issue #568 Error with tutorial on "Example: Open a web page"
+* Issue #579 Android platform SDK for android-10 not found (v1.0.2)
 
-Community:
+Internal:
 
-* Issue #533 How can I help? (di3z )
-* Issue #562 How can I help? (lucasallan)
-* Issue #563 How can I help? (pedroandrade)
-* Issue #572 How can I help? (iamrahulroy)
+* Issue #577 Domain expired
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=27
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=28
 
 
 Installation:
