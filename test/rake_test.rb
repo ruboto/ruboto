@@ -38,9 +38,12 @@ class RakeTest < Test::Unit::TestCase
     Dir.chdir APP_DIR do
       system 'rake debug'
       apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
-      File.open('src/ruboto_test_app_activity.rb', 'a'){|f| f << "\n"}
+      sleep 1
+      FileUtils.touch 'src/ruboto_test_app_activity.rb'
+      sleep 1
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
+      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"),
+          'APK should have been rebuilt'
     end
   end
 
@@ -50,7 +53,8 @@ class RakeTest < Test::Unit::TestCase
       apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       FileUtils.touch 'src/not_ruby_source.properties'
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should have been rebuilt'
+      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"),
+          'APK should have been rebuilt'
     end
   end
 

@@ -46,7 +46,7 @@ module RubotoTest
         version = $1
         api_level = VERSION_TO_API_LEVEL[version]
         raise "Unknown version: #{version}" if api_level.nil?
-        return api_level
+        return "android-#{api_level}"
       end
       if line =~ /\[ro\.build\.version\.sdk\]: \[(\d+)\]/
         return $1
