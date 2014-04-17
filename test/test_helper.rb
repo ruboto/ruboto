@@ -295,9 +295,7 @@ class Test::Unit::TestCase
  #                    'ruby_version' => ruby_version,
                      'heap_alloc' => heap_alloc})
     puts "Adding ruboto.yml:\n#{yml}"
-    File.open('ruboto.yml', 'w') do |f|
-      f << yml
-    end
+    File.open('ruboto.yml', 'w') { |f| f << yml }
   end
 
   def write_gemfile(bundle)

@@ -358,6 +358,7 @@ module Ruboto
       def update_core_classes(force = nil)
         generate_core_classes(:class => 'all', :method_base => 'on', :method_include => '', :method_exclude => '', :force => force, :implements => '')
         if File.exists?('ruboto.yml')
+          sleep 1
           FileUtils.touch 'ruboto.yml'
           system 'rake jruby_adapter'
         end
