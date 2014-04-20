@@ -17,20 +17,20 @@ class StdlibDependencies
     @@versions ||= {}
   end
 
-  def self.collect(dir=".")
-    local = new("app")
+  def self.collect(dir='.')
+    local = new('app')
     Dir.chdir(dir) do 
-      local.check_dir(["ruboto"])
+      local.check_dir(['ruboto'])
     end
     local
   end
 
-  def self.generate(dir=".")
+  def self.generate(dir='.')
     versions
 
     Dir.chdir(dir) do
-      raise("Can't find shared directory") unless File.directory?("shared") 
-      Dir["*"].select{|d| File.directory?(d) && d != "shared"}.each do |d|
+      raise("Can't find shared directory") unless File.directory?('shared')
+      Dir['*'].select{|d| File.directory?(d) && d != 'shared'}.each do |d|
         @@versions[d] = new(d).generate
       end
     end
@@ -74,10 +74,10 @@ class StdlibDependencies
   end
 
   def generate
-    raise("Can't find shared directory") unless File.directory?("shared") 
+    raise("Can't find shared directory") unless File.directory?('shared')
     raise("Can't find #{@version} directory") unless File.directory?(@version) 
 
-    Dir.chdir("shared"){check_dir}
+    Dir.chdir('shared'){check_dir}
     Dir.chdir(@version){check_dir}
 
     # Clean up dependencies
@@ -128,7 +128,7 @@ class StdlibDependencies
   end
 
   def check_dir(exclude=[])
-    Dir["**/*.rb"].select{|rb| not exclude.include?(rb.split('/')[0])}.each do |i|
+    Dir['**/*.rb'].select{|rb| not exclude.include?(rb.split('/')[0])}.each do |i|
       gather_dependencies(i)
     end
   end
