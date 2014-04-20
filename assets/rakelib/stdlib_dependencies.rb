@@ -40,14 +40,9 @@ class StdlibDependencies
 
   def self.dump(file)
     require 'yaml'
-
     all_dependencies = {}
     versions.each{|k, v| all_dependencies[k] = v.dependencies}
-
-    File.open( file, 'w' ) do |out|
-      YAML.dump( all_dependencies, out )
-    end
-
+    File.open(file, 'w') { |out| YAML.dump(all_dependencies, out) }
     versions
   end
 
@@ -57,8 +52,8 @@ class StdlibDependencies
     @@versions = {}
     raise("Can't find #{file}") unless File.exists?(file) 
 
-    File.open(file) do |versions|
-      YAML.load(versions).each{|k,v| @@versions[k] = new(k, v)}
+    File.open(file) do |f|
+      YAML.load(f).each{|k,v| @@versions[k] = new(k, v)}
     end
 
     versions

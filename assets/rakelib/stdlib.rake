@@ -22,8 +22,8 @@ namespace :libs do
       puts "Dependencies haven't changed: #{new_dep.join(', ')}"
     else
       puts "New dependencies: #{new_dep.join(', ')}"
-      File.open( 'auto_dependencies.yml', 'w' ) do |out|
-        YAML.dump( new_dep, out )
+      File.open('auto_dependencies.yml', 'w') do |out|
+        YAML.dump(new_dep, out)
       end
     end
   end
@@ -35,7 +35,7 @@ def log_action(initial_text, final_text='Done.', &block)
   print initial_text, '...'
   result = yield
   puts final_text
-  
+
   result
 end
 
@@ -253,7 +253,7 @@ def find_dependencies
 
   while check_values.any?
     check_values.each do |j|
-      new_values += stdlib[j] if stdlib[j] 
+      new_values += stdlib[j] if stdlib[j]
     end
 
     check_values = new_values - dependencies
@@ -261,6 +261,7 @@ def find_dependencies
     new_values = []
   end
 
-  dependencies.map{|d| d.split('/')[0]}.uniq.sort
-end
+  dependencies.reject!{|f| File.exists? "src/#{f}.rb"}
 
+  dependencies.map { |d| d.split('/')[0] }.uniq.sort
+end
