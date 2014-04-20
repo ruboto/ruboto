@@ -6,7 +6,7 @@
 class StdlibDependencies
   attr_reader :dependencies, :version
 
-  REQUIRE = %r{^\s*require[ (]['"]([a-zA-Z0-9/-_]+)["'][)]?\s*$}
+  REQUIRE = %r{^\s*require[ (]['"]([a-zA-Z0-9/_-]+)["'][)]?\s*$}
   REQUIRE_RELATIVE = %r{^\s*require_relative[ (]['"]([a-zA-Z0-9/-_]+)["'][)]?\s*$}
 
   def self.[](key)

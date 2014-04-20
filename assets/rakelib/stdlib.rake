@@ -22,17 +22,17 @@ namespace :libs do
       puts "Dependencies haven't changed: #{new_dep.join(', ')}"
     else
       puts "New dependencies: #{new_dep.join(', ')}"
-      File.open( "auto_dependencies.yml", 'w' ) do |out|
+      File.open( 'auto_dependencies.yml', 'w' ) do |out|
         YAML.dump( new_dep, out )
       end
     end
   end
 end
 
-def log_action(initial_text, final_text="Done.", &block)
+def log_action(initial_text, final_text='Done.', &block)
   $stdout.sync = true
 
-  print initial_text, "..."
+  print initial_text, '...'
   result = yield
   puts final_text
   
@@ -46,7 +46,7 @@ end
 
 # - Moves ruby stdlib to the root of the jruby-stdlib jar
 def reconfigure_jruby_stdlib
-  abort "cannot find jruby library in libs" if Dir["libs/jruby*"].empty?
+  abort 'cannot find jruby library in libs' if Dir['libs/jruby*'].empty?
 
   require 'jruby-jars'
 
@@ -92,7 +92,7 @@ def remove_unneeded_parts_of_stdlib
   included_stdlibs = ruboto_config['included_stdlibs']
   excluded_stdlibs = [*ruboto_config['excluded_stdlibs']].compact
 
-  if included_stdlibs and included_stdlibs == "auto"
+  if included_stdlibs and included_stdlibs == 'auto'
     if File.exists? '../../auto_dependencies.yml'
       included_stdlibs = YAML::load_file('../../auto_dependencies.yml')
     else
@@ -175,7 +175,7 @@ def cleanup_jars
 
       # FIXME(uwe): Adding the jars triggers the "LinearAlloc exceeded capacity"
       # bug in Android 2.3.  Remove when we stop supporting android-10 and older
-      abort "cannot find your AndroidManifest.xml to extract info from it" unless File.exists? '../../../AndroidManifest.xml'
+      abort 'cannot find your AndroidManifest.xml to extract info from it' unless File.exists? '../../../AndroidManifest.xml'
       manifest = REXML::Document.new(File.read('../../../AndroidManifest.xml')).root
       min_sdk_version = manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
       if min_sdk_version <= 10
@@ -242,9 +242,9 @@ def find_dependencies
   else
     ruboto_config = {}
   end
-  ruby_version = ruboto_config['ruby_version'] || "1.9"
+  ruby_version = ruboto_config['ruby_version'] || '1.9'
 
-  local = StdlibDependencies.collect("src").dependencies
+  local = StdlibDependencies.collect('src').dependencies
   stdlib = StdlibDependencies.load('rakelib/stdlib.yml')[ruby_version]
 
   dependencies = local.values.flatten
@@ -261,6 +261,6 @@ def find_dependencies
     new_values = []
   end
 
-  dependencies.map{|d| d.split("/")[0]}.uniq.sort
+  dependencies.map{|d| d.split('/')[0]}.uniq.sort
 end
 
