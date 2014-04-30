@@ -232,11 +232,11 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-#{(categories.keys & grouped_issues.keys).map do |cat|
-  "#{cat}:\n
-#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}}.wrap(2) }.join("\n")}
-"
-end.join("\n")}
+  #{(categories.keys & grouped_issues.keys).map do |cat|
+    "#{cat}:\n
+    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}}.wrap(2) }.join("\n")}
+    "
+  end.join("\n")}
 You can find a complete list of issues here:
 
 * https://github.com/ruboto/ruboto/issues?state=closed&milestone=#{milestone}
@@ -460,25 +460,27 @@ namespace :platform do
     puts 'Downloading the current RubotoCore platform release apk'
     uri = URI('https://raw.github.com/ruboto/ruboto.github.com/master/downloads/RubotoCore-release.apk')
     begin
-      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https',
-          :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-        headers = {'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'}
+      headers = {'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'}
+      catch :download_ok do
         loop do
-          response = http.get(uri.request_uri, headers)
-          if response.code == '200'
-            File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << response.body }
-            break
-          elsif response.code == '302'
-            headers.update('Referer' => uri.to_s)
-            if (cookie = response.response['set-cookie'])
-              headers.update('Cookie' => cookie)
+          Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https',
+              :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+            response = http.get(uri.request_uri, headers)
+            if response.code == '200'
+              File.open(PLATFORM_CURRENT_RELEASE_APK, 'wb') { |f| f << response.body }
+              throw :download_ok
+            elsif response.code == '301' || response.code == '302'
+              headers.update('Referer' => uri.to_s)
+              if (cookie = response.response['set-cookie'])
+                headers.update('Cookie' => cookie)
+              end
+              uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
+              puts "Following redirect to #{uri}."
+            else
+              puts "Got an unexpected response (#{response.code}).  Retrying download."
+              puts response.inspect
+              sleep 1
             end
-            uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
-            puts "Following redirect to #{uri}."
-          else
-            puts "Got an unexpected response (#{response.code}).  Retrying download."
-            puts response.inspect
-            sleep 1
           end
         end
       end
