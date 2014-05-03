@@ -37,8 +37,12 @@ module AppTestMethods
 
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
-      # FIXME(uwe):  Remove when we include jopenssl and bouncycastle
-      next if file =~ /ssl/
+      # FIXME(uwe):  Remove when we stop testing api level < 16
+      # FIXME(uwe):  Remove when we release RubotoCore with SSL included
+      next if file =~ /ssl/ && (ANDROID_OS < 16 ||
+          RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM') ||
+          JRUBY_JARS_VERSION == Gem::Version.new('1.7.12') ||
+          JRUBY_JARS_VERSION == Gem::Version.new('9000.dev')
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.4.dev

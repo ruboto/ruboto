@@ -92,7 +92,7 @@ module RubotoTest
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
 
   if RUBOTO_PLATFORM == 'CURRENT'
-    JRUBY_JARS_VERSION = Gem::Version.new('1.7.4')
+    JRUBY_JARS_VERSION = Gem::Version.new('1.7.12')
   elsif ENV['JRUBY_JARS_VERSION']
     JRUBY_JARS_VERSION = Gem::Version.new(ENV['JRUBY_JARS_VERSION'])
   else

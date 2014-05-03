@@ -698,6 +698,22 @@ def build_apk(t, release)
   else
     sh "#{ANT_CMD} debug"
   end
+  # FIXME(uwe): Simplify when we stop supporting Android 4.0.3
+  if sdk_level >= 16
+    # FIXME(uwe):  Maybe put the extra classes?.dex files as classloader resources directly in the apk?
+    FileUtils.mkdir_p 'assets'
+    Dir['bin/classes?.dex'].each do |f|
+      FileUtils.cp f, 'classes.dex'
+      sh "jar cf assets/#{f[4..-5]}.jar classes.dex"
+      FileUtils.rm 'classes.dex'
+    end
+    # FIXME(uwe):  This second build must be avoided!
+    if release
+      sh "#{ANT_CMD} release"
+    else
+      sh "#{ANT_CMD} debug"
+    end
+  end
   true
 end
 
@@ -793,10 +809,10 @@ def update_scripts
     source_files = Dir['**/*.rb']
     changed_files = source_files.select { |f| !File.directory?(f) && File.mtime(f) >= last_update && f !~ /~$/ }
     unless changed_files.empty?
-      puts 'Pushing files to apk public file area.'
+      puts 'Pushing files to apk public file area:'
       changed_files.each do |script_file|
         print "#{script_file}: "; $stdout.flush
-        `adb push #{script_file} #{scripts_path}/#{script_file}`
+        puts `adb push #{script_file} #{scripts_path}/#{script_file}`
       end
       mark_update
       return changed_files
@@ -815,7 +831,7 @@ end
 
 # Triggers reload of updated scripts and restart of the current activity
 def reload_scripts(scripts)
-  s = scripts.map{|s| s.gsub(/[&;]/){|m| "&#{m[0]}"}}.join('\;')
+  s = scripts.map { |s| s.gsub(/[&;]/) { |m| "&#{m[0]}" } }.join('\;')
   cmd = %Q{adb shell am broadcast -a android.intent.action.VIEW -e reload '#{s}'}
   puts cmd
   system cmd

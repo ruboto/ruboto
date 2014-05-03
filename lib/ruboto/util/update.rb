@@ -18,7 +18,8 @@ module Ruboto
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
         if File.exists? build_xml_file
-          name = REXML::Document.new(File.read(build_xml_file)).root.attributes['name']
+          ant_script = File.read(build_xml_file)
+          name = REXML::Document.new(ant_script).root.attributes['name']
         else
           name = File.basename(root)
         end
@@ -26,7 +27,8 @@ module Ruboto
         prop_file = "#{root}/project.properties"
         version_regexp = /^(target=android-)(\d+)$/
         if (project_property_file = File.read(prop_file)) =~ version_regexp
-          if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+          min_sdk = $2.to_i
+          if min_sdk < MINIMUM_SUPPORTED_SDK_LEVEL
             puts "Upgrading project to target #{MINIMUM_SUPPORTED_SDK}"
             File.open(prop_file, 'w') { |f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}") }
           end
@@ -34,6 +36,57 @@ module Ruboto
 
         system "android update project -p #{root} -n #{name} --subprojects"
         raise "android update project failed with return code #{$?}" unless $? == 0
+        patch_ant_script(min_sdk, ant_script) if File.exists?(build_xml_file)
+      end
+
+      # FIXME(uwe):  There is no output from this DEX helper.  Difficult to debug.
+      # FIXME(uwe):  Ensure that pre-dexed jars are not dexed again.
+      def patch_ant_script(min_sdk, ant_script = File.read('build.xml'))
+        start_marker = '<!-- BEGIN added by Ruboto -->'
+        end_marker = '<!-- END added by Ruboto -->'
+        dx_override = <<-EOF
+#{start_marker}
+    <macrodef name="dex-helper">
+       <element name="external-libs" optional="yes" />
+       <element name="extra-parameters" optional="yes" />
+       <sequential>
+         <!-- set the secondary dx input: the project (and library) jar files
+              If a pre-dex task sets it to something else this has no effect -->
+         <if>
+                <condition>
+                    <isreference refid="out.dex.jar.input.ref" />
+                </condition>
+                <else>
+                    <path id="out.dex.jar.input.ref">
+                        <path refid="project.all.jars.path" />
+                    </path>
+                </else>
+         </if>
+         <condition property="verbose.option" value="--verbose" else="">
+           <istrue value="${verbose}" />
+         </condition>
+         <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
+         <apply executable="${dx}" failonerror="true" parallel="true">
+             <arg value="--dex" />
+             <arg value="--multi-dex" />
+             <arg value="--output=${out.absolute.dir}" />
+             <extra-parameters />
+             <arg line="${verbose.option}" />
+             <arg path="${out.classes.absolute.dir}" />
+             <fileset dir="${out.dexed.absolute.dir}" includes="*.jar" />
+             <path refid="out.dex.jar.input.ref" />
+             <external-libs />
+         </apply>
+       </sequential>
+    </macrodef>
+#{end_marker}
+        EOF
+
+        ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
+        if min_sdk >= 16
+          raise 'Bad ANT script' unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
+        end
+        File.open('build.xml', 'w') { |f| f << ant_script }
       end
 
       def update_test(force = nil)
@@ -324,10 +377,12 @@ module Ruboto
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
 
+          # FIXME(uwe): Simplify when we stop supporting Android 2.3.x
           if min_sdk.to_i >= 11
             app_element.attributes['android:hardwareAccelerated'] ||= 'true'
             app_element.attributes['android:largeHeap'] ||= 'true'
           end
+          # EMXIF
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}

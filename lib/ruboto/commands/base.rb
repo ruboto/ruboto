@@ -107,6 +107,7 @@ module Ruboto
                 puts 'Done'
 
                 Dir.chdir root do
+                  patch_ant_script min_sdk[/\d+/].to_i
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
                   update_test true
                   update_assets

@@ -160,6 +160,7 @@ def remove_unneeded_parts_of_stdlib
   end
 end
 
+# FIXME(uwe):  Duplicate of code in ruboto.rake ?
 def cleanup_jars
   Dir.chdir 'new' do
     Dir['**/*.jar'].each do |j|
@@ -174,22 +175,28 @@ def cleanup_jars
       # EMXIF
 
       # FIXME(uwe): Adding the jars triggers the "LinearAlloc exceeded capacity"
-      # bug in Android 2.3.  Remove when we stop supporting android-10 and older
+      # bug in Android 4.0.  Remove when we stop supporting android-15 and older
       abort 'cannot find your AndroidManifest.xml to extract info from it' unless File.exists? '../../../AndroidManifest.xml'
       manifest = REXML::Document.new(File.read('../../../AndroidManifest.xml')).root
       min_sdk_version = manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
-      if min_sdk_version <= 10
+      if min_sdk_version <= 15
         FileUtils.rm j
         next
       end
       # EMXIF
 
-      # FIXME(uwe): These should be included but break the 64K method count limit
-      if j =~ /bcpkix-jdk15on-1\.?47|bcprov-jdk15on-1\.?47|jopenssl|kryptcore|kryptproviderjdk/
+      # FIXME(uwe): Duplicate in JRuby <=1.7.12. Remove when we stop supporting JRuby 1.7.12.
+      if j =~ /bc.*147/
         FileUtils.rm j
         next
       end
       # EMXIF
+
+      # Command line option library not needed
+      if j =~ /jline/
+        FileUtils.rm j
+        next
+      end
 
       print "#{File.basename(j).chomp('.jar')}..."
       system "jar xf #{j}"
@@ -220,6 +227,32 @@ def cleanup_jars
           puts 'Starting JSON Parser Service'
           public
           Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
+        END_CODE
+      elsif j =~ %r{jopenssl.jar$}
+        jar_load_code = <<-END_CODE
+          require 'jruby'
+          puts 'Starting JOpenSSL Service'
+          public
+          # Java::JopensslService.new.basicLoad(JRuby.runtime)
+          require 'java'
+          # remove the original bouncycastle provider of Android (com.android.org.bouncycastle.jce.provider)
+          java.security.Security.removeProvider("BC")
+          # add the new one used by jopenssl
+          java.security.Security.addProvider( org.bouncycastle.jce.provider.BouncyCastleProvider.new )
+        END_CODE
+      elsif j =~ %r{kryptprovider.jar$}
+        jar_load_code = <<-END_CODE
+          require 'jruby'
+          puts 'Starting JRuby KryptproviderjdkService Service'
+          public
+          Java::KryptproviderjdkService.new.basicLoad(JRuby.runtime)
+                  END_CODE
+      elsif j =~ %r{kryptcore.jar$}
+        jar_load_code = <<-END_CODE
+          require 'jruby'
+          puts 'Starting JRuby KryptcoreService Service'
+          public
+          Java::KryptcoreService.new.basicLoad(JRuby.runtime)
         END_CODE
       else
         jar_load_code = ''
