@@ -34,7 +34,7 @@ public class ScriptLoader {
                     Log.d("Found script.");
                     rubyInstance = component;
                     final String script = rubyScript.getContents();
-                    boolean scriptContainsClass = script.matches("(?s).*class "
+                    boolean scriptContainsClass = script.matches("(?s).*class\\s+"
                             + component.getScriptInfo().getRubyClassName() + ".*");
                     boolean hasBackingJavaClass = component.getScriptInfo().getRubyClassName()
                             .equals(component.getClass().getSimpleName());
