@@ -5,8 +5,9 @@ module Ruboto
   module Util
     module Setup
       include Ruboto::Util::Verify
-      REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
-      REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
+
+      # Migration away from Repository XML
+      REPOSITORY_URL = "http://developer.android.com/sdk/index.html?hl=sk"
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
       WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
@@ -105,22 +106,17 @@ module Ruboto
       end
 
       def get_tools_version(type='tool')
-        require 'rexml/document'
-        require 'open-uri'
+        require 'net/http'
+        require 'uri'
 
-        doc = REXML::Document.new(open(REPOSITORY_URL))
-        version = doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
-          major = t.elements['sdk:major']
-          minor = t.elements['sdk:minor']
-          micro = t.elements['sdk:micro']
-          prev = t.elements['sdk:preview']
-          next if prev
-          version = major.text
-          version += ".#{minor.text}" if minor
-          version += ".#{micro.text}" if micro
-          version += "_rc#{prev.text}" if prev
-          version
-        end.compact.sort_by { |v| Gem::Version.new(v.gsub('_', '.')) }.last
+        # Get's the Page to Scrape
+        page_content = Net::HTTP.get(URI.parse(REPOSITORY_URL))
+
+        # Get's the full download links for each OS
+        page_content = Net::HTTP.get(URI.parse("http://developer.android.com/sdk/index.html?hl=sk"))
+        link = page_content.scan(/(href=\".*\/android\/android-sdk.*.tgz)/).to_s
+        version = link.match( /(\d+).(\d+).(\d+)/ )[0]
+
         version
       end
 
