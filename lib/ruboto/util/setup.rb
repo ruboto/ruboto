@@ -109,8 +109,11 @@ module Ruboto
         require 'net/http'
         require 'uri'
 
-        # Scrapes the page (get's a single download of the sdk for version)
+        # Get's the Page to Scrape
         page_content = Net::HTTP.get(URI.parse(REPOSITORY_URL))
+
+        # Get's the full download links for each OS
+        page_content = Net::HTTP.get(URI.parse("http://developer.android.com/sdk/index.html?hl=sk"))
         link = page_content.scan(/(href=\".*\/android\/android-sdk.*.tgz)/).to_s
         version = link.match( /(\d+).(\d+).(\d+)/ )[0]
 
