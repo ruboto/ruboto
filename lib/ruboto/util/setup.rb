@@ -7,6 +7,7 @@ module Ruboto
       include Ruboto::Util::Verify
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
+      SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
       WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
@@ -121,6 +122,30 @@ module Ruboto
           version += "_rc#{prev.text}" if prev
           version
         end.compact.sort_by { |v| Gem::Version.new(v.gsub('_', '.')) }.last
+        version
+      end
+
+      def get_android_sdk_version
+        require 'net/http'
+        require 'uri'
+
+        # Get's the Page to Scrape
+        page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
+
+        case android_package_os_id
+        when MAC_OS_X
+          regex = '(\>android-sdk.*macosx.zip)'
+        when LINUX
+          regex = '(\>android-sdk.*.tgz)'
+        when WINDOWS
+          regex = '(\>installer_.*.exe)'
+        else #Error
+          nil
+        end
+
+        link = page_content.scan(/#{regex}/).to_s
+        version = link.match( /(\d+).(\d+).(\d+)/ )[0]
+
         version
       end
 
@@ -451,12 +476,12 @@ module Ruboto
             Dir.chdir File.expand_path('~/') do
               case android_package_os_id
               when MAC_OS_X
-                asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.zip"
+                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
                 download(asdk_file_name)
                 unzip(accept_all, asdk_file_name)
                 FileUtils.rm_f asdk_file_name
               when LINUX
-                asdk_file_name = "android-sdk_r#{get_tools_version}-#{android_package_os_id}.tgz"
+                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.tgz"
                 download asdk_file_name
                 system "tar -xzf #{asdk_file_name}"
                 FileUtils.rm_f asdk_file_name
@@ -469,7 +494,7 @@ module Ruboto
                 #    exit /b 1
                 #)
 
-                asdk_file_name = "installer_r#{get_tools_version}-#{android_package_os_id}.exe"
+                asdk_file_name = "installer_r#{get_android_sdk_version}-#{android_package_os_id}.exe"
                 download(asdk_file_name)
                 puts "Installing #{asdk_file_name}..."
                 system "#{WINDOWS_ELEVATE_CMD} #{asdk_file_name}"
