@@ -11,7 +11,7 @@ module Ruboto
         Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level] || "api_#{sdk_level}"
       end
 
-      def start_emulator(sdk_level)
+      def start_emulator(sdk_level, no_snapshot)
         sdk_level = sdk_level.gsub(/^android-/, '').to_i
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
@@ -25,6 +25,7 @@ module Ruboto
         end
 
         emulator_opts = '-partition-size 256'
+        emulator_opts << ' -no-snapshot-load' if no_snapshot
         if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
           emulator_opts << ' -no-window -no-audio'
         end
@@ -98,15 +99,26 @@ module Ruboto
               has_haxm = abis.find { |a| a =~ /x86/ }
             end
 
-            if has_haxm
-              abi_opt = '--abi x86'
+            # FIXME(uwe): The x86 emulator does not respect the heap setting and
+            # restricts to a 16MB heap on Android 2.3 which will crash any
+            # Ruboto app.  Remove the first "if" below when heap setting works
+            # on x86 emulator.
+            # https://code.google.com/p/android/issues/detail?id=37597
+            # https://code.google.com/p/android/issues/detail?id=61596
+            if sdk_level == 10
+              abi_opt = '--abi armeabi'
             else
-              if [17, 16, 15, 13, 11].include? sdk_level
-                abi_opt = '--abi armeabi-v7a'
-              elsif sdk_level == 10
-                abi_opt = '--abi armeabi'
+              if has_haxm
+                abi_opt = '--abi x86'
+              else
+                if [17, 16, 15, 13, 11].include? sdk_level
+                  abi_opt = '--abi armeabi-v7a'
+                elsif sdk_level == 10
+                  abi_opt = '--abi armeabi'
+                end
               end
             end
+            # EMXIF
 
             puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA`
 

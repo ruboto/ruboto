@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="custom_rules">
+    <dirname property="custom_rules.basedir" file="${ant.file.custom_rules}"/>
+    <path id="pathtool.antlibs">
+        <pathelement path="${custom_rules.basedir}/pathtool.jar" />
+    </path>
+    <taskdef resource="anttasks.properties" classpathref="pathtool.antlibs"/>
+
+    <target name="-post-compile">
+        <!--
+        libs="libs/" means pack all .jar library into the secondary dex.
+        if you to pack specific .jar into the secondary dex, change it to
+        libs="/android-support-v4.jar,/10k-methods.jar"
+        -->
+        <pathtool
+            libs="libs/"
+            refid="project.all.jars.path"
+            excludeRefid="out.dex.jar.input.ref"
+            includeRefid="out.dex.jar.assets" />
+        <mkdir dir="${out.absolute.dir}/libs.apk"/>
+        <dex executable="${dx}"
+                output="${out.absolute.dir}/libs.apk/classes.dex"
+                dexedlibs="${out.absolute.dir}/libs.apk"
+                nolocals="true"
+                forceJumbo="false"
+                disableDexMerger="false">
+            <path refid="out.dex.jar.assets" />
+        </dex>
+        <zip destfile="${out.absolute.dir}/libs-unaligned.apk"
+            basedir="${out.absolute.dir}/libs.apk"
+            includes="classes.dex"
+            update="true"/>
+        <zipalign
+            executable="${zipalign}"
+            input="${out.absolute.dir}/libs-unaligned.apk"
+            output="${asset.absolute.dir}/libs.apk"
+            verbose="${verbose}" />
+    </target>
+
+    <target name="-post-package">
+        <delete file="${asset.absolute.dir}/libs.apk"/>
+    </target>
+
+    <target name="run">
+        <xpath input="${manifest.abs.file}" expression="/manifest/@package" output="manifest.package" />
+        <xpath input="${manifest.abs.file}" expression="/manifest/application/activity[intent-filter/action/@android:name=&quot;android.intent.action.MAIN&quot; and intent-filter/category/@android:name=&quot;android.intent.category.LAUNCHER&quot;]/@android:name"
+            output="manifest.activity"/>
+        <echo>component: ${manifest.package}/${manifest.activity}</echo>
+        <exec executable="${adb}" failonerror="false">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="force-stop" />
+            <arg value="${manifest.package}" />
+        </exec>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="start" />
+            <arg value="-n" />
+            <arg value="${manifest.package}/${manifest.activity}" />
+            <arg value="-W" />
+        </exec>
+    </target>
+    <target name="rund">
+        <xpath input="${manifest.abs.file}" expression="/manifest/@package" output="manifest.package" />
+        <xpath input="${manifest.abs.file}" expression="/manifest/application/activity[intent-filter/action/@android:name=&quot;android.intent.action.MAIN&quot; and intent-filter/category/@android:name=&quot;android.intent.category.LAUNCHER&quot;]/@android:name"
+            output="manifest.activity"/>
+        <echo>component: ${manifest.package}/${manifest.activity}</echo>
+        <echo>Debug package ${mainfest.package}. You should prepare your eclipse.</echo>
+        <echo>Keep your project open, and if you get a red bug icon in DDMS, you</echo>
+        <echo>should stop and manually debug it once.</echo>
+        <exec executable="${adb}" failonerror="false">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="force-stop" />
+            <arg value="${manifest.package}" />
+        </exec>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="set-debug-app" />
+            <arg value="${manifest.package}" />
+        </exec>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="start" />
+            <arg value="-n" />
+            <arg value="${manifest.package}/${manifest.activity}" />
+            <arg value="-W" />
+            <arg value="-D" />
+        </exec>
+    </target>
+
+    <target name="help">
+        <!-- displays starts at col 13
+              |13                                                              80| -->
+        <echo>Android Ant Build. Available targets:</echo>
+        <echo>   help:      Displays this help.</echo>
+        <echo>   clean:     Removes output files created by other targets.</echo>
+        <echo>              This calls the same target on all dependent projects.</echo>
+        <echo>              Use 'ant nodeps clean' to only clean the local project</echo>
+        <echo>   debug:     Builds the application and signs it with a debug key.</echo>
+        <echo>              The 'nodeps' target can be used to only build the</echo>
+        <echo>              current project and ignore the libraries using:</echo>
+        <echo>              'ant nodeps debug'</echo>
+        <echo>   release:   Builds the application. The generated apk file must be</echo>
+        <echo>              signed before it is published.</echo>
+        <echo>              The 'nodeps' target can be used to only build the</echo>
+        <echo>              current project and ignore the libraries using:</echo>
+        <echo>              'ant nodeps release'</echo>
+        <echo>   instrument:Builds an instrumented package and signs it with a</echo>
+        <echo>              debug key.</echo>
+        <echo>   test:      Runs the tests. Project must be a test project and</echo>
+        <echo>              must have been built. Typical usage would be:</echo>
+        <echo>                  ant [emma] debug install test</echo>
+        <echo>   emma:      Transiently enables code coverage for subsequent</echo>
+        <echo>              targets.</echo>
+        <echo>   install:   Installs the newly build package. Must either be used</echo>
+        <echo>              in conjunction with a build target (debug/release/</echo>
+        <echo>              instrument) or with the proper suffix indicating</echo>
+        <echo>              which package to install (see below).</echo>
+        <echo>              If the application was previously installed, the</echo>
+        <echo>              application is reinstalled if the signature matches.</echo>
+        <echo>   installd:  Installs (only) the debug package.</echo>
+        <echo>   installr:  Installs (only) the release package.</echo>
+        <echo>   installi:  Installs (only) the instrumented package.</echo>
+        <echo>   installt:  Installs (only) the test and tested packages (unless</echo>
+        <echo>              nodeps is used as well.</echo>
+        <echo>   uninstall: Uninstalls the application from a running emulator or</echo>
+        <echo>              device. Also uninstall tested package if applicable</echo>
+        <echo>              unless 'nodeps' is used as well.</echo>
+        <echo></echo>
+        <echo>Custom targets:</echo>
+        <echo>   run:       Run your application.</echo>
+        <echo>   rund:      Run and attach to debugger.</echo>
+        <echo></echo>
+        <echo>--&gt; Example:</echo>
+        <echo>--&gt;    ant debug install run</echo>
+        <echo>--&gt;    ant rund</echo>
+    </target>
+
+</project>

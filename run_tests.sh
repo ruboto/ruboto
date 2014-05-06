@@ -3,7 +3,7 @@
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
-TIMEOUT=3300 # 55 minutes
+TIMEOUT=7200 # 55 minutes
 BOSSPID=$$
 (
   sleep $TIMEOUT

@@ -278,8 +278,8 @@ EOF
   ruby_version = ruby_version.to_s
   ruby_version['.'] = '_'
   config = <<EOF
-            #{begin_marker}
-            #{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
+#{begin_marker}
+  #{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
             #{end_marker}
 EOF
   pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
@@ -802,7 +802,19 @@ def uninstall_apk
 end
 
 def update_scripts
-  puts(`adb shell mkdir -p #{scripts_path}`) unless device_path_exists?(scripts_path)
+  # FIXME(uwe): Simplify when we stop supporting Android 2.3
+  if sdk_level < 15
+    scripts_path.split('/').tap do |parts|
+      parts.size.times do |i|
+        path = parts[0..i].join('/')
+        puts(`adb shell mkdir #{path}`) unless device_path_exists?(path)
+      end
+    end
+  else
+    puts(`adb shell mkdir -p #{scripts_path}`) unless device_path_exists?(scripts_path)
+  end
+  # EMXIF
+
   raise "Unable to create device scripts dir: #{scripts_path}" unless device_path_exists?(scripts_path)
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('src') do

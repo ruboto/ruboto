@@ -40,7 +40,7 @@ module Ruboto
               }
               option('activity') {
                 argument :required
-                description 'Name of your primary Activity.  Defaults to the name of the application with Activity appended.'
+                description 'Name of your primary Activity.  Defaults to the name of the application with "Activity" appended.'
               }
               option('path') {
                 argument :required
@@ -49,23 +49,27 @@ module Ruboto
               option('target', 't') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
-                description "Android version to target. Must begin with 'android-' (e.g., 'android-10' for gingerbread)"
-                cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
-                validate {|t| t =~ /^android-\d+$/}
+                description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
+                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
+                validate { |t| t =~ /^android-\d+$/ }
               }
               option('min-sdk') {
                 argument :required
-                description "Minimum android version supported. Must begin with 'android-'."
+                description "Minimum android version supported. (e.g., 'android-19' or '19' for kitkat)"
+                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
+                validate { |t| t =~ /^android-\d+$/ }
               }
               option('with-jruby') {
-                description 'Generate the JRuby jars jar'
-                cast :boolean
+                description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.'
+                argument :optional
+                cast { |v| Gem::Version.new(v) }
+                validate { |v| Gem::Version.correct?(v) }
               }
               option('ruby-version') {
                 description 'Using what version of Ruby? (e.g., 1.8, 1.9, 2.0)'
                 argument :required
                 cast :float
-                validate {|rv| [1.8, 1.9, 2.0].include?(rv)}
+                validate { |rv| [1.8, 1.9, 2.0].include?(rv) }
               }
               option('force') {
                 description 'Force creation of project even if the path exists'
@@ -121,8 +125,10 @@ module Ruboto
                   update_ruboto true
                   update_icons true
                   update_classes nil, 'exclude'
-                  update_jruby true if with_jruby
-                  update_dx_jar true if with_jruby
+                  if with_jruby
+                    update_jruby true, with_jruby
+                    update_dx_jar true
+                  end
                   update_core_classes 'exclude'
 
                   log_action('Generating the default Activity and script') do
@@ -139,8 +145,15 @@ module Ruboto
               include Ruboto::Util::Build
               include Ruboto::Util::Update
 
+              argument('version') {
+                required false
+                description 'The JRuby version to install.'
+                cast { |v| Gem::Version.new(v) }
+                validate { |v| Gem::Version.correct?(v) }
+              }
+
               def run
-                update_jruby true
+                update_jruby true, params['version'].value
               end
             end
 
@@ -334,20 +347,20 @@ module Ruboto
             include Ruboto::Util::LogAction
             include Ruboto::Util::Update
 
-            argument('what') {
-              required
-              # FIXME(uwe): Deprecated "ruboto update ruboto" in Ruboto 0.8.1.  Remove september 2013.
-              validate { |i| %w(jruby app ruboto).include?(i) }
-              description "What do you want to update: 'app', 'jruby', or 'ruboto'"
-            }
+            mode 'app' do
 
-            option('force') {
-              description "force an update even if the version hasn't changed"
-            }
+              option('with-jruby') {
+                description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.  If the JRuby jars are already present in your project, this option is implied.'
+                argument :optional
+                cast { |v| Gem::Version.new(v) }
+                validate { |v| Gem::Version.correct?(v) }
+              }
 
-            def run
-              case params['what'].value
-              when 'app' then
+              option('force') {
+                description "force an update even if the version hasn't changed"
+              }
+
+              def run
                 force = params['force'].value
                 old_version = read_ruboto_version
                 if old_version && Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
@@ -365,15 +378,29 @@ module Ruboto
                 update_ruboto force
                 update_classes old_version, force
                 update_dx_jar force
-                update_jruby force
+                update_jruby force, params['with-jruby'].value
                 update_manifest nil, nil, force
                 update_icons force
                 update_core_classes 'exclude'
                 update_bundle
-              when 'jruby' then
-                update_jruby(params['force'].value, true) || abort
-              else
-                raise "Unknown update target: #{params['what'].value.inspect}"
+              end
+            end
+
+            mode 'jruby' do
+
+              argument('version') {
+                required false
+                description 'The JRuby version to install.  The jruby-jars gem of the same version should be installed on your system already.'
+                cast { |v| Gem::Version.new(v) }
+                validate { |v| Gem::Version.correct?(v) }
+              }
+
+              option('force') {
+                description "force an update even if the version hasn't changed"
+              }
+
+              def run
+                update_jruby(params['force'].value, params['version'].value, true) || abort
               end
             end
           end
@@ -387,8 +414,8 @@ module Ruboto
               argument :required
               default DEFAULT_TARGET_SDK
               arity -1
-              cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
-              validate {|t| t =~ /^android-\d+$/}
+              cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
+              validate { |t| t =~ /^android-\d+$/ }
             }
 
             option('yes', 'y') {
@@ -413,12 +440,17 @@ module Ruboto
               required unless api_level
               argument :required
               default(api_level) if api_level
-              cast {|t| t =~ /^(\d+)$/ ? "android-#$1" : t}
-              validate {|t| t =~ /^android-(\d+)$/ && sdk_level_name($1.to_i)}
+              cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
+              validate { |t| t =~ /^android-(\d+)$/ && sdk_level_name($1.to_i) }
+            }
+
+            option('no-snapshot', 's') {
+              extend Ruboto::Util::Emulator
+              description 'do not use a snapshot when starting the emulator'
             }
 
             def run
-              start_emulator(params['target'].value)
+              start_emulator(params['target'].value, params['no-snapshot'].value)
             end
           end
 

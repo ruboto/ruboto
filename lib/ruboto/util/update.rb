@@ -185,19 +185,18 @@ module Ruboto
         end
       end
 
-      def update_jruby(force=nil, explicit = false)
+      def update_jruby(force, version, explicit = false)
         installed_jruby_core = Dir.glob('libs/jruby-core-*.jar')[0]
         installed_jruby_stdlib = Dir.glob('libs/jruby-stdlib-*.jar')[0]
 
-        unless force
-          if !installed_jruby_core || !installed_jruby_stdlib
-            puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app." if explicit
-            return false
-          end
+        unless force || (installed_jruby_core && installed_jruby_stdlib)
+          puts "Cannot find existing jruby jars in libs. Make sure you're in the root directory of your app." if explicit
+          return false
         end
 
-        install_jruby_jars_gem
+        install_jruby_jars_gem(version)
         begin
+          gem('jruby-jars', version) if version
           require 'jruby-jars'
         rescue LoadError
           puts "Could not find the jruby-jars gem.  You need it to include JRuby in your app.  Please install it using\n\n    gem install jruby-jars\n\n"
@@ -238,14 +237,14 @@ module Ruboto
         true
       end
 
-      def install_jruby_jars_gem
-        if (jars_version_from_env = ENV['JRUBY_JARS_VERSION'])
-          version_requirement = " -v #{jars_version_from_env}"
+      def install_jruby_jars_gem(jruby_jars_version = ENV['JRUBY_JARS_VERSION'])
+        if jruby_jars_version
+          version_requirement = " -v #{jruby_jars_version}"
         end
         `gem query -i -n jruby-jars#{version_requirement}`
         unless $? == 0
           local_gem_dir = ENV['LOCAL_GEM_DIR'] || Dir.getwd
-          local_gem_file = "#{local_gem_dir}/jruby-jars-#{jars_version_from_env}.gem"
+          local_gem_file = "#{local_gem_dir}/jruby-jars-#{jruby_jars_version}.gem"
           if File.exists?(local_gem_file)
             system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
           else
@@ -253,14 +252,6 @@ module Ruboto
           end
         end
         raise "install of jruby-jars failed with return code #$?" unless $? == 0
-        if jars_version_from_env
-          exclusion_clause = %Q{-v "!=#{jars_version_from_env}"}
-          `gem query -i -n jruby-jars #{exclusion_clause}`
-          if $? == 0
-            system %Q{gem uninstall jruby-jars --all #{exclusion_clause}}
-            raise "Uninstall of jruby-jars failed with return code #$?" unless $? == 0
-          end
-        end
         Gem.refresh
       end
 
@@ -286,6 +277,12 @@ module Ruboto
         puts "\nCopying files:"
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
         %w{.gitignore Rakefile ruboto.yml}.each { |f| log_action(f) { weak_copier.copy f } }
+
+        # FIXME(uwe): Only present in Ruboto 1.0.3.  Remove when we stop supporting updating from Ruboto 1.0.3
+        FileUtils.mv('rakelib/stdlib.rake', 'rakelib/ruboto.stdlib.rake') if File.exists?('rakelib/stdlib.rake')
+        FileUtils.mv('rakelib/stdlib.yml', 'rakelib/ruboto.stdlib.yml') if File.exists?('rakelib/stdlib.yml')
+        FileUtils.rm('rakelib/stdlib_dependencies.rb') if File.exists?('rakelib/stdlib_dependencies.rb')
+        # EMXIF
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         %w{assets rakelib res/layout test}.each do |f|
@@ -452,14 +449,15 @@ module Ruboto
         end
       end
 
-      def reconfigure_jruby_libs(jruby_core_version)
-        reconfigure_jruby_core(jruby_core_version)
-        reconfigure_jruby_stdlib
+      def reconfigure_jruby_libs(jruby_version)
+        reconfigure_jruby_core(jruby_version)
+        reconfigure_jruby_stdlib(jruby_version)
         reconfigure_dx_jar
       end
 
       # - Removes unneeded code from jruby-core
       # - Split into smaller jars that can be used separately
+      # FIXME(uwe): Refactor to take a Gem::Version as the parameter.
       def reconfigure_jruby_core(jruby_core_version)
         Dir.chdir 'libs' do
           jruby_core = Dir['jruby-core-*.jar'][-1]
@@ -471,7 +469,7 @@ module Ruboto
               `jar -xf #{jruby_core}`
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
-              gem_version = Gem::Version.new(jruby_core_version.tr('-', '.'))
+              gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
               if gem_version >= Gem::Version.new('9000.dev')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
@@ -494,6 +492,7 @@ module Ruboto
                     'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd',
                     'jnr/constants/platform/sunos',
+                    'jnr/enxio',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
                     'jnr/ffi/mapper',
@@ -515,6 +514,7 @@ module Ruboto
                     'org/jruby/embed/bsf',
                     'org/jruby/embed/jsr223',
                     'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/Enums*',
                     # 'org/jruby/ext/tracepoint',
                     'org/jruby/javasupport/bsf',
                     # 'org/jruby/management', # should be excluded
@@ -525,7 +525,7 @@ module Ruboto
                     'org/yecht',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.12')
-                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
+                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
               elsif gem_version >= Gem::Version.new('1.7.5')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.5
                 excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
@@ -606,8 +606,14 @@ module Ruboto
       end
 
       # - Moves ruby stdlib to the root of the jruby-stdlib jar
-      def reconfigure_jruby_stdlib
-        abort "cannot find rakelib/stdlib.rake; make sure you update your app (ruboto update app)" unless File.exists?("rakelib/stdlib.rake")
+      def reconfigure_jruby_stdlib(jruby_version)
+        # FIXME(uwe): Introduced in Ruboto 1.0.3.  Remove when we stop supporting upgrading from Ruboto 1.0.3.
+        unless File.exists?('rakelib/ruboto.stdlib.rake') || File.exists?('rakelib/stdlib.rake')
+          abort 'cannot find rakelib/ruboto.stdlib.rake; make sure you update your app (ruboto update app)'
+        end
+        # EMXIF
+
+        ENV['JRUBY_JARS_VERSION'] = jruby_version
         system 'rake libs:reconfigure_stdlib'
       end
 

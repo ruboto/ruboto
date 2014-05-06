@@ -11,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Environment;
 import dalvik.system.PathClassLoader;
 
@@ -157,13 +158,16 @@ public class JRubyAdapter {
             System.setProperty("jruby.ji.upper.case.package.name.allowed", "true");
             System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
 
-            DexDex.debug = true;
-            DexDex.validateClassPath(appContext);
-            while (DexDex.dexOptRequired) {
-                System.out.println("Waiting for class loader setup...");
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ie) {}
+            // FIXME(uwe): Simplify when we stop supporting android-15
+            if (Build.VERSION.SDK_INT >= 16) {
+                DexDex.debug = true;
+                DexDex.validateClassPath(appContext);
+                while (DexDex.dexOptRequired) {
+                    System.out.println("Waiting for class loader setup...");
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) {}
+                }
             }
 
             ClassLoader classLoader;

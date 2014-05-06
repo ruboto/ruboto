@@ -53,7 +53,7 @@ class RubotoGenTest < Test::Unit::TestCase
   # APK was    60.2KB.  PLATFORM: CURRENT, ANDROID_TARGET: 15
   # APK was    74.9KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    80.4KB.  PLATFORM: CURRENT, ANDROID_TARGET: 19
-  # APK was    57.1KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
+  # APK was    65.0KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
   # APK was  8428.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.4
   # APK was  7405.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.4
   # APK was  7420.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.4
@@ -89,7 +89,7 @@ class RubotoGenTest < Test::Unit::TestCase
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
-          10 => 60.0,
+          10 => 66.0,
           15 => 62.0,
           16 => 75.0,
           19 => 81.0,
@@ -277,7 +277,7 @@ EOF
   if RUBOTO_PLATFORM == 'FROM_GEM'
     def test_gen_jruby
       Dir.chdir APP_DIR do
-        system "#{RUBOTO_CMD} gen jruby"
+        system "#{RUBOTO_CMD} gen jruby #{JRUBY_JARS_VERSION}"
         assert_equal 0, $?.exitstatus
         assert_equal %W(libs/jruby-core-#{JRUBY_JARS_VERSION.to_s.downcase}.jar), Dir['libs/jruby-core-*.jar'].map(&:downcase)
         assert_equal %W(libs/jruby-stdlib-#{JRUBY_JARS_VERSION.to_s.downcase}.jar), Dir['libs/jruby-stdlib-*.jar'].map(&:downcase)

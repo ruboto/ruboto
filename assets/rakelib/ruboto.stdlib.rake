@@ -47,11 +47,13 @@ end
 # - Moves ruby stdlib to the root of the jruby-stdlib jar
 def reconfigure_jruby_stdlib
   abort 'cannot find jruby library in libs' if Dir['libs/jruby*'].empty?
-
+  if (gem_version = ENV['JRUBY_JARS_VERSION'])
+    gem('jruby-jars', gem_version)
+  end
   require 'jruby-jars'
 
   log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{JRubyJars::VERSION}.jar" }
-  StdlibDependencies.load('rakelib/stdlib.yml')
+  StdlibDependencies.load('rakelib/ruboto.stdlib.yml')
 
   Dir.chdir 'libs' do
     jruby_stdlib = Dir['jruby-stdlib-*.jar'][-1]
@@ -92,7 +94,7 @@ def remove_unneeded_parts_of_stdlib
   included_stdlibs = ruboto_config['included_stdlibs']
   excluded_stdlibs = [*ruboto_config['excluded_stdlibs']].compact
 
-  if included_stdlibs and included_stdlibs == 'auto'
+  if included_stdlibs == 'auto'
     if File.exists? '../../auto_dependencies.yml'
       included_stdlibs = YAML::load_file('../../auto_dependencies.yml')
     else
@@ -140,15 +142,15 @@ def remove_unneeded_parts_of_stdlib
           end
         end
       end
-    end
-
-    if included_stdlibs.nil? and excluded_stdlibs.any?
+    elsif excluded_stdlibs.any?
       # Don't allow jruby and java to be removed
-      excluded_stdlibs = excluded_stdlibs - %w(jruby java)
-
+      excluded_stdlibs -= %w(jruby java)
       ruby_stdlib_versions = Dir['*'] - %w(gems)
-      ruby_stdlib_versions.each do |ld|
-        excluded_stdlibs.each do |d|
+      excluded_stdlibs.each do |d|
+        if Dir["{#{ruby_stdlib_versions.join(',')}}/#{d}"].empty?
+          puts "Exclude pattern #{dir.inspect} does not match any files."
+        end
+        ruby_stdlib_versions.each do |ld|
           dir = "#{ld}/#{d}"
           FileUtils.rm_rf dir if File.exists? dir
           file = "#{dir}.rb"
@@ -246,7 +248,7 @@ def cleanup_jars
           puts 'Starting JRuby KryptproviderjdkService Service'
           public
           Java::KryptproviderjdkService.new.basicLoad(JRuby.runtime)
-                  END_CODE
+        END_CODE
       elsif j =~ %r{kryptcore.jar$}
         jar_load_code = <<-END_CODE
           require 'jruby'
@@ -278,7 +280,7 @@ def find_dependencies
   ruby_version = ruboto_config['ruby_version'] || '1.9'
 
   local = StdlibDependencies.collect('src').dependencies
-  stdlib = StdlibDependencies.load('rakelib/stdlib.yml')[ruby_version]
+  stdlib = StdlibDependencies.load('rakelib/ruboto.stdlib.yml')[ruby_version]
 
   dependencies = local.values.flatten
   new_values = []
@@ -294,7 +296,139 @@ def find_dependencies
     new_values = []
   end
 
-  dependencies.reject!{|f| File.exists? "src/#{f}.rb"}
+  dependencies.reject! { |f| File.exists? "src/#{f}.rb" }
 
   dependencies.map { |d| d.split('/')[0] }.uniq.sort
+end
+
+
+############################################################################
+#
+# Use to build dependencies within stdlib.
+#
+
+class StdlibDependencies
+  attr_reader :dependencies, :version
+
+  REQUIRE = %r{^\s*require[ (]['"]([a-zA-Z0-9/_-]+)["'][)]?\s*$}
+  REQUIRE_RELATIVE = %r{^\s*require_relative[ (]['"]([a-zA-Z0-9/-_]+)["'][)]?\s*$}
+
+  def self.[](key)
+    versions[key]
+  end
+
+  def self.versions
+    @@versions ||= {}
+  end
+
+  def self.collect(dir='.')
+    local = new('app')
+    Dir.chdir(dir) do
+      local.check_dir(['ruboto'])
+    end
+    local
+  end
+
+  def self.generate(dir='.')
+    versions
+
+    Dir.chdir(dir) do
+      raise("Can't find shared directory") unless File.directory?('shared')
+      Dir['*'].select{|d| File.directory?(d) && d != 'shared'}.each do |d|
+        @@versions[d] = new(d).generate
+      end
+    end
+
+    versions
+  end
+
+  def self.dump(file)
+    require 'yaml'
+    all_dependencies = {}
+    versions.each{|k, v| all_dependencies[k] = v.dependencies}
+    File.open(file, 'w') { |out| YAML.dump(all_dependencies, out) }
+    versions
+  end
+
+  def self.load(file)
+    require 'yaml'
+
+    @@versions = {}
+    raise("Can't find #{file}") unless File.exists?(file)
+
+    File.open(file) do |f|
+      YAML.load(f).each{|k,v| @@versions[k] = new(k, v)}
+    end
+
+    versions
+  end
+
+  def initialize(version, dependencies={})
+    @version = version
+    @dependencies = dependencies
+  end
+
+  def [](key)
+    @dependencies[key]
+  end
+
+  def generate
+    raise("Can't find shared directory") unless File.directory?('shared')
+    raise("Can't find #{@version} directory") unless File.directory?(@version)
+
+    Dir.chdir('shared'){check_dir}
+    Dir.chdir(@version){check_dir}
+
+    # Clean up dependencies
+    @dependencies.keys.sort.each do |i|
+      # remove duplicates
+      @dependencies[i] = @dependencies[i].uniq
+
+      # remove references to self
+      @dependencies[i] = @dependencies[i] - [i]
+
+      # sort
+      @dependencies[i] = @dependencies[i].sort
+    end
+
+    self
+  end
+
+  def depends_on(name, on=nil)
+    base = name[0..-4]
+    @dependencies[base] = (@dependencies[base] || [])
+    @dependencies[base] << on
+  end
+
+  def gather_dependencies(file)
+    f = IO.read(file)
+
+    ##################################
+    #
+    # Handle encoding problems under different rubies
+    #
+    if String.method_defined?(:encode)
+      f.encode!('UTF-8', 'UTF-8', :invalid => :replace)
+    else
+      require 'iconv'
+      f = Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(f)
+    end
+    #
+    #################################
+
+    f.scan(REQUIRE) do |j|
+      depends_on(file, j[0])
+    end
+
+    f.scan(REQUIRE_RELATIVE) do |j|
+      on = file.split('/')[0..-2] << j[0]
+      depends_on(file, on.join('/'))
+    end
+  end
+
+  def check_dir(exclude=[])
+    Dir['**/*.rb'].select{|rb| not exclude.include?(rb.split('/')[0])}.each do |i|
+      gather_dependencies(i)
+    end
+  end
 end
