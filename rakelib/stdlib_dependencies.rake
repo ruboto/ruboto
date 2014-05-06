@@ -15,7 +15,7 @@ namespace :libs do
   task :generate_stdlib_dependencies do
     require 'jruby-jars'
 
-    require_relative '../assets/rakelib/stdlib_dependencies'
+    require_relative '../assets/rakelib/ruboto.stdlib'
 
     log_action('Creating temporary directory') { FileUtils.mkdir_p 'tmp_stdlib' }
     Dir.chdir 'tmp_stdlib' do

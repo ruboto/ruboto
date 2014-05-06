@@ -281,7 +281,7 @@ module Ruboto
         # FIXME(uwe): Only present in Ruboto 1.0.3.  Remove when we stop supporting updating from Ruboto 1.0.3
         FileUtils.mv('rakelib/stdlib.rake', 'rakelib/ruboto.stdlib.rake') if File.exists?('rakelib/stdlib.rake')
         FileUtils.mv('rakelib/stdlib.yml', 'rakelib/ruboto.stdlib.yml') if File.exists?('rakelib/stdlib.yml')
-        FileUtils.rm('rakelib/stdlib_dependencies.rb') if File.exists?('rakelib/stdlib_dependencies.rb')
+        FileUtils.mv('rakelib/stdlib_dependencies.rb', 'ruboto.stdlib.rb') if File.exists?('rakelib/stdlib_dependencies.rb')
         # EMXIF
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'

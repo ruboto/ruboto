@@ -189,8 +189,7 @@ module Ruboto
           found = File.exists?(@haxm_kext_loc)
           @haxm_kext_loc = nil unless found
           puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
-          @haxm_installer_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM.dmg')
-          @haxm_installer_loc = nil unless File.exists?(@haxm_installer_loc)
+          @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*.dmg')].first
         when LINUX
           @haxm_installer_loc = 'Not supported, yet.'
           @haxm_kext_loc = 'Not supported, yet.'
@@ -200,8 +199,7 @@ module Ruboto
           found = ($? == 0)
           @haxm_kext_loc = nil unless found
           puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
-          @haxm_installer_loc = File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHaxm.exe')
-          @haxm_installer_loc = nil unless File.exists?(@haxm_installer_loc)
+          @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHaxm*.exe')].first
           return
         end
       end
