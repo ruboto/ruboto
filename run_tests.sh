@@ -10,7 +10,7 @@ BOSSPID=$$
   echo
   echo "Test timed out after $TIMEOUT seconds."
   echo
-  kill -9 $BOSSPID
+  kill -9 -$BOSSPID
   echo
   echo Emulator log:
   echo
