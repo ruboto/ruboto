@@ -59,6 +59,8 @@ module Ruboto
 
       script_name = options.delete(:script)
       extras = options.delete(:extras)
+      flags = options.delete(:flags)
+
       raise "Unknown options: #{options}" unless options.empty?
 
       if class_name.nil? && block_given?
@@ -76,6 +78,7 @@ module Ruboto
       end
       i = android.content.Intent.new
       i.setClass self, java_class.java_class
+      i.add_flags(flags) if flags
       i.putExtra(Ruboto::THEME_KEY, theme) if theme
       i.putExtra(Ruboto::CLASS_NAME_KEY, class_name) if class_name
       i.putExtra(Ruboto::SCRIPT_NAME_KEY, script_name) if script_name
@@ -124,4 +127,3 @@ end
 java_import 'android.app.Activity'
 java_import 'org.ruboto.RubotoActivity'
 ruboto_configure_activity(RubotoActivity)
-
