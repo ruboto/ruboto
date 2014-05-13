@@ -95,6 +95,7 @@ OTHER_SOURCE_FILES = Dir[File.expand_path 'src/**/*'] - JAVA_SOURCE_FILES - RUBY
 CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
 BUILD_XML_FILE = "#{PROJECT_DIR}/build.xml"
 APK_DEPENDENCIES = [:patch_dex, MANIFEST_FILE, BUILD_XML_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR, CLASSES_CACHE] + JRUBY_JARS + JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES + OTHER_SOURCE_FILES
+QUICK_APK_DEPENDENCIES = APK_DEPENDENCIES - RUBY_SOURCE_FILES
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
@@ -138,7 +139,7 @@ task :debug => APK_FILE
 
 namespace :debug do
   desc 'build debug package if compiled files have changed'
-  task :quick => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+  task :quick => QUICK_APK_DEPENDENCIES do |t|
     build_apk(t, false)
   end
 end
@@ -395,6 +396,8 @@ EOF
   File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source }
 end
 
+task apk_dependencies: APK_DEPENDENCIES
+
 file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t, false)
 end
@@ -422,7 +425,7 @@ task :boing => %w(update_scripts:reload)
 
 namespace :update_scripts do
   desc 'Copy scripts to emulator and restart the app'
-  task :restart => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+  task :restart => QUICK_APK_DEPENDENCIES do |t|
     if build_apk(t, false) || !stop_app
       install_apk
     else
@@ -432,7 +435,7 @@ namespace :update_scripts do
   end
 
   desc 'Copy scripts to emulator and restart the app'
-  task :start => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+  task :start => QUICK_APK_DEPENDENCIES do |t|
     if build_apk(t, false)
       install_apk
     else
@@ -442,7 +445,7 @@ namespace :update_scripts do
   end
 
   desc 'Copy scripts to emulator and reload'
-  task :reload => APK_DEPENDENCIES - RUBY_SOURCE_FILES do |t|
+  task :reload => QUICK_APK_DEPENDENCIES do |t|
     if build_apk(t, false)
       install_apk
       start_app
@@ -468,7 +471,7 @@ task :test => APK_DEPENDENCIES + [:uninstall] do
 end
 
 namespace :test do
-  task :quick => :update_scripts do
+  task :quick => :apk_dependencies do
     Dir.chdir('test') do
       puts 'Running quick tests'
       install_retry_count = 0

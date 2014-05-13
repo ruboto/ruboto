@@ -192,7 +192,9 @@ class Test::Unit::TestCase
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version) if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+              write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
+            end
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
             install_jruby_jars_gem
