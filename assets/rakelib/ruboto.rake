@@ -305,7 +305,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
          </apply>
          -->
 
-         <echo>Dexing from ${out.classes.absolute.dir}, ${out.dexed.absolute.dir} and ${project.all.jars.path} to ${out.dexed.absolute.dir}</echo>
+         <echo>Dexing from ${out.classes.absolute.dir} and ${out.dex.jar.input.ref} to ${out.absolute.dir}</echo>
          <apply executable="${dx}" failonerror="true" parallel="true">
              <arg value="--dex" />
              <arg value="--multi-dex" />
