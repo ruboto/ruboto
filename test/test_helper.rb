@@ -160,8 +160,10 @@ class Test::Unit::TestCase
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     update = options.delete(:update) || false
     ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == "9" ? 2.1 : 1.9)
-    raise "Unknown options: #{options.inspect}" unless options.empty?
+    multi_dex = options.has_key?(:multi_dex) ? options.delete(:multi_dex) :
+        (standalone && JRUBY_JARS_VERSION >= Gem::Version.new('9000.dev'))
 
+    raise "Unknown options: #{options.inspect}" unless options.empty?
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
 
     Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
@@ -170,11 +172,12 @@ class Test::Unit::TestCase
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_package_#{package}" if package != PACKAGE
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
-#    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
+    #    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
     template_dir << "_example_#{example}" if example
     template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
+    template_dir << '_multi-dex' if multi_dex
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
     template_dir << "_with_#{included_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if included_stdlibs
     if File.exists?(template_dir)
@@ -211,7 +214,11 @@ class Test::Unit::TestCase
         end
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
-          write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version) if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+          if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version || multi_dex
+            sleep 1
+            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
+            system 'rake build_xml jruby_adapter'
+          end
           if standalone
             system "#{RUBOTO_CMD} gen jruby"
             raise "update jruby failed with return code #$?" if $? != 0
@@ -289,11 +296,13 @@ class Test::Unit::TestCase
     end
   end
 
-  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
+  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
     yml = YAML.dump({'included_stdlibs' => included_stdlibs,
-                     'excluded_stdlibs' => excluded_stdlibs,
- #                    'ruby_version' => ruby_version,
-                     'heap_alloc' => heap_alloc})
+        'excluded_stdlibs' => excluded_stdlibs,
+        # 'ruby_version' => ruby_version,
+        'heap_alloc' => heap_alloc,
+        'multi_dex' => multi_dex,
+    })
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') { |f| f << yml }
   end
@@ -303,7 +312,7 @@ class Test::Unit::TestCase
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'http://rubygems.org/'\n\n"
-      gems.each { |g| f << "gem #{[*g].map{|gp|"'#{gp}'"}.join(', ')}\n" }
+      gems.each { |g| f << "gem #{[*g].map { |gp| "'#{gp}'" }.join(', ')}\n" }
     end
   end
 

@@ -93,7 +93,8 @@ JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
 OTHER_SOURCE_FILES = Dir[File.expand_path 'src/**/*'] - JAVA_SOURCE_FILES - RUBY_SOURCE_FILES
 CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
-APK_DEPENDENCIES = [:patch_dex, MANIFEST_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR, CLASSES_CACHE] + JRUBY_JARS + JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES + OTHER_SOURCE_FILES
+BUILD_XML_FILE = "#{PROJECT_DIR}/build.xml"
+APK_DEPENDENCIES = [:patch_dex, MANIFEST_FILE, BUILD_XML_FILE, RUBOTO_CONFIG_FILE, BUNDLE_JAR, CLASSES_CACHE] + JRUBY_JARS + JARS + JAVA_SOURCE_FILES + RESOURCE_FILES + RUBY_SOURCE_FILES + OTHER_SOURCE_FILES
 KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/).first) ? File.expand_path(key_store.chomp.sub(/^key.store=/, '').sub('${user.home}', '~')) : "#{build_project_name}.keystore"
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
@@ -235,6 +236,112 @@ file MANIFEST_FILE => PROJECT_PROPS_FILE do
 end
 
 file RUBOTO_CONFIG_FILE
+
+task :build_xml => BUILD_XML_FILE
+file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
+  puts 'patching build.xml'
+
+  require 'yaml'
+
+  multi_dex = (YAML.load(File.read(RUBOTO_CONFIG_FILE)) || {})['multi_dex']
+  ant_script = File.read(BUILD_XML_FILE)
+
+  # FIXME(uwe):  There is no output from this DEX helper.  Difficult to debug.
+  # FIXME(uwe):  Ensure that pre-dexed jars are not dexed again.
+  # FIXME(uwe):  Move this logic to the rakelib to enable reacting to ruboto.yml changes.
+  # https://android.googlesource.com/platform/tools/base/+/master/legacy/ant-tasks/src/main/java/com/android/ant/DexExecTask.java
+  # def patch_ant_script(min_sdk, ant_script = File.read('build.xml'))
+  start_marker = '<!-- BEGIN added by Ruboto -->'
+  end_marker = '<!-- END added by Ruboto -->'
+  dx_override = <<-EOF
+#{start_marker}
+    <macrodef name="dex-helper">
+       <element name="external-libs" optional="yes" />
+       <element name="extra-parameters" optional="yes" />
+       <sequential>
+         <!-- set the secondary dx input: the project (and library) jar files
+              If a pre-dex task sets it to something else this has no effect -->
+         <if>
+                <condition>
+                    <isreference refid="out.dex.jar.input.ref" />
+                </condition>
+                <else>
+                    <path id="out.dex.jar.input.ref">
+                        <path refid="project.all.jars.path" />
+                    </path>
+                </else>
+         </if>
+         <condition property="verbose.option" value="--verbose" else="">
+           <istrue value="${verbose}" />
+         </condition>
+         <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
+         <!--
+         <echo>Pre-dexing from ${jar.libs.absolute.dir} to ${out.dexed.absolute.dir}</echo>
+         <apply executable="${dx}" failonerror="true" parallel="false">
+             <arg value="- -dex" />
+             <arg value="- -incremental" />
+             <arg line="${verbose.option}" />
+             <extra-parameters />
+             <arg value="- -output" />
+             <targetfile/>
+             <srcfile/>
+             <path refid="out.dex.jar.input.ref" />
+             <external-libs />
+             <mapper type="glob" from="${jar.libs.absolute.dir}${file.separator}*.jar"
+                        to="${out.dexed.absolute.dir}${file.separator}*.jar"/>
+         </apply>
+
+         <echo>Dexing from ${out.classes.absolute.dir}, ${out.dexed.absolute.dir} and ${out.dex.jar.input.ref} to ${out.dexed.absolute.dir}</echo>
+         <apply executable="${dx}" failonerror="true" parallel="true">
+             <arg value="- -dex" />
+             <arg value="- -multi-dex" />
+             <arg value="- -output=${out.absolute.dir}" />
+             <extra-parameters />
+             <arg line="${verbose.option}" />
+             <arg path="${out.classes.absolute.dir}" />
+             <fileset dir="${out.dexed.absolute.dir}" includes="*.jar" />
+             <external-libs />
+         </apply>
+         -->
+
+         <echo>Dexing from ${out.classes.absolute.dir}, ${out.dexed.absolute.dir} and ${project.all.jars.path} to ${out.dexed.absolute.dir}</echo>
+         <apply executable="${dx}" failonerror="true" parallel="true">
+             <arg value="--dex" />
+             <arg value="--multi-dex" />
+             <arg value="--output=${out.absolute.dir}" />
+             <extra-parameters />
+             <arg line="${verbose.option}" />
+             <arg path="${out.classes.absolute.dir}" />
+             <path refid="out.dex.jar.input.ref" />
+             <external-libs />
+         </apply>
+
+         <echo>Zipping extra classes into jars ${out.classes.absolute.dir}, ${out.dexed.absolute.dir} and ${out.dex.jar.input.ref} to ${out.dexed.absolute.dir}</echo>
+         <apply executable="${zip}" failonerror="true" dest="${out.absolute.dir}/../assets" parallel="false">
+             <arg value="cf" />
+             <targetfile/>
+             <srcfile/>
+             <arg line="${verbose.option}" />
+             <fileset dir="${out.absolute.dir}" includes="classes?.dex" />
+             <mapper type="glob" from="*.jar" to="*.jar"/>
+         </apply>
+       </sequential>
+    </macrodef>
+#{end_marker}
+  EOF
+
+  ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
+  if multi_dex
+    if sdk_level >= 16
+      unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
+        raise 'Bad ANT script'
+      end
+    else
+      raise "I am sorry, but the 'multi_dex' option is only available for projects targeting api level android-16 (Android 4.1) or higher due to a bug in earlier versions of Android."
+    end
+  end
+  File.open(BUILD_XML_FILE, 'w') { |f| f << ant_script }
+end
 
 task :jruby_adapter => JRUBY_ADAPTER_FILE
 file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
@@ -697,22 +804,6 @@ def build_apk(t, release)
     sh "#{ANT_CMD} release"
   else
     sh "#{ANT_CMD} debug"
-  end
-  # FIXME(uwe): Simplify when we stop supporting Android 4.0.3
-  if sdk_level >= 16
-    # FIXME(uwe):  Maybe put the extra classes?.dex files as classloader resources directly in the apk?
-    FileUtils.mkdir_p 'assets'
-    Dir['bin/classes?.dex'].each do |f|
-      FileUtils.cp f, 'classes.dex'
-      sh "jar cf assets/#{f[4..-5]}.jar classes.dex"
-      FileUtils.rm 'classes.dex'
-    end
-    # FIXME(uwe):  This second build must be avoided!
-    if release
-      sh "#{ANT_CMD} release"
-    else
-      sh "#{ANT_CMD} debug"
-    end
   end
   true
 end

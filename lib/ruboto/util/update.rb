@@ -36,57 +36,6 @@ module Ruboto
 
         system "android update project -p #{root} -n #{name} --subprojects"
         raise "android update project failed with return code #{$?}" unless $? == 0
-        patch_ant_script(min_sdk, ant_script) if File.exists?(build_xml_file)
-      end
-
-      # FIXME(uwe):  There is no output from this DEX helper.  Difficult to debug.
-      # FIXME(uwe):  Ensure that pre-dexed jars are not dexed again.
-      def patch_ant_script(min_sdk, ant_script = File.read('build.xml'))
-        start_marker = '<!-- BEGIN added by Ruboto -->'
-        end_marker = '<!-- END added by Ruboto -->'
-        dx_override = <<-EOF
-#{start_marker}
-    <macrodef name="dex-helper">
-       <element name="external-libs" optional="yes" />
-       <element name="extra-parameters" optional="yes" />
-       <sequential>
-         <!-- set the secondary dx input: the project (and library) jar files
-              If a pre-dex task sets it to something else this has no effect -->
-         <if>
-                <condition>
-                    <isreference refid="out.dex.jar.input.ref" />
-                </condition>
-                <else>
-                    <path id="out.dex.jar.input.ref">
-                        <path refid="project.all.jars.path" />
-                    </path>
-                </else>
-         </if>
-         <condition property="verbose.option" value="--verbose" else="">
-           <istrue value="${verbose}" />
-         </condition>
-         <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
-         <apply executable="${dx}" failonerror="true" parallel="true">
-             <arg value="--dex" />
-             <arg value="--multi-dex" />
-             <arg value="--output=${out.absolute.dir}" />
-             <extra-parameters />
-             <arg line="${verbose.option}" />
-             <arg path="${out.classes.absolute.dir}" />
-             <fileset dir="${out.dexed.absolute.dir}" includes="*.jar" />
-             <path refid="out.dex.jar.input.ref" />
-             <external-libs />
-         </apply>
-       </sequential>
-    </macrodef>
-#{end_marker}
-        EOF
-
-        ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
-        if min_sdk >= 16
-          raise 'Bad ANT script' unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
-        end
-        File.open('build.xml', 'w') { |f| f << ant_script }
       end
 
       def update_test(force = nil)
@@ -199,6 +148,7 @@ module Ruboto
           gem('jruby-jars', version) if version
           require 'jruby-jars'
         rescue LoadError
+          puts $!
           puts "Could not find the jruby-jars gem.  You need it to include JRuby in your app.  Please install it using\n\n    gem install jruby-jars\n\n"
           return false
         end
@@ -412,7 +362,7 @@ module Ruboto
         if File.exists?('ruboto.yml')
           sleep 1
           FileUtils.touch 'ruboto.yml'
-          system 'rake jruby_adapter'
+          system 'rake build_xml jruby_adapter'
         end
       end
 
