@@ -161,7 +161,7 @@ class Test::Unit::TestCase
     update = options.delete(:update) || false
     ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == '9' ? 2.1 : 1.9)
     multi_dex = options.has_key?(:multi_dex) ? options.delete(:multi_dex) :
-        (standalone && JRUBY_JARS_VERSION >= Gem::Version.new('9000.dev') &&
+        (standalone && !example && JRUBY_JARS_VERSION >= Gem::Version.new('9000.dev') &&
             ANDROID_TARGET >= 16)
 
     raise "Unknown options: #{options.inspect}" unless options.empty?
@@ -193,7 +193,7 @@ class Test::Unit::TestCase
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version || multi_dex
               write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
             end
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
