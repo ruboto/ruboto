@@ -287,7 +287,7 @@ module Ruboto
 	            `sudo #{installer} install -y #{package_name}`
 	          else
 	            puts
-	            puts 'You can install #{pretty_name} manually by:'
+	            puts "You can install #{pretty_name} manually by:"
 	            puts "sudo #{installer} install #{package_name}"
 	            puts
 	          end
@@ -579,7 +579,7 @@ module Ruboto
               return
             when WINDOWS
               cmd = @haxm_installer_loc.gsub('/', "\\")
-              puts "Running the HAXM installer"
+              puts 'Running the HAXM installer'
               system %Q{#{WINDOWS_ELEVATE_CMD} "#{cmd}"}
               raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
               return

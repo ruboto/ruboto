@@ -165,6 +165,7 @@ end
 # FIXME(uwe):  Duplicate of code in ruboto.rake ?
 def cleanup_jars
   Dir.chdir 'new' do
+    cmd_line_jar_found = false
     Dir['**/*.jar'].each do |j|
 
       # FIXME(uwe):  Installing bcmail-jdk15-146.jar + bcprov-jdk15-146.jar fails due to
@@ -194,8 +195,9 @@ def cleanup_jars
       end
       # EMXIF
 
-      # Command line option library not needed
-      if j =~ /jline/
+      # Command line option libraries not needed
+      if j =~ /jline|readline/
+        cmd_line_jar_found = true
         FileUtils.rm j
         next
       end
@@ -262,6 +264,9 @@ def cleanup_jars
 
       File.open("#{j}.rb", 'w') { |f| f << jar_load_code }
       File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
+    end
+    unless cmd_line_jar_found
+      puts 'WARNING:  No command line jar filtered.  Has it changed?'
     end
   end
 end
