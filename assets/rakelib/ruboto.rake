@@ -471,7 +471,7 @@ task :test => APK_DEPENDENCIES + [:uninstall] do
 end
 
 namespace :test do
-  task :quick => :apk_dependencies do
+  task :quick => :update_scripts do
     Dir.chdir('test') do
       puts 'Running quick tests'
       install_retry_count = 0

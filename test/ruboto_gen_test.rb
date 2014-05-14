@@ -54,6 +54,7 @@ class RubotoGenTest < Test::Unit::TestCase
   # APK was    74.9KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    80.4KB.  PLATFORM: CURRENT, ANDROID_TARGET: 19
   # APK was    65.0KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
+  # APK was    80.2KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 17
   # APK was  8428.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 1.7.4
   # APK was  7405.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.4
   # APK was  7420.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.4
@@ -92,6 +93,7 @@ class RubotoGenTest < Test::Unit::TestCase
           10 => 66.0,
           15 => 62.0,
           16 => 75.0,
+          17 => 81.0,
           19 => 81.0,
       }[ANDROID_TARGET] || 75.0
     end
