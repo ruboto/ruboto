@@ -63,10 +63,14 @@ module Ruboto
 
       raise "Unknown options: #{options}" unless options.empty?
 
-      if class_name.nil? && block_given?
-        src_desc = source_descriptor(block)
-        class_name =
-            "#{java_class.name.split('::').last}_#{src_desc[0].split('/').last.gsub(/[.-]+/, '_')}_#{src_desc[1]}"
+      if class_name.nil?
+        if block_given?
+          src_desc = source_descriptor(block)
+          class_name =
+              "#{java_class.name.split('::').last}_#{src_desc[0].split('/').last.gsub(/[.-]+/, '_')}_#{src_desc[1]}"
+        else
+          class_name = java_class.name.split('::').last
+        end
       end
 
       class_name = class_name.to_s
