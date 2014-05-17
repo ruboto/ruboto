@@ -275,57 +275,44 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             <condition property="verbose.option" value="--verbose" else="">
                 <istrue value="${verbose}" />
             </condition>
-            <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
 
-            <!-- FIXME: We should speed up this operaton by using pre-dexed jars
-            <echo>Pre-dexing from ${jar.libs.absolute.dir} to ${out.dexed.absolute.dir}</echo>
-            <apply executable="${dx}" failonerror="true" parallel="false">
-                <arg value="- -dex" />
-                <arg value="- -incremental" />
-                <arg line="${verbose.option}" />
-                <extra-parameters />
-                <arg value="- -output" />
-                <targetfile/>
-                <srcfile/>
-                <path refid="out.dex.jar.input.ref" />
-                <external-libs />
-                <mapper type="glob" from="${jar.libs.absolute.dir}${file.separator}*.jar"
-                        to="${out.dexed.absolute.dir}${file.separator}*.jar"/>
-            </apply>
+            <union id="out.dex.jar.input.ref.union">
+                <resources refid="out.dex.jar.input.ref"/>
+            </union>
+            <if>
+                <condition>
+                    <uptodate targetfile="${out.absolute.dir}/classes.dex" >
+                        <srcfiles dir="${out.classes.absolute.dir}" includes="**/*.class"/>
+                        <srcresources refid="out.dex.jar.input.ref.union"/>
+                    </uptodate>
+                </condition>
+                <then>
+                    <echo>Classes and jars are unchanged.</echo>
+                </then>
+                <else>
+                    <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
+                    <delete file="${out.absolute.dir}/classes2.dex"/>
+                    <echo>Dexing from ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref} to ${out.absolute.dir}</echo>
+                    <apply executable="${dx}" failonerror="true" parallel="true">
+                        <arg value="--dex" />
+                        <arg value="--multi-dex" />
+                        <arg value="--output=${out.absolute.dir}" />
+                        <extra-parameters />
+                        <arg line="${verbose.option}" />
+                        <arg path="${out.classes.absolute.dir}" />
+                        <path refid="out.dex.jar.input.ref" />
+                        <external-libs />
+                    </apply>
 
-            <echo>Dexing from ${out.classes.absolute.dir}, ${out.dexed.absolute.dir} and ${out.dex.jar.input.ref} to ${out.dexed.absolute.dir}</echo>
-            <apply executable="${dx}" failonerror="true" parallel="true">
-                <arg value="- -dex" />
-                <arg value="- -multi-dex" />
-                <arg value="- -output=${out.absolute.dir}" />
-                <extra-parameters />
-                <arg line="${verbose.option}" />
-                <arg path="${out.classes.absolute.dir}" />
-                <fileset dir="${out.dexed.absolute.dir}" includes="*.jar" />
-                <external-libs />
-            </apply>
-            -->
-
-            <!-- Skip dex+zip if classes and jars are unchaged. -->
-            <echo>Dexing from ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref} to ${out.absolute.dir}</echo>
-            <apply executable="${dx}" failonerror="true" parallel="true">
-                <arg value="--dex" />
-                <arg value="--multi-dex" />
-                <arg value="--output=${out.absolute.dir}" />
-                <extra-parameters />
-                <arg line="${verbose.option}" />
-                <arg path="${out.classes.absolute.dir}" />
-                <path refid="out.dex.jar.input.ref" />
-                <external-libs />
-            </apply>
-
-            <echo>Zipping extra classes in ${out.absolute.dir} into jars</echo>
-            <mkdir dir="${out.absolute.dir}/../assets"/>
-            <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
-                              It should iterate over all classes?.dex files -->
-            <copy file="${out.absolute.dir}/classes2.dex" tofile="classes.dex"/>
-            <zip destfile="${out.absolute.dir}/../assets/classes2.jar" basedir="." includes="classes.dex" />
-            <delete file="classes.dex"/>
+                    <echo>Zipping extra classes in ${out.absolute.dir} into assets/classes2.jar</echo>
+                    <mkdir dir="${out.absolute.dir}/../assets"/>
+                    <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
+                                      It should iterate over all classes?.dex files -->
+                    <copy file="${out.absolute.dir}/classes2.dex" tofile="classes.dex"/>
+                    <zip destfile="${out.absolute.dir}/../assets/classes2.jar" basedir="." includes="classes.dex" />
+                    <delete file="classes.dex"/>
+                </else>
+            </if>
         </sequential>
     </macrodef>
 #{end_marker}
