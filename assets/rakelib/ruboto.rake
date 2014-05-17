@@ -290,7 +290,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                     <echo>Classes and jars are unchanged.</echo>
                 </then>
                 <else>
-                    <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi)...</echo>
+                    <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi-dex)</echo>
                     <delete file="${out.absolute.dir}/classes2.dex"/>
                     <echo>Dexing from ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref} to ${out.absolute.dir}</echo>
                     <apply executable="${dx}" failonerror="true" parallel="true">
@@ -304,13 +304,21 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                         <external-libs />
                     </apply>
 
-                    <echo>Zipping extra classes in ${out.absolute.dir} into assets/classes2.jar</echo>
-                    <mkdir dir="${out.absolute.dir}/../assets"/>
-                    <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
-                                      It should iterate over all classes?.dex files -->
-                    <copy file="${out.absolute.dir}/classes2.dex" tofile="classes.dex"/>
-                    <zip destfile="${out.absolute.dir}/../assets/classes2.jar" basedir="." includes="classes.dex" />
-                    <delete file="classes.dex"/>
+                    <delete file="assets/classes2.jar"/>
+                    <if>
+                        <condition>
+                            <available file="${out.absolute.dir}/classes2.dex" />
+                        </condition>
+                        <then>
+                            <echo>Zipping extra classes in ${out.absolute.dir} into assets/classes2.jar</echo>
+                            <mkdir dir="${out.absolute.dir}/../assets"/>
+                            <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
+                                              It should iterate over all classes?.dex files -->
+                            <copy file="${out.absolute.dir}/classes2.dex" tofile="classes.dex"/>
+                            <zip destfile="${out.absolute.dir}/../assets/classes2.jar" basedir="." includes="classes.dex" />
+                            <delete file="classes.dex"/>
+                        </then>
+                    </if>
                 </else>
             </if>
         </sequential>
