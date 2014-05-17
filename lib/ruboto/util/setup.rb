@@ -571,9 +571,8 @@ module Ruboto
             case android_package_os_id
             when MAC_OS_X
               system "hdiutil attach #{@haxm_installer_loc}"
-              # FIXME(uwe): Detect volume
-              # FIXME(uwe): Detect mpkg file with correct version.
-              system 'sudo -S installer -pkg /Volumes/IntelHAXM_1.0.6/IntelHAXM_1.0.6.mpkg -target /'
+              haxm_version = %x[find #{@haxm_installer_loc} -name '*.dmg' | grep -o '[0-9].[0-9].[0-9]']
+              system "sudo -S installer -pkg /Volumes/IntelHAXM_#{haxm_version.strip}/IntelHAXM_#{haxm_version.strip}.mpkg -target /"
             when LINUX
               puts '    HAXM installation on Linux is not supported, yet.'
               return
