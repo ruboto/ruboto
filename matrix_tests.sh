@@ -15,9 +15,11 @@ PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.12 1.7.11"
 RUBOTO_UPDATE_EXAMPLES=1
-# export STRIP_INVOKERS=1
+# STRIP_INVOKERS=1
+# TEST_PART=4of5
 
-export ANDROID_TARGET ANDROID_OS RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
+export ANDROID_OS ANDROID_TARGET RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
+export STRIP_INVOKERS TEST_PART
 
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
@@ -49,13 +51,11 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo "RUBOTO_PLATFORM: $RUBOTO_PLATFORM"
       echo "JRUBY_JARS_VERSION: $JRUBY_JARS_VERSION"
       echo ""
-      echo -ne "\033]0;$RUBOTO_PLATFORM $ANDROID_TARGET $JRUBY_JARS_VERSION\007"
+      echo -ne "\033]0;$ANDROID_TARGET $RUBOTO_PLATFORM $JRUBY_JARS_VERSION\007"
 
       set +e
 
       ./run_tests.sh
-      # ./run_tests.sh TEST_PART=2of5
-      # ./run_tests.sh TEST=test/ruboto_update_test.rb
       # testrb test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
       # ACTIVITY_TEST_PATTERN=subclass testrb test/ruboto_gen_test.rb -n test_activity_tests
 
@@ -77,4 +77,8 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
   done
 done
 
-echo Matrix tests completed OK!
+echo
+echo /-------------------------------------------------------------------------\\
+echo |                       Matrix tests completed OK!                        |
+echo \\-------------------------------------------------------------------------/
+echo
