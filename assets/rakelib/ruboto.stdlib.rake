@@ -162,7 +162,6 @@ def remove_unneeded_parts_of_stdlib
   end
 end
 
-# FIXME(uwe):  Duplicate of code in ruboto.rake ?
 def cleanup_jars
   Dir.chdir 'new' do
     cmd_line_jar_found = false
@@ -184,6 +183,7 @@ def cleanup_jars
       min_sdk_version = manifest.elements['uses-sdk'].attributes['android:minSdkVersion'].to_i
       if min_sdk_version <= 15
         FileUtils.rm j
+        cmd_line_jar_found = true
         next
       end
       # EMXIF
@@ -266,7 +266,7 @@ def cleanup_jars
       File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
     end
     unless cmd_line_jar_found
-      puts 'WARNING:  No command line jar filtered.  Has it changed?'
+      puts "\nWARNING:  No command line jar filtered.  Has it changed?"
     end
   end
 end

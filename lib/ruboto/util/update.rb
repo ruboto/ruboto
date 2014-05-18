@@ -169,7 +169,6 @@ module Ruboto
         log_action("Removing #{installed_jruby_core}") { File.delete *Dir.glob('libs/jruby-core-*.jar') } if installed_jruby_core
         log_action("Removing #{installed_jruby_stdlib}") { File.delete *Dir.glob('libs/jruby-stdlib-*.jar') } if installed_jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { FileUtils.cp JRubyJars::core_jar_path, "libs/jruby-core-#{new_jruby_version}.jar" }
-        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{new_jruby_version}.jar" }
 
         unless File.read('project.properties') =~ /^dex.force.jumbo=/
           log_action('Setting JUMBO dex file format') do
@@ -450,6 +449,7 @@ module Ruboto
                     'jnr/ffi/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
+                    'jnr/netdb',
                     'jnr/posix/Aix*',
                     'jnr/posix/FreeBSD*',
                     'jnr/posix/MacOS*',
@@ -475,7 +475,7 @@ module Ruboto
                     'org/yecht',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.12')
-                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
+                excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/netdb jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
               elsif gem_version >= Gem::Version.new('1.7.5')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.5
                 excluded_core_packages = %w(**/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/ext/tracepoint org/jruby/javasupport/bsf org/yecht)
