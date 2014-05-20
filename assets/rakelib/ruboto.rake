@@ -913,7 +913,7 @@ def update_scripts
       puts 'Pushing files to apk public file area:'
       changed_files.each do |script_file|
         print "#{script_file}: "; $stdout.flush
-        puts `adb push #{script_file} #{scripts_path}/#{script_file}`
+        system "adb push #{script_file} #{scripts_path}/#{script_file}"
       end
       mark_update
       return changed_files

@@ -159,6 +159,16 @@ def remove_unneeded_parts_of_stdlib
       end
       print "excluded #{excluded_stdlibs.join(' ')}..."
     end
+
+    # Corrects bug in krypt that loads FFI.
+    # Only affects JRuby 1.7.11, 1.7.12, and 9000 (until fixed).
+    # FIXME(uwe):  Remove when we stop supporting JRuby 1.7.11 and 1.7.12
+    Dir['**/provider.rb'].each do |f|
+      puts "Patching #{f}..."
+      File.write(f, File.read(f).sub(%r{require_relative 'provider/ffi'}, "# require_relative 'provider/ffi'"))
+    end
+    # EMXIF
+
   end
 end
 
@@ -244,7 +254,7 @@ def cleanup_jars
           # add the new one used by jopenssl
           java.security.Security.addProvider( org.bouncycastle.jce.provider.BouncyCastleProvider.new )
         END_CODE
-      elsif j =~ %r{kryptprovider.jar$}
+      elsif j =~ %r{kryptproviderjdk.jar$}
         jar_load_code = <<-END_CODE
           require 'jruby'
           puts 'Starting JRuby KryptproviderjdkService Service'

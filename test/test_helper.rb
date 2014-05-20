@@ -228,17 +228,10 @@ class Test::Unit::TestCase
         end
       end
 
-      # FIXME(uwe): Installation with dx.jar fails on Android < 4.0.3 due to complex interface structure
-      # Fixme(uwe): Remove when solved
-      #if standalone && ANDROID_OS < 15
-      #  Dir.chdir APP_DIR do
-      #    puts "Removing dx.jar for android-#{ANDROID_OS}"
-      #    FileUtils.rm(Dir['libs/dx.jar'])
-      #  end
-      #end
-      # EMXIF
-
       Dir.chdir APP_DIR do
+        File.write('AndroidManifest.xml',
+            File.read('AndroidManifest.xml').sub(%r{</manifest>},
+                "    <uses-permission android:name='android.permission.INTERNET'/>\n</manifest>"))
         if update
           update_app
         end

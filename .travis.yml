@@ -35,7 +35,7 @@ matrix:
 
 script:
     - rake install
-    - ruboto setup -y -t 10 -t $ANDROID_TARGET
+    - ruboto setup -y -t $ANDROID_TARGET
     - source ~/.rubotorc
     - ruboto emulator -t $ANDROID_TARGET
     - ./run_tests.sh
