@@ -16,6 +16,7 @@ module AppTestMethods
       assert_code 'YamlLoads', "require 'yaml'"
 
       assert_code 'ReadSourceFile', 'File.read(__FILE__)'
+      # noinspection RubyExpressionInStringInspection
       assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
       assert_code 'RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView'
     end
@@ -40,7 +41,7 @@ module AppTestMethods
       # FIXME(uwe):  Remove when we stop testing api level < 16
       # FIXME(uwe):  Remove when we release RubotoCore with SSL included
       next if file =~ /ssl/ && (ANDROID_OS < 16 ||
-          RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM')
+          RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM' || JRUBY_JARS_VERSION <= Gem::Version.new('1.7.12'))
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.4.dev
@@ -63,7 +64,7 @@ module AppTestMethods
         end
       elsif !File.exists? "#{file.chomp('.rb')}'_test.rb'"
         Dir.chdir APP_DIR do
-          FileUtils.cp file, "src/"
+          FileUtils.cp file, 'src/'
         end
       end
     end

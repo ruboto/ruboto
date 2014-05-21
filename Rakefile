@@ -29,7 +29,7 @@ RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC.md'
 RELEASE_DOC = 'RELEASE_DOC.md'
 
-CLEAN.include('ruboto-*.gem', 'tmp')
+CLEAN.include('adb_logcat.log', 'ruboto-*.gem', 'tmp')
 
 task :default => :gem
 

@@ -24,12 +24,6 @@ module Ruboto
           emulator_cmd = 'emulator-arm'
         end
 
-        emulator_opts = '-partition-size 256'
-        emulator_opts << ' -no-snapshot-load' if no_snapshot
-        if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
-          emulator_opts << ' -no-window -no-audio'
-        end
-
         avd_name = "Android_#{sdk_level_name(sdk_level)}"
         new_snapshot = false
 
@@ -56,6 +50,12 @@ module Ruboto
 
         # FIXME(uwe):  Change use of "killall" to use the Ruby Process API
         loop do
+          emulator_opts = '-partition-size 256'
+          emulator_opts << ' -no-snapshot-load' if no_snapshot
+          if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
+            emulator_opts << ' -no-window -no-audio'
+          end
+
           `killall -0 #{emulator_cmd} 2> /dev/null`
           if $? == 0
             `killall #{emulator_cmd}`
@@ -186,8 +186,14 @@ module Ruboto
             end
             puts
             break if device_ready?
+            puts 'Device started, but failed to respond.'
+            unless no_snapshot
+              puts 'Retrying without loading snapshot.'
+              no_snapshot = true
+            end
+          else
+            puts 'Unable to start the emulator.'
           end
-          puts 'Unable to start the emulator.'
         end
 
         if new_snapshot
