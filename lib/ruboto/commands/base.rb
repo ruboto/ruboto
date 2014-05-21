@@ -113,7 +113,7 @@ module Ruboto
 
                 Dir.chdir root do
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
-                  update_test target[/\d+/].to_i, true
+                  update_test true, target[/\d+/].to_i
                   update_assets
 
                   if ruby_version
