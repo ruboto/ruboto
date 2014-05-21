@@ -38,6 +38,7 @@ public class SplashActivity extends Activity {
         } catch (Exception e) {
             splash = -1;
         }
+        requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         if (!JRubyAdapter.isInitialized()) {
             initJRuby(true);
         }
@@ -164,7 +165,6 @@ public class SplashActivity extends Activity {
         if (loadingDialog == null) {
             if (splash > 0) {
                 Log.i("Showing splash");
-                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
                 Log.i("Showing progress");
@@ -184,7 +184,6 @@ public class SplashActivity extends Activity {
         if (loadingDialog == null) {
             if (splash > 0) {
                 Log.i("Showing splash");
-                requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
                 setContentView(splash);
             } else {
                 Log.i("Showing progress");

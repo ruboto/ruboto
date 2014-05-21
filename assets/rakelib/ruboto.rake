@@ -358,8 +358,8 @@ file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
     comment = '// '
   end
   config = <<EOF
-            #{begin_marker}
-            #{comment}@SuppressWarnings("unused")
+#{begin_marker}
+  #{comment}@SuppressWarnings("unused")
             #{comment}byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
             #{comment}arrayForHeapAllocation = null;
             #{end_marker}
@@ -380,10 +380,11 @@ EOF
   end
   ruby_version = ruby_version.to_s
   ruby_version['.'] = '_'
+  indent = ' ' * 12
   config = <<EOF
-#{begin_marker}
-  #{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
-            #{end_marker}
+#{indent}#{begin_marker}
+  #{indent}#{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
+#{indent}#{end_marker}
 EOF
   pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
   source = source.sub(pattern, config)
@@ -792,7 +793,7 @@ def build_apk(t, release)
   apk_file = release ? RELEASE_APK_FILE : APK_FILE
   if File.exist?(apk_file)
     changed_prereqs = t.prerequisites.select do |pr|
-      File.file?(pr) && !Dir[pr].empty? && Dir[pr].map { |f| File.mtime(f) }.max >= File.mtime(apk_file)
+      File.file?(pr) && !Dir[pr].empty? && Dir[pr].map { |f| File.mtime(f) }.max > File.mtime(apk_file)
     end
     return false if changed_prereqs.empty?
     changed_prereqs.each { |f| puts "#{f} changed." }
