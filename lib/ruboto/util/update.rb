@@ -10,11 +10,14 @@ module Ruboto
       include Ruboto::SdkVersions
       include Ruboto::SdkLocations
 
+      TARGET_VERSION_REGEXP = /^(target=android-)(\d+)$/
+
       ###########################################################################
       #
       # Updating components
       #
-      def update_android
+
+      def update_android(target_level = nil)
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
         if File.exists? build_xml_file
@@ -23,22 +26,30 @@ module Ruboto
         else
           name = File.basename(root)
         end
-
-        prop_file = "#{root}/project.properties"
-        version_regexp = /^(target=android-)(\d+)$/
-        if (project_property_file = File.read(prop_file)) =~ version_regexp
-          min_sdk = $2.to_i
-          if min_sdk < MINIMUM_SUPPORTED_SDK_LEVEL
-            puts "Upgrading project to target #{MINIMUM_SUPPORTED_SDK}"
-            File.open(prop_file, 'w') { |f| f << project_property_file.gsub(version_regexp, "\\1#{MINIMUM_SUPPORTED_SDK_LEVEL}") }
-          end
-        end
-
+        update_project_properties_target_level("#{root}/project.properties", target_level)
         system "android update project -p #{root} -n #{name} --subprojects"
         raise "android update project failed with return code #{$?}" unless $? == 0
       end
 
-      def update_test(force = nil)
+      def update_project_properties_target_level(prop_file, target_level)
+        if (project_property_file = File.read(prop_file)) =~ TARGET_VERSION_REGEXP
+          min_sdk = $2.to_i
+          if target_level
+            unless target_level == min_sdk
+              puts "Changing project target from #{min_sdk} to #{MINIMUM_SUPPORTED_SDK_LEVEL}."
+              new_target_level = target_level
+            end
+          elsif min_sdk < MINIMUM_SUPPORTED_SDK_LEVEL
+            puts "Upgrading project target from #{min_sdk} to #{MINIMUM_SUPPORTED_SDK_LEVEL}."
+            new_target_level = MINIMUM_SUPPORTED_SDK_LEVEL
+          end
+          if new_target_level
+            File.open(prop_file, 'w') { |f| f << project_property_file.gsub(TARGET_VERSION_REGEXP, "\\1#{new_target_level}") }
+          end
+        end
+      end
+
+      def update_test(force, target_level = nil)
         root = Dir.getwd
         if !File.exists?("#{root}/test") || !File.exists?("#{root}/test/AndroidManifest.xml") || !File.exists?("#{root}/test/ant.properties")
           name = verify_strings.root.elements['string'].text.gsub(' ', '')
@@ -49,6 +60,7 @@ module Ruboto
         end
 
         Dir.chdir File.join(root, 'test') do
+          update_project_properties_target_level('project.properties', target_level)
           instrumentation_property = "test.runner=org.ruboto.test.InstrumentationTestRunner\n"
           prop_file = 'ant.properties'
           prop_lines = (prop_lines_org = File.read(prop_file)).dup

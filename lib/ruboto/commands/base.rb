@@ -46,6 +46,7 @@ module Ruboto
                 argument :required
                 description 'Path to where you want your app.  Defaults to the last part of the package name.'
               }
+              # FIXME(uwe): Change to cast to integer for better comparison
               option('target', 't') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
@@ -112,7 +113,7 @@ module Ruboto
 
                 Dir.chdir root do
                   update_manifest min_sdk[/\d+/], target[/\d+/], true
-                  update_test true
+                  update_test target[/\d+/].to_i, true
                   update_assets
 
                   if ruby_version
@@ -347,14 +348,19 @@ module Ruboto
             include Ruboto::Util::Update
 
             mode 'app' do
-
+              # FIXME(uwe): Change to cast to integer for better comparison
+              option('target', 't') {
+                argument :required
+                description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
+                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
+                validate { |t| t =~ /^android-\d+$/ }
+              }
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.  If the JRuby jars are already present in your project, this option is implied.'
                 argument :optional
                 cast { |v| Gem::Version.new(v) }
                 validate { |v| Gem::Version.correct?(v) }
               }
-
               option('force') {
                 description "force an update even if the version hasn't changed"
               }
@@ -371,8 +377,18 @@ module Ruboto
                   system "ruboto _#{Ruboto::UPDATE_VERSION_LIMIT}_ update app"
                   raise "Ruboto update app to #{Ruboto::UPDATE_VERSION_LIMIT} failed!" unless $? == 0
                 end
-                update_android
-                update_test force
+
+                if (target = params['target'].value)
+                  abort "Target must match android-<number>: got #{target}" unless target =~ /^android-(\d+)$/
+                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
+                  target_level = target[/\d+/].to_i
+                  update_android(target_level)
+                  update_test force, target_level
+                else
+                  update_android
+                  update_test force
+                end
+
                 update_assets
                 update_ruboto force
                 update_classes old_version, force
