@@ -253,6 +253,9 @@ public class JRubyAdapter {
                     rubyInstanceConfigClass.getMethod("setError", PrintStream.class).invoke(config, output);
                 }
 
+                System.out.println("Ruby version: " + rubyInstanceConfigClass
+                        .getMethod("getCompatVersion").invoke(config));
+
                 // This will become the global runtime and be used by our ScriptingContainer
                 rubyClass.getMethod("newInstance", rubyInstanceConfigClass).invoke(null, config);
 
@@ -278,18 +281,26 @@ public class JRubyAdapter {
 
                 Thread.currentThread().setContextClassLoader(classLoader);
 
+                String scriptsDir = scriptsDirName(appContext);
+                addLoadPath(scriptsDir);
                 if (appContext.getFilesDir() != null) {
                     String defaultCurrentDir = appContext.getFilesDir().getPath();
                     Log.d("Setting JRuby current directory to " + defaultCurrentDir);
                     callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
                 } else {
                     Log.e("Unable to find app files dir!");
+                    if (new File(scriptsDir).exists()) {
+                        Log.d("Changing JRuby current directory to " + scriptsDir);
+                        callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
+                    }
                 }
 
-                addLoadPath(scriptsDirName(appContext));
                 put("$package_name", appContext.getPackageName());
 
                 runScriptlet("::RUBOTO_JAVA_PROXIES = {}");
+
+                System.out.println("JRuby version: " + Class.forName("org.jruby.runtime.Constants", true, scriptingContainerClass.getClassLoader())
+                        .getDeclaredField("VERSION").get(String.class));
 
                 initialized = true;
             } catch (ClassNotFoundException e) {
@@ -305,6 +316,8 @@ public class JRubyAdapter {
             } catch (InvocationTargetException e) {
                 handleInitException(e);
             } catch (NoSuchMethodException e) {
+                handleInitException(e);
+            } catch (NoSuchFieldException e) {
                 handleInitException(e);
             }
         }
@@ -324,8 +337,6 @@ public class JRubyAdapter {
             Log.i("Added directory to load path: " + scriptsDir);
             Script.addDir(scriptsDir);
             runScriptlet("$:.unshift '" + scriptsDir + "' ; $:.uniq!");
-            Log.d("Changing JRuby current directory to " + scriptsDir);
-            callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
             return true;
         } else {
             Log.i("Extra scripts dir not present: " + scriptsDir);

@@ -140,7 +140,7 @@ module Ruboto
             new_snapshot = true
           end
 
-          puts 'Start emulator'
+          puts "Start emulator#{' without snapshot' if no_snapshot}"
           system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
           return if ON_WINDOWS
 
