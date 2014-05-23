@@ -22,7 +22,7 @@ test('load net/https', :ui => false) do |activity|
       response = @response_view.text.to_s
     end
     break if (result == expected && response == response_expected) ||
-        (Time.now - start > 10)
+        (Time.now - start > 60)
     sleep 0.5
   end
   assert_equal expected, result

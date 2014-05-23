@@ -7,11 +7,11 @@
 #######################################################
 
 Java::android.content.Context.class_eval do
-  def toast(text, duration=5000)
+  def toast(text, duration=android.widget.Toast::LENGTH_SHORT)
     Java::android.widget.Toast.makeText(self, text, duration).show
   end
 
-  def toast_result(result, success, failure, duration=5000)
+  def toast_result(result, success, failure, duration=android.widget.Toast::LENGTH_SHORT)
     toast(result ? success : failure, duration)
   end
 end

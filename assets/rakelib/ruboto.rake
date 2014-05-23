@@ -287,7 +287,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                     </uptodate>
                 </condition>
                 <then>
-                    <echo>Classes and jars are unchanged.</echo>
+                    <echo>Java classes and jars are unchanged.</echo>
                 </then>
                 <else>
                     <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi-dex)</echo>
