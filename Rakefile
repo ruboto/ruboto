@@ -153,8 +153,8 @@ def get_github_issues
   milestone_description = milestone_description.split("\r\n").map(&:wrap).join("\r\n")
   categories = {
       'Features' => 'feature', 'Bugfixes' => 'bug',
-      'Documentation' => 'documentation', 'Support' => 'support',
-      'Community' => 'community',
+      'Performance' => 'performance', 'Documentation' => 'documentation',
+      'Support' => 'support', 'Community' => 'community',
       'Pull requests' => nil, 'Internal' => 'internal',
       'Rejected' => 'rejected', 'Other' => nil
   }
@@ -232,10 +232,10 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-  #{(categories.keys & grouped_issues.keys).map do |cat|
+#{(categories.keys & grouped_issues.keys).map do |cat|
     "#{cat}:\n
-    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}}.wrap(2) }.join("\n")}
-    "
+#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}#{" (#{i['user']['login']})" if i['pull_request'] && i['pull_request']['html_url']}}.wrap(2) }.join("\n")}
+"
   end.join("\n")}
 You can find a complete list of issues here:
 
@@ -248,13 +248,13 @@ To use Ruboto, you need to install a Ruby implementation.  Then do
 (possibly as root/administrator)
 
     gem install ruboto
-    ruboto setup
+    ruboto setup -y
 
 To create a project do
 
     ruboto gen app --package <your.package.name>
     cd <project directory>
-    ruboto setup
+    ruboto setup -y
 
 To run an emulator for your project
 
