@@ -447,7 +447,7 @@ namespace :update_scripts do
       start_app
     else
       scripts = update_scripts
-      if app_running?
+      if scripts && app_running?
         reload_scripts(scripts)
       else
         start_app
