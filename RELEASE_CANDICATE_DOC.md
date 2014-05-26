@@ -4,9 +4,9 @@ Hi all!
 
 The Ruboto 1.1.0 release candidate is now available.
 
-This release adds support for large projects with more than 64K methods
-and Ruby stdlib HTTPS/SSL.  HTTPS/SSL using the Android APIs is working as
-before.
+This release adds support for large projects with more than 64K Java
+methods and Ruby stdlib HTTPS/SSL.  HTTPS/SSL using the Android APIs is
+working as before.
 
 To use the Ruby stdlib SSL features you need to include JRuby 1.7.13 or
 later in your app, and set the Android target to Android 4.1 (api level

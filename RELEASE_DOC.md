@@ -10,9 +10,9 @@ you using the Ruby language.
 
 New in version 1.1.0:
 
-This release adds support for large projects with more than 64K methods
-and Ruby stdlib HTTPS/SSL.  HTTPS/SSL using the Android APIs is working as
-before.
+This release adds support for large projects with more than 64K Java
+methods and Ruby stdlib HTTPS/SSL.  HTTPS/SSL using the Android APIs is
+working as before.
 
 To use the Ruby stdlib SSL features you need to include JRuby 1.7.13 or
 later in your app, and set the Android target to Android 4.1 (api level
@@ -81,6 +81,10 @@ Pull requests:
 
 * Issue #588 Wait for valid device before installing (bootstraponline)
 * Issue #609 Scraping of Android SDK for Latest Version (daneb)
+
+Internal:
+
+* Issue #621 Release 1.1.0 gem
 
 Other:
 
