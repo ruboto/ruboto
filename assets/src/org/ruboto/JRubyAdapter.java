@@ -393,7 +393,8 @@ public class JRubyAdapter {
         //try {
         //    t.printStackTrace(output);
         //} catch (NullPointerException npe) {
-            // TODO(uwe): printStackTrace should not fail
+            // TODO(uwe): t.printStackTrace() should not fail
+            System.err.println(t.getClass().getName() + ": " + t);
             for (java.lang.StackTraceElement ste : t.getStackTrace()) {
                 output.append(ste.toString() + "\n");
             }
