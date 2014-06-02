@@ -351,6 +351,13 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             </condition>
             <then>
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
+
+                    <!-- FIXME(uwe):  Debug output.  Remove! -->
+                    <exec executable="ls" dir="${out.absolute.dir}" failonerror="true">
+                      <arg line="-lT"/>
+                    </exec>
+                    <!-- EMXIF -->
+
                 <if>
                   <condition>
                     <and>
@@ -360,7 +367,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                   </condition>
                   <then>
                     <exec executable="aapt" dir="${out.dexed.absolute.dir}" failonerror="true">
-                      <arg line="remove -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
+                      <arg line='remove -v "${out.absolute.dir}/${resource.package.file.name}" ${second_dex_path}'/>
                     </exec>
                   </then>
                 </if>
@@ -372,7 +379,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
 
                 <!-- FIXME(uwe): Use zip instead of aapt? -->
                 <exec executable="aapt" dir="${out.dexed.absolute.dir}" failonerror="true">
-                  <arg line="add -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
+                  <arg line='add -v "${out.absolute.dir}/${resource.package.file.name}" ${second_dex_path}'/>
                 </exec>
                 <!-- EMXIF -->
 
