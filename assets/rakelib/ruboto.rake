@@ -255,7 +255,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   start_marker = '<!-- BEGIN added by Ruboto -->'
   end_marker = '<!-- END added by Ruboto -->'
   dx_override = <<-EOF
-#{start_marker}
+    #{start_marker}
     <macrodef name="dex-helper">
         <element name="external-libs" optional="yes" />
         <element name="extra-parameters" optional="yes" />
@@ -290,9 +290,9 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                     <echo>Java classes and jars are unchanged.</echo>
                 </then>
                 <else>
-                    <echo>Converting compiled files and external libraries into ${intermediate.dex.file} (multi-dex)</echo>
+                    <echo>Converting compiled files and external libraries into ${out.absolute.dir} (multi-dex)</echo>
                     <delete file="${out.absolute.dir}/classes2.dex"/>
-                    <echo>Dexing from ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref} to ${out.absolute.dir}</echo>
+                    <echo>Dexing ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref}</echo>
                     <apply executable="${dx}" failonerror="true" parallel="true">
                         <arg value="--dex" />
                         <arg value="--multi-dex" />
@@ -303,27 +303,80 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                         <path refid="out.dex.jar.input.ref" />
                         <external-libs />
                     </apply>
-
-                    <delete file="assets/classes2.jar"/>
-                    <if>
-                        <condition>
-                            <available file="${out.absolute.dir}/classes2.dex" />
-                        </condition>
-                        <then>
-                            <echo>Zipping extra classes in ${out.absolute.dir} into assets/classes2.jar</echo>
-                            <mkdir dir="${out.absolute.dir}/../assets"/>
-                            <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
-                                              It should iterate over all classes?.dex files -->
-                            <copy file="${out.absolute.dir}/classes2.dex" tofile="classes.dex"/>
-                            <zip destfile="${out.absolute.dir}/../assets/classes2.jar" basedir="." includes="classes.dex" />
-                            <delete file="classes.dex"/>
-                        </then>
-                    </if>
+                    <sleep seconds="1"/>
                 </else>
             </if>
         </sequential>
     </macrodef>
-#{end_marker}
+
+    <!-- This is copied directly from <android-sdk>/tools/ant/build.xml,
+         just added the "-post-package-resources" dependency -->
+    <target name="-package" depends="-dex, -package-resources, -post-package-resources">
+        <!-- only package apk if *not* a library project -->
+        <do-only-if-not-library elseText="Library project: do not package apk..." >
+            <if condition="${build.is.instrumented}">
+                <then>
+                    <package-helper>
+                        <extra-jars>
+                            <!-- Injected from external file -->
+                            <jarfile path="${emma.dir}/emma_device.jar" />
+                        </extra-jars>
+                    </package-helper>
+                </then>
+                <else>
+                    <package-helper />
+                </else>
+            </if>
+        </do-only-if-not-library>
+    </target>
+
+    <target name="-post-package-resources">
+        <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
+                          It should iterate over all classes?.dex files -->
+        <property name="second_dex_file" value="${out.absolute.dir}/classes2.dex" />
+        <property name="second_dex_path" value="assets/classes2.jar" />
+        <property name="second_dex_jar" value="${out.dexed.absolute.dir}/${second_dex_path}" />
+        <property name="second_dex_copy" value="${out.dexed.absolute.dir}/classes.dex" />
+        <if>
+            <condition>
+              <and>
+                <available file="${second_dex_file}" />
+                <not>
+                  <and>
+                    <uptodate srcfile="${second_dex_file}" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
+                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${second_dex_file}" />
+                  </and>
+                </not>
+              </and>
+            </condition>
+            <then>
+                <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
+                <if>
+                  <condition>
+                    <available file="${second_dex_jar}" />
+                  </condition>
+                  <then>
+                    <exec executable="aapt" dir="${out.dexed.absolute.dir}">
+                      <arg line="remove -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
+                    </exec>
+                  </then>
+                </if>
+
+                <copy file="${second_dex_file}" tofile="${second_dex_copy}"/>
+                <mkdir dir="${out.dexed.absolute.dir}/assets"/>
+                <zip destfile="${second_dex_jar}" basedir="${out.dexed.absolute.dir}" includes="classes.dex" />
+                <delete file="${second_dex_copy}"/>
+
+                <!-- FIXME(uwe): Use zip instead of aapt? -->
+                <exec executable="aapt" dir="${out.dexed.absolute.dir}">
+                  <arg line="add -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
+                </exec>
+                <!-- EMXIF -->
+
+            </then>
+        </if>
+    </target>
+    #{end_marker}
   EOF
 
   ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
@@ -690,8 +743,12 @@ task :log, [:filter] do |t, args|
     started_regex = Regexp.new "^\\I/ActivityManager.+Start proc #{package} for activity #{package}/\\.#{main_activity}: pid=(?<pid>\\d+)"
     restarted_regex = Regexp.new "^\\I/ActivityManager.+START u0 {cmp=#{package}/org.ruboto.RubotoActivity.+} from pid (?<pid>\\d+)"
     related_regex = Regexp.new "#{package}|#{main_activity}"
+    android_4_2_noise_regex = /Unexpected value from nativeGetEnabledTags/
     pid_regex = nil
     logcat.each_line do |line|
+      # FIXME(uwe): Remove when we stop supporting Ancdroid 4.2
+      next if line =~ android_4_2_noise_regex
+      # EMXIF
       if (activity_start_match = started_regex.match(line) || restarted_regex.match(line))
         activity_started = true
         pid = activity_start_match[:pid]

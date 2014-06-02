@@ -389,7 +389,7 @@ module Ruboto
                   update_test force
                 end
 
-                update_assets
+                update_assets old_version
                 update_ruboto force
                 update_classes old_version, force
                 update_dx_jar force

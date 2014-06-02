@@ -234,7 +234,15 @@ module Ruboto
         log_action('Copying dx.jar to libs') { copier.copy 'libs' }
       end
 
-      def update_assets
+      def update_assets(old_version = nil)
+        # FIXME(uwe):  Remove when we stop support for updating from Ruboto 1.1.0
+        old_extra_classes = 'assets/classes2.jar'
+        if old_version == '1.1.0' && File.exists?(old_extra_classes)
+          puts "Deleting old extra dex file #{old_extra_classes}."
+          File.delete(string)
+        end
+        # EMXIF
+
         puts "\nCopying files:"
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
         %w{.gitignore Rakefile ruboto.yml}.each { |f| log_action(f) { weak_copier.copy f } }
