@@ -339,20 +339,6 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
         <property name="second_dex_path" value="assets/classes2.jar" />
         <property name="second_dex_jar" value="${out.dexed.absolute.dir}/${second_dex_path}" />
         <property name="second_dex_copy" value="${out.dexed.absolute.dir}/classes.dex" />
-        <if>
-            <condition>
-              <and>
-                <available file="${second_dex_file}" />
-                <not>
-                  <and>
-                    <uptodate srcfile="${second_dex_file}" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
-                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
-                  </and>
-                </not>
-              </and>
-            </condition>
-            <then>
-                <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
 
                 <!-- FIXME(uwe):  Debug output.  Remove! -->
                 <if>
@@ -372,6 +358,20 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 </if>
                 <!-- EMXIF -->
 
+        <if>
+            <condition>
+              <and>
+                <available file="${second_dex_file}" />
+                <not>
+                  <and>
+                    <uptodate srcfile="${second_dex_file}" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
+                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
+                  </and>
+                </not>
+              </and>
+            </condition>
+            <then>
+                <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
                 <if>
                   <condition>
                     <and>
