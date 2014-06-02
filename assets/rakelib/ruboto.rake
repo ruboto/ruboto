@@ -353,10 +353,13 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
                 <if>
                   <condition>
-                    <available file="${second_dex_jar}" />
+                    <and>
+                      <available file="${second_dex_jar}" />
+                      <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${second_dex_file}" />
+                    </and>
                   </condition>
                   <then>
-                    <exec executable="aapt" dir="${out.dexed.absolute.dir}">
+                    <exec executable="aapt" dir="${out.dexed.absolute.dir}" failonerror="true">
                       <arg line="remove -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
                     </exec>
                   </then>
@@ -368,7 +371,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 <delete file="${second_dex_copy}"/>
 
                 <!-- FIXME(uwe): Use zip instead of aapt? -->
-                <exec executable="aapt" dir="${out.dexed.absolute.dir}">
+                <exec executable="aapt" dir="${out.dexed.absolute.dir}" failonerror="true">
                   <arg line="add -v ${out.absolute.dir}/${resource.package.file.name} ${second_dex_path}"/>
                 </exec>
                 <!-- EMXIF -->
