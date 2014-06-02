@@ -29,7 +29,6 @@ class SslActivity
         @open_uri_thread.join
         run_on_ui_thread { @response_view.text = 'open-uri loaded OK!' }
         puts 'before open'
-        ENV['TMPDIR'] = files_dir.absolute_path
         open('https://google.com/', ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do |f|
           puts 'inside open'
           body = f.read

@@ -158,6 +158,10 @@ public class JRubyAdapter {
             System.setProperty("jruby.ji.upper.case.package.name.allowed", "true");
             System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
 
+            // ENV['TMPDIR'] = files_dir.absolute_path
+            Systen.out.println("java.io.tmpdir: " + System.getProperty("java.io.tmpdir");
+            System.setProperty("java.io.tmpdir", appContext.getCacheDir().getAbsolutePath());
+
             // FIXME(uwe): Simplify when we stop supporting android-15
             if (Build.VERSION.SDK_INT >= 16) {
                 DexDex.debug = true;
