@@ -353,6 +353,24 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             </condition>
             <then>
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
+
+                    <!-- FIXME(uwe):  Debug output.  Remove! -->
+                <if>
+                  <condition>
+                    <os family="mac"/>
+                  </condition>
+                  <then>
+                    <exec executable="ls" dir="${out.absolute.dir}" failonerror="true">
+                      <arg line="-lT"/>
+                    </exec>
+                  </then>
+                  <else>
+                    <exec executable="ls" dir="${out.absolute.dir}" failonerror="true">
+                      <arg line="-l --full-time"/>
+                    </exec>
+                  </else>
+                    <!-- EMXIF -->
+
                 <if>
                   <condition>
                     <and>
