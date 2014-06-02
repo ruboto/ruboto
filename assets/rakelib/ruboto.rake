@@ -362,12 +362,12 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             <condition>
               <and>
                 <available file="${second_dex_file}" />
-                <not>
-                  <and>
+                <or>
+                  <not>
                     <uptodate srcfile="${second_dex_file}" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
-                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
-                  </and>
-                </not>
+                  </not>
+                  <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}" targetfile="${out.absolute.dir}/${resource.package.file.name}.d" />
+                </or>
               </and>
             </condition>
             <then>
@@ -376,7 +376,9 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                   <condition>
                     <and>
                       <available file="${second_dex_jar}" />
-                      <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${second_dex_file}" />
+                      <not>
+                        <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}" targetfile="${out.absolute.dir}/${resource.package.file.name}.d" />
+                      </not>
                     </and>
                   </condition>
                   <then>
