@@ -91,6 +91,7 @@ JARS = Dir[File.expand_path 'libs/*.jar'] - JRUBY_JARS
 RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
+RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select{|fn| fn =~ /_activity.rb$/}
 OTHER_SOURCE_FILES = Dir[File.expand_path 'src/**/*'] - JAVA_SOURCE_FILES - RUBY_SOURCE_FILES
 CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
 BUILD_XML_FILE = "#{PROJECT_DIR}/build.xml"
@@ -100,6 +101,7 @@ KEYSTORE_FILE = (key_store = File.readlines('ant.properties').grep(/^key.store=/
 KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=/).first) ? key_alias.chomp.sub(/^key.alias=/, '') : build_project_name
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
 JRUBY_ADAPTER_FILE = "#{PROJECT_DIR}/src/org/ruboto/JRubyAdapter.java"
+RUBOTO_ACTIVITY_FILE = "#{PROJECT_DIR}/src/org/ruboto/RubotoActivity.java"
 
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
@@ -453,6 +455,17 @@ EOF
   source = source.sub(pattern, config)
 
   File.open(JRUBY_ADAPTER_FILE, 'w') { |f| f << source }
+end
+
+task :ruboto_activity => RUBOTO_ACTIVITY_FILE
+file RUBOTO_ACTIVITY_FILE => RUBY_ACTIVITY_SOURCE_FILES do |task|
+  source = File.read(RUBOTO_ACTIVITY_FILE)
+  intro = source.slice! %r{\A.*Generated Methods.*?\*/\s*}m
+  generated_methods = source.scan /^\s*public.*?^  }\n/m
+  implemented_methods = task.prerequisites.map{|f| File.read(f).scan(/(?:^\s*def\s+)([^\s(]+)/)}.flatten
+  commented_methods = generated_methods.map{|gm| implemented_methods.any?{|im| gm.upcase.include?(" #{im.upcase.gsub('_', '')}(")} ? gm : "/*\n#{gm}*/\n"}
+  new_source = "#{intro}#{commented_methods.join}}"
+  File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
 end
 
 task apk_dependencies: APK_DEPENDENCIES
