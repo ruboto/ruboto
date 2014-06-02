@@ -354,7 +354,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             <then>
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
 
-                    <!-- FIXME(uwe):  Debug output.  Remove! -->
+                <!-- FIXME(uwe):  Debug output.  Remove! -->
                 <if>
                   <condition>
                     <os family="mac"/>
@@ -369,7 +369,8 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                       <arg line="-l --full-time"/>
                     </exec>
                   </else>
-                    <!-- EMXIF -->
+                </if>
+                <!-- EMXIF -->
 
                 <if>
                   <condition>
