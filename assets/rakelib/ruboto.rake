@@ -91,7 +91,7 @@ JARS = Dir[File.expand_path 'libs/*.jar'] - JRUBY_JARS
 RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
 RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
-RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select{|fn| fn =~ /_activity.rb$/}
+RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_activity.rb$/ }
 OTHER_SOURCE_FILES = Dir[File.expand_path 'src/**/*'] - JAVA_SOURCE_FILES - RUBY_SOURCE_FILES
 CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
 BUILD_XML_FILE = "#{PROJECT_DIR}/build.xml"
@@ -257,7 +257,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   start_marker = '<!-- BEGIN added by Ruboto -->'
   end_marker = '<!-- END added by Ruboto -->'
   dx_override = <<-EOF
-    #{start_marker}
+#{start_marker}
     <macrodef name="dex-helper">
         <element name="external-libs" optional="yes" />
         <element name="extra-parameters" optional="yes" />
@@ -473,13 +473,19 @@ end
 
 task :ruboto_activity => RUBOTO_ACTIVITY_FILE
 file RUBOTO_ACTIVITY_FILE => RUBY_ACTIVITY_SOURCE_FILES do |task|
-  source = File.read(RUBOTO_ACTIVITY_FILE)
-  intro = source.slice! %r{\A.*Generated Methods.*?\*/\s*}m
-  generated_methods = source.scan /^\s*public.*?^  }\n/m
-  implemented_methods = task.prerequisites.map{|f| File.read(f).scan(/(?:^\s*def\s+)([^\s(]+)/)}.flatten
-  commented_methods = generated_methods.map{|gm| implemented_methods.any?{|im| gm.upcase.include?(" #{im.upcase.gsub('_', '')}(")} ? gm : "/*\n#{gm}*/\n"}
+  original_source = File.read(RUBOTO_ACTIVITY_FILE)
+  next unless original_source =~ %r{\A(.*Generated Methods.*?\*/\s*)(.*)\B}m
+  intro, generated_methods = $1, $2.scan(/^\s*public.*?^  }\n/m)
+  implemented_methods = task.prerequisites.map { |f| File.read(f).scan(/(?:^\s*def\s+)([^\s(]+)/) }.flatten.sort
+  commented_methods = generated_methods.map do |gm|
+    implemented_methods.
+        any? { |im| gm.upcase.include?(" #{im.upcase.gsub('_', '')}(") } ?
+        gm : "/*\n#{gm}*/\n"
+  end
   new_source = "#{intro}#{commented_methods.join}}"
-  File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
+  if new_source != original_source
+    File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
+  end
 end
 
 task apk_dependencies: APK_DEPENDENCIES
