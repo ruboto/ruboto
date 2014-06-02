@@ -346,7 +346,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 <not>
                   <and>
                     <uptodate srcfile="${second_dex_file}" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
-                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${second_dex_file}" />
+                    <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}.d" targetfile="${out.absolute.dir}/${resource.package.file.name}" />
                   </and>
                 </not>
               </and>
