@@ -257,7 +257,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   start_marker = '<!-- BEGIN added by Ruboto -->'
   end_marker = '<!-- END added by Ruboto -->'
   dx_override = <<-EOF
-#{start_marker}
+    #{start_marker}
     <macrodef name="dex-helper">
         <element name="external-libs" optional="yes" />
         <element name="extra-parameters" optional="yes" />
@@ -436,12 +436,13 @@ file JRUBY_ADAPTER_FILE => RUBOTO_CONFIG_FILE do
     heap_alloc = 13
     comment = '// '
   end
+  indent = ' ' * 12
   config = <<EOF
-#{begin_marker}
-  #{comment}@SuppressWarnings("unused")
-            #{comment}byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
-            #{comment}arrayForHeapAllocation = null;
-            #{end_marker}
+#{indent}#{begin_marker}
+#{indent}#{comment}@SuppressWarnings("unused")
+#{indent}#{comment}byte[] arrayForHeapAllocation = new byte[#{heap_alloc} * 1024 * 1024];
+#{indent}#{comment}arrayForHeapAllocation = null;
+#{indent}#{end_marker}
 EOF
   pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
   source = source.sub(pattern, config)
@@ -459,10 +460,9 @@ EOF
   end
   ruby_version = ruby_version.to_s
   ruby_version['.'] = '_'
-  indent = ' ' * 12
   config = <<EOF
 #{indent}#{begin_marker}
-  #{indent}#{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
+#{indent}#{comment}System.setProperty("jruby.compat.version", "RUBY#{ruby_version}"); // RUBY1_9 is the default in JRuby 1.7
 #{indent}#{end_marker}
 EOF
   pattern = %r{^\s*#{begin_marker}\n.*^\s*#{end_marker}\n}m
@@ -474,15 +474,15 @@ end
 task :ruboto_activity => RUBOTO_ACTIVITY_FILE
 file RUBOTO_ACTIVITY_FILE => RUBY_ACTIVITY_SOURCE_FILES do |task|
   original_source = File.read(RUBOTO_ACTIVITY_FILE)
-  next unless original_source =~ %r{\A(.*Generated Methods.*?\*/\s*)(.*)\B}m
-  intro, generated_methods = $1, $2.scan(/^\s*public.*?^  }\n/m)
+  next unless original_source =~ %r{\A(.*Generated Methods.*?\*/\n*)(.*)\B}m
+  intro, generated_methods = $1, $2.scan(/(?:\s*\n*)(^\s*?public.*?^  }\n)/m).flatten
   implemented_methods = task.prerequisites.map { |f| File.read(f).scan(/(?:^\s*def\s+)([^\s(]+)/) }.flatten.sort
   commented_methods = generated_methods.map do |gm|
     implemented_methods.
         any? { |im| gm.upcase.include?(" #{im.upcase.gsub('_', '')}(") } ?
         gm : "/*\n#{gm}*/\n"
   end
-  new_source = "#{intro}#{commented_methods.join}}"
+  new_source = "#{intro}#{commented_methods.join("\n")}\n}\n"
   if new_source != original_source
     File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
   end

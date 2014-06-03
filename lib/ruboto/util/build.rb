@@ -202,6 +202,7 @@ module Ruboto
      *
      *  Generated Methods
      */
+
 EOF
       end
 
