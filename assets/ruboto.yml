@@ -59,14 +59,3 @@
 # - webrick
 # - win32
 # - Win32API
-
-###################################
-#
-# multi_dex
-#
-#    Switch on use of multiple classes.dex files when building.
-#    This will allow you to have more than 65535 methods in your app.
-#    WARNING:  This disables pre-dex during build which will increase your
-#    incremental build time substantially.
-#
-# multi_dex: true

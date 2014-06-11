@@ -243,41 +243,21 @@ file RUBOTO_CONFIG_FILE
 task :build_xml => BUILD_XML_FILE
 file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   puts 'patching build.xml'
-
-  require 'yaml'
-
-  multi_dex = (YAML.load(File.read(RUBOTO_CONFIG_FILE)) || {})['multi_dex']
   ant_script = File.read(BUILD_XML_FILE)
 
   # FIXME(uwe):  There is no output from this DEX helper.  Difficult to debug.
   # FIXME(uwe):  Ensure that pre-dexed jars are not dexed again.
-  # FIXME(uwe):  Move this logic to the rakelib to enable reacting to ruboto.yml changes.
+  # FIXME(uwe):  Move this logic to ruboto/util/update.rb since it is independent of ruboto.yml changes.
   # https://android.googlesource.com/platform/tools/base/+/master/legacy/ant-tasks/src/main/java/com/android/ant/DexExecTask.java
   # def patch_ant_script(min_sdk, ant_script = File.read('build.xml'))
+  indent = '    '
   start_marker = '<!-- BEGIN added by Ruboto -->'
   end_marker = '<!-- END added by Ruboto -->'
   dx_override = <<-EOF
-    #{start_marker}
-    <macrodef name="dex-helper">
-        <element name="external-libs" optional="yes" />
-        <element name="extra-parameters" optional="yes" />
-        <sequential>
-            <!-- set the secondary dx input: the project (and library) jar files
-                If a pre-dex task sets it to something else this has no effect -->
-            <if>
-                <condition>
-                    <isreference refid="out.dex.jar.input.ref" />
-                </condition>
-                <else>
-                    <path id="out.dex.jar.input.ref">
-                        <path refid="project.all.jars.path" />
-                    </path>
-                </else>
-            </if>
-            <condition property="verbose.option" value="--verbose" else="">
-                <istrue value="${verbose}" />
-            </condition>
-
+#{indent}#{start_marker}
+    <macrodef name="multi-dex-helper">
+      <element name="external-libs" optional="yes" />
+      <sequential>
             <union id="out.dex.jar.input.ref.union">
                 <resources refid="out.dex.jar.input.ref"/>
             </union>
@@ -299,7 +279,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                         <arg value="--dex" />
                         <arg value="--multi-dex" />
                         <arg value="--output=${out.absolute.dir}" />
-                        <extra-parameters />
+                        <arg line="${jumbo.option}" />
                         <arg line="${verbose.option}" />
                         <arg path="${out.classes.absolute.dir}" />
                         <path refid="out.dex.jar.input.ref" />
@@ -308,7 +288,107 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                     <sleep seconds="1"/>
                 </else>
             </if>
-        </sequential>
+      </sequential>
+    </macrodef>
+
+    <macrodef name="dex-helper">
+      <element name="external-libs" optional="yes" />
+      <attribute name="nolocals" default="false" />
+      <sequential>
+          <!-- sets the primary input for dex. If a pre-dex task sets it to
+               something else this has no effect -->
+        <property name="out.dex.input.absolute.dir" value="${out.classes.absolute.dir}" />
+
+        <!-- set the secondary dx input: the project (and library) jar files
+             If a pre-dex task sets it to something else this has no effect -->
+        <if>
+          <condition>
+            <isreference refid="out.dex.jar.input.ref" />
+          </condition>
+          <else>
+            <path id="out.dex.jar.input.ref">
+              <path refid="project.all.jars.path" />
+            </path>
+          </else>
+        </if>
+        <condition property="verbose.option" value="--verbose" else="">
+          <istrue value="${verbose}" />
+        </condition>
+        <condition property="jumbo.option" value="--force-jumbo" else="">
+          <istrue value="${dex.force.jumbo}" />
+        </condition>
+
+        <if>
+          <condition>
+            <not>
+              <available file="${second_dex_file}" />
+            </not>
+          </condition>
+          <then>
+            <!-- Regular DEX process.  We would prefer to use the Android SDK
+                 ANT target, but we need to detect the "use multidex" error.
+                 https://android.googlesource.com/platform/sdk/+/tools_r21.1/anttasks/src/com/android/ant/DexExecTask.java
+            -->
+            <mapper id="pre-dex-mapper" type="glob" from="libs/*.jar" to="bin/dexedLibs/*-dexed.jar"/>
+
+
+            <!-- FIXME(uwe): Output something about what we are doing -->
+
+            <apply executable="${dx}" failonerror="true" parallel="false" dest="${out.dexed.absolute.dir}" relative="true">
+                        <arg value="--dex" />
+                        <arg value="--output" />
+                        <targetfile/>
+                        <arg line="${jumbo.option}" />
+                        <arg line="${verbose.option}" />
+                        <fileset dir="." includes="libs/*" />
+                        <external-libs />
+                        <mapper refid="pre-dex-mapper"/>
+            </apply>
+
+            <apply executable="${dx}" resultproperty="dex.merge.result" outputproperty="dex.merge.output" parallel="true">
+                <arg value="--dex" />
+                <arg value="--output=${intermediate.dex.file}" />
+                <arg line="${jumbo.option}" />
+                <arg line="${verbose.option}" />
+                <arg path="${out.classes.absolute.dir}" />
+                <fileset dir="${out.dexed.absolute.dir}" />
+                <external-libs />
+            </apply>
+
+            <if>
+              <condition>
+                <contains string="${dex.merge.output}" substring="method ID not in [0, 0xffff]: 65536"/>
+              </condition>
+              <then>
+                <echo message="The package contains too many methods.  Switching to multi-dex build." />
+                <multi-dex-helper>
+                  <external-libs>
+                    <external-libs/>
+                  </external-libs>
+                </multi-dex-helper>
+              </then>
+              <else>
+                <echo message="${dex.merge.output}"/>
+                <fail status="${dex.merge.result}">
+                  <condition>
+                    <not>
+                      <equals arg1="${dex.merge.result}" arg2="0"/>
+                    </not>
+                  </condition>
+                </fail>
+              </else>
+            </if>
+
+          </then>
+          <else>
+            <multi-dex-helper>
+              <external-libs>
+                <external-libs/>
+              </external-libs>
+            </multi-dex-helper>
+          </else>
+        </if>
+      </sequential>
     </macrodef>
 
     <!-- This is copied directly from <android-sdk>/tools/ant/build.xml,
@@ -406,13 +486,10 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   EOF
 
   ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
-  if multi_dex
-    if sdk_level >= 16
-      unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
-        raise 'Bad ANT script'
-      end
-    else
-      raise "I am sorry, but the 'multi_dex' option is only available for projects targeting api level android-16 (Android 4.1) or higher due to a bug in earlier versions of Android."
+  # FIXME(uwe): Remove condition when we stop supporting Android 4.0 and older.
+  if sdk_level >= 16
+    unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
+      raise 'Bad ANT script'
     end
   end
   File.open(BUILD_XML_FILE, 'w') { |f| f << ant_script }

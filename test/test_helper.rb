@@ -160,8 +160,6 @@ class Test::Unit::TestCase
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     update = options.delete(:update) || false
     ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == '9' ? 2.1 : 1.9)
-    multi_dex = options.has_key?(:multi_dex) ? options.delete(:multi_dex) :
-        (standalone && !example && ANDROID_TARGET >= 16)
 
     raise "Unknown options: #{options.inspect}" unless options.empty?
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
@@ -177,7 +175,6 @@ class Test::Unit::TestCase
     template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
-    template_dir << '_multi-dex' if multi_dex
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
     template_dir << "_with_#{included_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if included_stdlibs
     if File.exists?(template_dir)
@@ -192,8 +189,8 @@ class Test::Unit::TestCase
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version || multi_dex
-              write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
+            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+              write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
             end
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
@@ -216,13 +213,13 @@ class Test::Unit::TestCase
         end
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
-          if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version || multi_dex
+          if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
             sleep 1
-            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
+            write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
             system 'rake build_xml jruby_adapter'
           end
           if standalone
-            system "#{RUBOTO_CMD} gen jruby"
+            system "#{RUBOTO_CMD} gen jruby #{JRUBY_JARS_VERSION}"
             raise "update jruby failed with return code #$?" if $? != 0
           end
         end
@@ -291,12 +288,11 @@ class Test::Unit::TestCase
     end
   end
 
-  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version, multi_dex)
+  def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
     yml = YAML.dump({'included_stdlibs' => included_stdlibs,
         'excluded_stdlibs' => excluded_stdlibs,
         # 'ruby_version' => ruby_version,
         'heap_alloc' => heap_alloc,
-        'multi_dex' => multi_dex,
     })
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') { |f| f << yml }

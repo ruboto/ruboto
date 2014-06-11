@@ -32,6 +32,10 @@ env:
 
 matrix:
   fast_finish: true
+  allow_failures:
+    - env: ANDROID_TARGET=17 RUBOTO_PLATFORM=STANDALONE TEST_PART=3of5
+    - env: ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE TEST_PART=4of5
+    - env: ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=5of5
 
 script:
     - rake install
