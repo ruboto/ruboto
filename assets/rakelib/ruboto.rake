@@ -454,8 +454,8 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
 
 
-                # FIXME(uwe):  Maybe look at the APK content instead of the jar?
-                # aapt l bin/<APP>-debug.apk | grep assets/classes2.jar
+                <!-- FIXME(uwe):  Maybe look at the APK content instead of the jar? -->
+                <!-- aapt l bin/YourApp-debug.apk | grep assets/classes2.jar -->
                 <if>
                   <condition>
                     <and>
