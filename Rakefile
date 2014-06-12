@@ -626,10 +626,10 @@ task '.travis.yml' do
   source = File.read('.travis.yml')
   matrix = ''
   [17, 16, 15].each.with_index do |api, i|
-    n = 0
-    [['CURRENT', [nil]],['FROM_GEM', [nil]],['STANDALONE', [nil, '1.7.12', '1.7.11'].rotate(i)]].each do |platform, versions|
+    n = i
+    [['CURRENT', [nil]],['FROM_GEM', [nil]],['STANDALONE', [nil, '1.7.12', '1.7.11'].rotate(-i)]].each do |platform, versions|
       versions.each do |v|
-        n += 1
+        n = (n  % 5) + 1
         matrix << "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
       end
     end
