@@ -35,7 +35,7 @@ matrix:
   allow_failures: # Current master is failing: https://github.com/jruby/jruby/issues/1741
     - env: ANDROID_TARGET=17 RUBOTO_PLATFORM=STANDALONE TEST_PART=3of5
     - env: ANDROID_TARGET=16 RUBOTO_PLATFORM=STANDALONE TEST_PART=5of5
-    - env: ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=4of5
+    - env: ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=2of5
 
 script:
     - rake install
