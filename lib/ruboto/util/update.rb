@@ -381,8 +381,9 @@ module Ruboto
         if File.exists?('ruboto.yml')
           sleep 1
           FileUtils.touch 'ruboto.yml'
-          system 'rake build_xml jruby_adapter'
         end
+        Dir['src/*_activity.rb'].each{|f|FileUtils.touch(f)}
+        system 'rake build_xml jruby_adapter ruboto_activity'
       end
 
       def read_ruboto_version

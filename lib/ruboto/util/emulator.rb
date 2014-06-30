@@ -186,7 +186,7 @@ module Ruboto
             end
             puts
             break if device_ready?
-            puts 'Device started, but failed to respond.'
+            puts 'Emulator started, but failed to respond.'
             unless no_snapshot
               puts 'Retrying without loading snapshot.'
               no_snapshot = true

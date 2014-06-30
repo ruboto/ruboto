@@ -255,6 +255,8 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   end_marker = '<!-- END added by Ruboto -->'
   dx_override = <<-EOF
 #{indent}#{start_marker}
+    <property name="second_dex_file" value="${out.absolute.dir}/classes2.dex" />
+
     <macrodef name="multi-dex-helper">
       <element name="external-libs" optional="yes" />
       <sequential>
@@ -415,29 +417,9 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
     <target name="-post-package-resources">
         <!-- FIXME(uwe):  This is hardcoded for one extra dex file.
                           It should iterate over all classes?.dex files -->
-        <property name="second_dex_file" value="${out.absolute.dir}/classes2.dex" />
         <property name="second_dex_path" value="assets/classes2.jar" />
         <property name="second_dex_jar" value="${out.dexed.absolute.dir}/${second_dex_path}" />
         <property name="second_dex_copy" value="${out.dexed.absolute.dir}/classes.dex" />
-
-                <!-- FIXME(uwe):  Debug output.  Remove! -->
-                <if>
-                  <condition>
-                    <os family="mac"/>
-                  </condition>
-                  <then>
-                    <exec executable="ls" dir="${out.absolute.dir}" failonerror="true">
-                      <arg line="-lT"/>
-                    </exec>
-                  </then>
-                  <else>
-                    <exec executable="ls" dir="${out.absolute.dir}" failonerror="true">
-                      <arg line="-l --full-time"/>
-                    </exec>
-                  </else>
-                </if>
-                <!-- EMXIF -->
-
         <if>
             <condition>
               <and>
@@ -452,26 +434,9 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
             </condition>
             <then>
                 <echo>Adding ${second_dex_path} to ${resource.package.file.name}</echo>
-
-
-                <!-- FIXME(uwe):  Maybe look at the APK content instead of the jar? -->
-                <!-- aapt l bin/YourApp-debug.apk | grep assets/classes2.jar -->
-                <if>
-                  <condition>
-                    <and>
-                      <available file="${second_dex_jar}" />
-                      <not>
-                        <uptodate srcfile="${out.absolute.dir}/${resource.package.file.name}" targetfile="${out.absolute.dir}/${resource.package.file.name}.d" />
-                      </not>
-                    </and>
-                  </condition>
-                  <then>
-                    <exec executable="aapt" dir="${out.dexed.absolute.dir}" failonerror="true">
-                      <arg line='remove -v "${out.absolute.dir}/${resource.package.file.name}" ${second_dex_path}'/>
-                    </exec>
-                  </then>
-                </if>
-
+                <exec executable="aapt" dir="${out.dexed.absolute.dir}">
+                  <arg line='remove -v "${out.absolute.dir}/${resource.package.file.name}" ${second_dex_path}'/>
+                </exec>
                 <copy file="${second_dex_file}" tofile="${second_dex_copy}"/>
                 <mkdir dir="${out.dexed.absolute.dir}/assets"/>
                 <zip destfile="${second_dex_jar}" basedir="${out.dexed.absolute.dir}" includes="classes.dex" />
