@@ -1,7 +1,7 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'net/http'
 
-class SetupTest < Test::Unit::TestCase
+class RubotoSetupTest < Test::Unit::TestCase
   SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
 
   def test_if_page_still_exists
@@ -15,7 +15,7 @@ class SetupTest < Test::Unit::TestCase
     regex = '(\>installer_.*.exe)'
     page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
     link = page_content.scan(/#{regex}/).to_s
-    assert_match /(\d+).(\d+).(\d+)/, link 
+    assert_match /\d+(\.\d+)?(\.\d+)?/, link
   end
 
 end
