@@ -144,9 +144,14 @@ module Ruboto
         end
 
         link = page_content.scan(/#{regex}/).to_s
-        version = link.match( /r(\d+).(\d+).(\d+)|r(\d+).(\d+)|r(\d+)/ )[0]
+        version = link.match( /  r(\d+).(\d+).(\d+)|r(\d+).(\d+)|r(\d+)  / )[0]
+	
+	if version.nil?
+	 puts "File version cannot be determined " 
+        else
+	 version.delete! 'r'
+	end
 
-        version.delete! 'r'
       end
 
       #########################################
