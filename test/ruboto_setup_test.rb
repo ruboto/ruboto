@@ -15,7 +15,10 @@ class RubotoSetupTest < Test::Unit::TestCase
     regex = '(\>installer_.*.exe)'
     page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
     link = page_content.scan(/#{regex}/).to_s
-    assert_match /\d+(\.\d+)?(\.\d+)?/, link
+    version = link.match( /r(\d+).(\d+).(\d+)|r(\d+).(\d+)|r(\d+)/ )[0]
+    version.delete! 'r'
+
+    assert_match version, link
   end
 
 end
