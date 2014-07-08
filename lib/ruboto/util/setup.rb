@@ -139,19 +139,17 @@ module Ruboto
           regex = '(\>android-sdk.*.tgz)'
         when WINDOWS
           regex = '(\>installer_.*.exe)'
-        else #Error
-          nil
+        else
+          raise "Unknown host os: #{android_package_os_id}"
         end
 
-        link = page_content.scan(/#{regex}/).to_s
-        version = link.match(/r(\d+.)?(\d+.)?(\d+)/)[0]
-	
-	if version.nil?
-	 puts "File version cannot be determined " 
-        else
-	 version.delete! 'r'
-	end
+        link = page_content.scan(/#{regex}/)
+        raise "SDK link cannot be found on download page: #{SDK_DOWNLOAD_PAGE}" if link.nil?
+ 
+        version = link.to_s.match(/r(\d+.)?(\d+.)?(\d+)/)[0]
+        raise "SDK version cannot be determined from download page: #{SDK_DOWNLOAD_PAGE}" if version.nil?
 
+        version.delete! 'r'
       end
 
       #########################################
@@ -289,7 +287,7 @@ module Ruboto
 	          end
 	          if accept_all || a == 'Y' || a.empty?
 	            puts "sudo #{installer} install -y #{package_name}"
-	            `sudo #{installer} install -y #{package_name}`
+	            IO.popen("sudo #{installer} install -y #{package_name}") {|io| while (l = io.gets) do; puts l; end }
 	          else
 	            puts
 	            puts "You can install #{pretty_name} manually by:"
