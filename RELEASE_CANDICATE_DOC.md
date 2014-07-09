@@ -1,12 +1,10 @@
-Subject: [ANN] Ruboto 1.1.1 release candidate
+Subject: [ANN] Ruboto 1.1.2 release candidate
 
 Hi all!
 
-The Ruboto 1.1.1 release candidate is now available.
+The Ruboto 1.1.2 release candidate is now available.
 
-This release introduces a significant speedup of all UI actions by only
-overriding those Java methods actually implemented in Ruby code.  There
-are also some bug fixes and improvements to the SSL and big-app features.
+This is a quick release to add support for version 23 of the Android SDK.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 

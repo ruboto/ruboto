@@ -52,7 +52,9 @@ def reconfigure_jruby_stdlib
   end
   require 'jruby-jars'
 
-  log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{JRubyJars::VERSION}.jar" }
+  log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") do
+    FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{JRubyJars::VERSION}.jar"
+  end
   StdlibDependencies.load('rakelib/ruboto.stdlib.yml')
 
   Dir.chdir 'libs' do

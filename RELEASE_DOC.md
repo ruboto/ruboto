@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.1.1 released!
+Subject: [ANN] Ruboto 1.1.2 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.1.1.
+The Ruboto team is pleased to announce the release of Ruboto 1.1.2.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,27 +8,24 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.1.1:
+New in version 1.1.2:
 
-This release introduces a significant speedup of all UI actions by only
-overriding those Java methods actually implemented in Ruby code.  There
-are also some bug fixes and improvements to the SSL and big-app features.
+This is a quick release to add support for version 23 of the Android SDK.
 
-Features:
+Bugfixes:
 
-* Issue #619 Automatically switch multi-dex build on and off
-* Issue #625 Avoid storing extra dex files in assets since they are not
-  source.
-* Issue #628 Set tmpdir location
+* Issue #636 ruboto setup failing to install Android
+* Issue #637 Fixed match for SDK release versions (daneb)
+* Issue #639 Unit test fix (daneb)
+* Issue #641 Display progress text during linux package installs
 
-Performance:
+Internal:
 
-* Issue #574 Will Android 4.4 ART influence Ruboto APP?
-* Issue #629 Disable RubotoActivity methods that are not in use
+* Issue #633 Release 1.1.2 gem
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=33
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=34
 
 
 Installation:
