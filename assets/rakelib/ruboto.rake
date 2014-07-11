@@ -4,6 +4,7 @@ require 'time'
 require 'rake/clean'
 require 'rexml/document'
 require 'timeout'
+require 'erb'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
@@ -74,6 +75,14 @@ def app_files_path
   @app_files_path ||= "/data/data/#{package}/files"
 end
 
+def underscore(camel_cased_word)
+  camel_cased_word.to_s.gsub(/::/, '/').
+  gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+  gsub(/([a-z\d])([A-Z])/,'\1_\2').
+  tr("-", "_").
+  downcase
+end
+
 PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
 BUNDLE_JAR = File.expand_path 'libs/bundle.jar'
@@ -90,8 +99,12 @@ JRUBY_JARS = Dir[File.expand_path 'libs/{jruby-*,dx}.jar']
 JARS = Dir[File.expand_path 'libs/*.jar'] - JRUBY_JARS
 RESOURCE_FILES = Dir[File.expand_path 'res/**/*']
 JAVA_SOURCE_FILES = Dir[File.expand_path 'src/**/*.java']
+JAVA_ACTIVITY_FILES = JAVA_SOURCE_FILES.select { |fn| fn =~ /Activity\.java$/ }
 RUBY_SOURCE_FILES = Dir[File.expand_path 'src/**/*.rb']
 RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_activity.rb$/ }
+RUBY_SERVICE_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_service.rb$/ }
+RUBY_RECEIVER_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_receiver.rb$/ }
+PROXY_FILES = RUBY_ACTIVITY_SOURCE_FILES + RUBY_SERVICE_SOURCE_FILES + RUBY_RECEIVER_SOURCE_FILES
 OTHER_SOURCE_FILES = Dir[File.expand_path 'src/**/*'] - JAVA_SOURCE_FILES - RUBY_SOURCE_FILES
 CLASSES_CACHE = "#{PROJECT_DIR}/bin/#{build_project_name}-debug-unaligned.apk.d"
 BUILD_XML_FILE = "#{PROJECT_DIR}/build.xml"
@@ -102,6 +115,10 @@ KEYSTORE_ALIAS = (key_alias = File.readlines('ant.properties').grep(/^key.alias=
 APK_FILE_REGEXP = /^-rw-r--r--\s+(?:system|\d+\s+\d+)\s+(?:system|\d+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}|\w{3} \d{2}\s+(?:\d{4}|\d{2}:\d{2}))\s+(.*)$/
 JRUBY_ADAPTER_FILE = "#{PROJECT_DIR}/src/org/ruboto/JRubyAdapter.java"
 RUBOTO_ACTIVITY_FILE = "#{PROJECT_DIR}/src/org/ruboto/RubotoActivity.java"
+METHOD_PROXY_FILE = "#{PROJECT_DIR}/assets/MethodProxyTemplate.java.erb"
+METHOD_PROXIES_FILE =
+  "#{PROJECT_DIR}/assets/MethodProxiesTemplate.java.erb"
+NO_METHOD_PROXIES = %w(onCreate onDestroy onBind)
 
 CLEAN.include('bin', 'gen', 'test/bin', 'test/gen')
 
@@ -531,6 +548,72 @@ file RUBOTO_ACTIVITY_FILE => RUBY_ACTIVITY_SOURCE_FILES do |task|
   new_source = "#{intro}#{commented_methods.join("\n")}\n}\n"
   if new_source != original_source
     File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
+  end
+end
+
+def camelize(value, method=true)
+  if method
+    value.gsub(/_(.)/) { $1.upcase }
+  else
+    value.split('_').collect(&:capitalize).join('')
+  end
+end
+
+def render_template(file, b)
+  ERB.new(File.read(file), 0, '>').result(b)
+end
+
+def create_method_proxy(class_name, ruby_method_name, data)
+  sig = data[:signature]
+  method_name = sig['name']
+  return_type = sig.fetch('return', 'void')
+  parameters = data[:params].collect do |par|
+    "#{par['type']} #{par['name']}"
+  end.join(', ')
+  parameter_names = data[:params].collect do |par|
+    par['name']
+  end.join(', ')
+  render_template(METHOD_PROXY_FILE, binding)
+end
+
+def create_method_proxies(class_name, ruby_method_name, component)
+  api_name = camelize(ruby_method_name)
+  api_data = Object.const_get("#{component.upcase}_METHODS")
+  methods = api_data[api_name]
+  if methods
+    methods.collect do |data|
+      create_method_proxy class_name, ruby_method_name, data
+    end
+  end
+end
+
+def write_method_proxy_interface(class_name, proxies, component)
+  method_definitions = proxies.join("\n")
+  content = render_template(METHOD_PROXIES_FILE, binding)
+  pkg = package.to_s.split('.')
+  file_name = "#{class_name}MethodProxies.java"
+  file_path = File.join(PROJECT_DIR, 'src', *pkg, file_name)
+  IO.write(file_path, content)
+end
+
+def no_proxy(method_name)
+  NO_METHOD_PROXIES.include? method_name
+end
+
+task :method_proxies => PROXY_FILES do |task|
+  Dir["#{PROJECT_DIR}/src/ruboto/assets/*.rb"].each do |f|
+    require f
+  end
+  task.prerequisites.each do |file|
+    impl = File.read(file).scan(/(?:^\s*def\s+)([^\s(]+)/).flatten.sort
+    ruby_class_name = File.basename(file, '.rb')
+    class_name = camelize(ruby_class_name, false)
+    component = ruby_class_name.split('_')[-1]
+    proxies = impl.collect do |meth|
+      create_method_proxies(class_name, meth, component) unless no_proxy(meth)
+    end.flatten.compact!
+    write_method_proxy_interface(class_name, proxies,
+                                 component.capitalize) if proxies
   end
 end
 

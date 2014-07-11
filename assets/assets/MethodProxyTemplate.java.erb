@@ -1,0 +1,17 @@
+<% void = return_type == 'void' %>
+<% return_prefix = void ? '' : 'return ' %>
+    public <%= return_type %> <%= method_name %>(<%= parameters %>) {
+        if(relayToRuby("<%= class_name %>#<%= method_name %>")) {
+            <%= return_prefix %><%= void ? '' : "(#{return_type}) " %>
+JRubyAdapter.runRubyMethod(
+<% unless void %>
+                <%= return_type %>.class,
+<% end %>
+                scriptInfo.getRubyInstance(),
+                "<%= ruby_method_name %>"<% unless parameter_names.empty? %>,
+                new Object[]{<%= parameter_names %>}
+            <% end %>);
+        } else {
+            <%= return_prefix %>super.<%= method_name %>(<%= parameter_names %>);
+        }
+    }

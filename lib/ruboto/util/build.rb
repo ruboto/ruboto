@@ -150,6 +150,42 @@ module Ruboto
         end
       end
 
+      def project_asset_dir
+        "#{SCRIPTS_DIR}/ruboto/assets".tap do |asset_dir|
+          Dir.mkdir(asset_dir) unless File.directory?(asset_dir)
+        end
+      end
+
+      def project_asset_file(name)
+        path = File.join(project_asset_dir, name)
+        yield File.open(path, 'w')
+      end
+
+      def generate_method_proxy_api_asset
+        require 'pp'
+        puts 'Generating proxy method helpers'
+        %w(android.app.Activity android.app.Service
+           android.content.BroadcastReceiver).each do |class_path|
+          class_name = class_path.split('.').last
+          api_data = get_class_or_interface(class_path).all_methods
+          file_name = "#{underscore(class_name)}_methods.rb"
+          all_methods = Hash.new
+          api_data.each do |item|
+            data = {
+              signature: item['values'],
+              params: item.fetch('parameter', []).collect do |par|
+                par['values']
+              end
+            }
+            (all_methods[data[:signature]['name']] ||= []) << data
+          end
+          project_asset_file(file_name) do |file|
+            file << "#{class_name.upcase}_METHODS =\n"
+            PP.pp(all_methods, file)
+          end
+        end
+      end
+
       ###########################################################################
       #
       # generate_inheriting_file:

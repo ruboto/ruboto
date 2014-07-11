@@ -1,4 +1,4 @@
 package THE_PACKAGE;
 
-public class InheritingActivity extends org.ruboto.EntryPointActivity {
+public class InheritingActivity extends InheritingActivityMethodProxies {
 }
