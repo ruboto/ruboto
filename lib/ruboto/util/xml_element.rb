@@ -200,24 +200,7 @@ module Ruboto
                             super_return]),
                 'String rubyClassName = scriptInfo.getRubyClassName();',
                 "if (rubyClassName == null) #{super_return}",
-                if_else(
-                    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                    ruby_call,
-                    if_else(
-                        "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                        ruby_call(true),
-                        if_else(
-                            "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
-                            ruby_call(true),
-                            # FIXME(uwe):  Can the method be unimplemented?  Is the Ruby instance always an instance of this class?
-                            #if_else(
-                            #    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{attribute('name')}}\")",
-                            ruby_call,
-                        #    [super_return]
-                        #)
-                        )
-                    )
-                ),
+                ruby_call,
                 ('ScriptLoader.unloadScript(this);' if attribute('name') == 'onDestroy'),
             ]
         ).indent.join("\n")
