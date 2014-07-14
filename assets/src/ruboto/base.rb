@@ -8,6 +8,14 @@
 
 require 'java'
 
+class Class
+  def method_added(name)
+    # Create camel case alias of snake case "on_" methods
+    name = name.to_s
+    alias_method(name.gsub(/_[a-z]/){|i| i[1].upcase}, name) if name[0..2] == "on_"
+  end
+end
+
 # Create convenience method for top-level android package so we do not need to prefix with 'Java::'.
 module Kernel
   def android
