@@ -197,8 +197,8 @@ def setup_list_view
     end
 
     def reload_list(list)
-      @adapter_list.clear
-      @adapter_list.addAll(list)
+      adapter.clear
+      adapter.addAll(list)
       adapter.notifyDataSetChanged
       invalidate
     end
@@ -219,9 +219,9 @@ def setup_spinner
     end
 
     def reload_list(list)
-      @adapter.clear
-      @adapter.addAll(list)
-      @adapter.notifyDataSetChanged
+      adapter.clear
+      adapter.addAll(list)
+      adapter.notifyDataSetChanged
       invalidate
     end
   end
