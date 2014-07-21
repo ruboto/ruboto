@@ -232,9 +232,11 @@ module Ruboto
       def service_super_guard(class_name, method_name)
         if class_name == 'RubotoService'
           if method_name == 'onCreate'
-            'preOnCreate();'
-          elsif method_name == 'onStartCommand' || method_name == 'onBind'
-            '' # Trigger adding of load_script
+            "preOnCreate();\n"
+          elsif method_name == 'onStartCommand'
+            "preOnStartCommand(intent);\n"
+          elsif method_name == 'onBind'
+            "preOnBind(intent);\n"
           end
         end
       end
