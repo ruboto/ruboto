@@ -21,6 +21,7 @@ class ServiceTest < Test::Unit::TestCase
       File.open(activity_filename, 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
 require 'ruboto/widget'
+require 'ruboto/service'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
@@ -53,7 +54,7 @@ class RubotoTestAppActivity
     puts 'butterfly'
     Thread.start do
       begin
-        startService(android.content.Intent.new(application_context, $package.RubotoTestService.java_class))
+        start_ruboto_service("RubotoTestService")
       rescue Exception
         puts "Exception starting the service: \#{$!}"
         puts $!.backtrace.join("\\n")
@@ -68,8 +69,6 @@ EOF
       service_filename = "#{SRC_DIR}/ruboto_test_service.rb"
       assert File.exists? service_filename
       File.open(service_filename, 'w') { |f| f << <<EOF }
-require 'ruboto/service'
-
 class RubotoTestService
   TARGET_TEXT = 'What hath Matz wrought!'
 
