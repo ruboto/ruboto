@@ -53,12 +53,10 @@ class RubotoTestAppActivity
     Thread.start do
       begin
         start_ruboto_service do
-          TARGET_TEXT = 'What hath Matz wrought!'
-
           def onStartCommand(intent, flags, start_id)
             puts "service on_start_command(\#{intent}, \#{flags}, \#{start_id})"
             $ruboto_test_app_activity.set_title 'on_start_command'
-            $ruboto_test_app_activity.set_text TARGET_TEXT
+            $ruboto_test_app_activity.set_text 'What hath Matz wrought!'
 
             android.app.Service::START_STICKY
           end
