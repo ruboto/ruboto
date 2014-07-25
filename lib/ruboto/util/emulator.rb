@@ -5,7 +5,8 @@ module Ruboto
   module Util
     module Emulator
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
-      ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin(.*)/
+      ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin/
+      ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
 
       def sdk_level_name(sdk_level)
         Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level] || "api_#{sdk_level}"
@@ -17,6 +18,8 @@ module Ruboto
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
           if ON_MAC_OS_X
             emulator_cmd = '-m "emulator64-(arm|x86)"'
+          elsif ON_LINUX
+            emulator_cmd = '-r "emulator64-(arm|x86)"'
           else
             emulator_cmd = 'emulator64-arm'
           end
