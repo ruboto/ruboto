@@ -13,8 +13,8 @@ env:
     - RUBOTO_UPDATE_EXAMPLES=0
 #    - MASTER=9000.dev
 #    - STABLE=1.7.14.dev
-    - STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
-    - MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
+    - "STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`"
+    - "MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`"
 
   matrix:
     - ANDROID_TARGET=19 RUBOTO_PLATFORM=CURRENT    TEST_PART=1of5 JRUBY_JARS_VERSION=MASTER
