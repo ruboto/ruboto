@@ -94,10 +94,8 @@ module Ruboto
               exit 3
             end
 
-            if ON_MAC_OS_X || ON_WINDOWS
-              abis = target.slice(/(?<=ABIs : ).*/).split(', ')
-              has_haxm = abis.find { |a| a =~ /x86/ }
-            end
+            abis = target.slice(/(?<=ABIs : ).*/).split(', ')
+            has_x86 = abis.find { |a| a =~ /x86/ }
 
             # FIXME(uwe): The x86 emulator does not respect the heap setting and
             # restricts to a 16MB heap on Android 2.3 which will crash any
@@ -107,16 +105,10 @@ module Ruboto
             # https://code.google.com/p/android/issues/detail?id=61596
             if sdk_level == 10
               abi_opt = '--abi armeabi'
+            elsif has_x86
+              abi_opt = '--abi x86'
             else
-              if has_haxm
-                abi_opt = '--abi x86'
-              else
-                if [17, 16, 15, 13, 11].include? sdk_level
-                  abi_opt = '--abi armeabi-v7a'
-                elsif sdk_level == 10
-                  abi_opt = '--abi armeabi'
-                end
-              end
+              abi_opt = '--abi armeabi-v7a'
             end
             # EMXIF
 
