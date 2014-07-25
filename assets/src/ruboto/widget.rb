@@ -190,7 +190,7 @@ def setup_list_view
   android.widget.ListView.class_eval do
     def configure(context, params = {})
       if (list = params.delete(:list))
-        item_layout = params.delete(:item_layout) || R::layout::simple_list_item_1
+        item_layout = params.delete(:item_layout) || android.R::layout::simple_list_item_1
         params[:adapter] = android.widget.ArrayAdapter.new(context, item_layout, list)
       end
       super(context, params)
@@ -211,7 +211,7 @@ def setup_spinner
     def configure(context, params = {})
       if (list = params.delete(:list))
         item_layout = params.delete(:item_layout)
-        params[:adapter] = android.widget.ArrayAdapter.new(context, item_layout || R::layout::simple_spinner_item, list)
+        params[:adapter] = android.widget.ArrayAdapter.new(context, item_layout || android.R::layout::simple_spinner_item, list)
         dropdown_layout = params.delete(:dropdown_layout)
         params[:adapter].setDropDownViewResource(dropdown_layout) if dropdown_layout
       end

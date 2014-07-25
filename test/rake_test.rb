@@ -36,7 +36,6 @@ class RakeTest < Test::Unit::TestCase
   # source file instead of rebuilding the apk.
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
-      system 'rake debug'
       apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       sleep 1
       FileUtils.touch 'src/ruboto_test_app_activity.rb'
@@ -49,7 +48,6 @@ class RakeTest < Test::Unit::TestCase
 
   def test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
-      system 'rake debug'
       apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       FileUtils.touch 'src/not_ruby_source.properties'
       system 'rake debug'

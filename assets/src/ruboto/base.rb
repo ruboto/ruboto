@@ -21,7 +21,6 @@ module Kernel
   end
 end
 
-java_import 'android.R'
 AndroidIds = JavaUtilities.get_proxy_class('android.R$id')
 
 module Ruboto

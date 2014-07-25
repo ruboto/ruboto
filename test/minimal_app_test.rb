@@ -12,14 +12,15 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
       cleanup_app
     end
 
-    # APK was 4.4MB.  JRuby: 1.7.4, ANDROID_TARGET: 10
-    # APK was 4.3MB.  JRuby: 1.7.4, ANDROID_TARGET: 16
-    # APK was 4.3MB.  JRuby: 1.7.5, ANDROID_TARGET: 10
-    # APK was 4.2MB.  JRuby: 1.7.5, ANDROID_TARGET: 15
-    # APK was 4.3MB.  JRuby: 1.7.5, ANDROID_TARGET: 16
-    # APK was 8.4MB.  JRuby: 1.7.8, ANDROID_TARGET: 10
-    # APK was 4.3MB.  JRuby: 1.7.8, ANDROID_TARGET: 16
+    # APK was 4.4MB.  JRuby: 1.7.4,  ANDROID_TARGET: 10
+    # APK was 4.3MB.  JRuby: 1.7.4,  ANDROID_TARGET: 16
+    # APK was 4.3MB.  JRuby: 1.7.5,  ANDROID_TARGET: 10
+    # APK was 4.2MB.  JRuby: 1.7.5,  ANDROID_TARGET: 15
+    # APK was 4.3MB.  JRuby: 1.7.5,  ANDROID_TARGET: 16
+    # APK was 8.4MB.  JRuby: 1.7.8,  ANDROID_TARGET: 10
+    # APK was 4.3MB.  JRuby: 1.7.8,  ANDROID_TARGET: 16
     # APK was 4.4MB.  JRuby: 1.7.12, ANDROID_TARGET: 19
+    # APK was 4.4MB.  JRuby: 1.7.14.SNAPSHOT, ANDROID_TARGET: 19
     # APK was 4.2MB.  JRuby: 9000.dev, ANDROID_TARGET: 10
     # APK was 4.2MB.  JRuby: 9000.dev, ANDROID_TARGET: 15
     # APK was 4.5MB.  JRuby: 9000.dev, ANDROID_TARGET: 16
@@ -32,8 +33,9 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.10' => 4.4,
           '1.7.11' => 4.4,
           '1.7.12' => 4.4,
+          '1.7.14.dev' => 4.4,
           '9000.dev' => 4.5,
-      }[JRUBY_JARS_VERSION.to_s] || 4.3
+      }[JRUBY_JARS_VERSION.to_s] || 4.4
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"
       assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB.  #{version_message}"

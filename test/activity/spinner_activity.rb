@@ -17,7 +17,7 @@ class SpinnerActivity
           spinner :layout => {:width => :match_parent}, :id => 42
           plain_spinner = spinner :layout => {:width => :match_parent}, :id => 43,
                                   :on_item_selected_listener => click_handler
-          plain_spinner.adapter = android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item)
+          plain_spinner.adapter = android.widget.ArrayAdapter.new(self, android.R::layout::simple_spinner_item)
 
           # FIXME(uwe): Simplify when we stop supporting Android < 4.0.3
           if android.os.Build::VERSION::SDK_INT < 11
@@ -31,19 +31,19 @@ class SpinnerActivity
 
           spinner :layout => {:width => :match_parent}, :id => 44,
                   :on_item_selected_listener => click_handler,
-                  :adapter => android.widget.ArrayAdapter.new(self, R::layout::simple_spinner_item, ['Adapter Spinner', 'Adapter Item'])
+                  :adapter => android.widget.ArrayAdapter.new(self, android.R::layout::simple_spinner_item, ['Adapter Spinner', 'Adapter Item'])
           spinner :layout => {:width => :match_parent}, :id => 45  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item']
           spinner :layout => {:width => :match_parent}, :id => 46  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item'],
-                  :item_layout => R::layout::simple_spinner_dropdown_item
+                  :item_layout => android.R::layout::simple_spinner_dropdown_item
           spinner :layout => {:width => :match_parent}, :id => 47  ,
                   :on_item_selected_listener => click_handler,
                   :list => ['List Spinner', 'List Item'],
-                  :item_layout => R::layout::simple_spinner_dropdown_item,
-                  :dropdown_layout => R::layout::simple_spinner_item
+                  :item_layout => android.R::layout::simple_spinner_dropdown_item,
+                  :dropdown_layout => android.R::layout::simple_spinner_item
           @text_view = text_view :text => 'Spinning?', :id => 69, 
                                  :layout => {:width => :match_parent},
                                  :gravity => :center, :text_size => 48.0

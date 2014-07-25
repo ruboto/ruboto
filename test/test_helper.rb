@@ -233,10 +233,10 @@ class Test::Unit::TestCase
           update_app
         end
         if update || !example
-          system 'rake patch_dex' # Ensure dx heap space is sufficient.
+          system 'rake debug' # Ensure dx heap space is sufficient.
           assert_equal 0, $?
           Dir.chdir 'test' do
-            system 'ant instrument' # This will also build the main project.
+            system '#{ANT_CMD} instrument' # This will also build the main project.
             assert_equal 0, $?
           end
         end
@@ -259,10 +259,10 @@ class Test::Unit::TestCase
     check_platform_installation
     test_completed = false
     Thread.start do
-      loop do
-        sleep 60
+      4.times do
+        sleep 600
         break if test_completed
-        print '-'
+        print '...'
       end
     end
     Dir.chdir APP_DIR do

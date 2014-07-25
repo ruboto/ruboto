@@ -602,34 +602,39 @@ namespace :platform do
 end
 
 desc 'Download the latest jruby-jars snapshot'
-task :get_jruby_jars_snapshot do
-  current_gem = 'jruby-jars-9000.dev.gem'
-  print "Downloading #{current_gem}: \r"
-  uri = URI("http://ci.jruby.org/snapshots/master/#{current_gem}")
-  done = 0
-  body = ''
-  Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
-    length = response['Content-Length'].to_i
-    response.read_body do |fragment|
-      body << fragment
-      done += fragment.length
-      progress = (done * 100) / length
-      print "Downloading #{current_gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+task :get_jruby_jars_snapshots do
+  download_host = 'ci.jruby.org'
+  # FIXME(uwe): Scan the snapshots directory to find active branches
+  [:master, :'1.7.x'].each do |branch|
+    index = Net::HTTP.get(download_host, "/snapshots/#{branch}/")
+    current_gem = index[/jruby-jars-.*?.gem/]
+    print "Downloading #{current_gem}: \r"
+    uri = URI("http://#{download_host}/snapshots/#{branch}/#{current_gem}")
+    done = 0
+    body = ''
+    Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
+      length = response['Content-Length'].to_i
+      response.read_body do |fragment|
+        body << fragment
+        done += fragment.length
+        progress = (done * 100) / length
+        print "Downloading #{current_gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+      end
+      puts
     end
-    puts
+    File.open(current_gem, 'wb') { |f| f << body }
   end
-  File.open(current_gem, 'wb') { |f| f << body }
 end
 
 task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
   matrix = ''
-  [17, 16, 15].each.with_index do |api, i|
+  [19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [nil]],['FROM_GEM', [nil]],['STANDALONE', [nil, '1.7.13', '1.7.12'].rotate(-i)]].each do |platform, versions|
+    [['CURRENT', [:MASTER, :STABLE]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
       versions.each do |v|
-        n = (n  % 5) + 1
+        n = (n % 5) + 1
         matrix << "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
       end
     end

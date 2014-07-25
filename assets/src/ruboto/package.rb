@@ -1,4 +1,5 @@
 $package = eval("Java::#{$package_name}")
+R = $package.R
 
 module Ruboto
   java_import "#{$package_name}.R"

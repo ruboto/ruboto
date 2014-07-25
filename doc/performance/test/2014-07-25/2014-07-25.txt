@@ -1,0 +1,2355 @@
+macbeth:ruboto uwe$ ./matrix_tests.sh
+WARN: Unresolved specs during Gem::Specification.reset:
+      rake (~> 10.0)
+WARN: Clearing out unresolved specs.
+Please report a bug if this causes problems.
+Java runtime             : Found
+Java Compiler            : Found
+Apache ANT               : Found
+Android Package Installer: Found
+Android Emulator         : Found
+Intel HAXM               : Found
+Android SDK Command adb  : Found
+Android SDK Command dx   : Found
+Platform SDK android-10  : Found
+Platform SDK android-19  : Found
+
+    *** Ruboto setup is OK! ***
+
+WARN: Unresolved specs during Gem::Specification.reset:
+      rake (~> 10.0)
+WARN: Clearing out unresolved specs.
+Please report a bug if this causes problems.
+Emulator Android_4.4.2 is already running.
+
+********************************************************************************
+ANDROID_TARGET: 19
+RUBOTO_PLATFORM: STANDALONE
+JRUBY_JARS_VERSION: 1.7.14.dev
+
+Starting tests...
+PIDs: Boss: 65061, Timer: 65112
+Apache Ant(TM) version 1.9.2 compiled on July 8 2013
+Fetching: bundler-1.6.5.gem (100%)
+Successfully installed bundler-1.6.5
+1 gem installed
+Fetching gem metadata from http://rubygems.org/..........
+Fetching additional metadata from http://rubygems.org/..
+Resolving dependencies...
+Installing rake 10.3.2
+Installing arrayfields 4.9.2
+Installing chronic 0.10.2
+Installing fattr 2.2.2
+Installing map 6.5.3
+Installing main 5.2.0
+Installing rubyzip 1.1.3
+Using ruboto 1.1.3.dev from source at .
+Using bundler 1.6.5
+Your bundle is complete!
+Use `bundle show [gemname]` to see where a bundled gem is installed.
+ruby 2.1.2p95 (2014-05-08 revision 45877) [x86_64-darwin13.0]
+ANDROID_OS: 19
+ANDROID_TARGET: 19
+ANDROID_HOME: /Users/uwe/android-sdk-macosx
+ANDROID_SDK_TOOLS_REVISION: 23
+RUBOTO_PLATFORM: STANDALONE
+JRUBY_JARS_VERSION: 1.7.14.dev
+Detected RUBOTO_UPDATE_EXAMPLES environment variable.  Limiting to 1 examples.
+Run options:
+
+# Running tests:
+
+[ 1/38] ArjdbcTest#test_arjdbc
+================================================================================
+Starting test ArjdbcTest#test_arjdbc at 2014-07-25 11:10:46:
+
+Successfully installed jruby-jars-1.7.14.dev
+1 gem installed
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/test_app/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.test_app
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding Gemfile.apk: activerecord <4.0.0 activerecord-jdbcsqlite3-adapter sqldroid
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+jopenssl...generator...parser...kryptcore...kryptproviderjdk...bcpkix-jdk15on-1.47...bcprov-jdk15on-1.47...ripper...Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+Generating /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+Fetching gem metadata from http://rubygems.org/...........
+Resolving dependencies...
+Fetching: i18n-0.6.11.gem (100%)
+Installing i18n 0.6.11
+Fetching: multi_json-1.10.1.gem (100%)
+Installing multi_json 1.10.1
+Fetching: activesupport-3.2.19.gem (100%)
+Installing activesupport 3.2.19
+Fetching: builder-3.0.4.gem (100%)
+Installing builder 3.0.4
+Fetching: activemodel-3.2.19.gem (100%)
+Installing activemodel 3.2.19
+Fetching: arel-3.0.3.gem (100%)
+Installing arel 3.0.3
+Fetching: tzinfo-0.3.40.gem (100%)
+Installing tzinfo 0.3.40
+Fetching: activerecord-3.2.19.gem (100%)
+Installing activerecord 3.2.19
+Fetching: activerecord-jdbc-adapter-1.3.9.gem (100%)
+Installing activerecord-jdbc-adapter 1.3.9
+Fetching: jdbc-sqlite3-3.7.2.1.gem (100%)
+Installing jdbc-sqlite3 3.7.2.1
+Fetching: activerecord-jdbcsqlite3-adapter-1.3.9.gem (100%)
+Installing activerecord-jdbcsqlite3-adapter 1.3.9
+Fetching: sqldroid-1.0.0-java.gem (100%)
+Installing sqldroid 1.0.0
+Using bundler 1.6.5
+Found gems in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/bundle/gems
+Overwriting duplicate file active_record/connection_adapters/mysql2_adapter.rb in gem activerecord-3.2.19 with file in activerecord-jdbc-adapter-1.3.9
+Overwriting duplicate file active_record/connection_adapters/mysql_adapter.rb in gem activerecord-3.2.19 with file in activerecord-jdbc-adapter-1.3.9
+Overwriting duplicate file active_record/connection_adapters/postgresql_adapter.rb in gem activerecord-3.2.19 with file in activerecord-jdbc-adapter-1.3.9
+Overwriting duplicate file active_record/connection_adapters/sqlite3_adapter.rb in gem activerecord-3.2.19 with file in activerecord-jdbc-adapter-1.3.9
+Expanding activerecord-jdbc-adapter-1.3.9 arjdbc/jdbc/adapter_java.jar into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+
+Writing dummy JAR file arjdbc/jdbc/adapter_java.jar.rb
+Writing dummy JAR file arjdbc/jdbc/adapter_java.rb
+Writing dummy JAR file sqlite-jdbc-3.7.2.jar.rb
+Writing dummy JAR file sqlite-jdbc-3.7.2.rb
+Expanding sqldroid-1.0.0-java sqldroid/sqldroid-1.0.0.jar into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+Writing dummy JAR file sqldroid/sqldroid-1.0.0.jar.rb
+Writing dummy JAR file sqldroid/sqldroid-1.0.0.rb
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+ Result: 2
+The package contains too many methods.  Switching to multi-dex build.
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_bundle_activerecord_<4.0.0_activerecord-jdbcsqlite3-adapter_sqldroid_standalone
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.111558
+Fri Jul 25 11:15:58 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 20.086
+
+OK (1 test)
+
+
+Ended test ArjdbcTest#test_arjdbc: PASSED after 6:06
+================================================================================
+
+[ 2/38] BroadcastReceiverTest#test_generated_broadcast_receiver
+================================================================================
+Starting test BroadcastReceiverTest#test_generated_broadcast_receiver at 2014-07-25 11:16:53:
+
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/test_app/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.test_app
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+jopenssl...generator...parser...kryptcore...kryptproviderjdk...bcpkix-jdk15on-1.47...bcprov-jdk15on-1.47...ripper...Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+^R
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Result: 2
+The package contains too many methods.  Switching to multi-dex build.
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ClickReceiver.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/click_receiver.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/click_receiver_test.rb.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ClickReceiver.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.112230
+Fri Jul 25 11:22:30 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:..
+Test results for InstrumentationTestRunner=..
+Time: 3.298
+
+OK (2 tests)
+
+
+Ended test BroadcastReceiverTest#test_generated_broadcast_receiver: PASSED after 6:12
+================================================================================
+
+[ 3/38] GemTest#test_rake_gem
+================================================================================
+Starting test GemTest#test_rake_gem at 2014-07-25 11:23:05:
+
+Generating ruboto-1.1.3.dev.gem
+
+Ended test GemTest#test_rake_gem: PASSED after 0:01
+================================================================================
+
+[ 4/38] GitBasedGemTest#test_uri_shortener
+================================================================================
+Starting test GitBasedGemTest#test_uri_shortener at 2014-07-25 11:23:06:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Generating /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+Fetching https://github.com/Nyangawa/UriShortener.git
+Fetching gem metadata from http://rubygems.org/..
+Resolving dependencies...
+  Successfully built RubyGem
+  Name: uri_shortener
+  Version: 0.0.8
+  File: uri_shortener-0.0.8.gem
+Using uri_shortener 0.0.8 from https://github.com/Nyangawa/UriShortener.git (at master)
+Using bundler 1.6.5
+Found gems in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/bundle/gems
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.112438
+Fri Jul 25 11:24:38 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 3.967
+
+OK (1 test)
+
+
+Ended test GitBasedGemTest#test_uri_shortener: PASSED after 2:04
+================================================================================
+
+[ 5/38] MinimalAppTest#test_minimal_apk_is_within_limits
+================================================================================
+Starting test MinimalAppTest#test_minimal_apk_is_within_limits at 2014-07-25 11:25:10:
+
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/test_app/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.test_app
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding ruboto.yml:
+---
+included_stdlibs: []
+excluded_stdlibs:
+heap_alloc:
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...excluded...abbrev base64 benchmark bigdecimal cgi cgi-lib complex csv date date2 debug delegate digest dl drb e2mmap English Env erb eregex expect fileutils finalize find forwardable ftools generator getoptlong getopts gserver importenv io ipaddr irb jcode kconv logger mailread mathn matrix md5 monitor mutex_m net observer open-uri open3 optparse ostruct parsearg parsedate pathname ping pp prettyprint profile profiler pstore racc rational rdoc readbytes README resolv-replace resolv rexml rinda rss rubyunit runit scanf set sha1 shell shellwords singleton soap sync test thwait time tracer tsort un uri webrick win32 wsdl xmlrpc xsd yaml abbrev base64 benchmark bigdecimal cgi cmath complex csv date debug delegate digest dl drb e2mmap English erb expect fileutils find forwardable gauntlet_rdoc getoptlong gserver io ipaddr irb kconv logger mathn matrix minitest monitor mutex_m net observer open-uri open3 optparse ostruct pathname pp prettyprint prime profile profiler pstore racc rake rational rbconfig rdoc README resolv-replace resolv rexml rinda ripper rss scanf set shell shellwords singleton socket syck sync test thwait time tracer tsort un uri webrick win32 xmlrpc yaml abbrev benchmark bigdecimal cgi csv delegate drb erb fileutils gserver ipaddr irb matrix minitest monitor net open-uri openssl optparse ostruct pp profiler pstore racc rake rbconfig rdoc resolv rexml rinda rss set shell socket ssl sync test thread time tracer un uri webrick xmlrpc yaml ant ffi fiber fiddle gauntlet_rubygems jopenssl jopenssl18 jopenssl19 jopenssl21 json krypt krypt_missing kryptcore kryptproviderjdk mkmf openssl org psych pty rake rbconfig readline ripper rubygems securerandom syslog tempfile tmpdir ubygems Win32API
+WARNING:  No command line jar filtered.  Has it changed?
+Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Merged dex A (32 defs/62.2KiB) with dex B (515 defs/649.3KiB). Result is 547 defs/869.5KiB. Took 0.2s
+Result compacted from 10611.8KiB to 8243.5KiB to save 2368.3KiB
+Merged dex A (547 defs/869.5KiB) with dex B (7862 defs/7541.5KiB). Result is 8409 defs/8243.5KiB. Took 0.9s
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone_with_
+
+Ended test MinimalAppTest#test_minimal_apk_is_within_limits: PASSED after 1:17
+================================================================================
+
+[ 6/38] MinimalAppTest#test_minimal_apk_succeeds_tests
+================================================================================
+Starting test MinimalAppTest#test_minimal_apk_succeeds_tests at 2014-07-25 11:26:28:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone_with_
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.112629
+Fri Jul 25 11:26:29 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Merged dex A (32 defs/62.2KiB) with dex B (515 defs/649.3KiB). Result is 547 defs/869.5KiB. Took 0.2s
+Result compacted from 10611.8KiB to 8243.5KiB to save 2368.3KiB
+Merged dex A (547 defs/869.5KiB) with dex B (7862 defs/7541.5KiB). Result is 8409 defs/8243.5KiB. Took 1.0s
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:..
+Test results for InstrumentationTestRunner=..
+Time: 2.467
+
+OK (2 tests)
+
+
+Ended test MinimalAppTest#test_minimal_apk_succeeds_tests: PASSED after 1:43
+================================================================================
+
+[ 7/38] RakeTest#test_install_when_adb_server_is_stopped
+================================================================================
+Starting test RakeTest#test_install_when_adb_server_is_stopped at 2014-07-25 11:28:11:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.112824
+Fri Jul 25 11:28:24 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Ended test RakeTest#test_install_when_adb_server_is_stopped: PASSED after 0:20
+================================================================================
+
+[ 8/38] RakeTest#test_install_with_space_in_project_name
+================================================================================
+Starting test RakeTest#test_install_with_space_in_project_name at 2014-07-25 11:28:32:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar, jruby-stdlib-1.7.14.dev.jar
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/bin/RubotoTestApp-debug-unaligned.apk.d changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp with_space/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.113007
+Fri Jul 25 11:30:07 EDT 2014
+
+Ended test RakeTest#test_install_with_space_in_project_name: PASSED after 1:42
+================================================================================
+
+[ 9/38] RakeTest#test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed
+================================================================================
+Starting test RakeTest#test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed at 2014-07-25 11:30:15:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/not_ruby_source.properties changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+
+Ended test RakeTest#test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed: PASSED after 1:53
+================================================================================
+
+[10/38] RakeTest#test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
+================================================================================
+Starting test RakeTest#test_that_apk_is_built_if_only_one_ruby_source_file_has_changed at 2014-07-25 11:32:08:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+
+Ended test RakeTest#test_that_apk_is_built_if_only_one_ruby_source_file_has_changed: PASSED after 1:51
+================================================================================
+
+[11/38] RakeTest#test_that_manifest_is_updated_when_project_properties_are_changed
+================================================================================
+Starting test RakeTest#test_that_manifest_is_updated_when_project_properties_are_changed at 2014-07-25 11:34:00:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+
+Updating AndroidManifest.xml with target from project.properties
+
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+
+BUILD FAILED
+/Users/uwe/android-sdk-macosx/tools/ant/build.xml:542: Unable to resolve project target 'android-6'
+
+Total time: 0 seconds
+rake aborted!
+Command failed with status (1): [ant -q -S debug...]
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/rakelib/ruboto.rake:951:in `build_apk'
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/rakelib/ruboto.rake:542:in `block in <top (required)>'
+Tasks: TOP => debug => /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk
+(See full trace by running task with --trace)
+
+Ended test RakeTest#test_that_manifest_is_updated_when_project_properties_are_changed: PASSED after 0:01
+================================================================================
+
+[12/38] RakeTest#test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity
+================================================================================
+Starting test RakeTest#test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity at 2014-07-25 11:34:02:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.113403
+Fri Jul 25 11:34:03 EDT 2014
+
+Pushing files to apk public file area:
+ruboto_test_app_activity.rb: 211 KB/s (957 bytes in 0.004s)
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+Installing package timed out.
+Retrying install...
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:..
+Test results for InstrumentationTestRunner=..
+Time: 2.255
+
+OK (2 tests)
+
+
+Ended test RakeTest#test_that_update_scripts_task_copies_files_to_sdcard_and_are_read_by_activity: PASSED after 2:33
+================================================================================
+
+[13/38] RubotoActivityTest#test_ruboto_activity_as_entry_point
+================================================================================
+Starting test RubotoActivityTest#test_ruboto_activity_as_entry_point at 2014-07-25 11:36:35:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.113637
+Fri Jul 25 11:36:37 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+Starting: Intent { cmp=org.ruboto.test_app/org.ruboto.RubotoActivity (has extras) }
+
+Ended test RubotoActivityTest#test_ruboto_activity_as_entry_point: PASSED after 0:09
+================================================================================
+
+[14/38] RubotoGenTest#test_activity_tests
+================================================================================
+Starting test RubotoGenTest#test_activity_tests at 2014-07-25 11:36:45:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/Base64LoadsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/base64_loads_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/base64_loads_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/YamlLoadsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/yaml_loads_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/yaml_loads_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ReadSourceFileActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/read_source_file_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/read_source_file_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirListsFilesInApkActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/dir_lists_files_in_apk_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dir_lists_files_in_apk_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RepeatRubotoImportWidgetActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/repeat_ruboto_import_widget_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/repeat_ruboto_import_widget_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/CallSuperActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/call_super_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DialogFragmentActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dialog_fragment_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirAndFileActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dir_and_file_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/image_button_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonAndButtonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/image_button_and_button_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/JsonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/json_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/LocationActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/location_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MarginsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/margins_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/navigation_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationTargetActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/navigation_target_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NoOnCreateActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/no_on_create_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/OptionMenuActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/option_menu_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/PsychActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/psych_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SpinnerActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/spinner_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StackActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/stack_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StartupExceptionActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/startup_exception_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SubclassActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/subclass_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ViewConstantsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/view_constants_activity_test.rb.
+Added activity to manifest.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/Base64LoadsActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/CallSuperActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DialogFragmentActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirAndFileActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirListsFilesInApkActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonAndButtonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/JsonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/LocationActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MarginsActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationTargetActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NoOnCreateActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/OptionMenuActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/PsychActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ReadSourceFileActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RepeatRubotoImportWidgetActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SpinnerActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StackActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StartupExceptionActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SubclassActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ViewConstantsActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/YamlLoadsActivity.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.113832
+Fri Jul 25 11:38:32 EDT 2014
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:....................................................
+Test results for InstrumentationTestRunner=.........................................
+...........
+Time: 134.504
+
+OK (52 tests)
+
+
+Ended test RubotoGenTest#test_activity_tests: PASSED after 4:34
+================================================================================
+
+[15/38] RubotoGenTest#test_activity_with_first_letter_lower_case_in_name
+================================================================================
+Starting test RubotoGenTest#test_activity_with_first_letter_lower_case_in_name at 2014-07-25 11:41:19:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/AppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/app_activity_test.rb.
+Added activity to manifest.
+
+Ended test RubotoGenTest#test_activity_with_first_letter_lower_case_in_name: PASSED after 0:00
+================================================================================
+
+[16/38] RubotoGenTest#test_activity_with_number_in_name
+================================================================================
+Starting test RubotoGenTest#test_activity_with_number_in_name at 2014-07-25 11:41:20:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/App1Activity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/app1_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/app1_activity_test.rb.
+Added activity to manifest.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/App1Activity.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.114259
+Fri Jul 25 11:42:59 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:....
+Test results for InstrumentationTestRunner=....
+Time: 5.291
+
+OK (4 tests)
+
+
+Ended test RubotoGenTest#test_activity_with_number_in_name: PASSED after 2:17
+================================================================================
+
+[17/38] RubotoGenTest#test_gen_class_activity_with_lowercase_should_fail
+================================================================================
+Starting test RubotoGenTest#test_gen_class_activity_with_lowercase_should_fail at 2014-07-25 11:43:38:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+invalid: argument(class)="activity"
+
+Ended test RubotoGenTest#test_gen_class_activity_with_lowercase_should_fail: PASSED after 0:00
+================================================================================
+
+[18/38] RubotoGenTest#test_gen_subclass
+================================================================================
+Starting test RubotoGenTest#test_gen_subclass at 2014-07-25 11:43:38:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MyDatabaseHelper.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/my_database_helper.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/my_database_helper_test.rb.
+Loading Android API...Done.
+Generating methods for MyDatabaseHelper...Done. Methods created: 5
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MyDatabaseHelper.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/my_database_helper.rb changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+
+Ended test RubotoGenTest#test_gen_subclass: PASSED after 1:53
+================================================================================
+
+[19/38] RubotoGenTest#test_gen_subclass_of_array_adapter
+================================================================================
+Starting test RubotoGenTest#test_gen_subclass_of_array_adapter at 2014-07-25 11:45:32:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoArrayAdapter.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_array_adapter.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_array_adapter_test.rb.
+Loading Android API...Done.
+Generating methods for RubotoArrayAdapter...Done. Methods created: 32
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoArrayAdapter.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/list_item.xml changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoArrayAdapter.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.114728
+Fri Jul 25 11:47:28 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 2.433
+
+OK (1 test)
+
+
+Ended test RubotoGenTest#test_gen_subclass_of_array_adapter: PASSED after 2:32
+================================================================================
+
+[20/38] RubotoGenTest#test_gitignore_is_included_in_new_project
+================================================================================
+Starting test RubotoGenTest#test_gitignore_is_included_in_new_project at 2014-07-25 11:48:04:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+
+Ended test RubotoGenTest#test_gitignore_is_included_in_new_project: PASSED after 0:00
+================================================================================
+
+[21/38] RubotoGenTest#test_icons_are_updated
+================================================================================
+Starting test RubotoGenTest#test_icons_are_updated at 2014-07-25 11:48:05:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+
+Ended test RubotoGenTest#test_icons_are_updated: PASSED after 0:00
+================================================================================
+
+[22/38] RubotoGenTest#test_new_apk_size_is_within_limits
+================================================================================
+Starting test RubotoGenTest#test_new_apk_size_is_within_limits at 2014-07-25 11:48:05:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+
+Ended test RubotoGenTest#test_new_apk_size_is_within_limits: PASSED after 0:00
+================================================================================
+
+[23/38] RubotoSetupTest#test_if_page_still_exists
+================================================================================
+Starting test RubotoSetupTest#test_if_page_still_exists at 2014-07-25 11:48:06:
+
+
+Ended test RubotoSetupTest#test_if_page_still_exists: PASSED after 0:00
+================================================================================
+
+[24/38] RubotoSetupTest#test_if_regex_still_applies_to_sdk
+================================================================================
+Starting test RubotoSetupTest#test_if_regex_still_applies_to_sdk at 2014-07-25 11:48:06:
+
+
+Ended test RubotoSetupTest#test_if_regex_still_applies_to_sdk: PASSED after 0:00
+================================================================================
+
+[25/38] RubotoUpdate1_1_2Tools23Test#test_subclass_is_updated
+================================================================================
+Starting test RubotoUpdate1_1_2Tools23Test#test_subclass_is_updated at 2014-07-25 11:48:07:
+
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_example_1.1.2_tools_r23_standalone
+Adding a subclass
+Fetching: ruboto-1.1.2.gem (100%)
+Successfully installed ruboto-1.1.2
+1 gem installed
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MyDatabaseHelper.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/my_database_helper.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/my_database_helper_test.rb.
+Loading Android API...Done.
+Generating methods for MyDatabaseHelper...Done. Methods created: 4
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Error: The project either has no target set or the target is invalid.
+Please provide a --target to the 'android update' command.
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Regenerating subclass org.ruboto.test_app.MyDatabaseHelper
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MyDatabaseHelper.java.
+Loading Android API...Done.
+Generating methods for MyDatabaseHelper...Done. Methods created: 4
+Regenerating Activity RubotoTestAppActivity
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Current jruby version: x.x.x
+New jruby version: 1.7.14.dev
+Removing libs/jruby-core-x.x.x.jar...Done.
+Removing libs/jruby-stdlib-x.x.x.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+Copying icons...Done.
+Generating methods for RubotoActivity...Done. Methods created: 57
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar, jruby-stdlib-1.7.14.dev.jar
+patching build.xml
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar, jruby-stdlib-1.7.14.dev.jar
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/ruboto.yml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug-unaligned.apk.d changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/DexDex.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/EntryPointActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/FrameworkHack.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/JRubyAdapter.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/Log.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoBroadcastReceiver.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoComponent.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoDialog.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoService.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/Script.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/ScriptInfo.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/ScriptLoader.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/SplashActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MyDatabaseHelper.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/get_ruboto_core.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/my_database_helper.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/activity/reload.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/activity.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/base.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/broadcast_receiver.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/package.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/preference.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/service.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/util/stack.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/util/toast.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/version.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/widget.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+
+Ended test RubotoUpdate1_1_2Tools23Test#test_subclass_is_updated: PASSED after 2:09
+================================================================================
+
+[26/38] RubotoUpdateTest#test_jruby_adapter_heap_alloc
+================================================================================
+Starting test RubotoUpdateTest#test_jruby_adapter_heap_alloc at 2014-07-25 11:50:17:
+
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/test_app/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.test_app
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc: 16
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+jopenssl...generator...parser...kryptcore...kryptproviderjdk...bcpkix-jdk15on-1.47...bcprov-jdk15on-1.47...ripper...Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Regenerating Activity RubotoTestAppActivity
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Copying dx.jar to libs...Done.
+JRuby is up to date at version 1.7.14.dev. Make sure you 'gem update jruby-jars' if there is a new version.
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+Copying icons...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Result: 2
+The package contains too many methods.  Switching to multi-dex build.
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_heap_alloc_16_updated_standalone
+
+Ended test RubotoUpdateTest#test_jruby_adapter_heap_alloc: PASSED after 4:15
+================================================================================
+
+[27/38] RubotoUpdatedExample1_1_2Tools23Test#test_activity_tests
+================================================================================
+Starting test RubotoUpdatedExample1_1_2Tools23Test#test_activity_tests at 2014-07-25 11:54:32:
+
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Error: The project either has no target set or the target is invalid.
+Please provide a --target to the 'android update' command.
+Updated local.properties
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Regenerating Activity RubotoTestAppActivity
+Updated file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Current jruby version: x.x.x
+New jruby version: 1.7.14.dev
+Removing libs/jruby-core-x.x.x.jar...Done.
+Removing libs/jruby-stdlib-x.x.x.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+Copying icons...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 57
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar, jruby-stdlib-1.7.14.dev.jar
+patching build.xml
+Jars have changed: dx.jar, jruby-core-1.7.14.dev.jar, jruby-stdlib-1.7.14.dev.jar
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/ruboto.yml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug-unaligned.apk.d changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/DexDex.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/EntryPointActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/FrameworkHack.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/JRubyAdapter.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/Log.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoBroadcastReceiver.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoComponent.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoDialog.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoService.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/Script.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/ScriptInfo.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/ScriptLoader.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/SplashActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/get_ruboto_core.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/activity/reload.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/activity.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/base.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/broadcast_receiver.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/package.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/preference.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/service.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/util/stack.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/util/toast.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/version.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto/widget.rb changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_example_1.1.2_tools_r23_updated_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/Base64LoadsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/base64_loads_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/base64_loads_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/YamlLoadsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/yaml_loads_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/yaml_loads_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ReadSourceFileActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/read_source_file_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/read_source_file_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirListsFilesInApkActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/dir_lists_files_in_apk_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dir_lists_files_in_apk_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RepeatRubotoImportWidgetActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/repeat_ruboto_import_widget_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/repeat_ruboto_import_widget_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/CallSuperActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/call_super_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DialogFragmentActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dialog_fragment_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirAndFileActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/dir_and_file_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/image_button_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonAndButtonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/image_button_and_button_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/JsonActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/json_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/LocationActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/location_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MarginsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/margins_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/navigation_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationTargetActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/navigation_target_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NoOnCreateActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/no_on_create_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/OptionMenuActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/option_menu_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/PsychActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/psych_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SpinnerActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/spinner_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StackActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/stack_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StartupExceptionActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/startup_exception_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SubclassActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/subclass_activity_test.rb.
+Added activity to manifest.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ViewConstantsActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/view_constants_activity_test.rb.
+Added activity to manifest.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/RubotoActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/CallSuperActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DialogFragmentActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirAndFileActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/DirListsFilesInApkActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ImageButtonAndButtonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/JsonActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/LocationActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/MarginsActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NavigationTargetActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/NoOnCreateActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/OptionMenuActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/PsychActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ReadSourceFileActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RepeatRubotoImportWidgetActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SpinnerActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StackActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/StartupExceptionActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/SubclassActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/ViewConstantsActivity.java changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/YamlLoadsActivity.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.115704
+Fri Jul 25 11:57:04 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:....................................................
+Test results for InstrumentationTestRunner=.........................................
+...........
+Time: 121.065
+
+OK (52 tests)
+
+
+Ended test RubotoUpdatedExample1_1_2Tools23Test#test_activity_tests: PASSED after 5:02
+================================================================================
+
+[28/38] RubotoUpdatedExample1_1_2Tools23Test#test_dexmaker_jar_is_removed
+================================================================================
+Starting test RubotoUpdatedExample1_1_2Tools23Test#test_dexmaker_jar_is_removed at 2014-07-25 11:59:35:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_example_1.1.2_tools_r23_updated_standalone
+
+Ended test RubotoUpdatedExample1_1_2Tools23Test#test_dexmaker_jar_is_removed: PASSED after 0:00
+================================================================================
+
+[29/38] RubotoUpdatedExample1_1_2Tools23Test#test_icons_are_untouched
+================================================================================
+Starting test RubotoUpdatedExample1_1_2Tools23Test#test_icons_are_untouched at 2014-07-25 11:59:36:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_example_1.1.2_tools_r23_updated_standalone
+
+Ended test RubotoUpdatedExample1_1_2Tools23Test#test_icons_are_untouched: PASSED after 0:00
+================================================================================
+
+[30/38] RubotoUpdatedExample1_1_2Tools23Test#test_properties_and_ant_file_has_no_duplicates
+================================================================================
+Starting test RubotoUpdatedExample1_1_2Tools23Test#test_properties_and_ant_file_has_no_duplicates at 2014-07-25 11:59:36:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_example_1.1.2_tools_r23_updated_standalone
+
+Ended test RubotoUpdatedExample1_1_2Tools23Test#test_properties_and_ant_file_has_no_duplicates: PASSED after 0:00
+================================================================================
+
+[31/38] SampleBroadcastReceiverTest#test_on_receive_calls_log_e
+================================================================================
+Starting test SampleBroadcastReceiverTest#test_on_receive_calls_log_e at 2014-07-25 11:59:36:
+
+
+Ended test SampleBroadcastReceiverTest#test_on_receive_calls_log_e: PASSED after 0:00
+================================================================================
+
+[32/38] SampleBroadcastReceiverTest#test_on_receive_calls_log_v
+================================================================================
+Starting test SampleBroadcastReceiverTest#test_on_receive_calls_log_v at 2014-07-25 11:59:36:
+
+
+Ended test SampleBroadcastReceiverTest#test_on_receive_calls_log_v: PASSED after 0:00
+================================================================================
+
+[33/38] ServiceBlockTest#test_service_startup
+================================================================================
+Starting test ServiceBlockTest#test_service_startup at 2014-07-25 11:59:37:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.115938
+Fri Jul 25 11:59:38 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Pushing files to apk public file area:
+ruboto_test_app_activity.rb: 402 KB/s (1531 bytes in 0.003s)
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+Installing package timed out.
+Retrying install...
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 2.409
+
+OK (1 test)
+
+
+Ended test ServiceBlockTest#test_service_startup: PASSED after 2:30
+================================================================================
+
+[34/38] ServiceClassTest#test_service_startup
+================================================================================
+Starting test ServiceClassTest#test_service_startup at 2014-07-25 12:02:07:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.120209
+Fri Jul 25 12:02:09 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Pushing files to apk public file area:
+ruboto_test_app_activity.rb: 371 KB/s (1519 bytes in 0.003s)
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 2.403
+
+OK (1 test)
+
+
+Ended test ServiceClassTest#test_service_startup: PASSED after 2:00
+================================================================================
+
+[35/38] ServiceTest#test_service_startup
+================================================================================
+Starting test ServiceTest#test_service_startup at 2014-07-25 12:04:08:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestService.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_service.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_service_test.rb.
+Added service to manifest.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestService.java changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.120541
+Fri Jul 25 12:05:41 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 2.286
+
+OK (1 test)
+
+
+Ended test ServiceTest#test_service_startup: PASSED after 2:03
+================================================================================
+
+[36/38] SplashTest#test_splash
+================================================================================
+Starting test SplashTest#test_splash at 2014-07-25 12:06:11:
+
+Copying app from template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_standalone
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable/logo.png changed.
+/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/splash.xml changed.
+Forcing rebuild of /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/RubotoTestApp-debug.apk.
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.120801
+Fri Jul 25 12:08:01 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+Installing package timed out.
+Retrying install...
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+Java classes and jars are unchanged.
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:..
+Test results for InstrumentationTestRunner=..
+Time: 1.986
+
+OK (2 tests)
+
+
+Ended test SplashTest#test_splash: PASSED after 4:18
+================================================================================
+
+[37/38] SqldroidTest#test_sqldroid
+================================================================================
+Starting test SqldroidTest#test_sqldroid at 2014-07-25 12:10:30:
+
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/test_app/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.test_app
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test_app/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/test_app/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding Gemfile.apk: sqldroid
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+jopenssl...generator...parser...kryptcore...kryptproviderjdk...bcpkix-jdk15on-1.47...bcprov-jdk15on-1.47...ripper...Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+Generating /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+Fetching gem metadata from http://rubygems.org/..
+Resolving dependencies...
+Fetching: sqldroid-1.0.0-java.gem (100%)
+Installing sqldroid 1.0.0
+Using bundler 1.6.5
+Found gems in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/bundle/gems
+Expanding sqldroid-1.0.0-java sqldroid/sqldroid-1.0.0.jar into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar
+Writing dummy JAR file sqldroid/sqldroid-1.0.0.jar.rb
+Writing dummy JAR file sqldroid/sqldroid-1.0.0.rb
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Result: 2
+The package contains too many methods.  Switching to multi-dex build.
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_bundle_sqldroid_standalone
+Package org.ruboto.test_app already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.121427
+Fri Jul 25 12:14:27 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.test_app/files/scripts
+
+Pushing files to apk public file area:
+ruboto_test_app_activity.rb: 442 KB/s (1119 bytes in 0.002s)
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/bundle.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:.
+Test results for InstrumentationTestRunner=.
+Time: 1.935
+
+OK (1 test)
+
+
+Ended test SqldroidTest#test_sqldroid: PASSED after 5:51
+================================================================================
+
+[38/38] UppercasePackageNameTest#test_gen_package_with_uppercase_name
+================================================================================
+Starting test UppercasePackageNameTest#test_gen_package_with_uppercase_name at 2014-07-25 12:16:22:
+
+Generating app /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+
+Generating Android app RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/TestApp
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/TestApp/RubotoTestAppActivity.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/values/strings.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/layout/main.xml
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-xhdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-hdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-mdpi
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/res/drawable-ldpi
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/proguard-project.txt
+Removed file src/org/ruboto/TestApp/RubotoTestAppActivity.java
+Removed file res/layout/main.xml
+Done
+
+Adding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest...Done.
+
+Generating Android test project RubotoTestApp in /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp...
+Found main project package: org.ruboto.TestApp
+Found main project activity: RubotoTestAppActivity
+Found main project target: Android 4.4.2
+Created project directory: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/TestApp
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/TestApp/RubotoTestAppActivityTest.java
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/res
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/bin
+Created directory /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/libs
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/AndroidManifest.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/build.xml
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/proguard-project.txt
+Done
+
+Copying files:
+.gitignore...Done.
+Rakefile...Done.
+ruboto.yml...Done.
+assets...Done.
+rakelib...Done.
+res/layout...Done.
+test...Done.
+Copying ruboto/version.rb...Done.
+Copying additional ruboto script components...Done.
+Copying icons...Done.
+Ruboto java classes...Done.
+Ruboto java test classes...Done.
+Loading Android API...Done.
+Generating methods for RubotoActivity...Done. Methods created: 62
+Generating methods for RubotoService...Done. Methods created: 10
+Generating methods for RubotoBroadcastReceiver...Done. Methods created: 1
+patching build.xml
+Generating the default Activity and script...Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/org/ruboto/TestApp/RubotoTestAppActivity.java.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/src/ruboto_test_app_activity.rb.
+Added file /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/ruboto_test_app_activity_test.rb.
+Done.
+
+Hello, RubotoTestApp
+Adding ruboto.yml:
+---
+included_stdlibs:
+excluded_stdlibs:
+heap_alloc:
+patching build.xml
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-core-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Setting JUMBO dex file format...Done.
+Copying dx.jar to libs...Done.
+Removing unneeded classes from jruby-core-1.7.14.dev.jar...Done.
+Copying /Users/uwe/workspace/jruby/ruboto/tmp/gems/gems/jruby-jars-1.7.14.dev/lib/jruby-stdlib-complete-1.7.14.dev-SNAPSHOT.jar to libs...Done.
+Reformatting jruby-stdlib-1.7.14.dev.jar...Patching shared/krypt/provider/ffi/provider.rb...
+Patching shared/krypt/provider/provider.rb...
+Patching shared/krypt/provider.rb...
+jopenssl...generator...parser...kryptcore...kryptproviderjdk...bcpkix-jdk15on-1.47...bcprov-jdk15on-1.47...ripper...Done.
+Removing unneeded classes from dx.jar...Done.
+JRuby version is now: 1.7.14.dev
+ant -q -S debug
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Result: 2
+The package contains too many methods.  Switching to multi-dex build.
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+Result: 1
+Storing app as template /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp_template_65132_package_org.ruboto.TestApp_standalone
+Package org.ruboto.TestApp already installed, but of different size or timestamp.  Replacing package.
+adb shell date -s 20140725.121941
+Fri Jul 25 12:19:41 EDT 2014
+adb shell rm -r /mnt/sdcard/Android/data/org.ruboto.TestApp/files/scripts
+Deleted scripts directory /mnt/sdcard/Android/data/org.ruboto.TestApp/files/scripts
+
+Running quick tests
+ant -q -S instrument install
+Trying to override old definition of task run-tests-helper
+No sub-builds to iterate on
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+No sub-builds to iterate on
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Converting compiled files and external libraries into /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin (multi-dex)
+Dexing /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/bin/classes and /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-stdlib-1.7.14.dev.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/dx.jar:/Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/libs/jruby-core-1.7.14.dev.jar
+Adding assets/classes2.jar to RubotoTestApp.ap_
+warning: [options] source value 1.5 is obsolete and will be removed in a future release
+warning: [options] target value 1.5 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /Users/uwe/workspace/jruby/ruboto/tmp/RubotoTestApp/test/src/org/ruboto/test/ActivityTest.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+3 warnings
+Trying to override old definition of task run-tests-helper
+Trying to override old definition of task dex-helper
+ant -q -S run-tests-quick
+Trying to override old definition of task run-tests-helper
+Running tests with failure detection...
+WARNING: linker: libdvm.so has text relocations. This is wasting memory and is a security risk. Please fix.
+
+org.ruboto.test.ActivityTest:..
+Test results for InstrumentationTestRunner=..
+Time: 2.427
+
+OK (2 tests)
+
+
+Ended test UppercasePackageNameTest#test_gen_package_with_uppercase_name: PASSED after 5:11
+================================================================================
+
+ = 311.23 sFinished tests in 4246.863966s, 0.0089 tests/s, 0.0240 assertions/s.
+38 tests, 102 assertions, 0 failures, 0 errors, 0 skips
+
+ruby -v: ruby 2.1.2p95 (2014-05-08 revision 45877) [x86_64-darwin13.0]
+Tests exited with code 0
+
+ANDROID_TARGET: 19
+RUBOTO_PLATFORM: STANDALONE
+JRUBY_JARS_VERSION: 1.7.14.dev
+********************************************************************************
+
+
+/-------------------------------------------------------------------------\
+|                       Matrix tests completed OK!                        |
+\-------------------------------------------------------------------------/
+
+macbeth:ruboto uwe$

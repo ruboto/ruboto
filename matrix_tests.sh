@@ -1,19 +1,20 @@
 #!/bin/bash -e
 
-if [ -z `find . -name "jruby-jars-*.dev.gem" -maxdepth 1` ] ; then
-  echo JRuby-jars master gem is missing.
-  rake get_jruby_jars_snapshot
+if [ `find . -name "jruby-jars-*.gem" -maxdepth 1 | wc -l` -ne 2 ] ; then
+  echo JRuby-jars gems are missing.
+  rake get_jruby_jars_snapshots
 else
-  if [ `find . -name "jruby-jars-*.dev.gem" -mtime +1d -maxdepth 1` ] ; then
-    echo jruby-jars master is old.
-    rake get_jruby_jars_snapshot
+  if [ `find . -name "jruby-jars-*.gem" -mtime +1d -maxdepth 1` ] ; then
+    echo jruby-jars are old.
+    rake get_jruby_jars_snapshots
   fi
 fi
 
 ANDROID_TARGETS="19 18 17 16 15 10" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
-MASTER=`ls jruby-jars-*.dev.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
-STANDALONE_JRUBY_VERSIONS="$MASTER 1.7.12 1.7.11"
+STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
+MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
+STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE 1.7.13 1.7.12"
 RUBOTO_UPDATE_EXAMPLES=1
 # STRIP_INVOKERS=1
 # TEST_PART=4of5

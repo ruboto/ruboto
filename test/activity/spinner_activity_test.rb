@@ -33,18 +33,18 @@ end
 test('list spinner view resources') do |activity|
   activity.run_on_ui_thread do
     spinner = activity.findViewById(45)
-    assert_equal R::layout::simple_spinner_item, spinner.adapter.mResource
-    assert_equal R::layout::simple_spinner_item, spinner.adapter.mDropDownResource
+    assert_equal android.R::layout::simple_spinner_item, spinner.adapter.mResource
+    assert_equal android.R::layout::simple_spinner_item, spinner.adapter.mDropDownResource
     assert_equal 0, spinner.adapter.mFieldId
 
     spinner = activity.findViewById(46)
-    assert_equal R::layout::simple_spinner_dropdown_item, spinner.adapter.mResource
-    assert_equal R::layout::simple_spinner_dropdown_item, spinner.adapter.mDropDownResource
+    assert_equal android.R::layout::simple_spinner_dropdown_item, spinner.adapter.mResource
+    assert_equal android.R::layout::simple_spinner_dropdown_item, spinner.adapter.mDropDownResource
     assert_equal 0, spinner.adapter.mFieldId
 
     spinner = activity.findViewById(47)
-    assert_equal R::layout::simple_spinner_dropdown_item, spinner.adapter.mResource
-    assert_equal R::layout::simple_spinner_item, spinner.adapter.mDropDownResource
+    assert_equal android.R::layout::simple_spinner_dropdown_item, spinner.adapter.mResource
+    assert_equal android.R::layout::simple_spinner_item, spinner.adapter.mDropDownResource
     assert_equal 0, spinner.adapter.mFieldId
   end
 end

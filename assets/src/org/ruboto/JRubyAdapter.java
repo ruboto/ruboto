@@ -303,6 +303,10 @@ public class JRubyAdapter {
                 System.out.println("JRuby version: " + Class.forName("org.jruby.runtime.Constants", true, scriptingContainerClass.getClassLoader())
                         .getDeclaredField("VERSION").get(String.class));
 
+                // TODO(uwe):  Add a way to display startup progress.
+                put("$application_context", appContext.getApplicationContext());
+                runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  puts e\nend");
+
                 initialized = true;
             } catch (ClassNotFoundException e) {
                 handleInitException(e);
