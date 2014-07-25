@@ -632,7 +632,7 @@ task '.travis.yml' do
   matrix = ''
   [19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [:MASTER, :STABLE]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
+    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         matrix << "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
