@@ -7,16 +7,26 @@ require 'timeout'
 
 ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
 
-ANT_CMD = ON_WINDOWS ? 'ant.bat' : 'ant'
-ANT_CMD << ' -q -S' unless verbose == true || Rake.application.options.trace == true
-ANT_CMD << ' -v' if Rake.application.options.trace == true
+ANT_BINARY = ON_WINDOWS ? 'ant.bat' : 'ant'
+ANT_VERSION_CMD = "#{ANT_BINARY} -version"
 
-if (ant_version_output = `#{ANT_CMD} -version`) !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8)
-  puts "#{ANT_CMD} -version"
+if (ant_version_output = `#{ANT_VERSION_CMD}`) !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8)
+  puts ANT_VERSION_CMD
   puts ant_version_output
   puts "ANT version 1.8.0 or later required.  Version found: #{$1}.#{$2}.#{$3}"
   exit 1
 end
+
+ANT_CMD = ANT_BINARY.dup
+ANT_CMD << ' -q' unless verbose == true || Rake.application.options.trace == true
+
+# FIXME(uwe):  Remove when we stop supporting ANT 1.8.x
+if $1.to_i >= 2 || $2.to_i >= 9
+  ANT_CMD << ' -S' unless verbose == true || Rake.application.options.trace == true
+end
+# EMXIF
+
+ANT_CMD << ' -v' if Rake.application.options.trace == true
 
 #
 # OS independent "which"
