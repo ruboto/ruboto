@@ -11,7 +11,7 @@ before_install:
 env:
   global:
     - RUBOTO_UPDATE_EXAMPLES=0
-    - MASTER=9000.dev* Looks like we have to hard code the version s for now.
+    - MASTER=9000.dev
     - STABLE=1.7.14.dev
 #    - "STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`"
 #    - "MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`"
