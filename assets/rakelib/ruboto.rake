@@ -11,7 +11,9 @@ ANT_CMD = ON_WINDOWS ? 'ant.bat' : 'ant'
 ANT_CMD << ' -q -S' unless verbose == true || Rake.application.options.trace == true
 ANT_CMD << ' -v' if Rake.application.options.trace == true
 
-if `#{ANT_CMD} -version` !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8)
+if (ant_version_output = `#{ANT_CMD} -version`) !~ /version (\d+)\.(\d+)\.(\d+)/ || $1.to_i < 1 || ($1.to_i == 1 && $2.to_i < 8)
+  puts "#{ANT_CMD} -version"
+  puts ant_version_output
   puts "ANT version 1.8.0 or later required.  Version found: #{$1}.#{$2}.#{$3}"
   exit 1
 end
