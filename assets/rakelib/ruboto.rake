@@ -1032,7 +1032,9 @@ def install_apk
       retry
     end
     puts 'Trying one final time to install the package:'
+    install_start = Time.now
     output = `adb install "#{APK_FILE}" 2>&1`
+    puts "Install took #{(Time.now - install_start).to_i}s."
   end
   puts output
   raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
