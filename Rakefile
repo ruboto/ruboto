@@ -527,6 +527,7 @@ namespace :platform do
 
     failure_pattern = /^Failure \[(.*)\]/
     success_pattern = /^Success/
+    install_timeout = 300
     case package_installed?
     when true
       puts "Package #{package} already installed."
@@ -537,7 +538,7 @@ namespace :platform do
       output = nil
       install_retry_count = 0
       begin
-        timeout 120 do
+        timeout install_timeout do
           output = `adb install -r "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
         end
       rescue Timeout::Error
@@ -569,7 +570,7 @@ namespace :platform do
     output = nil
     install_retry_count = 0
     begin
-      timeout 120 do
+      timeout install_timeout do
         output = `adb install "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
       end
     rescue Timeout::Error
