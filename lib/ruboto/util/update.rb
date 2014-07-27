@@ -462,7 +462,7 @@ module Ruboto
                     'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd',
                     'jnr/constants/platform/sunos',
-                    'jnr/enxio',
+                    # 'jnr/enxio',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
                     'jnr/ffi/mapper',

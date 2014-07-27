@@ -262,7 +262,7 @@ class Test::Unit::TestCase
       4.times do
         sleep 600
         break if test_completed
-        print '...'
+        puts '...'
       end
     end
     Dir.chdir APP_DIR do
