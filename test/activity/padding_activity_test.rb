@@ -14,16 +14,28 @@ end
 
 test('padding is set') do |activity|
   assert_equal 40, @layout.padding_bottom
-  assert_equal 30, @layout.padding_end
+
+  # FIXME(uwe): Remove condition when we stop testing api level < 17
+  assert_equal(30, @layout.padding_end) if android.os.Build::VERSION::SDK_INT >= 17
+
   assert_equal 10, @layout.padding_left
   assert_equal 30, @layout.padding_right
-  assert_equal 10, @layout.padding_start
+
+  # FIXME(uwe): Remove condition when we stop testing api level < 17
+  assert_equal(10, @layout.padding_start) if android.os.Build::VERSION::SDK_INT >= 17
+
   assert_equal 20, @layout.padding_top
 
   assert_equal 8, @text_view.padding_bottom
-  assert_equal 4, @text_view.padding_end
+
+  # FIXME(uwe): Remove condition when we stop testing api level < 17
+  assert_equal(4, @text_view.padding_end) if android.os.Build::VERSION::SDK_INT >= 17
+
   assert_equal 1, @text_view.padding_left
   assert_equal 4, @text_view.padding_right
-  assert_equal 1, @text_view.padding_start
+
+  # FIXME(uwe): Remove condition when we stop testing api level < 17
+  assert_equal(1, @text_view.padding_start) if android.os.Build::VERSION::SDK_INT >= 17
+
   assert_equal 2, @text_view.padding_top
 end
