@@ -18,14 +18,6 @@ if (ant_version_output = `#{ANT_VERSION_CMD}`) !~ /version (\d+)\.(\d+)\.(\d+)/ 
 end
 
 ANT_CMD = ANT_BINARY.dup
-ANT_CMD << ' -q' unless verbose == true || Rake.application.options.trace == true
-
-# FIXME(uwe):  Remove when we stop supporting ANT 1.8.x
-if $1.to_i >= 2 || $2.to_i >= 9
-  ANT_CMD << ' -S' unless verbose == true || Rake.application.options.trace == true
-end
-# EMXIF
-
 ANT_CMD << ' -v' if Rake.application.options.trace == true
 
 #
