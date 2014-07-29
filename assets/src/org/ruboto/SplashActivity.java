@@ -99,7 +99,7 @@ public class SplashActivity extends Activity {
                                 } else {
                                     Toast.makeText(SplashActivity.this,"Failed to initialize Ruboto Core.",Toast.LENGTH_LONG).show();
                                     try {
-                                        TextView textView = (TextView) findViewById(Class.forName(getPackageName() + ".R$id").getField("text").getInt(null));
+                                        TextView textView = (TextView) findViewById(android.R.id.text1);
                                         textView.setText("Woops!  Ruboto Core was installed, but it failed to initialize properly!  I am not sure how to proceed from here.  If you can, please file an error report at http://ruboto.org/");
                                     } catch (Exception e) {
                                     }

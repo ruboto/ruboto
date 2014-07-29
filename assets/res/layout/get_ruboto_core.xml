@@ -7,7 +7,6 @@
     android:gravity="center_horizontal|center_vertical"
 >
   <ImageButton
-      android:id="@+id/image"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
       android:src="@drawable/get_ruboto_core"
@@ -15,7 +14,7 @@
       android:scaleType="fitCenter"
       android:onClick="getRubotoCore"
   />
-  <TextView android:id="@+id/text"
+  <TextView android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome to Ruboto!  This is the first Ruboto application installed on this device.  To continue, you need to install the Ruboto Core platform package.  Click on the image above to go to the market and d\
