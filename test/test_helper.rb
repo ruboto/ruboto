@@ -229,6 +229,13 @@ class Test::Unit::TestCase
         File.write('AndroidManifest.xml',
             File.read('AndroidManifest.xml').sub(%r{</manifest>},
                 "    <uses-permission android:name='android.permission.INTERNET'/>\n</manifest>"))
+        File.write('res/layout/dummy_layout.xml', <<-EOF)
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/my_text"
+  android:layout_width="wrap_content" android:layout_height="wrap_content"
+  android:text="This is a dummy layout to generate layout and id constants." />
+        EOF
         if update
           update_app
         end

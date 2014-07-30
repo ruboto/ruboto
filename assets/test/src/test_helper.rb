@@ -4,6 +4,10 @@ def assert(value, message = nil)
   raise "#{"#{message}\n" if message}#{value.inspect} expected to be true" unless value
 end
 
+def fail(message = nil)
+  assert false, message || 'Failure'
+end
+
 def assert_equal(expected, actual, message = nil)
   raise "#{"#{message}\n" if message}'#{expected}' expected, but got '#{actual}'" unless expected == actual
 end

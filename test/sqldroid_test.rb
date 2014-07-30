@@ -38,7 +38,7 @@ class RubotoTestAppActivity
     super
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "\#{s[0..0].upcase}\#{s[1..-1]}" }.join(' ')
 
-    adapter = MyArrayAdapter.new(self, android.R.layout.simple_list_item_1 , AndroidIds::text1, ['Record one', 'Record two'])
+    adapter = MyArrayAdapter.new(self, android.R.layout.simple_list_item_1 , android.R.id.text1, ['Record one', 'Record two'])
 
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do

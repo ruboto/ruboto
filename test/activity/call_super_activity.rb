@@ -10,8 +10,8 @@ class CallSuperActivity
     setTitle 'Without Super', false
 
     self.content_view =
-        linear_layout :orientation => :vertical, :gravity => android.view.Gravity::CENTER do
-          text_view :id => 42, :text => title, :text_size => 48.0, :gravity => android.view.Gravity::CENTER
+        linear_layout orientation: :vertical, gravity: :center do
+          text_view id: 42, text: title, text_size: 48.0, gravity: :center
         end
   end
 

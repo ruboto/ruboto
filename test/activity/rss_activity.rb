@@ -7,7 +7,8 @@ ruboto_import_widgets :LinearLayout, :ListView, :TextView
 class RssActivity
   def onCreate(bundle)
     super
-    set_title File.basename(__FILE__).chomp('_activity.rb').split('_').map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
+    set_title File.basename(__FILE__).chomp('_activity.rb').split('_').
+        map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
     self.content_view = linear_layout orientation: :vertical, gravity: :center do
       @status = text_view id: 42, text: 'Activity created...'
       @list_view = list_view id: 43

@@ -146,7 +146,7 @@ class RubotoTestAppActivity
     set_title 'ListView Example'
 
     records = [{:text1 => 'First row'}, {:image => resources.get_drawable($package.R::drawable::get_ruboto_core), :text1 => 'Second row'}, 'Third row']
-    adapter = $package.RubotoArrayAdapter.new(self, $package.R::layout::list_item, AndroidIds::text1, records)
+    adapter = $package.RubotoArrayAdapter.new(self, $package.R::layout::list_item, android.R.id.text1, records)
 puts "adapter: \#{adapter.inspect}"
     self.content_view =
         linear_layout :orientation => :vertical do
@@ -198,7 +198,7 @@ class RubotoArrayAdapter
     if convert_view
       row = convert_view
       row.findViewById(Ruboto::Id.image).image_drawable = nil
-      row.findViewById(AndroidIds.text1).text = nil
+      row.findViewById(android.R.id.text1).text = nil
     else
       row = @inflater.inflate(mResource, nil)
     end
@@ -209,7 +209,7 @@ class RubotoArrayAdapter
       model.each do |field, value|
         begin
           field_id = Ruboto::Id.respond_to?(field) && Ruboto::Id.send(field) ||
-              AndroidIds.respond_to?(field) && AndroidIds.send(field)
+              android.R.id.respond_to?(field) && android.R.id.send(field)
           field_view = row.findViewById(field_id)
           case value
           when String
