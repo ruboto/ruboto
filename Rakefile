@@ -658,17 +658,25 @@ task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
   matrix = ''
-  [19, 17, 16, 15].each.with_index do |api, i|
+  allow_failures = ''
+  [20, 19, 17, 16, 15].each.with_index do |api, i|
     n = i
     [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
-        matrix << "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
+        line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
+        matrix << line
+        if platform == 'STANDALONE' && v == :MASTER
+          allow_failures << line.gsub('-', '- env:')
+        end
       end
     end
     matrix << "\n"
   end
   matrix << "    - ANDROID_TARGET=10 RUBOTO_PLATFORM=CURRENT\n"
-  matrix_str = "  matrix:\n#{matrix}\nmatrix:"
-  File.write('.travis.yml', source.sub(/^  matrix:.*?matrix:/m, matrix_str))
+  matrix_str = "  matrix:\n#{matrix}\n"
+  allow_failures_str = "  allow_failures: # Current master is failing: https://github.com/jruby/jruby/issues/1741\n#{allow_failures}\n"
+  File.write('.travis.yml', source.
+      sub(/^  matrix:.*?(?=^matrix:)/m, matrix_str).
+      sub(/^  allow_failures:.*?(?=^script:)/m, allow_failures_str))
 end

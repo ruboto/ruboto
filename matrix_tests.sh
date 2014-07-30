@@ -10,7 +10,7 @@ else
   fi
 fi
 
-ANDROID_TARGETS="19 18 17 16 15 10" # We should cover at least 90% of the market
+ANDROID_TARGETS="20 19 17 16 15 10" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
