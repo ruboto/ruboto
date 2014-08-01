@@ -377,13 +377,13 @@ module Ruboto
       end
 
       def update_core_classes(force = nil)
-        generate_core_classes(:class => 'all', :method_base => 'on', :method_include => '', :method_exclude => '', :force => force, :implements => '')
+        generate_core_classes(:class => 'all', :method_base => 'none', :method_include => 'onCreate,onDestroy,onBind', :method_exclude => '', :force => force, :implements => '')
         if File.exists?('ruboto.yml')
           sleep 1
           FileUtils.touch 'ruboto.yml'
         end
         Dir['src/*_activity.rb'].each{|f|FileUtils.touch(f)}
-        system 'rake build_xml jruby_adapter ruboto_activity'
+        system 'rake build_xml jruby_adapter'
       end
 
       def read_ruboto_version

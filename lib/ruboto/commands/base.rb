@@ -130,6 +130,7 @@ module Ruboto
                     update_dx_jar true
                   end
                   update_core_classes 'exclude'
+                  generate_method_proxy_api_asset
 
                   log_action('Generating the default Activity and script') do
                     generate_inheriting_file 'Activity', activity, package
@@ -304,7 +305,7 @@ module Ruboto
                 required
                 argument :required
                 validate { |i| %w(all on none).include?(i) }
-                defaults 'on'
+                defaults 'none'
                 description 'the base set of methods to generate (adjusted with method_include and method_exclude): all, none, on (e.g., onClick)'
               }
 
@@ -337,6 +338,7 @@ module Ruboto
 
               def run
                 abort("specify 'implements' only for Activity, Service, BroadcastReceiver, PreferenceActivity, or TabActivity") unless %w(Activity Service BroadcastReceiver PreferenceActivity TabActivity).include?(params['class'].value) or params['implements'].value == ''
+                params[:method_include] += ',onCreate,onDestroy,onBind'
                 generate_core_classes [:class, :method_base, :method_include, :method_exclude, :implements, :force].inject({}) { |h, i| h[i] = params[i.to_s].value; h }
               end
             end
@@ -398,6 +400,7 @@ module Ruboto
                 update_icons force
                 update_core_classes 'exclude'
                 update_bundle
+                generate_method_proxy_api_asset
               end
             end
 

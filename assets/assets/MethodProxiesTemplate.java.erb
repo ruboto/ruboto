@@ -1,0 +1,25 @@
+package <%= package %>;
+<% component = component == 'Activity' ? 'EntryPointActivity' : "Ruboto#{component}" %>
+
+import org.ruboto.JRubyAdapter;
+import org.ruboto.ScriptLoader;
+import org.ruboto.ScriptInfo;
+import org.ruboto.<%= component %>;
+import org.ruboto.Log;
+
+public class <%= class_name %>MethodProxies extends <%= component %> {
+
+    private final ScriptInfo scriptInfo = new ScriptInfo();
+
+    protected boolean relayToRuby(String method) {
+        if (!JRubyAdapter.isInitialized()) {
+            Log.i("Method called before JRuby runtime was initialized: " +
+                    method);
+            return false;
+        }
+        return !ScriptLoader.isCalledFromJRuby() &&
+            scriptInfo.getRubyInstance() != null;
+    }
+
+<%= method_definitions %>
+}
