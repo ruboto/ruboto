@@ -36,7 +36,14 @@ module RubotoTest
   APP_NAME = 'RubotoTestApp'
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join TMP_DIR, APP_NAME
-  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
+
+  # FIXME(uwe):  Remove special case when Android L has been released.
+  if (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'] =~ /(?:android-)?L/)
+    ANDROID_TARGET = 'L'
+  else
+    ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
+  end
+  # EMXIF
 
   def self.version_from_device
     puts 'Reading OS version from device/emulator'
@@ -80,6 +87,11 @@ module RubotoTest
   puts RUBY_DESCRIPTION
 
   ANDROID_OS = (ENV['ANDROID_OS'] || version_from_device).slice(/\d+/).to_i
+
+  # FIXME(uwe): Remove when Android L has been released
+  ANDROID_OS = 21 if ANDROID_OS == 0
+  # EMXIF
+
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
 

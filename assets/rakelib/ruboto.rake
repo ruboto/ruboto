@@ -236,8 +236,17 @@ file PROJECT_PROPS_FILE
 file MANIFEST_FILE => PROJECT_PROPS_FILE do
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
-  manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
-  manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
+
+  # FIXME(uwe):  Remove 'L' special case when Android L has been released.
+  if sdk_level == 21
+    manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1L#$2" }
+    manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#$1L#$2" }
+  else
+    manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
+    manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#$1#{sdk_level}#$2" }
+  end
+  # EMXIF
+
   if manifest != old_manifest
     puts "\nUpdating #{File.basename MANIFEST_FILE} with target from #{File.basename PROJECT_PROPS_FILE}\n\n"
     File.open(MANIFEST_FILE, 'w') { |f| f << manifest }
@@ -861,7 +870,9 @@ end
 # Methods
 
 def sdk_level
-  File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
+  # FIXME(uwe):  Remove special case 'L' when Android L is released.
+  level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+|L)/)[0][0].to_i
+  level == 0 ? 21 : level
 end
 
 def mark_update(time = Time.now)

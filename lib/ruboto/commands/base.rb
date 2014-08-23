@@ -19,6 +19,11 @@ module Ruboto
       include Ruboto::SdkVersions
       include Ruboto::Util::Verify
 
+      # FIXME(uwe): Remove "L" special case
+      API_LEVEL_PATTERN = /^android-(\d+|L)$/
+      API_NUMBER_PATTERN = /(\d+|L)/
+      # EMXIF
+
       def self.main
         Main do
           mode 'gen' do
@@ -51,14 +56,14 @@ module Ruboto
                 argument :required
                 defaults DEFAULT_TARGET_SDK
                 description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
-                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
-                validate { |t| t =~ /^android-\d+$/ }
+                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+                validate { |t| t =~ API_LEVEL_PATTERN }
               }
               option('min-sdk') {
                 argument :required
                 description "Minimum android version supported. (e.g., 'android-19' or '19' for kitkat)"
-                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
-                validate { |t| t =~ /^android-\d+$/ }
+                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+                validate { |t| t =~ API_LEVEL_PATTERN }
               }
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.'
@@ -90,8 +95,11 @@ module Ruboto
                 force = params['force'].value
 
                 abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if !force && File.exists?(path)
-                abort "Target must match android-<number>: got #{target}" unless target =~ /^android-(\d+)$/
-                abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
+                abort "Target must match android-<number>: got #{target}" unless target =~ API_LEVEL_PATTERN
+
+                # FIXME(uwe): Remove the 'L' special case when Android L has been released
+                abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1 == 'L' || $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
+                # EMXIF
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."
@@ -112,8 +120,8 @@ module Ruboto
                 puts 'Done'
 
                 Dir.chdir root do
-                  update_manifest min_sdk[/\d+/], target[/\d+/], true
-                  update_test true, target[/\d+/].to_i
+                  update_manifest min_sdk[API_NUMBER_PATTERN], target[API_NUMBER_PATTERN], true
+                  update_test true, target[API_NUMBER_PATTERN]
                   update_assets
 
                   if ruby_version
@@ -352,8 +360,8 @@ module Ruboto
               option('target', 't') {
                 argument :required
                 description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
-                cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
-                validate { |t| t =~ /^android-\d+$/ }
+                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+                validate { |t| t =~ API_LEVEL_PATTERN }
               }
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.  If the JRuby jars are already present in your project, this option is implied.'
@@ -379,9 +387,13 @@ module Ruboto
                 end
 
                 if (target = params['target'].value)
-                  abort "Target must match android-<number>: got #{target}" unless target =~ /^android-(\d+)$/
-                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
-                  target_level = target[/\d+/].to_i
+                  abort "Target must match android-<number>: got #{target}" unless target =~ API_LEVEL_PATTERN
+
+                  # FIXME(uwe):  Remove the 'L' special case when Android L has been released.
+                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1 == 'L' || $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
+                  # EMXIF
+
+                  target_level = target[API_NUMBER_PATTERN]
                   update_android(target_level)
                   update_test force, target_level
                 else
@@ -429,8 +441,8 @@ module Ruboto
               argument :required
               default DEFAULT_TARGET_SDK
               arity -1
-              cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
-              validate { |t| t =~ /^android-\d+$/ }
+              cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+              validate { |t| t =~ API_LEVEL_PATTERN }
             }
 
             option('yes', 'y') {
@@ -455,8 +467,8 @@ module Ruboto
               required unless api_level
               argument :required
               default(api_level) if api_level
-              cast { |t| t =~ /^(\d+)$/ ? "android-#$1" : t }
-              validate { |t| t =~ /^android-(\d+)$/ && sdk_level_name($1.to_i) }
+              cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+              validate { |t| t =~ API_LEVEL_PATTERN && sdk_level_name($1.to_i) }
             }
 
             option('no-snapshot', 's') {

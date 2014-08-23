@@ -9,11 +9,11 @@ module Ruboto
       ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
 
       def sdk_level_name(sdk_level)
-        Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level] || "api_#{sdk_level}"
+        Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level.to_i] || sdk_level
       end
 
       def start_emulator(sdk_level, no_snapshot)
-        sdk_level = sdk_level.gsub(/^android-/, '').to_i
+        sdk_level = sdk_level.gsub(/^android-/, '')
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
           if ON_MAC_OS_X
@@ -135,7 +135,7 @@ module Ruboto
             new_snapshot = true
           end
 
-          puts "Start emulator#{' without snapshot' if no_snapshot}"
+          puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
           system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
           return if ON_WINDOWS
 

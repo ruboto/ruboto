@@ -74,6 +74,19 @@ module Ruboto
           test_manifest.elements['application'].attributes['android:icon'] ||= '@drawable/ic_launcher'
           test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
 
+          # FIXME(uwe):  Remove when "Android L" has been released.
+          puts "update_test: target_level: #{target_level}"
+          if target_level == 'L'
+            if (sdk_element = test_manifest.elements['uses-sdk'])
+              sdk_element.attributes['android:minSdkVersion'] = target_level
+              sdk_element.attributes['android:targetSdkVersion'] = target_level
+            else
+              test_manifest.add_element 'uses-sdk', {'android:minSdkVersion' => target_level, 'android:targetSdkVersion' => target_level}
+            end
+            test_manifest.elements['instrumentation'].attributes['android:name'] = 'org.ruboto.test.InstrumentationTestRunner'
+          end
+          # EMXIF
+
           # TODO(uwe): Trying to push test scripts for faster test cycle, but failing...
           # if test_manifest.elements["uses-permission[@android:name='android.permission.WRITE_INTERNAL_STORAGE']"]
           #   puts 'Found permission tag'
@@ -324,27 +337,37 @@ module Ruboto
 
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
-          if (sdk_element = verify_manifest.elements['uses-sdk'])
-            min_sdk ||= sdk_element.attributes['android:minSdkVersion']
-            target ||= sdk_element.attributes['android:targetSdkVersion']
+          # FIXME(uwe):  Remove the special case 'L' when Android L is released.
+          if target == 'L'
+            min_sdk = 'L'
           else
-            min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
-            target ||= MINIMUM_SUPPORTED_SDK_LEVEL
-          end
+            if (sdk_element = verify_manifest.elements['uses-sdk'])
+              min_sdk ||= sdk_element.attributes['android:minSdkVersion']
+              target ||= sdk_element.attributes['android:targetSdkVersion']
+            else
+              min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
+              target ||= MINIMUM_SUPPORTED_SDK_LEVEL
+            end
 
-          if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
-          end
+            # FIXME(uwe): Remove the L special case when Android L has been released
+            if min_sdk == 'L'
+              puts "Android L detected."
+            elsif min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+              min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
+            end
 
-          if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            target = MINIMUM_SUPPORTED_SDK_LEVEL
+            if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+              target = MINIMUM_SUPPORTED_SDK_LEVEL
+            end
           end
+          # EMXIF
 
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
 
           # FIXME(uwe): Simplify when we stop supporting Android 2.3.x
-          if min_sdk.to_i >= 11
+          # FIXME(uwe): Simplify when Android L is released
+          if min_sdk == 'L' || min_sdk.to_i >= 11
             app_element.attributes['android:hardwareAccelerated'] ||= 'true'
             app_element.attributes['android:largeHeap'] ||= 'true'
           end
@@ -382,7 +405,7 @@ module Ruboto
           sleep 1
           FileUtils.touch 'ruboto.yml'
         end
-        Dir['src/*_activity.rb'].each{|f|FileUtils.touch(f)}
+        Dir['src/*_activity.rb'].each { |f| FileUtils.touch(f) }
         system 'rake build_xml jruby_adapter ruboto_activity'
       end
 
@@ -443,10 +466,14 @@ module Ruboto
               if gem_version >= Gem::Version.new('9000.dev')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
-                    '**/*Darwin*',
-                    '**/*Solaris*',
-                    '**/*windows*',
-                    '**/*Windows*',
+
+                    # FIXME(uwe): Exclude these packages?
+                    # '**/*Darwin*',
+                    # '**/*Solaris*',
+                    # '**/*windows*',
+                    # '**/*Windows*',
+                    # EMXIF
+
                     'META-INF',
                     # 'com/headius',
                     'com/headius/invokebinder',

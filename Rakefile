@@ -659,14 +659,15 @@ task '.travis.yml' do
   source = File.read('.travis.yml')
   matrix = ''
   allow_failures = ''
-  [20, 19, 17, 16, 15].each.with_index do |api, i|
+  ['L', 19, 17, 16, 15].each.with_index do |api, i|
     n = i
     [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
-        if platform == 'STANDALONE' && v == :MASTER
+        if (platform == 'STANDALONE' && v == :MASTER) ||
+            api == 'L'
           allow_failures << line.gsub('-', '- env:')
         end
       end

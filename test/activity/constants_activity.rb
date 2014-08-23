@@ -21,7 +21,8 @@ class ConstantsActivity
 
     self.content_view = linear_layout orientation: :vertical, gravity: :center do
       i = 41
-      text_view id: i += 1, hint: 'actionBarHeight', tag: '48', text: actionBarHeight
+      expected_action_bar_height = android.os.Build::VERSION::SDK_INT >= 20 ? 56 : 48
+      text_view id: i += 1, hint: 'actionBarHeight', tag: expected_action_bar_height.to_s, text: actionBarHeight
 
       text_view id: i += 1, hint: 'anim.fade_in', tag: '17432576', text: android.R.anim.fade_in.to_s
       text_view id: i += 1, hint: 'attr.actionBarSize', tag: '16843499', text: android.R.attr.actionBarSize.to_s

@@ -598,7 +598,11 @@ module Ruboto
         end
         if accept_all || a == 'Y' || a.empty?
           android_cmd = windows? ? 'android.bat' : 'android'
-          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sysimg-#{api_level.slice(/\d+$/)} --all"
+
+          # FIXME(uwe):  Does this pattern work for all api levels?
+          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
+          # EMXIF
+
           update_sdk(update_cmd, accept_all)
           check_for_android_platform(api_level)
         end
