@@ -106,7 +106,7 @@ module Ruboto
             # on x86 emulator.
             # https://code.google.com/p/android/issues/detail?id=37597
             # https://code.google.com/p/android/issues/detail?id=61596
-            if sdk_level == 10
+            if sdk_level.to_i == 10
               abi_opt = '--abi armeabi'
             elsif has_x86 && (ON_MAC_OS_X || ON_WINDOWS)
               abi_opt = '--abi x86'
