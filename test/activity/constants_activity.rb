@@ -9,19 +9,33 @@ class ConstantsActivity
     setTitle File.basename(__FILE__).chomp('_activity.rb').split('_').
         map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
 
-    attr = android.R.attr.actionBarSize
-    tv = TypedValue.new
-    if theme.resolveAttribute(attr, tv, true)
-      actionBarHeight = TypedValue.
-          complexToDimensionPixelSize(tv.data, resources.display_metrics).
-          inspect
+    # FIXME(uwe): Remove condition when we stop testing Android 2.3
+    if android.os.Build::VERSION::SDK_INT > 10
+      attr = android.R.attr.actionBarSize
+      tv = TypedValue.new
+      if theme.resolveAttribute(attr, tv, true)
+        actionBarHeight = TypedValue.
+            complexToDimensionPixelSize(tv.data, resources.display_metrics).
+            inspect
+      else
+        actionBarHeight = 'N/A'
+      end
     else
       actionBarHeight = 'N/A'
     end
+    # EMXIF
 
     self.content_view = linear_layout orientation: :vertical, gravity: :center do
       i = 41
-      expected_action_bar_height = android.os.Build::VERSION::SDK_INT >= 20 ? 56 : 48
+
+      # FIXME(uwe): Remove condition when we stop testing Android 2.3
+      if android.os.Build::VERSION::SDK_INT > 10
+        expected_action_bar_height = 'N/A'
+      else
+        expected_action_bar_height = android.os.Build::VERSION::SDK_INT >= 20 ? 56 : 48
+      end
+      # EMXIF
+
       text_view id: i += 1, hint: 'actionBarHeight', tag: expected_action_bar_height.to_s, text: actionBarHeight
 
       text_view id: i += 1, hint: 'anim.fade_in', tag: '17432576', text: android.R.anim.fade_in.to_s
