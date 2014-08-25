@@ -9,6 +9,8 @@ before_install:
   - echo $STABLE
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
+  - echo $PATH
+  - which dx
 
 env:
   global:
@@ -85,11 +87,15 @@ matrix:
     - env: ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=4of5 JRUBY_JARS_VERSION=STABLE
 
 script:
-    - rake install
-    - ruboto setup -y -t $ANDROID_TARGET
-    - source ~/.rubotorc
-    - ruboto emulator -t $ANDROID_TARGET
-    - ./run_tests.sh
+  - echo $PATH
+  - which dx
+  - rake install
+  - ruboto setup -y -t $ANDROID_TARGET
+  - source ~/.rubotorc
+  - echo $PATH
+  - which dx
+  - ruboto emulator -t $ANDROID_TARGET
+  - ./run_tests.sh
 
 notifications:
   irc: "irc.freenode.org#ruboto"
