@@ -29,7 +29,7 @@ class ConstantsActivity
       i = 41
 
       # FIXME(uwe): Remove condition when we stop testing Android 2.3
-      if android.os.Build::VERSION::SDK_INT > 10
+      if android.os.Build::VERSION::SDK_INT <= 10
         expected_action_bar_height = 'N/A'
       else
         expected_action_bar_height = android.os.Build::VERSION::SDK_INT >= 20 ? 56 : 48
