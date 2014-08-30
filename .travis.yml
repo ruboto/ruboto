@@ -10,7 +10,11 @@ before_install:
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
   - echo $PATH
-  - which dx || echo $?
+  - ls -l usr/local || echo "What?!"
+  - ls -l usr/local/android-sdk || echo "android tools not found"
+  - ls -l usr/local/android-sdk/platform-tools || echo "platform tools not found"
+  - ls -l usr/local/android-sdk/tools || echo "tools not found"
+  - which dx || echo "dx command not in PATH"
 
 env:
   global:
