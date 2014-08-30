@@ -1,4 +1,8 @@
+# http://docs.travis-ci.com/user/languages/android/
 language: android
+android:
+  components:
+    - build-tools-19.1
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
