@@ -10,7 +10,7 @@ before_install:
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
   - echo $PATH
-  - which dx
+  - which dx || echo $?
 
 env:
   global:
