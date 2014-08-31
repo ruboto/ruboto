@@ -39,7 +39,6 @@ class ConstantsActivity
       text_view id: i += 1, hint: 'actionBarHeight', tag: expected_action_bar_height.to_s, text: actionBarHeight
 
       text_view id: i += 1, hint: 'anim.fade_in', tag: '17432576', text: android.R.anim.fade_in.to_s
-      text_view id: i += 1, hint: 'attr.actionBarSize', tag: '16843499', text: android.R.attr.actionBarSize.to_s
       text_view id: i += 1, hint: 'color.holo_green', tag: '17170452', text: android.R.color.holo_green_light.to_s
       text_view id: i += 1, hint: 'id.text1', tag: '16908308', text: android.R.id.text1.to_s
       text_view id: i += 1, hint: 'layout.simple_list_item1', tag: '17367043', text: android.R.layout.simple_list_item_1.to_s
