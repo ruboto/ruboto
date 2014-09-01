@@ -40,7 +40,7 @@ class ConstantsActivity
       text_view id: i += 1, hint: 'anim.fade_in', tag: '17432576', text: android.R.anim.fade_in.to_s
 
       # FIXME(uwe): Remove condition when we stop testing Android 2.3
-      if android.os.Build::VERSION::SDK_INT >= 10
+      if android.os.Build::VERSION::SDK_INT > 10
         text_view id: i += 1, hint: 'attr.actionBarSize', tag: '16843499', text: android.R.attr.actionBarSize.to_s
         text_view id: i += 1, hint: 'color.holo_green', tag: '17170452', text: android.R.color.holo_green_light.to_s
       end
