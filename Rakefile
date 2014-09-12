@@ -143,7 +143,7 @@ def get_github_issues
   raise "Milestone for version #{Ruboto::VERSION} not found." unless milestone_entry
   milestone = milestone_entry['number']
 
-  uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
+    uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)
   req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
@@ -232,10 +232,10 @@ New in version #{milestone_name}:
 
 #{milestone_description}
 
-#{(categories.keys & grouped_issues.keys).map do |cat|
+  #{(categories.keys & grouped_issues.keys).map do |cat|
     "#{cat}:\n
-#{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}#{" (#{i['user']['login']})" if i['pull_request'] && i['pull_request']['html_url']}}.wrap(2) }.join("\n")}
-"
+    #{grouped_issues[cat].map { |i| %Q{* Issue ##{i['number']} #{i['title'].gsub('`', "'")}#{" (#{i['user']['login']})" if i['pull_request'] && i['pull_request']['html_url']}}.wrap(2) }.join("\n")}
+    "
   end.join("\n")}
 You can find a complete list of issues here:
 
@@ -631,13 +631,13 @@ end
 
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshots do
-  download_host = 'ci.jruby.org'
+  download_host = 'lafo.ssw.uni-linz.ac.at'
   # FIXME(uwe): Scan the snapshots directory to find active branches
-  [:master, :'1.7.x'].each do |branch|
-    index = Net::HTTP.get(download_host, "/snapshots/#{branch}/")
-    current_gem = index[/jruby-jars-.*?.gem/]
-    print "Downloading #{current_gem}: \r"
-    uri = URI("http://#{download_host}/snapshots/#{branch}/#{current_gem}")
+  index = Net::HTTP.get(download_host, "/graalvm/")
+  current_gems = index.scan(/jruby-jars-.*?.gem/)
+  current_gems.each do |gem|
+    print "Downloading #{gem}: \r"
+    uri = URI("http://#{download_host}/graalvm/#{gem}")
     done = 0
     body = ''
     Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
@@ -646,11 +646,11 @@ task :get_jruby_jars_snapshots do
         body << fragment
         done += fragment.length
         progress = (done * 100) / length
-        print "Downloading #{current_gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+        print "Downloading #{gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
       end
       puts
     end
-    File.open(current_gem, 'wb') { |f| f << body }
+    File.open(gem, 'wb') { |f| f << body }
   end
 end
 
@@ -661,18 +661,15 @@ task '.travis.yml' do
   allow_failures = ''
   ['L', 19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13', '1.7.12']]].each do |platform, versions|
+    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.15', '1.7.13']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
         if (platform == 'STANDALONE' && v == :MASTER) ||
-            # FIXME(uwe):  Remove when Android L is released
-            api == 'L' ||
-            # EMXIF
-            # FIXME(uwe):  Remove when master and stable branches are green.
+            # FIXME(uwe):  Remove when master and stable branches are downloadable and green.
             v == :MASTER || v == :STABLE
-            # EMXiF
+          # EMXiF
           allow_failures << line.gsub('-', '- env:')
         end
       end
@@ -681,7 +678,12 @@ task '.travis.yml' do
   end
   matrix << "    - ANDROID_TARGET=10 RUBOTO_PLATFORM=CURRENT\n"
   matrix_str = "  matrix:\n#{matrix}\n"
-  allow_failures_str = "  allow_failures: # Current master is failing: https://github.com/jruby/jruby/issues/1741\n#{allow_failures}\n"
+  allow_failures_str = <<EOF
+  allow_failures:
+    # Current master is failing: https://github.com/jruby/jruby/issues/1741
+    # Current JRuby 1.7.x gem is failing.  Why?
+#{allow_failures}
+EOF
   File.write('.travis.yml', source.
       sub(/^  matrix:.*?(?=^matrix:)/m, matrix_str).
       sub(/^  allow_failures:.*?(?=^script:)/m, allow_failures_str))
