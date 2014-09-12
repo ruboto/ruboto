@@ -632,9 +632,8 @@ end
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshots do
   download_host = 'lafo.ssw.uni-linz.ac.at'
-  # FIXME(uwe): Scan the snapshots directory to find active branches
   index = Net::HTTP.get(download_host, "/graalvm/")
-  current_gems = index.scan(/jruby-jars-.*?.gem/)
+  current_gems = index.scan(/jruby-jars-.*?.gem/).uniq
   current_gems.each do |gem|
     print "Downloading #{gem}: \r"
     uri = URI("http://#{download_host}/graalvm/#{gem}")
