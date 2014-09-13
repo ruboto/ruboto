@@ -666,6 +666,8 @@ task '.travis.yml' do
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
         if (platform == 'STANDALONE' && v == :MASTER) ||
+            # FIXME(uwe):  Remove when Android L is released
+            api == 'L' ||
             # FIXME(uwe):  Remove when master and stable branches are downloadable and green.
             v == :MASTER || v == :STABLE
           # EMXiF
