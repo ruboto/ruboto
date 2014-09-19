@@ -1,7 +1,7 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
-class ServiceClassTest < Test::Unit::TestCase
+class ServiceInfileClassTest < Test::Unit::TestCase
   SRC_DIR = "#{APP_DIR}/src"
 
   def setup
@@ -13,6 +13,10 @@ class ServiceClassTest < Test::Unit::TestCase
   end
 
   def test_service_startup
+    # FIXME(uwe):  Remove when Android L is released or service start is fixed
+    return if ANDROID_OS == 21
+    # EMXIF
+
     Dir.chdir APP_DIR do
       activity_filename = "#{SRC_DIR}/ruboto_test_app_activity.rb"
       assert File.exists? activity_filename

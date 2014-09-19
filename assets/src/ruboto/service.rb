@@ -62,6 +62,7 @@ module Ruboto
       i.putExtra(Ruboto::CLASS_NAME_KEY, class_name)
       i.putExtra(Ruboto::SCRIPT_NAME_KEY, script_name) if script_name
       extras.each { |k, v| i.putExtra(k.to_s, v) } if extras
+      puts "starting Ruboto service: #{i.inspect}"
       self.startService i
       self
     end
