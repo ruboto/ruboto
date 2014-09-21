@@ -482,6 +482,7 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
+                    'com/oracle/nfi',
                     'com/oracle/truffle',
                     'jni',
                     'jnr/constants/platform/darwin',
@@ -506,7 +507,6 @@ module Ruboto
                     'org/jruby/ant',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
-                    'org/jruby/compiler/impl/BaseBodyCompiler*',
                     'org/jruby/compiler/util',
                     'org/jruby/demo',
                     'org/jruby/embed/bsf',
@@ -519,7 +519,24 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                     # 'org/jruby/runtime/opto',              # What is this?
                     # 'org/jruby/runtime/opto/OptoFactory*', # What is this?
-                    'org/jruby/truffle',
+
+                    # FIXME(uwe): We should filter the whole truffle package...
+                    # 'org/jruby/truffle',
+
+                    'org/jruby/truffle/*.class',
+                    'org/jruby/truffle/nodes',
+                    'org/jruby/truffle/runtime/control',
+                    'org/jruby/truffle/runtime/core',
+                    'org/jruby/truffle/runtime/lookup',
+                    'org/jruby/truffle/runtime/methods',
+                    'org/jruby/truffle/runtime/objectstorage',
+                    'org/jruby/truffle/runtime/signal',
+                    'org/jruby/truffle/runtime/subsystems',
+                    'org/jruby/truffle/runtime/util',
+                    'org/jruby/truffle/runtime/*.class',
+                    'org/jruby/truffle/translator',
+                    # EMXIF
+
                     'org/yecht',
                     'yaml.rb', # This looks like 1.8 stdlib...
                 ]
