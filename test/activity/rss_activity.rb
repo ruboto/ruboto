@@ -5,13 +5,16 @@ require 'ruboto/widget'
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
 class RssActivity
+  attr_reader :list
+
   def onCreate(bundle)
     super
     set_title File.basename(__FILE__).chomp('_activity.rb').split('_').
         map { |s| "#{s[0..0].upcase}#{s[1..-1]}" }.join(' ')
+    @list = []
     self.content_view = linear_layout orientation: :vertical, gravity: :center do
       @status = text_view id: 42, text: 'Activity created...'
-      @list_view = list_view id: 43
+      @list_view = list_view id: 43, list: @list
     end
   end
 
@@ -22,7 +25,7 @@ class RssActivity
       begin
         run_on_ui_thread { @status.text = 'Started update thread...' }
         subjects = []
-        rss = RSS::Parser.parse('http://www.gypsyrumor.com/podcast/podcast.xml')
+        rss = RSS::Parser.parse('http://www.reddit.com/r/ruby/.rss')
         rss.items.each do |item|
           subject = item.title.to_s
           subjects << subject
