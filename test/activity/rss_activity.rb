@@ -25,7 +25,7 @@ class RssActivity
       begin
         run_on_ui_thread { @status.text = 'Started update thread...' }
         subjects = []
-        rss = RSS::Parser.parse('http://www.reddit.com/r/ruby/.rss')
+        rss = RSS::Parser.parse('http://www.feedforall.com/sample.xml')
         rss.items.each do |item|
           subject = item.title.to_s
           subjects << subject
