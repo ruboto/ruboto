@@ -555,7 +555,7 @@ file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t, false)
 end
 
-MINIMUM_DX_HEAP_SIZE = 2048
+MINIMUM_DX_HEAP_SIZE = 2560
 task :patch_dex do
   new_dx_content = File.read(DX_FILENAME).dup
   xmx_pattern = ON_WINDOWS ? /^set defaultXmx=-Xmx(\d+)(M|m|G|g|T|t)/ : /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
