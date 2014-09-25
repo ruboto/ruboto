@@ -252,12 +252,8 @@ class Test::Unit::TestCase
           update_app
         end
         if update || !example
-          system 'rake debug' # Ensure dx heap space is sufficient.
+          system 'rake --trace debug' # Ensure dx heap space is sufficient.
           assert_equal 0, $?
-          Dir.chdir 'test' do
-            system '#{ANT_CMD} instrument' # This will also build the main project.
-            assert_equal 0, $?
-          end
         end
       end
       puts "Storing app as template #{template_dir}"
@@ -285,7 +281,7 @@ class Test::Unit::TestCase
       end
     end
     Dir.chdir APP_DIR do
-      system 'rake test:quick'
+      system 'rake --trace test:quick'
       assert_equal 0, $?, "tests failed with return code #$?"
     end
     test_completed = true
