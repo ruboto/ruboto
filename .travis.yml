@@ -2,7 +2,7 @@
 language: android
 android:
   components:
-    - build-tools-20.0.0
+    - build-tools-19.1.0
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
