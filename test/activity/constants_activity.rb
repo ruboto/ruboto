@@ -14,29 +14,21 @@ class ConstantsActivity
       attr = android.R.attr.actionBarSize
       tv = TypedValue.new
       if theme.resolveAttribute(attr, tv, true)
-        actionBarHeight = TypedValue.
+        action_bar_height = TypedValue.
             complexToDimensionPixelSize(tv.data, resources.display_metrics).
             inspect
       else
-        actionBarHeight = 'N/A'
+        action_bar_height = 'N/A'
       end
     else
-      actionBarHeight = 'N/A'
+      action_bar_height = 'N/A'
     end
     # EMXIF
 
     self.content_view = linear_layout orientation: :vertical, gravity: :center do
       i = 41
 
-      # FIXME(uwe): Remove condition when we stop testing Android 2.3
-      if android.os.Build::VERSION::SDK_INT <= 10
-        expected_action_bar_height = 'N/A'
-      else
-        expected_action_bar_height = android.os.Build::VERSION::SDK_INT >= 20 ? 56 : 48
-      end
-      # EMXIF
-
-      text_view id: i += 1, hint: 'actionBarHeight', tag: expected_action_bar_height.to_s, text: actionBarHeight
+      text_view id: i += 1, hint: 'actionBarHeight', tag: action_bar_height, text: action_bar_height
       text_view id: i += 1, hint: 'anim.fade_in', tag: '17432576', text: android.R.anim.fade_in.to_s
 
       # FIXME(uwe): Remove condition when we stop testing Android 2.3
