@@ -4,7 +4,7 @@ if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 2 ] ; then
   echo JRuby-jars gems are missing.
   rake get_jruby_jars_snapshots
 else
-  if [ `find . -mtime +1d -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -ne 0 ] ; then
+  if [ `find . -maxdepth 1 -mtime 1 -name "jruby-jars-*.gem" | wc -l` -ne 0 ] ; then
     echo jruby-jars are old.
     rake get_jruby_jars_snapshots
   fi
