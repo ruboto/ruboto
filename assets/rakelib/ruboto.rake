@@ -627,7 +627,7 @@ namespace :test do
       puts 'Running quick tests'
       install_retry_count = 0
       begin
-        timeout 120 do
+        timeout 300 do
           sh "#{ANT_CMD} instrument install"
         end
       rescue TimeoutError
@@ -991,7 +991,7 @@ def install_apk
     output = nil
     install_retry_count = 0
     begin
-      timeout 120 do
+      timeout 300 do
         output = `adb install -r "#{APK_FILE}" 2>&1`
       end
     rescue Timeout::Error
@@ -1024,7 +1024,7 @@ def install_apk
   output = nil
   install_retry_count = 0
   begin
-    timeout 120 do
+    timeout 300 do
       output = `adb install "#{APK_FILE}" 2>&1`
     end
   rescue Timeout::Error
