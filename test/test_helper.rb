@@ -16,13 +16,16 @@ module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
-  GEM_PATH = File.join PROJECT_DIR, 'tmp', 'gems'
-  FileUtils.mkdir_p GEM_PATH
-  ENV['GEM_HOME'] = GEM_PATH
-  ENV['GEM_PATH'] = GEM_PATH
-  ENV['PATH'] = "#{GEM_PATH}/bin:#{ENV['PATH']}"
-  Gem.paths = GEM_PATH
-  Gem.refresh
+  unless File.writable?(ENV['GEM_HOME'])
+    GEM_PATH = File.join PROJECT_DIR, 'tmp', 'gems'
+    FileUtils.mkdir_p GEM_PATH
+    ENV['GEM_HOME'] = GEM_PATH
+    ENV['GEM_PATH'] = GEM_PATH
+    ENV['PATH'] = "#{GEM_PATH}/bin:#{ENV['PATH']}"
+    Gem.paths = GEM_PATH
+    Gem.refresh
+  end
+
   `gem query -i -n bundler`
   system 'gem install bundler --no-ri --no-rdoc' unless $? == 0
   `bundle check`
@@ -305,10 +308,10 @@ class Test::Unit::TestCase
 
   def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
     yml = YAML.dump({'included_stdlibs' => included_stdlibs,
-        'excluded_stdlibs' => excluded_stdlibs,
-        # 'ruby_version' => ruby_version,
-        'heap_alloc' => heap_alloc,
-    })
+            'excluded_stdlibs' => excluded_stdlibs,
+            # 'ruby_version' => ruby_version,
+            'heap_alloc' => heap_alloc,
+        })
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') { |f| f << yml }
   end

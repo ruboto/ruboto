@@ -12,7 +12,7 @@ setup do |activity|
   assert @list_view
 end
 
-test('item click sets text') do |activity|
+test('item click sets text', ui: false) do |activity|
   activity.run_on_ui_thread { @list_view.performItemClick(@list_view, 1, 1) }
   assert_equal '[Record one]', @text_view.text
 end
@@ -30,12 +30,12 @@ class MyObject < java.lang.Object
   end
 end
 
-test('add constructor with parameter') do
+test('add constructor with parameter', ui: false) do
   o = MyObject.new('It works!')
   assert_equal 'It works!', o.my_param
 end
 
-test('call instance method super') do
+test('call instance method super', ui: false) do
   o = MyObject.new('It works!')
   assert !o.equals(o)
 end
@@ -46,7 +46,7 @@ class MyJRubyAdapter < org.ruboto.JRubyAdapter
   end
 end
 
-test('call super from static subclass method') do
+test('call super from static subclass method', ui: false) do
   a = org.ruboto.JRubyAdapter
   b = MyJRubyAdapter
   assert a.isDebugBuild != b.isDebugBuild
