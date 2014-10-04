@@ -16,7 +16,7 @@ class SubclassOfArrayAdapter < Java::AndroidWidget::ArrayAdapter
 end
 
 class Java::AndroidWidget::ArrayAdapter
-   field_reader :mResource, :mFieldId
+  field_reader :mResource, :mFieldId
 end
 
 class SubclassActivity
@@ -28,9 +28,9 @@ class SubclassActivity
 
     self.content_view =
         linear_layout :orientation => LinearLayout::VERTICAL do
-          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42
-          @list_view = list_view :adapter => adapter, :id => 43,
-              :on_item_click_listener => proc{|_,view,_,_| @text_view.text = view.findViewById(android.R.id.text1).text}
+          @text_view = text_view text: 'What hath Matz wrought?', id: 42
+          @list_view = list_view adapter: adapter, id: 43,
+              on_item_click_listener: ->(_, view, _, _) { @text_view.text = view.findViewById(android.R.id.text1).text }
         end
   end
 end

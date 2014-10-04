@@ -13,8 +13,10 @@ setup do |activity|
 end
 
 test('item click sets text', ui: false) do |activity|
-  activity.run_on_ui_thread { @list_view.performItemClick(@list_view, 1, 1) }
-  assert_equal '[Record one]', @text_view.text
+  activity.run_on_ui_thread do
+    @list_view.performItemClick(@list_view, 1, 1)
+    assert_equal '[Record one]', @text_view.text
+  end
 end
 
 class MyObject < java.lang.Object
