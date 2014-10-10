@@ -46,7 +46,7 @@ public class SplashActivity extends Activity {
     }
 
     public void onResume() {
-        Log.d("onResume: ");
+        Log.d("SplashActivity onResume: ");
         if (!JRubyAdapter.isInitialized() && receiver == null) {
             registerPackageInstallReceiver();
         }
@@ -54,7 +54,7 @@ public class SplashActivity extends Activity {
     }
     
     public void onPause() {
-        Log.d("onPause: ");
+        Log.d("SplashActivity onPause: ");
         if (receiver != null) {
             unregisterReceiver(receiver);
             receiver = null;
@@ -63,7 +63,7 @@ public class SplashActivity extends Activity {
     }
 
     public void onDestroy() {
-        Log.d("onDestroy: ");
+        Log.d("SplashActivity onDestroy: ");
         super.onDestroy();
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
@@ -77,7 +77,7 @@ public class SplashActivity extends Activity {
             public void run() {
                 final boolean jrubyOk = JRubyAdapter.setUpJRuby(SplashActivity.this);
                 if (jrubyOk) {
-                    Log.d("onResume: JRuby OK");
+                    Log.d("SplashActivity onResume: JRuby OK");
                     startUserActivity();
                 } else {
                     registerPackageInstallReceiver();
@@ -87,7 +87,7 @@ public class SplashActivity extends Activity {
                                 installDownload();
                             } else {
                                 if (firstTime) {
-                                    Log.d("onResume: Checking JRuby - IN UI thread");
+                                    Log.d("SplashActivity onResume: Checking JRuby - IN UI thread");
                                     try {
                                         setContentView(Class.forName(getPackageName() + ".R$layout").getField("get_ruboto_core").getInt(null));
                                         if (hasInternetPermission()) {
@@ -134,7 +134,7 @@ public class SplashActivity extends Activity {
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException ie) {
-                                    Log.e("Interupted!");
+                                    Log.e("SplashActivity Interupted!");
                                 }
                             }
                         }
@@ -164,10 +164,10 @@ public class SplashActivity extends Activity {
     private void showProgress() {
         if (loadingDialog == null) {
             if (splash > 0) {
-                Log.i("Showing splash");
+                Log.i("SplashActivity Showing splash");
                 setContentView(splash);
             } else {
-                Log.i("Showing progress");
+                Log.i("SplashActivity Showing progress");
                 loadingDialog = ProgressDialog.show(this, null, "Starting...", true, true);
                 loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setOnCancelListener(new OnCancelListener() {
@@ -183,10 +183,10 @@ public class SplashActivity extends Activity {
     private void showDownloadProgress(String message) {
         if (loadingDialog == null) {
             if (splash > 0) {
-                Log.i("Showing splash");
+                Log.i("SplashActivity Showing splash");
                 setContentView(splash);
             } else {
-                Log.i("Showing progress");
+                Log.i("SplashActivity Showing progress");
                 loadingDialog = new ProgressDialog(this);
                 loadingDialog.setTitle(null);
                 loadingDialog.setMessage(message);
@@ -210,7 +210,7 @@ public class SplashActivity extends Activity {
 
     private void hideProgress() {
         if (loadingDialog != null) {
-            Log.d("Hide progress");
+            Log.d("SplashActivity Hide progress");
             loadingDialog.dismiss();
             loadingDialog = null;
         }
@@ -327,13 +327,13 @@ public class SplashActivity extends Activity {
     // EMXIF
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult: " + requestCode + ", " + resultCode + ", " + data);
-        Log.d("onActivityResult: " + INSTALL_REQUEST_CODE + ", " + RESULT_OK + ", " + RESULT_CANCELED);
+        Log.d("SplashActivity onActivityResult: " + requestCode + ", " + resultCode + ", " + data);
+        Log.d("SplashActivity onActivityResult: " + INSTALL_REQUEST_CODE + ", " + RESULT_OK + ", " + RESULT_CANCELED);
         if (requestCode == INSTALL_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Log.d("onActivityResult: Install OK.");
+                Log.d("SplashActivity onActivityResult: Install OK.");
             } else if (resultCode == RESULT_CANCELED) {
-                Log.d("onActivityResult: Install canceled.");
+                Log.d("SplashActivity onActivityResult: Install canceled.");
                 // FIXME(uwe): Maybe show a dialog explaining that RubotoCore is needed and try again?
                 deleteFile(RUBOTO_APK);
                 if (!JRubyAdapter.isInitialized()) {
@@ -341,7 +341,7 @@ public class SplashActivity extends Activity {
                 }
                 // EMXIF
             } else {
-                Log.e("onActivityResult: resultCode: " + resultCode);
+                Log.e("SplashActivity onActivityResult: resultCode: " + resultCode);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

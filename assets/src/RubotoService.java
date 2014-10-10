@@ -10,21 +10,22 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
      */
     private void preOnCreate() {
         if (!getClass().getSimpleName().equals("RubotoService")) {
-          System.out.println("RubotoService onCreate(): " + getClass().getName());
+          System.out.println("RubotoService preOnCreate(): " + getClass().getName());
           getScriptInfo().setRubyClassName(getClass().getSimpleName());
+          JRubyAdapter.setUpJRuby(this);
         }
     }
 
     private void preOnStartCommand(android.content.Intent intent) {
         if (getClass().getSimpleName().equals("RubotoService")) {
-          System.out.println("RubotoService onStartCommand(): " + getClass().getName());
+          System.out.println("RubotoService preOnStartCommand(): " + getClass().getName());
           scriptInfo.setFromIntent(intent);
         }
     }
 
     private void preOnBind(android.content.Intent intent) {
         if (getClass().getSimpleName().equals("RubotoService")) {
-          System.out.println("RubotoService onBind(): " + getClass().getName());
+          System.out.println("RubotoService preOnBind(): " + getClass().getName());
           scriptInfo.setFromIntent(intent);
         }
     }

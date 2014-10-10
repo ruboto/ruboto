@@ -33,13 +33,13 @@ module Ruboto
 
       def update_project_properties_target_level(prop_file, target_level)
         if (project_property_file = File.read(prop_file)) =~ TARGET_VERSION_REGEXP
-          min_sdk = $2.to_i
+          min_sdk = $2
           if target_level
             unless target_level == min_sdk
               puts "Changing project target from #{min_sdk} to #{MINIMUM_SUPPORTED_SDK_LEVEL}."
               new_target_level = target_level
             end
-          elsif min_sdk < MINIMUM_SUPPORTED_SDK_LEVEL
+          elsif min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
             puts "Upgrading project target from #{min_sdk} to #{MINIMUM_SUPPORTED_SDK_LEVEL}."
             new_target_level = MINIMUM_SUPPORTED_SDK_LEVEL
           end

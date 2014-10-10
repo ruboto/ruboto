@@ -16,7 +16,9 @@ module Kernel
 
   alias :old_method_missing :method_missing
   def method_missing(method, *args, &block)
-    return @ruboto_java_instance.send(method, *args, &block) if @ruboto_java_instance && @ruboto_java_instance.respond_to?(method)
+    if @ruboto_java_instance && @ruboto_java_instance.respond_to?(method)
+      return @ruboto_java_instance.send(method, *args, &block)
+    end
     old_method_missing(method, *args, &block)
   end
 end
