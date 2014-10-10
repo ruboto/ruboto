@@ -655,8 +655,11 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   next unless File.exists? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
   require 'bundler'
-  # FIXME(uwe): Issue #547 https://github.com/ruboto/ruboto/issues/547
-  if true || Gem::Version.new(Bundler::VERSION) <= Gem::Version.new('1.6.3')
+  if false
+    # FIXME(uwe): Issue #547 https://github.com/ruboto/ruboto/issues/547
+    # Bundler.settings[:platform] = Gem::Platform::DALVIK
+    sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
+  else
     require 'bundler/vendored_thor'
 
     # Store original RubyGems/Bundler environment
@@ -697,9 +700,6 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     Gem.platforms = platforms
     ENV['GEM_HOME'] = env_home
     ENV['GEM_PATH'] = env_path
-  else
-    # Bundler.settings[:platform] = Gem::Platform::DALVIK
-    sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
   end
 
   gem_paths = Dir["#{BUNDLE_PATH}/gems"]
