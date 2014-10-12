@@ -209,7 +209,7 @@ module Ruboto
 
         if new_snapshot
           puts 'Allow the emulator to calm down a bit.'
-          20.times do
+          60.times do
             break if `adb shell ps` =~ /android.process.acore/
             print '.'
             sleep 1
