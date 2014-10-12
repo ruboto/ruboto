@@ -217,7 +217,8 @@ module Ruboto
           puts
         end
 
-        system <<EOF
+        # FIXME(uwe): Remove condition when Android L is released.
+        system <<EOF unless sdk_level == 'L'
 (
   set +e
   for i in {1..10} ; do
@@ -226,7 +227,7 @@ module Ruboto
     if [ "$?" = "0" ] ; then
       set -e
       adb shell input keyevent 82 >/dev/null 2>&1
-      #{'adb shell input keyevent 4 >/dev/null 2>&1' unless sdk_level == 'L'}
+      adb shell input keyevent 4 >/dev/null 2>&1
       exit 0
     fi
   done
