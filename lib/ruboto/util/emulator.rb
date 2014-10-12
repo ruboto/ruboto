@@ -84,6 +84,9 @@ module Ruboto
           end
 
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
+          manifest_file = 'AndroidManifest.xml'
+          large_heap = (File.exists?(manifest_file) && File.read(manifest_file) =~ /largeHeap/)
+          heap_size = large_heap ? 256 : 48
 
           unless File.exists? avd_home
             puts "Creating AVD #{avd_name}"
@@ -123,9 +126,6 @@ module Ruboto
             end
             avd_config_file_name = "#{avd_home}/config.ini"
             old_avd_config = File.read(avd_config_file_name)
-            manifest_file = 'AndroidManifest.xml'
-            large_heap = (File.exists?(manifest_file) && File.read(manifest_file) =~ /largeHeap/)
-            heap_size = large_heap ? 256 : 48
             new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
             add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
             add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
@@ -133,12 +133,14 @@ module Ruboto
             add_property(new_avd_config, 'hw.sdCard', 'yes')
             File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
 
-            hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
+            new_snapshot = true
+          end
+
+          hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
+          if File.exists?(hw_config_file_name)
             old_hw_config = File.read(hw_config_file_name)
             new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
             File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
-
-            new_snapshot = true
           end
 
           puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
