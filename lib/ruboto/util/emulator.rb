@@ -217,8 +217,7 @@ module Ruboto
           puts
         end
 
-        # FIXME(uwe): Remove condition when Android L is released.
-        system <<EOF unless sdk_level == 'L'
+        system <<EOF
 (
   set +e
   for i in {1..10} ; do
