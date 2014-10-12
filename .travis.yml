@@ -94,7 +94,7 @@ script:
   - rake install
   - ruboto setup -y -t $ANDROID_TARGET
   - source ~/.rubotorc
-  - ruboto emulator -t $ANDROID_TARGET
+  - ruboto emulator -t $ANDROID_TARGET --no-snapshot
   - ./run_tests.sh
 
 notifications:
