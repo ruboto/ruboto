@@ -226,7 +226,7 @@ module Ruboto
     if [ "$?" = "0" ] ; then
       set -e
       adb shell input keyevent 82 >/dev/null 2>&1
-      adb shell input keyevent 4 >/dev/null 2>&1
+      #{'adb shell input keyevent 4 >/dev/null 2>&1' unless sdk_level == 'L'}
       exit 0
     fi
   done
