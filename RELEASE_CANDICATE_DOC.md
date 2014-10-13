@@ -1,10 +1,12 @@
-Subject: [ANN] Ruboto 1.1.2 release candidate
+Subject: [ANN] Ruboto 1.2.0 release candidate
 
 Hi all!
 
-The Ruboto 1.1.2 release candidate is now available.
+The Ruboto 1.2.0 release candidate is now available.
 
-This is a quick release to add support for version 23 of the Android SDK.
+In this release we add support for the Android L preview and the ART
+runtime.  We also specify accessing the "R" class without specifying a
+package to refer to the local package "R" class instead of "android.R".
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
