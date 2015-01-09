@@ -4,6 +4,10 @@ android:
   components:
     - build-tools-20.0.0
 
+os:
+  - linux
+  - osx
+
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] || [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then rake get_jruby_jars_snapshots ; fi

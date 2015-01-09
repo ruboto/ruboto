@@ -33,7 +33,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions=$STANDALONE_JRUBY_VERSIONS
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then
-      jruby_versions="$MASTER"
+      jruby_versions="$MASTER $STABLE"
     elif [ "$RUBOTO_PLATFORM" == "CURRENT" ] ; then
       jruby_versions="CURRENT"
     fi

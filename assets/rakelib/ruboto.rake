@@ -660,6 +660,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     # Bundler.settings[:platform] = Gem::Platform::DALVIK
     sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
   else
+    # ENV["DEBUG"] = "true"
     require 'bundler/vendored_thor'
 
     # Store original RubyGems/Bundler environment

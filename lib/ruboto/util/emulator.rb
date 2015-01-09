@@ -119,7 +119,7 @@ module Ruboto
             end
             # EMXIF
 
-            skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-L/skins/HVGA/hardware.ini"
+            skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/HVGA/hardware.ini"
             if File.exists?(skin_filename)
               old_skin_config = File.read(skin_filename)
               new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
