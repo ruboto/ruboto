@@ -660,7 +660,7 @@ task '.travis.yml' do
   allow_failures = ''
   [21, 19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.18', '1.7.13']]].each do |platform, versions|
+    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.18']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
