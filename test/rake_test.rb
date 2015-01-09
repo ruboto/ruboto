@@ -1,6 +1,6 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
-class RakeTest < Test::Unit::TestCase
+class RakeTest < Minitest::Test
   def setup
     generate_app
   end

@@ -21,11 +21,12 @@ GEM
       pry (>= 0.9)
     map (6.5.5)
     method_source (0.8.2)
+    minitest (5.5.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rake (10.3.2)
+    rake (10.4.2)
     rubyzip (1.1.6)
     slop (3.6.0)
 
@@ -33,4 +34,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  minitest (~> 5.5)
   ruboto!

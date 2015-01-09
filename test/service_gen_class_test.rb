@@ -1,7 +1,7 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 require 'fileutils'
 
-class ServiceGenClassTest < Test::Unit::TestCase
+class ServiceGenClassTest < Minitest::Test
   SRC_DIR = "#{APP_DIR}/src"
 
   def setup

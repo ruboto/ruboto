@@ -2,7 +2,7 @@ require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'bigdecimal'
 require 'test/app_test_methods'
 
-class GitBasedGemTest < Test::Unit::TestCase
+class GitBasedGemTest < Minitest::Test
   def setup
     generate_app
     Dir.chdir APP_DIR do

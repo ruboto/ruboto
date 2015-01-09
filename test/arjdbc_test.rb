@@ -3,7 +3,7 @@ require File.expand_path('test_helper', File.dirname(__FILE__))
 # FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
 if RubotoTest::ANDROID_OS >= 15
 
-class ArjdbcTest < Test::Unit::TestCase
+class ArjdbcTest < Minitest::Test
   def setup
     generate_app :bundle => [['activerecord', '<4.0.0'], 'activerecord-jdbcsqlite3-adapter', :sqldroid]
   end

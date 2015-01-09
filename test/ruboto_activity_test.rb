@@ -1,6 +1,6 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
-class RubotoActivityTest < Test::Unit::TestCase
+class RubotoActivityTest < Minitest::Test
   def setup
     generate_app
   end

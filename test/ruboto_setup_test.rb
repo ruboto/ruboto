@@ -1,7 +1,7 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'net/http'
 
-class RubotoSetupTest < Test::Unit::TestCase
+class RubotoSetupTest < Minitest::Test
   SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
 
   def test_if_page_still_exists

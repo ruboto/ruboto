@@ -15,7 +15,7 @@ class Log
   end
 end
 
-class SampleBroadcastReceiverTest < Test::Unit::TestCase
+class SampleBroadcastReceiverTest < Minitest::Test
   require 'assets/samples/sample_broadcast_receiver'
 
   def test_on_receive_calls_log_v

@@ -2,7 +2,7 @@ require File.expand_path('test_helper', File.dirname(__FILE__))
 require 'bigdecimal'
 require 'test/app_test_methods'
 
-class RubotoGenTest < Test::Unit::TestCase
+class RubotoGenTest < Minitest::Test
   include AppTestMethods
 
   def setup

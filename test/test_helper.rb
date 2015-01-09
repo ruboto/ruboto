@@ -1,7 +1,7 @@
 lib = File.dirname(File.dirname(__FILE__)) + '/lib'
 $:.unshift(lib) unless $:.include?(lib)
-require 'test/unit'
 require 'rubygems'
+require 'minitest/autorun'
 require 'fileutils'
 require 'yaml'
 require 'ruboto/sdk_versions'
@@ -128,16 +128,17 @@ module RubotoTest
   ENV['LOCAL_GEM_DIR'] = Dir.getwd
 end
 
-class Test::Unit::TestCase
+class Minitest::Test
   include RubotoTest
   extend RubotoTest
 
   alias old_run run
 
   def run(*args, &block)
-    mark_test_start("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __name__}")
-    old_run(*args, &block)
-    mark_test_end("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __name__}")
+    mark_test_start("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __method__}")
+    result = old_run(*args, &block)
+    mark_test_end("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __method__}")
+    result
   end
 
   def mark_test_start(test_name)

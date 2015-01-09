@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'main', '~>5.2'
   s.add_runtime_dependency 'rake', '~>10.0'
   s.add_runtime_dependency 'rubyzip', '~>1.0'
+  s.add_development_dependency 'minitest', '~>5.5'
 
   # jruby-jars is only necessary for standalone apps.
   # It will be installed on demand.

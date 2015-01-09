@@ -602,9 +602,9 @@ namespace :platform do
   def package_installed?
     package_name = package
     %w( -0 -1 -2).each do |i|
-      path = "/data/app/#{package_name}#{i}.apk"
-      o = `adb shell ls -l #{path}`.chomp
-      if o =~ /^-rw-r--r-- system\s+system\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}$/
+      path = "/data/app/#{package_name}#{i}"
+      o = `adb shell ls -dl #{path}*`.chomp
+      if o =~ /^[-d]rw[-x]r-[-x]r-[-x] system\s+system\s+(\d+)? \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}(\.apk)?$/
         apk_file = PLATFORM_CURRENT_RELEASE_APK
         if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
           return true
@@ -614,8 +614,8 @@ namespace :platform do
       end
 
       sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
-      o = `adb shell ls -l #{sdcard_path}`.chomp
-      if o =~ /^-r-xr-xr-x system\s+root\s+(\d+) \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
+      o = `adb shell ls -dl #{sdcard_path}`.chomp
+      if o =~ /^.r-xr-xr-x system\s+root\s+(\d+)? \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
         apk_file = PLATFORM_CURRENT_RELEASE_APK
         if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
           return true
@@ -658,18 +658,16 @@ task '.travis.yml' do
   source = File.read('.travis.yml')
   matrix = ''
   allow_failures = ''
-  [19, 17, 16, 15].each.with_index do |api, i|
+  [21, 19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.13']]].each do |platform, versions|
+    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.18', '1.7.13']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
         if (platform == 'STANDALONE' && v == :MASTER) ||
             # FIXME(uwe):  Remove when master and stable branches are green.
-            v == :MASTER || v == :STABLE ||
-            # FIXME(uwe):  Remove when master and stable branches are green.
-            v == '1.7.16'
+            v == :MASTER || v == :STABLE
           # EMXiF
           allow_failures << line.gsub('-', '- env:')
         end

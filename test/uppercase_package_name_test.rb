@@ -1,6 +1,6 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
-class UppercasePackageNameTest < Test::Unit::TestCase
+class UppercasePackageNameTest < Minitest::Test
 
   def setup
     generate_app :package => 'org.ruboto.TestApp'

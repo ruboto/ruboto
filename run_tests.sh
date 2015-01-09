@@ -52,7 +52,7 @@ fi
 export NOEXEC_DISABLE=1
 rake clean
 set +e
-rake --trace test $*
+rake test $*
 TEST_RC=$?
 set -e
 

@@ -47,14 +47,14 @@ Dir.chdir "#{RubotoTest::PROJECT_DIR}/examples/" do
     tools_version = m[:tools_version]
     ruboto_version_no_dots = ruboto_version.gsub('.', '_')
     self.class.class_eval <<EOF
-class RubotoUpdatedExample#{ruboto_version_no_dots}Tools#{tools_version}Test < Test::Unit::TestCase
+class RubotoUpdatedExample#{ruboto_version_no_dots}Tools#{tools_version}Test < Minitest::Test
   include UpdatedExampleTestMethods
   def setup
     super('#{ruboto_version}', '#{tools_version}')
   end
 end
 
-class RubotoUpdate#{ruboto_version_no_dots}Tools#{tools_version}Test < Test::Unit::TestCase
+class RubotoUpdate#{ruboto_version_no_dots}Tools#{tools_version}Test < Minitest::Test
   include UpdateTestMethods
   def setup
     super('#{ruboto_version}', '#{tools_version}')
@@ -65,7 +65,7 @@ EOF
 
 end
 
-class RubotoUpdateTest < Test::Unit::TestCase
+class RubotoUpdateTest < Minitest::Test
   def setup
     generate_app :heap_alloc => 16, :update => true
   end
