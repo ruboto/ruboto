@@ -41,7 +41,7 @@ class RakeTest < Minitest::Test
       FileUtils.touch 'src/ruboto_test_app_activity.rb'
       sleep 1
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"),
+      assert apk_timestamp != File.mtime("bin/#{APP_NAME}-debug.apk"),
           'APK should have been rebuilt'
     end
   end
@@ -51,7 +51,7 @@ class RakeTest < Minitest::Test
       apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
       FileUtils.touch 'src/not_ruby_source.properties'
       system 'rake debug'
-      assert_not_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"),
+      assert apk_timestamp != File.mtime("bin/#{APP_NAME}-debug.apk"),
           'APK should have been rebuilt'
     end
   end

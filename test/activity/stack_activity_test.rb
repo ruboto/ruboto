@@ -16,11 +16,13 @@ end
 # ANDROID: 16, PLATFORM: 0.5.6,      JRuby: 1.7.3    '[28, 33, 45, 62]' expected, but got '[28, 33, 44, 61]'
 # ANDROID: 16, PLATFORM: 0.6.0,      JRuby: 9000.dev '[28, 33, 45, 62]' expected, but got '[28, 33, 45, 63]'
 # ANDROID: 20, PLATFORM: 1.0.2,      JRuby: 1.7.12   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
+# ANDROID: 21, PLATFORM: 1.0.2,      JRuby: 1.7.12   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
 test('stack depth') do |activity|
   os_offset = {
       10 => [0, 0, -1, -1],
       13 => [1, 1, 0, 0],
       20 => [0, 0, -1, -1],
+      21 => [0, 0, -1, -1],
   }[android.os.Build::VERSION::SDK_INT] || [0, 0, 0, 0]
   jruby_offset = {
       /^1\.7/ => [0, 0, 0, -1],
