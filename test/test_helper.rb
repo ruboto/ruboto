@@ -139,9 +139,9 @@ class Minitest::Test
   alias old_run run
 
   def run(*args, &block)
-    mark_test_start("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __method__}")
+    mark_test_start("#{self.class.name}\##{name}")
     result = old_run(*args, &block)
-    mark_test_end("#{self.class.name}\##{respond_to?(:method_name) ? method_name : __method__}")
+    mark_test_end("#{self.class.name}\##{name}")
     result
   end
 

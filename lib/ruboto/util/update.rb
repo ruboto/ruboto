@@ -463,7 +463,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.0.0.0.dev')
+              if gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -507,7 +507,6 @@ module Ruboto
                     'org/jruby/ant',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
-                    'org/jruby/compiler/util',
                     'org/jruby/demo',
                     'org/jruby/embed/bsf',
                     'org/jruby/embed/jsr223',
@@ -524,18 +523,12 @@ module Ruboto
                     'org/jruby/truffle/nodes',
                     'org/jruby/truffle/runtime/control',
                     'org/jruby/truffle/runtime/core',
-                    'org/jruby/truffle/runtime/lookup',
                     'org/jruby/truffle/runtime/methods',
-                    'org/jruby/truffle/runtime/objectstorage',
                     'org/jruby/truffle/runtime/signal',
                     'org/jruby/truffle/runtime/subsystems',
                     'org/jruby/truffle/runtime/util',
                     'org/jruby/truffle/runtime/*.class',
                     'org/jruby/truffle/translator',
-                    # EMXIF
-
-                    'org/yecht',
-                    'yaml.rb', # This looks like 1.8 stdlib...
                 ]
               elsif gem_version >= Gem::Version.new('1.7.17.dev')
                 excluded_core_packages = %w(*.sh **/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht yaml.rb)
