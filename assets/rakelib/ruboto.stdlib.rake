@@ -163,7 +163,7 @@ def remove_unneeded_parts_of_stdlib
     end
 
     # Corrects bug in krypt that loads FFI.
-    # Only affects JRuby 1.7.11, 1.7.12, and 9000 (until fixed).
+    # Only affects JRuby 1.7.11, 1.7.12, and 9.0.0.0 (until fixed).
     # FIXME(uwe):  Remove when we stop supporting JRuby 1.7.11 and 1.7.12
     Dir['**/provider.rb'].each do |f|
       print "patching #{f}..."

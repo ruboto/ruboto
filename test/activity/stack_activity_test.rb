@@ -26,7 +26,7 @@ test('stack depth') do |activity|
   }[android.os.Build::VERSION::SDK_INT] || [0, 0, 0, 0]
   jruby_offset = {
       /^1\.7/ => [0, 0, 0, -1],
-      /^9000/ => [0, 0, 0, 0],
+      /^9.0.0.0/ => [0, 0, 0, 0],
       // => [0, 0, 0, 0],
   }.find { |k, v| org.jruby.runtime.Constants::VERSION =~ k }[1]
   version_message ="ANDROID: #{android.os.Build::VERSION::SDK_INT}, PLATFORM: #{org.ruboto.JRubyAdapter.uses_platform_apk ? org.ruboto.JRubyAdapter.platform_version_name : 'STANDALONE'}, JRuby: #{org.jruby.runtime.Constants::VERSION}"

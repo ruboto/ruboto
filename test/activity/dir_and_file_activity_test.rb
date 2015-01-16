@@ -11,10 +11,10 @@ setup do |activity|
 end
 
 test('__FILE__ is set OK') do |activity|
-  assert_matches %r{jar:file:/data/app/org.ruboto.test_app-[12].apk!/dir_and_file_activity.rb},
+  assert_matches %r{jar:file:/data/app/org.ruboto.test_app-[123](?:/base)?.apk!/dir_and_file_activity.rb},
                  activity.find_view_by_id(42).text.to_s
-  assert_matches %r{jar:file:/data/app/org.ruboto.test_app-[12].apk!},
+  assert_matches %r{jar:file:/data/app/org.ruboto.test_app-[123](?:/base)?.apk!},
                  activity.find_view_by_id(43).text.to_s
-  assert_matches %r{file:/data/app/org.ruboto.test_app-[12].apk!/AndroidManifest.xml},
+  assert_matches %r{file:/data/app/org.ruboto.test_app-[123](?:/base)?.apk!/AndroidManifest.xml},
                  activity.find_view_by_id(44).text.to_s
 end

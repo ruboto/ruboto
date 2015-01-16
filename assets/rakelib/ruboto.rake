@@ -374,7 +374,10 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
 
             <if>
               <condition>
-                <contains string="${dex.merge.output}" substring="method ID not in [0, 0xffff]: 65536"/>
+                <or>
+                  <contains string="${dex.merge.output}" substring="method ID not in [0, 0xffff]: 65536"/>
+                  <contains string="${dex.merge.output}" substring="Too many method references"/>
+                </or>
               </condition>
               <then>
                 <echo message="The package contains too many methods.  Switching to multi-dex build." />

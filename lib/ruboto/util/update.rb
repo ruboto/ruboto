@@ -463,7 +463,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9000.dev')
+              if gem_version >= Gem::Version.new('9.0.0.0.dev')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -519,10 +519,7 @@ module Ruboto
                     # 'org/jruby/runtime/invokedynamic', # Should be excluded
                     # 'org/jruby/runtime/opto',              # What is this?
                     # 'org/jruby/runtime/opto/OptoFactory*', # What is this?
-
-                    # FIXME(uwe): We should filter the whole truffle package...
-                    # 'org/jruby/truffle',
-
+                    'org/jruby/truffle',
                     'org/jruby/truffle/*.class',
                     'org/jruby/truffle/nodes',
                     'org/jruby/truffle/runtime/control',

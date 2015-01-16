@@ -51,7 +51,7 @@ module AppTestMethods
       next if file =~ /ssl/ && (ANDROID_OS < 16 ||
           RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM' ||
           JRUBY_JARS_VERSION < Gem::Version.new('1.7.13') ||
-          JRUBY_JARS_VERSION < Gem::Version.new('9000')) # FIXME(uwe): JRuby 9K should contain the SSLSocket fix.
+          JRUBY_JARS_VERSION < Gem::Version.new('9.0.0.0')) # FIXME(uwe): JRuby 9K should contain the SSLSocket fix.
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.4.dev

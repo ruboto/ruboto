@@ -34,7 +34,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.11' => 4.4,
           '1.7.12' => 4.4,
           '1.7.14.dev' => 4.4,
-          '9000.dev' => 4.6,
+          '9.0.0.0.dev' => 4.6,
       }[JRUBY_JARS_VERSION.to_s] || 4.4
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"

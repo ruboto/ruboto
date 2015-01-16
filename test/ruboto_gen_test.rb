@@ -89,7 +89,7 @@ class RubotoGenTest < Minitest::Test
           '1.7.11' => 8800.0,
           '1.7.12' => 9800.0,
           '1.7.14.dev' => 9800.0,
-          '9000.dev' => 8300.0,
+          '9.0.0.0.dev' => 8300.0,
       }[JRUBY_JARS_VERSION.to_s] || 9800.0
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
