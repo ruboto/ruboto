@@ -1,17 +1,12 @@
 lib = File.dirname(File.dirname(__FILE__)) + '/lib'
 $:.unshift(lib) unless $:.include?(lib)
 require 'rubygems'
-require 'bundler/setup'
 require 'minitest/autorun'
 require 'fileutils'
 require 'yaml'
 require 'ruboto/sdk_versions'
 require 'ruboto/sdk_locations'
 require 'ruboto/util/update'
-
-# FIXME(uwe): Remove when we stop supporting onler Ruby versions
-Minitest = MiniTest if RUBY_VERSION =~ /^(1\.9|2\.0|2\.1)\./
-# EMXIF
 
 module RubotoTest
   include Ruboto::SdkVersions

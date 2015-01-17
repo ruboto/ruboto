@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-(gem query -i -q ruboto > /dev/null) || rake install
+(gem query -i -q -n ruboto > /dev/null) || rake install
 
 if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 2 ] ; then
   echo JRuby-jars gems are missing.
@@ -57,6 +57,23 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo -ne "\033]0;$ANDROID_TARGET $RUBOTO_PLATFORM $JRUBY_JARS_VERSION\007"
 
       set +e
+
+      if [ "$RVM" != "" ] ; then
+        if [ -e /etc/profile.d/rvm.sh ] ; then
+          . /etc/profile.d/rvm.sh
+        fi
+        if [ ! $(command -v rvm) ] ; then
+          echo RVM is missing!
+          exit 2
+        fi
+        rvm --version
+        unset JRUBY_HOME
+        rvm install $RVM
+        rvm use $RVM
+        (gem query -q -i bundler >/dev/null) || gem install bundler
+        bundle install
+        echo -n
+      fi
 
       ./run_tests.sh
       # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits

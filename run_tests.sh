@@ -34,24 +34,6 @@ if [ ! $(command -v ant) ] ; then
 fi
 ant -version
 
-if [ "$RVM" != "" ] ; then
-  if [ -e /etc/profile.d/rvm.sh ] ; then
-    . /etc/profile.d/rvm.sh
-  fi
-  if [ ! $(command -v rvm) ] ; then
-    echo RVM is missing!
-    exit 2
-  fi
-  rvm --version
-  unset JRUBY_HOME
-  rvm install $RVM
-  rvm use $RVM
-  gem query -i bundler >/dev/null || gem install bundler
-  bundle install
-  echo -n
-fi
-
-export NOEXEC_DISABLE=1
 rake clean
 set +e
 rake test $*
