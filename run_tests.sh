@@ -34,7 +34,7 @@ if [ ! $(command -v ant) ] ; then
 fi
 ant -version
 
-if [ "$RUBY_IMPL" != "" ] ; then
+if [ "$RVM" != "" ] ; then
   if [ -e /etc/profile.d/rvm.sh ] ; then
     . /etc/profile.d/rvm.sh
   fi
@@ -44,8 +44,8 @@ if [ "$RUBY_IMPL" != "" ] ; then
   fi
   rvm --version
   unset JRUBY_HOME
-  rvm install $RUBY_IMPL
-  rvm use $RUBY_IMPL
+  rvm install $RVM
+  rvm use $RVM
   echo -n
 fi
 

@@ -4,9 +4,6 @@ android:
   components:
     - build-tools-20.0.0
 
-rvm:
-  - 2.2.0
-
 os:
   - linux
   - osx
@@ -22,6 +19,7 @@ before_install:
 env:
   global:
     - RUBOTO_UPDATE_EXAMPLES=0
+    - RVM=2.2.0
 
   matrix:
     - ANDROID_TARGET=21 RUBOTO_PLATFORM=CURRENT    TEST_PART=1of5
