@@ -1,6 +1,4 @@
 $:.unshift('lib') unless $:.include?('lib')
-require 'rubygems'
-require 'bundle/setup'
 require 'time'
 require 'date'
 require 'rake/clean'
