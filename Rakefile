@@ -633,8 +633,10 @@ desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshots do
   download_host = 'lafo.ssw.uni-linz.ac.at'
   index = Net::HTTP.get(download_host, "/graalvm/")
-  current_gems = index.scan(/jruby-jars-.*?.gem/).uniq.
-      sort_by{|v| Gem::Version.new(v[11..-5])}.last(2)
+  current_gems = [index.scan(/jruby-jars-.*?.gem/).uniq.
+      sort_by{|v| Gem::Version.new(v[11..-5])}.last]
+  current_gems << index.scan(/jruby-jars-1\.7\..*?.gem/).uniq.
+      sort_by{|v| Gem::Version.new(v[11..-5])}.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
   current_gems.each do |gem|
     print "Downloading #{gem}: \r"
@@ -642,16 +644,22 @@ task :get_jruby_jars_snapshots do
     done = 0
     body = ''
     Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
-      length = response['Content-Length'].to_i
-      response.read_body do |fragment|
-        body << fragment
-        done += fragment.length
-        progress = (done * 100) / length
-        print "Downloading #{gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+      if response.code == '200'
+        length = response['Content-Length'].to_i
+        response.read_body do |fragment|
+          body << fragment
+          done += fragment.length
+          unless length == 0
+            progress = (done * 100) / length
+            print "Downloading #{gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
+          end
+        end
+        puts
+      else
+        raise "Unexpected HTTP response code: #{response.code.inspect}"
       end
-      puts
     end
-    File.open(gem, 'wb') { |f| f << body }
+    File.open(gem, 'wb') { |f| f << body } unless body.empty?
   end
 end
 
