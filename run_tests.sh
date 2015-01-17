@@ -46,6 +46,8 @@ if [ "$RVM" != "" ] ; then
   unset JRUBY_HOME
   rvm install $RVM
   rvm use $RVM
+  gem query -i bundler >/dev/null || gem install bundler
+  bundle install
   echo -n
 fi
 
