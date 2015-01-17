@@ -70,8 +70,6 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
         unset JRUBY_HOME
         rvm install $RVM
         rvm use $RVM
-        (gem query -q -i bundler >/dev/null) || gem install bundler
-        bundle install
         echo -n
       fi
 

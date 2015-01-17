@@ -34,6 +34,9 @@ if [ ! $(command -v ant) ] ; then
 fi
 ant -version
 
+(gem query -q -i bundler >/dev/null) || gem install bundler
+bundle install
+
 rake clean
 set +e
 rake test $*
