@@ -4,6 +4,9 @@ android:
   components:
     - build-tools-20.0.0
 
+rvm:
+  - ruby
+
 os:
   - linux
   - osx
