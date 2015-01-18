@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-(gem query -i -q -n ruboto > /dev/null) || rake install
-
 if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 2 ] ; then
   echo JRuby-jars gems are missing.
   rake get_jruby_jars_snapshots
@@ -13,10 +11,13 @@ else
 fi
 
 ANDROID_TARGETS="21 19 17 16 15" # We should cover at least 90% of the market
+ANDROID_TARGETS="19 17 16 15" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
+PLATFORM_MODES="STANDALONE"
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE 1.7.18"
+STANDALONE_JRUBY_VERSIONS="$STABLE 1.7.18"
 RUBOTO_UPDATE_EXAMPLES=1
 # STRIP_INVOKERS=1
 # TEST_PART=4of5
@@ -27,15 +28,12 @@ export STRIP_INVOKERS TEST_PART
 for ANDROID_TARGET in $ANDROID_TARGETS ; do
   ANDROID_OS=$ANDROID_TARGET
 
-  ruboto setup -y -t 10 -t $ANDROID_OS
-  source ~/.rubotorc
-  ruboto emulator -t $ANDROID_OS
-
   for RUBOTO_PLATFORM in $PLATFORM_MODES ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions=$STANDALONE_JRUBY_VERSIONS
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then
       jruby_versions="$MASTER $STABLE"
+      jruby_versions="$STABLE"
     elif [ "$RUBOTO_PLATFORM" == "CURRENT" ] ; then
       jruby_versions="CURRENT"
     fi

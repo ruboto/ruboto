@@ -677,7 +677,9 @@ task '.travis.yml' do
         matrix << line
         if (platform == 'STANDALONE' && v == :MASTER) ||
             # FIXME(uwe):  Remove when master and stable branches are green.
-            v == :MASTER || v == :STABLE
+            v == :MASTER ||
+            v == :STABLE ||
+            api == 21
           # EMXiF
           allow_failures << line.gsub('-', '- env:')
         end
@@ -685,7 +687,6 @@ task '.travis.yml' do
     end
     matrix << "\n"
   end
-  matrix << "    - ANDROID_TARGET=10 RUBOTO_PLATFORM=CURRENT\n"
   matrix_str = "  matrix:\n#{matrix}\n"
   allow_failures_str = <<EOF
   allow_failures:
