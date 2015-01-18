@@ -1,5 +1,10 @@
 #!/bin/bash -el
 
+# This script expects environment variables already set, and configures the
+# environment before starting the tests.  The environment variables can be set
+# manually, by matrix_tests.sh or by travis-ci.  The script should self-destruct
+# after a timeout to avoid running forever with hung tests.
+
 echo "Starting tests..."
 
 # BEGIN TIMEOUT #
@@ -34,6 +39,12 @@ if [ ! $(command -v ant) ] ; then
 fi
 ant -version
 
+rake install
+# ruboto setup -y -t 10 -t $ANDROID_OS
+ruboto setup -y -t $ANDROID_TARGET
+source ~/.rubotorc
+# ruboto emulator -t $ANDROID_OS
+ruboto emulator -t $ANDROID_TARGET --no-snapshot
 (gem query -q -i bundler >/dev/null) || gem install bundler
 bundle install
 

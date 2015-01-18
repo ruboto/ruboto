@@ -86,10 +86,6 @@ matrix:
     - env: ANDROID_TARGET=15 RUBOTO_PLATFORM=STANDALONE TEST_PART=4of5 JRUBY_JARS_VERSION=STABLE
 
 script:
-  - rake install
-  - ruboto setup -y -t $ANDROID_TARGET
-  - source ~/.rubotorc
-  - ruboto emulator -t $ANDROID_TARGET --no-snapshot
   - ./run_tests.sh
 
 notifications:
