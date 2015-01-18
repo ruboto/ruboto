@@ -675,22 +675,16 @@ task '.travis.yml' do
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
-        if (platform == 'STANDALONE' && v == :MASTER) ||
-            # FIXME(uwe):  Remove when master branch is green.
-            v == :MASTER ||
-            # EMXIF
-            # FIXME(uwe):  Remove when stable branch is green.
-            v == :STABLE ||
-            # EMXIF
-            api == 21
-          # EMXiF
+        if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
+            v == :STABLE || # FIXME(uwe):  Remove when stable branch is green.
+            api == 21 # FIXME(uwe):  Remove when Android 5 is green.
           allow_failures << line.gsub('-', '- env:')
         end
       end
     end
     matrix << "\n"
   end
-  matrix_str = "  matrix:\n#{matrix}\n"
+  matrix_str = "  matrix:\n#{matrix}"
   allow_failures_str = <<EOF
   allow_failures:
     # Current master is failing: https://github.com/jruby/jruby/issues/1741
