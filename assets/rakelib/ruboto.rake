@@ -52,10 +52,10 @@ else
 end
 
 # FIXME(uwe): Simplify when we stop supporting Android SDK < 22: Don't look in platform-tools for dx
-DX_FILENAME = Dir[File.join(android_home, '{build-tools/*,platform-tools}', ON_WINDOWS ? 'dx.bat' : 'dx')][-1]
+DX_FILENAMES = Dir[File.join(android_home, '{build-tools/*,platform-tools}', ON_WINDOWS ? 'dx.bat' : 'dx')]
 # EMXIF
 
-unless DX_FILENAME
+unless DX_FILENAMES.any?
   puts 'You need to install the Android SDK Build-tools!'
   exit 1
 end
@@ -560,14 +560,16 @@ end
 
 MINIMUM_DX_HEAP_SIZE = 3072
 task :patch_dex do
-  new_dx_content = File.read(DX_FILENAME).dup
-  xmx_pattern = ON_WINDOWS ? /^set defaultXmx=-Xmx(\d+)(M|m|G|g|T|t)/ : /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
-  if new_dx_content =~ xmx_pattern &&
-      ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < MINIMUM_DX_HEAP_SIZE*1024**2
-    puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{DX_FILENAME}"
-    new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{MINIMUM_DX_HEAP_SIZE}M} : %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"}
-    new_dx_content.sub!(xmx_pattern, new_xmx_value)
-    File.open(DX_FILENAME, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
+  DX_FILENAMES.each do |dx_filename|
+    new_dx_content = File.read(dx_filename).dup
+    xmx_pattern = ON_WINDOWS ? /^set defaultXmx=-Xmx(\d+)(M|m|G|g|T|t)/ : /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
+    if new_dx_content =~ xmx_pattern &&
+        ($1.to_i * 1024 ** {'M' => 2, 'G' => 3, 'T' => 4}[$2.upcase]) < MINIMUM_DX_HEAP_SIZE*1024**2
+      puts "Increasing max heap space from #$1#$2 to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
+      new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{MINIMUM_DX_HEAP_SIZE}M} : %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"}
+      new_dx_content.sub!(xmx_pattern, new_xmx_value)
+      File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
+    end
   end
 end
 
