@@ -45,13 +45,20 @@ ruboto setup -y -t $ANDROID_TARGET
 source ~/.rubotorc
 # ruboto emulator -t $ANDROID_OS
 ruboto emulator -t $ANDROID_TARGET --no-snapshot
-(gem query -q -i bundler >/dev/null) || gem install bundler
+(gem query -q -i -n bundler >/dev/null) || gem install bundler
 bundle install
 
+export NOEXEC_DISABLE=1
 rake clean
 set +e
-rake test $*
-# ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
+if [ "$TEST_NAME" != "" ] ; then
+  TEST_NAME_ARG="-n $TEST_NAME"
+fi
+if [ "$TEST_SCRIPT" != "" ] ; then
+  ruby $TEST_SCRIPT $TEST_NAME_ARG
+else
+  rake test $* $TEST_NAME_ARG
+fi
 TEST_RC=$?
 set -e
 

@@ -663,7 +663,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   if false
     # FIXME(uwe): Issue #547 https://github.com/ruboto/ruboto/issues/547
     # Bundler.settings[:platform] = Gem::Platform::DALVIK
-    sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level}"
+    sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level} --without development test"
   else
     # ENV["DEBUG"] = "true"
     require 'bundler/vendored_thor'
@@ -688,6 +688,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
     Bundler.ui = Bundler::UI::Shell.new
     Bundler.bundle_path = Pathname.new BUNDLE_PATH
+    Bundler.settings.without = [:development, :test]
     definition = Bundler.definition
     definition.validate_ruby!
     Bundler::Installer.install(Bundler.root, definition)
