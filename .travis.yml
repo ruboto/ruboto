@@ -1,8 +1,8 @@
 # http://docs.travis-ci.com/user/languages/android/
 language: android
-#android:
-#  components:
-#    - build-tools-21.1.1
+android:
+  components:
+    - build-tools-21.1.2
 
 os:
   - linux
