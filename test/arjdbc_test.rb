@@ -58,7 +58,7 @@ class RubotoTestAppActivity
     with_large_stack do
 
       ActiveRecord::Base.establish_connection(
-        :adapter => 'jdbcsqlite3',
+        :adapter => 'jdbc',
         :driver => 'org.sqldroid.SQLDroidDriver',
         :url => "jdbc:sqldroid:\#{db_dir}?timeout=60000&retry=1000",
         :database => db_dir,
