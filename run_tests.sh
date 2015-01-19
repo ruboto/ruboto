@@ -51,6 +51,7 @@ bundle install
 rake clean
 set +e
 rake test $*
+# ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
 TEST_RC=$?
 set -e
 
