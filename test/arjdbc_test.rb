@@ -5,7 +5,7 @@ if RubotoTest::ANDROID_OS >= 15
 
 class ArjdbcTest < Minitest::Test
   def setup
-    generate_app :bundle => [['activerecord', '<4.0.0'], 'activerecord-jdbcsqlite3-adapter', :sqldroid]
+    generate_app bundle: [%w(activerecord <4.2.0), %w(activerecord-jdbcsqlite3-adapter <1.3.0), :sqldroid]
   end
 
   def teardown

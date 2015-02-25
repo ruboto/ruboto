@@ -45,7 +45,7 @@ Before you can use Ruboto, you need the following tools installed:
 Ruboto offers a setup command to help you with the component installation and
 configuration:
 
-    $ ruboto setup
+    $ ruboto setup -y
 
 * Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html)
   image unless you want to develop using your phone.

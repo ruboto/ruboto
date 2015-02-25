@@ -11,9 +11,10 @@ require 'net/http'
 require 'net/https'
 require 'openssl'
 require 'yaml'
+require_relative 'assets/rakelib/ruboto.device'
 
-PROJECT_DIR = File.expand_path(File.dirname(__FILE__))
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
+PLATFORM_PACKAGE = 'org.ruboto.core'
 PLATFORM_DEBUG_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk"
 PLATFORM_DEBUG_APK_BAK = "#{PLATFORM_PROJECT}/bin/RubotoCore-debug.apk.bak"
 PLATFORM_RELEASE_APK = "#{PLATFORM_PROJECT}/bin/RubotoCore-release.apk"
@@ -22,7 +23,7 @@ MANIFEST_FILE = 'AndroidManifest.xml'
 GEM_FILE = "ruboto-#{Ruboto::VERSION}.gem"
 GEM_SPEC_FILE = 'ruboto.gemspec'
 README_FILE = 'README.md'
-WEB_DIR = "#{File.dirname PROJECT_DIR}/ruboto.github.com"
+WEB_DIR = File.expand_path('../ruboto.github.com', File.dirname(__FILE__))
 BLOG_DIR = '_posts'
 RELEASE_BLOG = "#{BLOG_DIR}/#{Date.today}-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
@@ -492,8 +493,8 @@ namespace :platform do
   end
 
   desc 'Install the current RubotoCore platform release apk'
-  task :current => PLATFORM_CURRENT_RELEASE_APK do
-    install_apk
+  task current: PLATFORM_CURRENT_RELEASE_APK do
+    install_apk PLATFORM_PACKAGE, PLATFORM_CURRENT_RELEASE_APK
   end
 
   desc 'Install the Ruboto Core platform debug apk'
@@ -505,126 +506,7 @@ namespace :platform do
 
   desc 'Uninstall the Ruboto Core platform debug apk'
   task :uninstall do
-    uninstall_apk
-  end
-
-  private
-
-  def package
-    'org.ruboto.core'
-  end
-
-  def wait_for_valid_device
-    while `adb shell echo "ping"`.strip != 'ping'
-      `adb kill-server`
-      `adb devices`
-      sleep 5
-    end
-  end
-
-  def install_apk
-    wait_for_valid_device
-
-    failure_pattern = /^Failure \[(.*)\]/
-    success_pattern = /^Success/
-    install_timeout = 300
-    case package_installed?
-    when true
-      puts "Package #{package} already installed."
-      return
-    when false
-      puts "Package #{package} already installed, but of different size or timestamp.  Replacing package."
-      sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
-      output = nil
-      install_retry_count = 0
-      begin
-        timeout install_timeout do
-          output = `adb install -r "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
-        end
-      rescue Timeout::Error
-        puts "Installing package #{package} timed out."
-        install_retry_count += 1
-        if install_retry_count <= 3
-          puts 'Retrying install...'
-          retry
-        end
-        puts 'Trying one final time to install the package:'
-        output = `adb install -r "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
-      end
-      if $? == 0 && output !~ failure_pattern && output =~ success_pattern
-        return
-      end
-      case $1
-      when 'INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES'
-        puts 'Found package signed with different certificate.  Uninstalling it and retrying install.'
-      else
-        puts "'adb install' returned an unknown error: (#$?) #{$1 ? "[#$1}]" : output}."
-        puts "Uninstalling #{package} and retrying install."
-      end
-      uninstall_apk
-    else
-      # Package not installed.
-      sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
-    end
-    puts "Installing package #{package}"
-    output = nil
-    install_retry_count = 0
-    begin
-      timeout install_timeout do
-        output = `adb install "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
-      end
-    rescue Timeout::Error
-      puts "Installing package #{package} timed out."
-      install_retry_count += 1
-      if install_retry_count <= 3
-        puts 'Retrying install...'
-        retry
-      end
-      puts 'Trying one final time to install the package:'
-      install_start = Time.now
-      output = `adb install "#{PLATFORM_CURRENT_RELEASE_APK}" 2>&1`
-      puts "Install took #{(Time.now - install_start).to_i}s."
-    end
-    puts output
-    raise "Install failed (#{$?}) #{$1 ? "[#$1}]" : output}" if $? != 0 || output =~ failure_pattern || output !~ success_pattern
-  end
-
-  def uninstall_apk
-    return if package_installed?.nil?
-    puts "Uninstalling package #{package}"
-    system "adb uninstall #{package}"
-    if $? != 0 && package_installed?
-      puts "Uninstall failed exit code #{$?}"
-      exit $?
-    end
-  end
-
-  def package_installed?
-    package_name = package
-    %w( -0 -1 -2).each do |i|
-      path = "/data/app/#{package_name}#{i}"
-      o = `adb shell ls -dl #{path}*`.chomp
-      if o =~ /^[-d]rw[-x]r-[-x]r-[-x] system\s+system\s+(\d+)? \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(path)}(\.apk)?$/
-        apk_file = PLATFORM_CURRENT_RELEASE_APK
-        if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
-          return true
-        else
-          return false
-        end
-      end
-
-      sdcard_path = "/mnt/asec/#{package_name}#{i}/pkg.apk"
-      o = `adb shell ls -dl #{sdcard_path}`.chomp
-      if o =~ /^.r-xr-xr-x system\s+root\s+(\d+)? \d{4}-\d{2}-\d{2} \d{2}:\d{2} #{File.basename(sdcard_path)}$/
-        apk_file = PLATFORM_CURRENT_RELEASE_APK
-        if !File.exists?(apk_file) || $1.to_i == File.size(apk_file)
-          return true
-        else
-          return false
-        end
-      end
-    end
-    return nil
+    uninstall_apk(PLATFORM_PACKAGE, PLATFORM_CURRENT_RELEASE_APK)
   end
 
 end
