@@ -515,8 +515,9 @@ desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshots do
   download_host = 'lafo.ssw.uni-linz.ac.at'
   index = Net::HTTP.get(download_host, "/graalvm/")
-  current_gems = [index.scan(/jruby-jars-.*?.gem/).uniq.
-      sort_by{|v| Gem::Version.new(v[11..-5])}.last]
+  all_gems = index.scan(%r{(jruby-jars-.*?.gem).*?</td>\s*<td.*?</td>\s*<td.*?>\s*(.*?)</td>})
+  current_gems = [all_gems.select{|a| a[1].to_i > 0}.map{|a| a[0]}.
+          uniq.sort_by{|v| Gem::Version.new(v[11..-5])}.last]
   current_gems << index.scan(/jruby-jars-1\.7\..*?.gem/).uniq.
       sort_by{|v| Gem::Version.new(v[11..-5])}.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']

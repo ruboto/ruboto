@@ -5,7 +5,12 @@ if RubotoTest::ANDROID_OS >= 15
 
 class ArjdbcTest < Minitest::Test
   def setup
-    generate_app bundle: [%w(activerecord <4.2.0), %w(activerecord-jdbcsqlite3-adapter <1.3.0), :sqldroid]
+    generate_app bundle: [
+            %w(activerecord <4.2.0),
+            [:'activerecord-jdbc-adapter', {path: '~/workspace/jruby/activerecord-jdbc-adapter'}],
+            [:thread_safe, {path: '~/workspace/jruby/thread_safe'}],
+            :sqldroid,
+        ]
   end
 
   def teardown
@@ -53,15 +58,14 @@ class RubotoTestAppActivity
   def onResume
     super
 
-    db_dir = "\#{application_context.files_dir}/sqlite"
+    db_file = "\#{application_context.files_dir}/sqlite"
 
     with_large_stack do
 
       ActiveRecord::Base.establish_connection(
-        :adapter => 'jdbc',
+        :adapter => 'sqlite3',
         :driver => 'org.sqldroid.SQLDroidDriver',
-        :url => "jdbc:sqldroid:\#{db_dir}?timeout=60000&retry=1000",
-        :database => db_dir,
+        :database => db_file,
       )
 
       begin

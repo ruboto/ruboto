@@ -40,11 +40,12 @@ fi
 ant -version
 
 rake install
-# ruboto setup -y -t 10 -t $ANDROID_OS
 ruboto setup -y -t $ANDROID_TARGET
 source ~/.rubotorc
-# ruboto emulator -t $ANDROID_OS
+
 ruboto emulator -t $ANDROID_TARGET --no-snapshot
+> adb_logcat.log
+
 (gem query -q -i -n bundler >/dev/null) || gem install bundler
 bundle install
 

@@ -189,7 +189,7 @@ class Minitest::Test
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
     #    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
     template_dir << "_example_#{example}" if example
-    template_dir << "_bundle_#{[*bundle].join('_')}" if bundle
+    template_dir << "_bundle_#{[*bundle].map(&:to_s).join('_').gsub(/[{}\[\]'",:=~<>\/ ]+/, '_')}" if bundle
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
@@ -319,11 +319,11 @@ class Minitest::Test
   end
 
   def write_gemfile(bundle)
-    gems = [*bundle]
+    gems = [*bundle].map{|g| g.is_a?(Symbol) ? g.to_s : g}
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'http://rubygems.org/'\n\n"
-      gems.each { |g| f << "gem #{[*g].map { |gp| "'#{gp}'" }.join(', ')}\n" }
+      gems.each { |g| f << "gem #{[*g].map { |gp| (gp.is_a?(Symbol) ? gp.to_s : gp).inspect }.join(', ')}\n" }
     end
   end
 

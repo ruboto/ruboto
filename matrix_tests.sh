@@ -9,17 +9,18 @@ else
     rake get_jruby_jars_snapshots
   fi
 fi
+STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
+MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
 ANDROID_TARGETS="21 19 17 16 15" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
-STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
-MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE 1.7.18"
 RUBOTO_UPDATE_EXAMPLES=1
 # STRIP_INVOKERS=1
 # TEST_PART=4of5
 # TEST_SCRIPT=test/ruboto_gen_test.rb
-# TEST_NAME=test_new_apk_size_is_within_limits
+# TEST_NAME=test_activity_tests
+# ACTIVITY_TEST_PATTERN=subclass
 
 export ANDROID_OS ANDROID_TARGET RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 export STRIP_INVOKERS TEST_NAME TEST_PART TEST_SCRIPT
@@ -71,8 +72,6 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       fi
 
       ./run_tests.sh
-      # ruby test/ruboto_gen_test.rb -n test_new_apk_size_is_within_limits
-      # ACTIVITY_TEST_PATTERN=subclass testrb test/ruboto_gen_test.rb -n test_activity_tests
 
       TEST_RC=$?
       set -e

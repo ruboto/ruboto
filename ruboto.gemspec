@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.description = Ruboto::DESCRIPTION
   s.rubyforge_project = 'ruboto/ruboto'
   s.license = 'MIT'
-  s.files = FileList['[A-Z]*', 'assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
+  s.files = FileList['[A-Z]*'].to_a.select{|f| f =~ /^[A-Z]/} + FileList['assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
   s.executables = %w(ruboto)
   s.default_executable = 'ruboto'
   s.add_runtime_dependency 'main', '~>5.2'
