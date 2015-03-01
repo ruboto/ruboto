@@ -7,8 +7,7 @@ class ArjdbcTest < Minitest::Test
   def setup
     generate_app bundle: [
             %w(activerecord <4.2.0),
-            [:'activerecord-jdbc-adapter', {path: '~/workspace/jruby/activerecord-jdbc-adapter'}],
-            [:thread_safe, {path: '~/workspace/jruby/thread_safe'}],
+            :'activerecord-jdbc-adapter',
             :sqldroid,
         ]
   end
