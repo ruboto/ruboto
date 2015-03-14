@@ -267,7 +267,7 @@ class Minitest::Test
   end
 
   def update_app
-    system "#{RUBOTO_CMD} update app"
+    system "#{RUBOTO_CMD} update app #{"--with-jruby #{JRUBY_JARS_VERSION}" if RUBOTO_PLATFORM == 'STANDALONE'}"
     assert_equal 0, $?, "update app failed with return code #$?"
   end
 
