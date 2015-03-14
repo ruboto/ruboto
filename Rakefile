@@ -553,13 +553,19 @@ task '.travis.yml' do
   allow_failures = ''
   [21, 19, 17, 16, 15].each.with_index do |api, i|
     n = i
-    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18']]].each do |platform, versions|
+    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18', '1.7.17', '1.7.16', '1.7.15', '1.7.14', '1.7.13']]].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
         matrix << line
         if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
             v == :STABLE || # FIXME(uwe):  Remove when stable branch is green.
+            v == '1.7.19' || # FIXME(uwe):  Remove when 1.7.19 is green or unsupported.
+            v == '1.7.18' || # FIXME(uwe):  Remove when 1.7.18 is green or unsupported.
+            v == '1.7.17' || # FIXME(uwe):  Remove when 1.7.17 is green or unsupported.
+            v == '1.7.16' || # FIXME(uwe):  Remove when 1.7.16 is green or unsupported.
+            v == '1.7.15' || # FIXME(uwe):  Remove when 1.7.15 is green or unsupported.
+            v == '1.7.14' || # FIXME(uwe):  Remove when 1.7.14 is green or unsupported.
             api == 21 # FIXME(uwe):  Remove when Android 5 is green.
           allow_failures << line.gsub('-', '- env:')
         end
