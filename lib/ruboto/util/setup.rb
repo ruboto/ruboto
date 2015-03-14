@@ -145,7 +145,7 @@ module Ruboto
 
         link = page_content.scan(/#{regex}/)
         raise "SDK link cannot be found on download page: #{SDK_DOWNLOAD_PAGE}" if link.nil?
- 
+
         version = link.to_s.match(/r(\d+.)?(\d+.)?(\d+)/)[0]
         raise "SDK version cannot be determined from download page: #{SDK_DOWNLOAD_PAGE}" if version.nil?
 
@@ -190,9 +190,18 @@ module Ruboto
         when MAC_OS_X
           @haxm_kext_loc = '/System/Library/Extensions/intelhaxm.kext'
           found = File.exists?(@haxm_kext_loc)
-          @haxm_kext_loc = nil unless found
-          puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
+          if found
+            @haxm_kext_version = `kextstat | grep com.intel.kext.intelhaxm`.slice(/\(.*\)/)[1..-2]
+          else
+            @haxm_kext_loc = nil
+          end
           @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*.dmg')].first
+          @haxm_installer_version = @haxm_installer_loc.slice(/IntelHAXM_1.1.1_/)[10..-2]
+          if @haxm_kext_version == @haxm_installer_version
+            puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? "Found" : 'Not found')}"
+          else
+            puts "#{'%-25s' % 'Intel HAXM'}: Old   #{@haxm_kext_version}/#{@haxm_installer_version}"
+          end
         when LINUX
           @haxm_installer_loc = 'Not supported, yet.'
           @haxm_kext_loc = 'Not supported, yet.'
