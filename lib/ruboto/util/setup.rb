@@ -610,9 +610,9 @@ module Ruboto
 
       def update_sdk(update_cmd, accept_all)
         if accept_all
-          IO.popen(update_cmd, 'r+') do |cmd_io|
+          IO.popen(update_cmd, 'r+', external_encoding: "BINARY") do |cmd_io|
             begin
-              output = ''.encode('UTF-8', :invalid => :replace)
+              output = ''.encode('BINARY')
               question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
               STDOUT.sync = true
               cmd_io.each_char do |text|
