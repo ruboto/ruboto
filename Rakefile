@@ -551,11 +551,19 @@ task '.travis.yml' do
   source = File.read('.travis.yml')
   matrix = ''
   allow_failures = ''
-  [21, 19, 16, 15].each.with_index do |api, i|
+  # FIXME(uwe):  Test the newest api levels
+  # [21, 19, 18, 17, 16, 15].each.with_index do |api, i|
+  [19, 15].each.with_index do |api, i|
     n = i
     # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
-    # FIXME(uwe):  JRuby 1.7.14 has malformed gem
-    [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18', '1.7.17', '1.7.16', '1.7.15', '1.7.13']]].each do |platform, versions|
+    # FIXME(uwe):  JRuby 1.7.14 has a malformed gem
+    # FIXME(uwe):  Test all of these that work
+    # [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18', '1.7.17', '1.7.16', '1.7.15', '1.7.13']]].each do |platform, versions|
+    [
+        ['STANDALONE', ['1.7.13', '1.7.13', '1.7.13', '1.7.13', '1.7.13', '1.7.16', '1.7.15', ]],
+        ['FROM_GEM', ['1.7.13', :STABLE, ]],
+        ['CURRENT', [nil]],
+    ].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
         line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of5#{" JRUBY_JARS_VERSION=#{v}" if v}\n"

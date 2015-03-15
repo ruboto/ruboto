@@ -14,7 +14,8 @@ MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
 ANDROID_TARGETS="21 19 17 16 15" # We should cover at least 90% of the market
 PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
-STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE 1.7.18"
+STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE 1.7.13"
+FROM_GEM_JRUBY_VERSIONS="$MASTER $STABLE"
 RUBOTO_UPDATE_EXAMPLES=1
 # STRIP_INVOKERS=1
 # TEST_PART=4of5
@@ -32,8 +33,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
       jruby_versions=$STANDALONE_JRUBY_VERSIONS
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then
-      jruby_versions="$MASTER $STABLE"
-      jruby_versions="$STABLE"
+      jruby_versions=$FROM_GEM_JRUBY_VERSIONS
     elif [ "$RUBOTO_PLATFORM" == "CURRENT" ] ; then
       jruby_versions="CURRENT"
     fi
