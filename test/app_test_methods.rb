@@ -63,7 +63,7 @@ module AppTestMethods
       # EMXIF
 
       # FIXME(uwe):  Remove when we have fixed app test failures in travis
-      next if file =~ /button|json|margins/
+      next if file =~ /button|json|margins/ && RbConfig::CONFIG['host_os'] =~ /linux/
       # EMXIF
 
       if file =~ /_test.rb$/

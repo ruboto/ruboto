@@ -551,7 +551,7 @@ task '.travis.yml' do
   source = File.read('.travis.yml')
   matrix = ''
   allow_failures = ''
-  [21, 19, 17, 16, 15].each.with_index do |api, i|
+  [21, 19, 16, 15].each.with_index do |api, i|
     n = i
     # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
     # FIXME(uwe):  JRuby 1.7.14 has malformed gem
