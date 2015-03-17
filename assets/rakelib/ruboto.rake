@@ -742,28 +742,6 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     end
   end
 
-  # Remove duplicate files
-  Dir.chdir gem_path do
-    scanned_files = []
-    source_files = RUBY_SOURCE_FILES.map { |f| f.gsub("#{PROJECT_DIR}/src/", '') }
-    Dir['*/lib/**/*'].each do |f|
-      next if File.directory? f
-      raise 'Malformed file name' unless f =~ %r{^(.*?)/lib/(.*)$}
-      gem_name, lib_file = $1, $2
-      if (existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} })
-        puts "Overwriting duplicate file #{lib_file} in gem #{$1} with file in #{gem_name}"
-        FileUtils.rm existing_file
-        scanned_files.delete existing_file
-      elsif source_files.include? lib_file
-        puts "Removing duplicate file #{lib_file} in gem #{gem_name}"
-        puts "Already present in project source src/#{lib_file}"
-        FileUtils.rm f
-        next
-      end
-      scanned_files << f
-    end
-  end
-
   # Expand JARs
   Dir.chdir gem_path do
     Dir['*'].each do |gem_lib|
@@ -848,7 +826,42 @@ end
           end
           FileUtils.rm_f(jar)
         end
+
+        # FIXME(uwe):  Issue # 705 https://github.com/ruboto/ruboto/issues/705
+        # FIXME(uwe):  Use the files from the bundle instead of stdlib.
+        stdlib_files = `jar tf #{PROJECT_DIR}/libs/jruby-stdlib-*.jar`.lines.map(&:chomp)
+        Dir['**/*'].each do |f|
+          if stdlib_files.include? f
+            puts "Removing duplicate file #{f} in gem #{gem_lib}."
+            puts "Already present in the Ruby Standard Library."
+            FileUtils.rm f
+          end
+        end
+        # EMXIF
+
       end
+    end
+  end
+
+  # Remove duplicate files
+  Dir.chdir gem_path do
+    scanned_files = []
+    source_files = RUBY_SOURCE_FILES.map { |f| f.gsub("#{PROJECT_DIR}/src/", '') }
+    Dir['*/lib/**/*'].each do |f|
+      next if File.directory? f
+      raise 'Malformed file name' unless f =~ %r{^(.*?)/lib/(.*)$}
+      gem_name, lib_file = $1, $2
+      if (existing_file = scanned_files.find { |sf| sf =~ %r{(.*?)/lib/#{lib_file}} })
+        puts "Overwriting duplicate file #{lib_file} in gem #{$1} with file in #{gem_name}"
+        FileUtils.rm existing_file
+        scanned_files.delete existing_file
+      elsif source_files.include? lib_file
+        puts "Removing duplicate file #{lib_file} in gem #{gem_name}"
+        puts "Already present in project source src/#{lib_file}"
+        FileUtils.rm f
+        next
+      end
+      scanned_files << f
     end
   end
 

@@ -584,8 +584,10 @@ module Ruboto
           if accept_all || a == 'Y' || a.empty?
             case android_package_os_id
             when MAC_OS_X
+              puts "Mounting the HAXM install image"
               system "hdiutil attach #{@haxm_installer_loc}"
               fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+              puts "Starting the HAXM installer.  Sudo password required."
               system "sudo -S installer -pkg #{fileName} -target /"
             when LINUX
               puts '    HAXM installation on Linux is not supported, yet.'
@@ -621,9 +623,9 @@ module Ruboto
 
       def update_sdk(update_cmd, accept_all)
         if accept_all
-          IO.popen(update_cmd, 'r+', external_encoding: "BINARY") do |cmd_io|
+          IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
             begin
-              output = ''.encode('BINARY')
+              output = ''.encode(Encoding::BINARY)
               question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
               STDOUT.sync = true
               cmd_io.each_char do |text|
