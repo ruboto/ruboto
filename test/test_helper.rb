@@ -176,7 +176,7 @@ class Minitest::Test
     package = options.delete(:package) || PACKAGE
     standalone = options.delete(:standalone) || !!included_stdlibs || !!excluded_stdlibs || ENV['RUBOTO_PLATFORM'] == 'STANDALONE'
     update = options.delete(:update) || false
-    ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == '9' ? 2.1 : 1.9)
+    ruby_version = options.delete(:ruby_version) || (JRUBY_JARS_VERSION.to_s[0..0] == '9' ? '2.2' : '1.9')
 
     raise "Unknown options: #{options.inspect}" unless options.empty?
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
@@ -206,7 +206,7 @@ class Minitest::Test
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           File.open('test/local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }
           if standalone
-            if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+            if included_stdlibs || excluded_stdlibs || heap_alloc
               write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
             end
             FileUtils.touch 'libs/jruby-core-x.x.x.jar'
@@ -230,7 +230,7 @@ class Minitest::Test
         end
         Dir.chdir APP_DIR do
           write_gemfile(bundle) if bundle
-          if included_stdlibs || excluded_stdlibs || heap_alloc || ruby_version
+          if included_stdlibs || excluded_stdlibs || heap_alloc
             sleep 1
             write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
             system 'rake build_xml jruby_adapter'
@@ -309,11 +309,12 @@ class Minitest::Test
   end
 
   def write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
-    yml = YAML.dump({'included_stdlibs' => included_stdlibs,
-            'excluded_stdlibs' => excluded_stdlibs,
-            # 'ruby_version' => ruby_version,
-            'heap_alloc' => heap_alloc,
-        })
+    options = {}
+    options['included_stdlibs'] = included_stdlibs if included_stdlibs
+    options['excluded_stdlibs'] = excluded_stdlibs if excluded_stdlibs
+    options['ruby_version'] = ruby_version if ruby_version
+    options['heap_alloc'] = heap_alloc if heap_alloc
+    yml = YAML.dump(options)
     puts "Adding ruboto.yml:\n#{yml}"
     File.open('ruboto.yml', 'w') { |f| f << yml }
   end

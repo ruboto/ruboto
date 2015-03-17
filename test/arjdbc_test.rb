@@ -21,7 +21,14 @@ class ArjdbcTest < Minitest::Test
       File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
 require 'ruboto/widget'
 require 'ruboto/util/stack'
+
+module Gem
+  VERSION = '2.4.6'
+end
+
 with_large_stack do
+  require 'rubygems/errors'
+  require 'rubygems/version'
   require 'active_record'
 end
 
