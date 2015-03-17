@@ -552,7 +552,7 @@ file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t, false)
 end
 
-MINIMUM_DX_HEAP_SIZE = 4096
+MINIMUM_DX_HEAP_SIZE = (ENV['DX_HEAP_SIZE'] && ENV['DX_HEAP_SIZE'].to_i) || 4096
 task :patch_dex do
   DX_FILENAMES.each do |dx_filename|
     new_dx_content = File.read(dx_filename).dup
