@@ -22,13 +22,8 @@ class ArjdbcTest < Minitest::Test
 require 'ruboto/widget'
 require 'ruboto/util/stack'
 
-module Gem
-  VERSION = '2.4.6'
-end
-
 with_large_stack do
-  require 'rubygems/errors'
-  require 'rubygems/version'
+  require 'rubygems'
   require 'active_record'
 end
 
