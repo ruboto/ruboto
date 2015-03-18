@@ -6,7 +6,7 @@ module Ruboto
     module Setup
       include Ruboto::Util::Verify
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
-      REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
+      REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
       SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
@@ -110,7 +110,7 @@ module Ruboto
         require 'open-uri'
 
         doc = REXML::Document.new(open(REPOSITORY_URL))
-        version = doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
+        doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
           micro = t.elements['sdk:micro']
@@ -122,7 +122,6 @@ module Ruboto
           version += "_rc#{prev.text}" if prev
           version
         end.compact.sort_by { |v| Gem::Version.new(v.gsub('_', '.')) }.last
-        version
       end
 
       def get_android_sdk_version
