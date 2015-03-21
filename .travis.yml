@@ -18,7 +18,7 @@ before_install:
 
 env:
   global:
-    - DX_HEAP_SIZE=1024
+    - DX_HEAP_SIZE=1536
     - RUBOTO_UPDATE_EXAMPLES=0
 #    - RVM=2.1
 
