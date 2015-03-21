@@ -284,6 +284,11 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
                 </then>
                 <else>
                     <echo>Converting compiled files and external libraries into ${out.absolute.dir} (multi-dex)</echo>
+
+<!-- FIXME(uwe): Remove debug -->
+<exec executable="free" os="Linux"/>
+<!-- EMXIF -->
+
                     <delete file="${out.absolute.dir}/classes2.dex"/>
                     <echo>Dexing ${out.classes.absolute.dir} and ${toString:out.dex.jar.input.ref}</echo>
                     <apply executable="${dx}" failonerror="true" parallel="true">
