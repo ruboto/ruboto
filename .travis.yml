@@ -4,7 +4,7 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools-22.0.0
+    - build-tools-22.0.1
 
 os:
   - linux
@@ -20,9 +20,8 @@ before_install:
 
 env:
   global:
-    - DX_HEAP_SIZE=1536
+    - DX_HEAP_SIZE=1290
     - RUBOTO_UPDATE_EXAMPLES=0
-#    - RVM=2.1
 
   matrix:
     - ANDROID_TARGET=19 RUBOTO_PLATFORM=STANDALONE TEST_PART=1of5 JRUBY_JARS_VERSION=1.7.13

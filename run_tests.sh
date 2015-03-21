@@ -7,6 +7,14 @@
 
 echo "Starting tests..."
 
+killtree() {
+    local parent=$1 child
+    for child in $(ps -o ppid= -o pid= | awk "\$1==$parent {print \$2}"); do
+        killtree $child
+    done
+    kill -9 $parent
+}
+
 # BEGIN TIMEOUT #
 TIMEOUT=3000 # 50 minutes
 BOSSPID=$$
@@ -15,7 +23,7 @@ BOSSPID=$$
   echo
   echo "Test timed out after $TIMEOUT seconds."
   echo
-  kill -9 -$BOSSPID
+  killtree -$BOSSPID
   echo
   echo Emulator log:
   echo
@@ -26,7 +34,7 @@ BOSSPID=$$
 TIMERPID=$!
 echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 
-trap "kill -9 $TIMERPID" EXIT
+trap "killtree $TIMERPID" EXIT
 # END TIMEOUT #
 
 if [ ! $(command -v ant) ] ; then
