@@ -1,5 +1,7 @@
 # http://docs.travis-ci.com/user/languages/android/
 language: android
+
+sudo: false
 android:
   components:
     - build-tools-22.0.0
@@ -15,13 +17,6 @@ before_install:
   - MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
-  - sudo dd if=/dev/zero of=/ruboto_swapfile bs=1024M count=16
-  - sudo mkswap /ruboto_swapfile
-  - sudo swapon /ruboto_swapfile
-
-#after_test:
-#  - sudo swapoff /swapfile
-#  - sudo rm /swapfile
 
 env:
   global:
