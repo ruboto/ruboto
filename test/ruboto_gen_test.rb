@@ -69,10 +69,12 @@ class RubotoGenTest < Minitest::Test
   # APK was  8793.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.11
   # APK was  9743.3KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 1.7.12
   # APK was  9123.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.12
-  # APK was  9745.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.14.dev
+  # APK was  9745.0KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.14
+  # APK was  9985.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.17
   # APK was 10052.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 17, JRuby: 1.7.18
   # APK was 10045.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.18
-  # APK was 10109.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 1.7.19.dev
+  # APK was 10109.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 1.7.19
+  # APK was 10609.7KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.20.dev
   # APK was  6689.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
   # APK was  7012.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 9000.dev
   # APK was  8015.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 17, JRuby: 9000.dev
@@ -94,8 +96,10 @@ class RubotoGenTest < Minitest::Test
           '1.7.11' => 8800.0,
           '1.7.12' => 9800.0,
           '1.7.14' => 9800.0,
+          '1.7.17' => 9999.0,
           '1.7.18' => 10100.0,
-          '1.7.19.dev' => 10200.0,
+          '1.7.19' => 10200.0,
+          '1.7.20.dev' => 10700.0,
           '9.0.0.0.dev' => 8300.0,
           '9.0.0.0.pre1' => 8600.0,
       }[JRUBY_JARS_VERSION.to_s] || 9800.0
@@ -135,13 +139,13 @@ class RubotoGenTest < Minitest::Test
 
       # FIXME(uwe):  Workaround for Ruboto Issue #246
       java_source = File.read(java_source_file)
-      File.open(java_source_file, 'w'){|f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T> \2<T>').gsub(/T.class/, 'Object.class')}
+      File.open(java_source_file, 'w') { |f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T> \2<T>').gsub(/T.class/, 'Object.class') }
       # EMXIF
 
       assert File.exists?('src/ruboto_array_adapter.rb')
       assert File.exists?('test/src/ruboto_array_adapter_test.rb')
 
-      File.open('src/ruboto_test_app_activity.rb', 'w'){|f| f << <<EOF}
+      File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
 require 'ruboto/util/stack'
 require 'ruboto/widget'
@@ -168,7 +172,7 @@ puts "adapter: \#{adapter.inspect}"
 end
 EOF
 
-      File.open('test/src/ruboto_test_app_activity_test.rb', 'w'){|f| f << <<EOF}
+      File.open('test/src/ruboto_test_app_activity_test.rb', 'w') { |f| f << <<EOF }
 activity Java::org.ruboto.test_app.RubotoTestAppActivity
 
 setup do |activity|
@@ -193,7 +197,7 @@ test('Item click changes text') do |activity|
 end
 EOF
 
-      File.open('src/ruboto_array_adapter.rb', 'w'){|f| f << <<EOF}
+      File.open('src/ruboto_array_adapter.rb', 'w') { |f| f << <<EOF }
 class Java::AndroidWidget::ArrayAdapter
    field_reader :mResource, :mFieldId
 end
@@ -246,7 +250,7 @@ class RubotoArrayAdapter
 end
 EOF
 
-      File.open('res/layout/list_item.xml', 'w'){|f| f << <<EOF}
+      File.open('res/layout/list_item.xml', 'w') { |f| f << <<EOF }
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
