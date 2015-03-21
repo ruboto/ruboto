@@ -5,11 +5,13 @@ if RubotoTest::ANDROID_OS >= 15
 
 class ArjdbcTest < Minitest::Test
   def setup
+    # FIXME(uwe):  Simplify when RubotoCore is released with newer thread_safe
     generate_app bundle: [
-            %w(activerecord <4.2.0),
+            [:activerecord, RUBOTO_PLATFORM == 'CURRENT' ? '<4.0.0' : '<4.2.0'],
             :'activerecord-jdbc-adapter',
             :sqldroid,
         ]
+    # EMXIF
   end
 
   def teardown

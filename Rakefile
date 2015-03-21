@@ -557,12 +557,13 @@ task '.travis.yml' do
     n = i
     # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
     # FIXME(uwe):  JRuby 1.7.14 has a malformed gem
+    # FIXME(uwe):  RubotoCore (CURRENT) is missing thread_safe
     # FIXME(uwe):  Test all of these that work
     # [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18', '1.7.17', '1.7.16', '1.7.15', '1.7.13']]].each do |platform, versions|
     [
         ['STANDALONE', ['1.7.13', '1.7.13', '1.7.13', '1.7.13', '1.7.13', '1.7.16', '1.7.15', ]],
         ['FROM_GEM', ['1.7.13', :STABLE, ]],
-        ['CURRENT', [nil]],
+        # ['CURRENT', [nil]],
     ].each do |platform, versions|
       versions.each do |v|
         n = (n % 5) + 1
