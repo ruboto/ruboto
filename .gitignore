@@ -1,10 +1,10 @@
-tmp
-.DS_Store
-.rvmrc
-.bundle
-*.gem
-.idea
 *~
+*.gem
+.DS_Store
+/.bundle
+/.idea
 /.rbx
+/.vagrant
 /adb_logcat.log
 /exportToHTML
+/tmp
