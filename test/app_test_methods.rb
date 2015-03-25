@@ -38,11 +38,11 @@ module AppTestMethods
 
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
-      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.14
-      next if file =~ /rss/ && (JRUBY_JARS_VERSION < Gem::Version.new('1.7.14.dev'))
+      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.20.dev
+      next if file =~ /rss/ && (JRUBY_JARS_VERSION < Gem::Version.new('1.7.20.dev'))
       # EMXIF
 
-      # FIXME(uwe):  Remove when we release RubotoCore based on JRuby 1.7.14
+      # FIXME(uwe):  Remove when we release RubotoCore based on JRuby 1.7.20
       next if file =~ /rss/ && (RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM')
       # EMXIF
 
@@ -60,10 +60,6 @@ module AppTestMethods
 
       # FIXME(uwe):  Remove when we stop testing api level < 11
       next if file =~ /fragment/ && ANDROID_OS < 11
-      # EMXIF
-
-      # FIXME(uwe):  Remove when we have fixed app test failures in travis
-      next if file =~ /button|json|margins|navigation/ && RbConfig::CONFIG['host_os'] =~ /linux/
       # EMXIF
 
       if file =~ /_test.rb$/
