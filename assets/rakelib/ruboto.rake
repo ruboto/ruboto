@@ -829,12 +829,15 @@ end
 
         # FIXME(uwe):  Issue # 705 https://github.com/ruboto/ruboto/issues/705
         # FIXME(uwe):  Use the files from the bundle instead of stdlib.
-        stdlib_files = `jar tf #{PROJECT_DIR}/libs/jruby-stdlib-*.jar`.lines.map(&:chomp)
-        Dir['**/*'].each do |f|
-          if stdlib_files.include? f
-            puts "Removing duplicate file #{f} in gem #{gem_lib}."
-            puts "Already present in the Ruby Standard Library."
-            FileUtils.rm f
+        stdlib_jar = "#{PROJECT_DIR}/libs/jruby-stdlib-*.jar"
+        if File.exists? stdlib_jar
+          stdlib_files = `jar tf #{stdlib_jar}`.lines.map(&:chomp)
+          Dir['**/*'].each do |f|
+            if stdlib_files.include? f
+              puts "Removing duplicate file #{f} in gem #{gem_lib}."
+              puts 'Already present in the Ruby Standard Library.'
+              FileUtils.rm f
+            end
           end
         end
         # EMXIF
