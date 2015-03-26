@@ -113,6 +113,7 @@ module Ruboto
             if sdk_level.to_i == 10
               abi_opt = '--abi armeabi'
             elsif has_x86 && (ON_MAC_OS_X || ON_WINDOWS)
+              # FIXME(uwe):  Use x86 on Linux?
               abi_opt = '--abi x86'
             else
               abi_opt = '--abi armeabi-v7a'
@@ -126,7 +127,7 @@ module Ruboto
               File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
             end
 
-            puts `echo n | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA -d "Nexus One"`
+            puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA -d "Nexus One"`
 
             if $? != 0
               puts 'Failed to create AVD.'
@@ -134,10 +135,11 @@ module Ruboto
             end
             # avd_config_file_name = "#{avd_home}/config.ini"
             # old_avd_config = File.read(avd_config_file_name)
-            # new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+            # new_avd_config = old_avd_config.dup
+            # new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
             # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
             # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
-            # add_property(new_avd_config, 'hw.mainKeys', 'yes')
+            # add_property(new_avd_config, 'hw.mainKeys', 'no')
             # add_property(new_avd_config, 'hw.sdCard', 'yes')
             # File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
 

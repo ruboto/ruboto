@@ -829,8 +829,7 @@ end
 
         # FIXME(uwe):  Issue # 705 https://github.com/ruboto/ruboto/issues/705
         # FIXME(uwe):  Use the files from the bundle instead of stdlib.
-        stdlib_jar = Dir["#{PROJECT_DIR}/libs/jruby-stdlib-*.jar"].sort.last
-        if File.exists? stdlib_jar
+        if (stdlib_jar = Dir["#{PROJECT_DIR}/libs/jruby-stdlib-*.jar"].sort.last)
           stdlib_files = `jar tf #{stdlib_jar}`.lines.map(&:chomp)
           Dir['**/*'].each do |f|
             if stdlib_files.include? f
