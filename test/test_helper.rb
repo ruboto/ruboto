@@ -201,6 +201,7 @@ class Minitest::Test
       if example
         Dir.chdir TMP_DIR do
           system "tar xzf #{PROJECT_DIR}/examples/#{APP_NAME}_#{example}.tgz"
+          Dir.chdir(APP_NAME) { system '../../bin/ruboto setup -y' }
         end
         Dir.chdir APP_DIR do
           File.open('local.properties', 'w') { |f| f.puts "sdk.dir=#{ANDROID_HOME}" }

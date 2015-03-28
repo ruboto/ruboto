@@ -1,7 +1,11 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
 # FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
-if RubotoTest::ANDROID_OS >= 15
+if RubotoTest::ANDROID_OS >= 15 &&
+    # FIXME(uwe):  Remove when CURRENT works with ARJDBC
+    RubotoTest::RUBOTO_PLATFORM != 'CURRENT' &&
+    # FIXME(uwe):  Remove when CURRENT works with ARJDBC
+    RubotoTest::RUBOTO_PLATFORM != 'FROM_GEM'
 
 class ArjdbcTest < Minitest::Test
   def setup

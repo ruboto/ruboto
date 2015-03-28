@@ -292,19 +292,23 @@ module Ruboto
           puts "#{pretty_name} was not found."
           installer = package_installer
           if installer
-	          unless accept_all
-	            print 'Would you like to and install it? (Y/n): '
-	            a = STDIN.gets.chomp.upcase
-	          end
-	          if accept_all || a == 'Y' || a.empty?
-	            puts "sudo #{installer} install -y #{package_name}"
-	            IO.popen("sudo #{installer} install -y #{package_name}") {|io| while (l = io.gets) do; puts l; end }
-	          else
-	            puts
-	            puts "You can install #{pretty_name} manually by:"
-	            puts "sudo #{installer} install #{package_name}"
-	            puts
-	          end
+            unless accept_all
+              print 'Would you like to and install it? (Y/n): '
+              a = STDIN.gets.chomp.upcase
+            end
+            if accept_all || a == 'Y' || a.empty?
+              puts "sudo #{installer} install -y #{package_name}"
+              IO.popen("sudo #{installer} install -y #{package_name}") do |io|
+                while (l = io.gets)
+                  puts l
+                end
+              end
+            else
+              puts
+              puts "You can install #{pretty_name} manually by:"
+              puts "sudo #{installer} install #{package_name}"
+              puts
+            end
           else
             puts "Package installer not found. You'll need to install #{pretty_name} manually."
           end

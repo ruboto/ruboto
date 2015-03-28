@@ -84,6 +84,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
       echo ""
 
       if [ "$TEST_RC" != "0" ] ; then
+        echo -ne "\033]0;FAILED $ANDROID_TARGET $RUBOTO_PLATFORM $JRUBY_JARS_VERSION\007"
         echo Tests exited with code $TEST_RC
         exit $TEST_RC
       fi
@@ -91,6 +92,7 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
   done
 done
 
+echo -ne "\033]0;COMPLETED $ANDROID_TARGET $RUBOTO_PLATFORM $JRUBY_JARS_VERSION\007"
 echo
 echo '/-------------------------------------------------------------------------\'
 echo '|                       Matrix tests completed OK!                        |'

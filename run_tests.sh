@@ -37,16 +37,6 @@ echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 trap "killtree $TIMERPID" EXIT
 # END TIMEOUT #
 
-if [ ! $(command -v ant) ] ; then
-  if [ -e /etc/profile.d/ant.sh ] ; then
-    . /etc/profile.d/ant.sh
-  else
-    echo Apache ANT is missing!
-    exit 2
-  fi
-fi
-ant -version
-
 rake install
 ruboto setup -y -t $ANDROID_TARGET
 source ~/.rubotorc
