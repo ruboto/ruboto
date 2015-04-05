@@ -119,16 +119,6 @@ end
 desc 'Generate release docs for a given milestone'
 
 def get_github_issues
-  puts 'GitHub login:'
-  begin
-    require 'rubygems'
-    require 'highline/import'
-    user = ask('login   : ') { |q| q.echo = true }
-    pass = ask('password: ') { |q| q.echo = '*' }
-  rescue Exception
-    print 'user name: '; user = STDIN.gets.chomp
-    print ' password: '; pass = STDIN.gets.chomp
-  end
   host = 'api.github.com'
   base_uri = "https://#{host}/repos/ruboto/ruboto"
   https = Net::HTTP.new(host, 443)
@@ -137,7 +127,6 @@ def get_github_issues
 
   milestone_uri = URI("#{base_uri}/milestones")
   req = Net::HTTP::Get.new(milestone_uri.request_uri)
-  req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   milestones = YAML.load(res.body).sort_by { |i| Date.parse(i['due_on']) }
   milestone_entry = milestones.find { |m| m['title'] == Ruboto::VERSION.chomp('.dev') }
@@ -146,18 +135,17 @@ def get_github_issues
 
     uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)
-  req.basic_auth(user, pass)
   res = https.start { |http| http.request(req) }
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
   milestone_name = issues[0] ? issues[0]['milestone']['title'] : "No issues for milestone #{milestone}"
   milestone_description = issues[0] ? issues[0]['milestone']['description'] : "No issues for milestone #{milestone}"
-  milestone_description = milestone_description.split("\r\n").map(&:wrap).join("\r\n")
+  milestone_description = milestone_description.split("\r\n").map(&:wrap).join("\n")
   categories = {
-      'Features' => 'feature', 'Bugfixes' => 'bug',
-      'Performance' => 'performance', 'Documentation' => 'documentation',
-      'Support' => 'support', 'Community' => 'community',
-      'Pull requests' => nil, 'Internal' => 'internal',
-      'Rejected' => 'rejected', 'Other' => nil
+      'API Changes' => 'API change', 'Features' => 'feature',
+      'Bugfixes' => 'bug', 'Performance' => 'performance',
+      'Documentation' => 'documentation', 'Support' => 'support',
+      'Community' => 'community', 'Pull requests' => nil,
+      'Internal' => 'internal', 'Rejected' => 'rejected', 'Other' => nil
   }
   grouped_issues = issues.group_by do |i|
     labels = i['labels'].map { |l| l['name'] }

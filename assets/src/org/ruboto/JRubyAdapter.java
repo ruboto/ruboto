@@ -126,6 +126,7 @@ public class JRubyAdapter {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
+            Log.d("Max memory: " + (Runtime.getRuntime().maxMemory() / (1024 * 1024)) + "MB");
             // BEGIN Ruboto HeapAlloc
             // @SuppressWarnings("unused")
             // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];

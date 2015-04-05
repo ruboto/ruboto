@@ -90,7 +90,7 @@ def start_activity_by_button(activity, button_id, activity_class_name = 'org.rub
     puts 'waitForIdleSync'
     waitForIdleSync
     puts 'wait_for_monitor_with_timeout'
-    current_activity = wait_for_monitor_with_timeout(monitor, 10000)
+    current_activity = monitor.wait_for_activity_with_timeout(10000)
   ensure
     removeMonitor(monitor)
   end
@@ -101,6 +101,7 @@ end
 
 def button_activity_text(button_id, activity, expected_text_id, expected_text_string,
     activity_class_name = 'org.ruboto.RubotoActivity')
+  puts "Start activity: #{expected_text_string}"
   current_activity = start_activity_by_button(activity, button_id, activity_class_name)
   start = Time.now
   loop do

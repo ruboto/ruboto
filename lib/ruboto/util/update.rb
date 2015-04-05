@@ -534,10 +534,18 @@ module Ruboto
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.20
                 excluded_core_packages = [
                     '**/*.sh',
+                    '**/*Aix*',
                     '**/*Darwin*',
+                    '**/*darwin*',
+                    '**/*FreeBSD*',
+                    '**/*freebsd*',
+                    '**/*MacOS*',
+                    '**/*OpenBSD*',
+                    '**/*openbsd*',
                     '**/*Solaris*',
-                    '**/*windows*',
+                    '**/*sunos*',
                     '**/*Windows*',
+                    '**/*windows*',
                     'META-INF',
                     'com/headius/invokebinder',
                     'com/headius/options/example',
@@ -546,11 +554,7 @@ module Ruboto
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
                     'jni',
-                    'jnr/constants/platform/darwin',
                     'jnr/constants/platform/fake',
-                    'jnr/constants/platform/freebsd',
-                    'jnr/constants/platform/openbsd',
-                    'jnr/constants/platform/sunos',
                     'jnr/enxio',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
@@ -559,10 +563,6 @@ module Ruboto
                     'jnr/ffi/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
-                    'jnr/posix/Aix*',
-                    'jnr/posix/FreeBSD*',
-                    'jnr/posix/MacOS*',
-                    'jnr/posix/OpenBSD*',
                     'jnr/x86asm',
                     'org/jruby/ant',
                     'org/jruby/cext',
@@ -618,7 +618,7 @@ module Ruboto
               excluded_core_packages.each do |i|
                 if File.directory? i
                   FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
-                elsif Dir[i].each { |f| FileUtils.rm_rf f }.empty?
+                elsif Dir.glob(i, File::FNM_CASEFOLD).each { |f| FileUtils.rm_rf f }.empty?
                   print "exclude pattern #{i.inspect} found no files..."
                 end
               end

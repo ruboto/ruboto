@@ -6,7 +6,7 @@ class RubotoGenTest < Minitest::Test
   include AppTestMethods
 
   def setup
-    generate_app
+    generate_app heap_alloc: 50
   end
 
   def teardown
@@ -53,6 +53,7 @@ class RubotoGenTest < Minitest::Test
   # APK was    66.6KB.  PLATFORM: CURRENT, ANDROID_TARGET: 15
   # APK was    74.9KB.  PLATFORM: CURRENT, ANDROID_TARGET: 16
   # APK was    80.4KB.  PLATFORM: CURRENT, ANDROID_TARGET: 19
+  # APK was    75.1KB.  PLATFORM: CURRENT, ANDROID_TARGET: 22
   # APK was    65.0KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 10
   # APK was    81.0KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 16
   # APK was    80.2KB.  PLATFORM: FROM_GEM, ANDROID_TARGET: 17
@@ -111,7 +112,8 @@ class RubotoGenTest < Minitest::Test
           16 => 82.0,
           17 => 81.0,
           19 => 81.0,
-      }[ANDROID_TARGET] || 75.0
+          22 => 76.0,
+      }[ANDROID_TARGET] || 76.0
     end
     lower_limit = upper_limit * 0.8
     assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
