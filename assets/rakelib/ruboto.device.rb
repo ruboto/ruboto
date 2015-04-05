@@ -64,6 +64,7 @@ def install_apk(package, apk_file)
 
   failure_pattern = /^Failure \[(.*)\]/
   success_pattern = /^Success/
+  install_timeout = 900
   case package_installed?(package, apk_file)
   when true
     puts "Package #{package} already installed."
@@ -74,11 +75,11 @@ def install_apk(package, apk_file)
     output = nil
     install_retry_count = 0
     begin
-      timeout 300 do
+      timeout install_timeout do
         output = `adb install -r "#{apk_file}" 2>&1`
       end
     rescue Timeout::Error
-      puts "Installing package #{package} timed out."
+      puts "Installing package #{package} timed out after #{install_timeout}s."
       install_retry_count += 1
       if install_retry_count <= 3
         puts 'Retrying install...'
@@ -107,11 +108,11 @@ def install_apk(package, apk_file)
   output = nil
   install_retry_count = 0
   begin
-    timeout 300 do
+    timeout install_timeout do
       output = `adb install "#{apk_file}" 2>&1`
     end
   rescue Timeout::Error
-    puts "Installing package #{package} timed out."
+    puts "Installing package #{package} timed out after #{install_timeout}s."
     install_retry_count += 1
     if install_retry_count <= 3
       puts 'Retrying install...'

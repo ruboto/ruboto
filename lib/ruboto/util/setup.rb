@@ -622,7 +622,7 @@ module Ruboto
           android_cmd = windows? ? 'android.bat' : 'android'
 
           # FIXME(uwe):  Does this pattern work for all api levels?
-          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
+          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
           # EMXIF
 
           update_sdk(update_cmd, accept_all)

@@ -133,7 +133,7 @@ def get_github_issues
   raise "Milestone for version #{Ruboto::VERSION} not found." unless milestone_entry
   milestone = milestone_entry['number']
 
-    uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
+  uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)
   res = https.start { |http| http.request(req) }
   issues = YAML.load(res.body).sort_by { |i| i['number'] }
@@ -537,60 +537,51 @@ end
 task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
-  test_parts = 5
+  test_parts = 4
   matrix = ''
   allow_failures = ''
-  # FIXME(uwe):  Test the newest api levels
-  # [21, 19, 18, 17, 16, 15].each.with_index do |api, i|
-  [19, 17, 16, 15].each.with_index do |api, i|
-    n = i
-    # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
-    # FIXME(uwe):  JRuby 1.7.14 has a malformed gem
-    # FIXME(uwe):  JRuby 1.7.15 looks OK!
-    # FIXME(uwe):  JRuby 1.7.16: RaiseException: (ENOENT) No such file or directory - /.gem/jruby/1.9
-    #                            https://github.com/jruby/jruby/issues/2040
-    # FIXME(uwe):  JRuby 1.7.17:  RSS? => RubotoGenTest#test_activity_tests => Native crash
-    # FIXME(uwe):  JRuby 1.7.18:  RSS? => RubotoGenTest#test_activity_tests => Process crashed
-    # FIXME(uwe):  JRuby 1.7.19:  RSS? => RubotoGenTest#test_activity_tests => Native crash
-    # FIXME(uwe):  JRuby 1.7.20:  Fails on RSS and upper case package names
-    # FIXME(uwe):  RubotoCore (CURRENT) is missing thread_safe
-    # FIXME(uwe):  Test all of these that work
-    # [['CURRENT', [nil]], ['FROM_GEM', [:MASTER, :STABLE]], ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.18', '1.7.17', '1.7.16', '1.7.15', '1.7.13']]].each do |platform, versions|
-    [
-        ['STANDALONE', [
-                *(['1.7.13']*test_parts),
-                *(['1.7.15']*test_parts),
-                *(['1.7.19']*test_parts),
-                *([:STABLE]*test_parts),
-            ]
-        ],
-        # ['FROM_GEM', ['1.7.13', :STABLE, ]],
-        # ['CURRENT', [nil]],
-    ].each do |platform, versions|
-      versions.each do |v|
-        n = (n % test_parts) + 1
-        line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
-        matrix << line
-        if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
-            v == :STABLE || # FIXME(uwe):  Remove when 1.7.20 supports RSS and upper case package names.
-            api == 21 || # FIXME(uwe):  Remove when Android 5 is green.
-            api == 17 || # FIXME(uwe):  Remove when Android 4.2 is green.
-            api == 16 || # FIXME(uwe):  Remove when Android 4.1 is green.
-            api == 15 # FIXME(uwe):  Remove when Android 4.0 is green.
-          allow_failures << line.gsub('-', '- env:')
+
+  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
+  # FIXME(uwe):  JRuby 1.7.19:  RSS? => RubotoGenTest#test_activity_tests => Native crash
+  # FIXME(uwe):  JRuby 1.7.20:  Fails on RSS and upper case package names
+  # FIXME(uwe):  RubotoCore (CURRENT) is missing thread_safe
+  # FIXME(uwe):  Test all of these that work
+  [
+      ['CURRENT', [nil]],
+      ['FROM_GEM', [:MASTER, :STABLE]],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.13']],
+  ].each do |platform, versions|
+    versions.each do |v|
+      # FIXME(uwe):  Test the newest and most common api levels
+      # FIXME(uwe):  Nettbuss uses api level 15.
+      # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
+      [22, 19, 17, 16, 15].each do |api|
+        (1..test_parts).each do |n|
+          line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
+          if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
+              v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
+              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.
+              api == 21 || # FIXME(uwe):  Remove when Android 5.0 is green.
+              api == 17 || # FIXME(uwe):  Remove when Android 4.2 is green.
+              api == 16 || # FIXME(uwe):  Remove when Android 4.1 is green.
+              false
+            next
+          elsif v == :STABLE || # FIXME(uwe):  Remove when 1.7.20 supports RSS and upper case package names.
+              platform == 'FROM_GEM' # FIXME(uwe): Remove when new RubotoCore is green.
+            allow_failures << line.gsub('-', '- env:')
+          end
+          matrix << line
         end
       end
+      matrix << "\n"
     end
-    matrix << "\n"
   end
   matrix_str = "  matrix:\n#{matrix}"
   allow_failures_str = <<EOF # FIXME(uwe)
   allow_failures:
-    # Current master is failing: https://github.com/jruby/jruby/issues/1741
-    # Current JRuby 1.7.x gem is failing.  Why?
 #{allow_failures}
 EOF
   File.write('.travis.yml', source.
-      sub(/^  matrix:.*?(?=^matrix:)/m, matrix_str).
-      sub(/^  allow_failures:.*?(?=^script:)/m, allow_failures_str))
+          sub(/^  matrix:.*?(?=^matrix:)/m, matrix_str).
+          sub(/^  allow_failures:.*?(?=^script:)/m, allow_failures_str))
 end

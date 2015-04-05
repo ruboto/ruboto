@@ -227,6 +227,7 @@ task :uninstall do
 end
 
 file PROJECT_PROPS_FILE
+file File.basename(MANIFEST_FILE) => MANIFEST_FILE
 file MANIFEST_FILE => PROJECT_PROPS_FILE do
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
@@ -250,6 +251,7 @@ end
 file RUBOTO_CONFIG_FILE
 
 task build_xml: BUILD_XML_FILE
+task File.basename(BUILD_XML_FILE) => BUILD_XML_FILE
 file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
   puts 'patching build.xml'
   ant_script = File.read(BUILD_XML_FILE)
@@ -542,6 +544,7 @@ file RUBOTO_ACTIVITY_FILE => RUBY_ACTIVITY_SOURCE_FILES do |task|
   end
   new_source = "#{intro}#{commented_methods.join("\n")}\n}\n"
   if new_source != original_source
+    puts "Regenerating #{File.basename RUBOTO_ACTIVITY_FILE} with active methods"
     File.open(RUBOTO_ACTIVITY_FILE, 'w') { |f| f << new_source }
   end
 end
@@ -721,7 +724,11 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
   if package != 'org.ruboto.core' && JRUBY_JARS.none? { |f| File.exists? f }
     Dir.chdir gem_path do
-      Dir['{activerecord-jdbc-adapter,jruby-openssl}-*'].each do |g|
+      # FIXME(uwe):  Fetch this list from the ruboto-core Gemfile.apk.lock?
+      ruboto_core_extension_gems =
+          %w{activerecord activerecord-jdbc-adapter jruby-openssl json thread_safe}
+      Dir['*'].each do |g|
+        next unless g =~ /#{ruboto_core_extension_gems.join('|')}-[^-]+(-java)$/
         puts "Removing #{g} gem since it is included in the RubotoCore platform apk."
         FileUtils.rm_rf g
       end
@@ -912,9 +919,7 @@ end
 # Methods
 
 def sdk_level
-  # FIXME(uwe):  Remove special case 'L' when Android L is released.
-  level = File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+|L)/)[0][0].to_i
-  level == 0 ? 21 : level
+  File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
 end
 
 def strings(name)
