@@ -194,9 +194,14 @@ module Ruboto
           else
             @haxm_kext_loc = nil
           end
-          # FIXME(uwe): Use the system version to choose the right .dmg
+          
           os_x_version = ENV['_system_version']
-          @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*.dmg')].first
+          if Gem::Version.new(os_x_version) > Gem::Version.new('10.9') 
+            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')]
+          else
+            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')]
+          end
+
           @haxm_installer_version = @haxm_installer_loc.slice(/IntelHAXM_1.1.1_/)[10..-2]
           if @haxm_kext_version == @haxm_installer_version
             puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? "Found" : 'Not found')}"
