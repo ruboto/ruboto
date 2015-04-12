@@ -197,12 +197,12 @@ module Ruboto
           
           os_x_version = ENV['_system_version']
           if Gem::Version.new(os_x_version) > Gem::Version.new('10.9') 
-            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')]
+            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')][0]
           else
-            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')]
+            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')][0]
           end
 
-          @haxm_installer_version = @haxm_installer_loc.slice(/IntelHAXM_1.1.1_/)[10..-2]
+          @haxm_installer_version = @haxm_installer_loc.scan(/\d+/).join('.')[0..4] if not @haxm_installer_loc.empty?
           if @haxm_kext_version == @haxm_installer_version
             puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? "Found" : 'Not found')}"
           else
