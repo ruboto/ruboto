@@ -1,3 +1,4 @@
+[![Gem Version](https://badge.fury.io/rb/ruboto.png)](http://badge.fury.io/rb/ruboto)
 [![Build Status](https://travis-ci.org/ruboto/ruboto.png?branch=master)](https://travis-ci.org/ruboto/ruboto)
 [![Code Climate](https://codeclimate.com/github/ruboto/ruboto.png)](https://codeclimate.com/github/ruboto/ruboto)
 
