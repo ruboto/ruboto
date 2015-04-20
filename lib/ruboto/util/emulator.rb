@@ -103,6 +103,7 @@ module Ruboto
 
             abis = target.slice(/(?<=ABIs : ).*/).split(', ')
             has_x86 = abis.find { |a| a =~ /x86/ }
+            has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
 
             # FIXME(uwe): The x86 emulator does not respect the heap setting and
             # restricts to a 16MB heap on Android 2.3 which will crash any
@@ -113,8 +114,11 @@ module Ruboto
             if sdk_level.to_i == 10
               abi_opt = '--abi armeabi'
             elsif has_x86 && (ON_MAC_OS_X || ON_WINDOWS)
-              # FIXME(uwe):  Use x86 on Linux?
-              abi_opt = '--abi x86'
+              if has_x86_64
+                abi_opt = '--abi x86_64'
+              else
+                abi_opt = '--abi x86'
+              end
             else
               abi_opt = '--abi armeabi-v7a'
             end
