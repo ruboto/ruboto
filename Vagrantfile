@@ -29,11 +29,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'ubuntu' do |ubuntu|
     ubuntu.vm.box = 'ubuntu/trusty64'
-    ubuntu.vm.provision :shell, inline: create_swap(1536)
+    ubuntu.vm.provision :shell, inline: 'apt-get install puppet ; puppet apply --modulepath=/vagrant/puppet/modules /vagrant/puppet/manifests/site.pp'
+    # ubuntu.vm.provision :shell, inline: create_swap(1536)
     ubuntu.vm.provision :shell, inline: <<-SHELL
-      sudo apt-get -y install git libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1
-      su - vagrant -c 'command curl -sSL https://rvm.io/mpapis.asc | gpg --import -'
-      su - vagrant -c 'curl -sSL https://get.rvm.io | bash -s stable --ruby'
       su - vagrant -c 'mkdir -p ruboto'
       su - vagrant -c 'rsync -acPuv --exclude adb_logcat.log --exclude /tmp /vagrant/* ruboto/'
     SHELL
