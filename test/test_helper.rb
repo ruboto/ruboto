@@ -17,7 +17,7 @@ module RubotoTest
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
-  unless File.writable?(ENV['GEM_HOME'])
+  unless ENV['GEM_HOME'] && File.writable?(ENV['GEM_HOME'])
     GEM_PATH = File.join PROJECT_DIR, 'tmp', 'gems'
     FileUtils.mkdir_p GEM_PATH
     ENV['GEM_HOME'] = GEM_PATH
@@ -87,6 +87,15 @@ module RubotoTest
     system "gem install ruboto #{version_requirement} --no-ri --no-rdoc" unless $? == 0
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
+
+  # FIXME(uwe): Remove when stupid crash is resolved
+  def has_stupid_crash
+    require 'rbconfig'
+    ANDROID_OS <= 15 &&
+        JRUBY_JARS_VERSION >= Gem::Version.new('1.7.19') &&
+        RbConfig::CONFIG['host_os'].downcase.include?('linux')
+  end
+  # EMXIF
 
   puts RUBY_DESCRIPTION
 
@@ -244,9 +253,7 @@ class Minitest::Test
       end
 
       Dir.chdir APP_DIR do
-        File.write('AndroidManifest.xml',
-            File.read('AndroidManifest.xml').sub(%r{</manifest>},
-                "    <uses-permission android:name='android.permission.INTERNET'/>\n</manifest>"))
+        write_android_manifest
         File.write('res/layout/dummy_layout.xml', <<-EOF)
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -268,7 +275,7 @@ class Minitest::Test
   end
 
   def update_app
-    system "#{RUBOTO_CMD} update app #{"--with-jruby #{JRUBY_JARS_VERSION}" if RUBOTO_PLATFORM == 'STANDALONE'}"
+    system "#{RUBOTO_CMD} update app -t #{ANDROID_TARGET} #{"--with-jruby #{JRUBY_JARS_VERSION}" if RUBOTO_PLATFORM == 'STANDALONE'}"
     assert_equal 0, $?, "update app failed with return code #$?"
   end
 
@@ -321,12 +328,26 @@ class Minitest::Test
   end
 
   def write_gemfile(bundle)
-    gems = [*bundle].map{|g| g.is_a?(Symbol) ? g.to_s : g}
+    gems = [*bundle].map { |g| g.is_a?(Symbol) ? g.to_s : g }
     puts "Adding Gemfile.apk: #{gems.join(' ')}"
     File.open('Gemfile.apk', 'w') do |f|
       f << "source 'http://rubygems.org/'\n\n"
       gems.each { |g| f << "gem #{[*g].map { |gp| (gp.is_a?(Symbol) ? gp.to_s : gp).inspect }.join(', ')}\n" }
     end
+  end
+
+  def write_project_properties(api_level)
+    puts "Write project.properties with api level #{api_level}"
+    properties_file = 'project.properties'
+    properties = File.read(properties_file)
+    properties.sub!(/^target=android-\d+/, "target=android-#{api_level}")
+    File.write(properties_file, properties)
+  end
+
+  def write_android_manifest
+    File.write('AndroidManifest.xml',
+        File.read('AndroidManifest.xml').sub(%r{</manifest>},
+            "    <uses-permission android:name='android.permission.INTERNET'/>\n</manifest>"))
   end
 
 end

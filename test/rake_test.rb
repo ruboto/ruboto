@@ -61,8 +61,7 @@ class RakeTest < Minitest::Test
       manifest = File.read('AndroidManifest.xml')
       assert_equal "android:minSdkVersion='#{ANDROID_TARGET}'", manifest[/android:minSdkVersion='[^']+'/]
       assert_equal "android:targetSdkVersion='#{ANDROID_TARGET}'", manifest[/android:targetSdkVersion='[^']+'/]
-      prop_file = File.read('project.properties')
-      File.open('project.properties', 'w') { |f| f << prop_file.sub(/target=android-#{ANDROID_TARGET}/, 'target=android-6') }
+      write_project_properties(6)
       system 'rake debug'
       manifest = File.read('AndroidManifest.xml')
       assert_equal "android:minSdkVersion='6'", manifest.slice(/android:minSdkVersion='\d+'/)

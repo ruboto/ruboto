@@ -132,6 +132,7 @@ public class JRubyAdapter {
             // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
             // arrayForHeapAllocation = null;
             // END Ruboto HeapAlloc
+            Log.d("Memory allocation OK");
             setDebugBuild(appContext);
             Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
             System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri

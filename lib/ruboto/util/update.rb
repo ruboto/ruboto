@@ -341,7 +341,11 @@ module Ruboto
           if target == 'L'
             min_sdk = 'L'
           else
-            if (sdk_element = verify_manifest.elements['uses-sdk'])
+            sdk_element = verify_manifest.elements['uses-sdk']
+            if project_api_level
+              min_sdk ||= project_api_level
+              target ||= project_api_level
+            elsif sdk_element
               min_sdk ||= sdk_element.attributes['android:minSdkVersion']
               target ||= sdk_element.attributes['android:targetSdkVersion']
             else
