@@ -78,7 +78,11 @@ class RubotoGenTest < Minitest::Test
   # APK was 10045.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.18
   # APK was  7882.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.19
   # APK was 10109.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 1.7.19
+
+  # Conflict?
+  # APK was  7040.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.20.dev
   # APK was  8938.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.20.dev
+
   # APK was  6689.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
   # APK was  7012.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 9000.dev
   # APK was  8015.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 17, JRuby: 9000.dev
@@ -109,6 +113,11 @@ class RubotoGenTest < Minitest::Test
           '9.0.0.0.dev' => 8300.0,
           '9.0.0.0.pre1' => 8600.0,
       }[JRUBY_JARS_VERSION.to_s] || 9800.0
+
+      # FIXME(uwe): Simplify when we stop testing api level 15
+      upper_limit -= 1800.0 if ANDROID_TARGET <= 15
+      # EMXIF
+
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {

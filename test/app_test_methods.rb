@@ -64,7 +64,7 @@ module AppTestMethods
 
       # FIXME(uwe):  Weird total app crash when running these tests together
       # FIXME(uwe):  Remove when we stop testing api level <= 15
-      next if file =~ /button|fragment|margins|navigation|psych|spinner|startup_exception|subclass/ && has_stupid_crash
+      next if file =~ /button|fragment|margins|navigation|psych|rss|spinner|startup_exception|subclass/ && has_stupid_crash
       # EMXIF
 
       if file =~ /_test.rb$/
