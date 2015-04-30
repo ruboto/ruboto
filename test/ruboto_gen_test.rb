@@ -76,6 +76,7 @@ class RubotoGenTest < Minitest::Test
   # APK was  9985.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.17
   # APK was 10052.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 17, JRuby: 1.7.18
   # APK was 10045.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.18
+  # APK was  6721.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.19
   # APK was  7882.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.19
   # APK was 10109.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 1.7.19
 
@@ -89,6 +90,7 @@ class RubotoGenTest < Minitest::Test
   # APK was  8232.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 9000.dev
   # APK was  7126.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 9.0.0.0.pre1
   # APK was  8571.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 9.0.0.0.pre1
+  # APK was  4633.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 22, JRuby: 9.0.0.0.SNAPSHOT
   def test_new_apk_size_is_within_limits
     apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / 1024
     version = "  PLATFORM: #{RUBOTO_PLATFORM}"
@@ -109,15 +111,11 @@ class RubotoGenTest < Minitest::Test
           '1.7.17' => 9999.0,
           '1.7.18' => 10100.0,
           '1.7.19' => 8000.0,
-          '1.7.20.dev' => 9000.0,
+          '1.7.20.dev' => ANDROID_TARGET <= 15 ? 8000 : 9000.0,
           '9.0.0.0.dev' => 8300.0,
           '9.0.0.0.pre1' => 8600.0,
+          '9.0.0.0.SNAPSHOT' => 5000.0,
       }[JRUBY_JARS_VERSION.to_s] || 9800.0
-
-      # FIXME(uwe): Simplify when we stop testing api level 15
-      upper_limit -= 1800.0 if ANDROID_TARGET <= 15
-      # EMXIF
-
       version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
