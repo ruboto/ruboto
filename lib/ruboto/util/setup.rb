@@ -195,7 +195,7 @@ module Ruboto
             @haxm_kext_loc = nil
           end
 
-          os_x_version = ENV['_system_version']
+          os_x_version = `sw_vers -productVersion`
           if Gem::Version.new(os_x_version) > Gem::Version.new('10.9')
             @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')][0]
           else
