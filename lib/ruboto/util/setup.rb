@@ -188,21 +188,21 @@ module Ruboto
         case android_package_os_id
         when MAC_OS_X
           @haxm_kext_loc = '/System/Library/Extensions/intelhaxm.kext'
-          found = File.exists?(@haxm_kext_loc)
+          found = File.exist?(@haxm_kext_loc)
           if found
             @haxm_kext_version = `kextstat | grep com.intel.kext.intelhaxm`.slice(/\(.*\)/)[1..-2]
           else
             @haxm_kext_loc = nil
           end
-          
-          os_x_version = ENV['_system_version']
-          if Gem::Version.new(os_x_version) > Gem::Version.new('10.9') 
+
+          os_x_version = `sw_vers -productVersion`
+          if Gem::Version.new(os_x_version) > Gem::Version.new('10.9')
             @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')][0]
           else
             @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')][0]
           end
 
-          @haxm_installer_version = @haxm_installer_loc.scan(/\d+/).join('.')[0..4] if not @haxm_installer_loc.empty?
+          @haxm_installer_version = @haxm_installer_loc.scan(/\d+/).join('.')[0..4] unless @haxm_installer_loc.nil? || @haxm_installer_loc.empty?
           if @haxm_kext_version == @haxm_installer_version
             puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? "Found" : 'Not found')}"
           else
@@ -244,7 +244,7 @@ module Ruboto
 
         if rv
           @existing_paths << File.dirname(rv)
-        elsif alt_dir && File.exists?(alt_dir)
+        elsif alt_dir && File.exist?(alt_dir)
           rv = alt_dir
           if windows?
             ENV['PATH'] = "#{File.dirname(rv).gsub('/', '\\')};#{ENV['PATH']}"
@@ -259,14 +259,12 @@ module Ruboto
       end
 
       def check_for_android_platform(api_level)
-        begin
-          @platform_sdk_loc[api_level] = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
-          found = File.exists? @platform_sdk_loc[api_level]
-          @platform_sdk_loc[api_level] = nil unless found
-          puts "#{'%-25s' % "Platform SDK #{api_level}"}: #{(found ? 'Found' : 'Not found')}"
-        rescue
-          @platform_sdk_loc[api_level] = nil
-        end
+        @platform_sdk_loc[api_level] = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
+        found = File.exist? @platform_sdk_loc[api_level]
+        @platform_sdk_loc[api_level] = nil unless found
+        puts "#{'%-25s' % "Platform SDK #{api_level}"}: #{(found ? 'Found' : 'Not found')}"
+      rescue
+        @platform_sdk_loc[api_level] = nil
       end
 
       #########################################
@@ -366,7 +364,7 @@ module Ruboto
           end
           unless check_for('javac')
             ENV['JAVA_HOME'] = 'c:\\Program Files\\Java\\jdk1.7.0'
-            if Dir.exists?(ENV['JAVA_HOME'])
+            if Dir.exist?(ENV['JAVA_HOME'])
               @javac_loc = "#{ENV['JAVA_HOME'].gsub('\\', '/')}/bin/javac"
               puts "Setting the JAVA_HOME environment variable to #{ENV['JAVA_HOME']}"
               system %Q{setx JAVA_HOME "#{ENV['JAVA_HOME']}"}
@@ -429,7 +427,7 @@ module Ruboto
           end
           unless check_for('ant')
             ENV['ANT_HOME'] = File.expand_path(File.join('~', 'apache-ant-1.9.0')).gsub('/', '\\')
-            if Dir.exists?(ENV['ANT_HOME'])
+            if Dir.exist?(ENV['ANT_HOME'])
               @ant_loc = "#{ENV['ANT_HOME'].gsub('\\', '/')}/bin/ant"
               puts "Setting the ANT_HOME environment variable to #{ENV['ANT_HOME']}"
               system %Q{setx ANT_HOME "#{ENV['ANT_HOME']}"}
