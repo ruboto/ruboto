@@ -188,7 +188,7 @@ module Ruboto
         case android_package_os_id
         when MAC_OS_X
           @haxm_kext_loc = '/System/Library/Extensions/intelhaxm.kext'
-          found = File.exists?(@haxm_kext_loc)
+          found = File.exist?(@haxm_kext_loc)
           if found
             @haxm_kext_version = `kextstat | grep com.intel.kext.intelhaxm`.slice(/\(.*\)/)[1..-2]
           else
@@ -244,7 +244,7 @@ module Ruboto
 
         if rv
           @existing_paths << File.dirname(rv)
-        elsif alt_dir && File.exists?(alt_dir)
+        elsif alt_dir && File.exist?(alt_dir)
           rv = alt_dir
           if windows?
             ENV['PATH'] = "#{File.dirname(rv).gsub('/', '\\')};#{ENV['PATH']}"
@@ -261,7 +261,7 @@ module Ruboto
       def check_for_android_platform(api_level)
         begin
           @platform_sdk_loc[api_level] = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
-          found = File.exists? @platform_sdk_loc[api_level]
+          found = File.exist? @platform_sdk_loc[api_level]
           @platform_sdk_loc[api_level] = nil unless found
           puts "#{'%-25s' % "Platform SDK #{api_level}"}: #{(found ? 'Found' : 'Not found')}"
         rescue
@@ -366,7 +366,7 @@ module Ruboto
           end
           unless check_for('javac')
             ENV['JAVA_HOME'] = 'c:\\Program Files\\Java\\jdk1.7.0'
-            if Dir.exists?(ENV['JAVA_HOME'])
+            if Dir.exist?(ENV['JAVA_HOME'])
               @javac_loc = "#{ENV['JAVA_HOME'].gsub('\\', '/')}/bin/javac"
               puts "Setting the JAVA_HOME environment variable to #{ENV['JAVA_HOME']}"
               system %Q{setx JAVA_HOME "#{ENV['JAVA_HOME']}"}
@@ -429,7 +429,7 @@ module Ruboto
           end
           unless check_for('ant')
             ENV['ANT_HOME'] = File.expand_path(File.join('~', 'apache-ant-1.9.0')).gsub('/', '\\')
-            if Dir.exists?(ENV['ANT_HOME'])
+            if Dir.exist?(ENV['ANT_HOME'])
               @ant_loc = "#{ENV['ANT_HOME'].gsub('\\', '/')}/bin/ant"
               puts "Setting the ANT_HOME environment variable to #{ENV['ANT_HOME']}"
               system %Q{setx ANT_HOME "#{ENV['ANT_HOME']}"}
