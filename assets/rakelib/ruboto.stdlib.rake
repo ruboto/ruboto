@@ -111,8 +111,15 @@ def remove_unneeded_parts_of_stdlib
     # to trim unused versions from stdlib
     #
     if ruby_version
-      ruby_stdlib_versions = Dir['*'] - %w(gems shared)
-      print "ruby version = #{ruby_version}..."
+      # FIXME(uwe): Simplify when we stop supporting JRuby 1.7.x
+      if Gem::Version.new(ruby_version) < Gem::Version.new('2.2')
+        print "ruby version = #{ruby_version}..."
+        ruby_stdlib_versions = Dir['*'] - %w(gems shared)
+      else
+        ruby_stdlib_versions = Dir['*'] - %w(gems stdlib)
+      end
+      # EMXIF
+
       ruby_stdlib_versions.each do |ld|
         unless ld == ruby_version.to_s
           print "removing #{ld}..."

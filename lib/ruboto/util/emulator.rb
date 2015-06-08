@@ -113,7 +113,7 @@ module Ruboto
             # https://code.google.com/p/android/issues/detail?id=61596
             if sdk_level.to_i == 10
               abi_opt = '--abi armeabi'
-            elsif has_x86 && (ON_MAC_OS_X || ON_WINDOWS)
+            elsif has_x86
               if has_x86_64
                 abi_opt = '--abi x86_64'
               else

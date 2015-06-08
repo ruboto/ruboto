@@ -216,7 +216,7 @@ public class JRubyAdapter {
                 // Set jruby.home
                 //
 
-                String jrubyHome = "file:" + apkName + "!/jruby.home";
+                String jrubyHome = "jar:" + apkName + "!/jruby.home";
 
                 // FIXME(uwe): Remove when we stop supporting RubotoCore 0.4.7
                 Log.i("RUBOTO_CORE_VERSION_NAME: " + RUBOTO_CORE_VERSION_NAME);
@@ -308,6 +308,7 @@ public class JRubyAdapter {
                 // TODO(uwe):  Add a way to display startup progress.
                 put("$application_context", appContext.getApplicationContext());
                 runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  puts e\nend");
+                // runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  java.lang.System.out.println(e)\nend");
 
                 initialized = true;
             } catch (ClassNotFoundException e) {

@@ -480,7 +480,7 @@ module Ruboto
 
                     'META-INF',
                     # 'com/headius',
-                    'com/headius/invokebinder',
+                    # 'com/headius/invokebinder',
                     'com/headius/options/example',
                     'com/kenai/constantine',
                     'com/kenai/jffi',
