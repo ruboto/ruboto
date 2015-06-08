@@ -211,19 +211,20 @@ public class JRubyAdapter {
             }
 
             try {
+                String jrubyVersion = (String)
+                        Class.forName("org.jruby.runtime.Constants", true,
+                                scriptingContainerClass.getClassLoader())
+                        .getDeclaredField("VERSION").get(String.class);
+                System.out.println("JRuby version: " + jrubyVersion);
+
                 //////////////////////////////////
                 //
                 // Set jruby.home
                 //
 
-                String jrubyHome = "jar:" + apkName + "!/jruby.home";
-
-                // FIXME(uwe): Remove when we stop supporting RubotoCore 0.4.7
-                Log.i("RUBOTO_CORE_VERSION_NAME: " + RUBOTO_CORE_VERSION_NAME);
-                if (RUBOTO_CORE_VERSION_NAME != null &&
-                        (RUBOTO_CORE_VERSION_NAME.equals("0.4.7") || RUBOTO_CORE_VERSION_NAME.equals("0.4.8"))) {
-                    jrubyHome = "file:" + apkName + "!";
-                }
+                // FIXME(uwe): Simplify when we stop support for JRuby 1.7.x
+                final String jrubyHome = (jrubyVersion.startsWith("9.0.0.0") ?
+                        "jar:" : "file:") + apkName + "!/jruby.home";
                 // EMXIF
 
                 Log.i("Setting JRUBY_HOME: " + jrubyHome);
@@ -301,9 +302,6 @@ public class JRubyAdapter {
                 put("$package_name", appContext.getPackageName());
 
                 runScriptlet("::RUBOTO_JAVA_PROXIES = {}");
-
-                System.out.println("JRuby version: " + Class.forName("org.jruby.runtime.Constants", true, scriptingContainerClass.getClassLoader())
-                        .getDeclaredField("VERSION").get(String.class));
 
                 // TODO(uwe):  Add a way to display startup progress.
                 put("$application_context", appContext.getApplicationContext());
