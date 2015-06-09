@@ -30,7 +30,7 @@ RELEASE_BLOG_GLOB = "#{BLOG_DIR}/*-Ruboto-#{Ruboto::VERSION}-release-doc.md"
 RELEASE_CANDIDATE_DOC = 'RELEASE_CANDICATE_DOC.md'
 RELEASE_DOC = 'RELEASE_DOC.md'
 
-CLEAN.include('ruboto-*.gem', 'tmp')
+CLEAN.include('**/*~', 'adb_logcat.log', '{jruby-jars,ruboto}-*.gem', 'tmp')
 
 task :default => :gem
 
@@ -116,8 +116,6 @@ file README_FILE => 'lib/ruboto/description.rb' do
   File.write(README_FILE, File.read(README_FILE).sub(/(?<=\n\n).*(?=\nInstallation)/m, Ruboto::DESCRIPTION))
 end
 
-desc 'Generate release docs for a given milestone'
-
 def get_github_issues
   host = 'api.github.com'
   base_uri = "https://#{host}/repos/ruboto/ruboto"
@@ -163,6 +161,7 @@ def get_github_issues
   return categories, grouped_issues, milestone, milestone_description, milestone_name
 end
 
+desc 'Generate release docs for a given milestone'
 task :release_docs do
   raise "\n    This task requires Ruby 1.9 or newer to parse JSON as YAML.\n\n" if RUBY_VERSION == '1.8.7'
   categories, grouped_issues, milestone, milestone_description, milestone_name = get_github_issues

@@ -13,25 +13,38 @@ APIs of Android, Java, and Ruby are available to you using the Ruby language.
 Installation
 ------------
 
-To use Ruboto you need a Ruby implementation installed:
+To use Ruboto you need a [Ruby](http://ruby-lang.org/) implementation like
+[MRI](http://ruby-lang.org/),
+[JRuby](http://jruby.org/),
+or [Rubinius](http://rubini.us/)
+installed.  Using a tool like
+[rvm](https://rvm.io)
+or [pik](https://github.com/vertiginous/pik)
+is recommended.
 
-* http://ruby-lang.org/
-* http://jruby.org/
-* http://rubini.us/
-
-Ruby installation tools:
-
-* [rvm](https://rvm.io)
-* [pik](https://github.com/vertiginous/pik)
-
-Then run (possibly as root/administrator):
+Then run
 
     $ gem install ruboto
+    
+### From source
+
+    git clone https://github.com/ruboto/ruboto.git
+    cd ruboto
+    rake install
+
+If you are unfamiliar with Ruby gems, you can get more information at
+ [rubygems.org](http://guides.rubygems.org/).
+ 
 
 Tools
 ---------------
 
-Before you can use Ruboto, you need the following tools installed:
+Ruboto offers a setup command to help you with the component installation and
+configuration:
+
+    $ ruboto setup -y
+
+This should install the following tools if not already present:
 
 * A Java Development Kit (JDK)
 * [The Android SDK](http://developer.android.com/sdk/index.html)
@@ -43,22 +56,19 @@ Before you can use Ruboto, you need the following tools installed:
 * Add the sdk's `tools`, `build-tools`, and `platform-tools/` directory to your
   "PATH" environment variable.
 
-Ruboto offers a setup command to help you with the component installation and
-configuration:
-
-    $ ruboto setup -y
-
-* Generate an [Emulator](http://developer.android.com/guide/developing/tools/emulator.html)
-  image unless you want to develop using your phone.
+Emulator
+--------
 
 Ruboto offers a command to help you create and run the emulator for a given
 version (api-level) of Android.
 
     $ ruboto emulator -t android-17
 
+See [Emulator](http://developer.android.com/guide/developing/tools/emulator.html)
+for more information on emulators.
 
 Command-line Tools
--------
+------------------
 
 * [Application generator](#application_generator) (like the Rails application generator)
 * [Class generator](#class_generator) to generate additional Activities, BroadcastReceivers, Services, etc.
@@ -71,8 +81,15 @@ Command-line Tools
 <a name="application_generator"></a>
 ### Application generator
 
+    $ ruboto gen app --package com.yourdomain.whatever
+
+You can specify lots of parameters if you don't want the defaults.
+
     $ ruboto gen app --package com.yourdomain.whatever --path path/to/where/you/want/the/app --name NameOfApp --target android-version --min-sdk another-android-version --activity MainActivityName
-Version values must be specified using `android-` and the sdk level number (e.g., android-10 is Gingerbread.)
+
+Version values must be specified using the sdk level number (e.g., 22 is
+Lollipop).  You can prefix with `android-` (e.g. android-22).  
+
 
 <a name="class_generator"></a>
 ### Class generator
