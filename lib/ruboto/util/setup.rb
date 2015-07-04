@@ -229,7 +229,7 @@ module Ruboto
 
       def check_for_build_tools
         dx_locations = Dir[File.join android_package_directory, 'build-tools', '*', windows? ? 'dx.bat' : 'dx']
-        sorted_dx_locations = dx_locations.sort_by { |f| Gem::Version.new f[%r{build-tools/[^/]+/}][12..-2] }
+        sorted_dx_locations = dx_locations.sort_by { |f| Gem::Version.new f[%r{build-tools/[^/]+/(\d{1,}[.]){2}\d{1,}(_rc\d)?}]}
         @dx_loc = check_for('dx', 'Android SDK Command dx', sorted_dx_locations[-1])
       end
 
