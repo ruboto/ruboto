@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (1.3.1.dev)
+    ruboto (1.3.1)
       main (~> 5.2)
       rake (~> 10.0)
       rubyzip (~> 1.0)
@@ -36,3 +36,6 @@ PLATFORMS
 DEPENDENCIES
   minitest (~> 5.5)
   ruboto!
+
+BUNDLED WITH
+   1.10.5
