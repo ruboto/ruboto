@@ -187,7 +187,7 @@ module Ruboto
       def check_for_haxm
         case android_package_os_id
         when MAC_OS_X
-          @haxm_kext_loc = '/System/Library/Extensions/intelhaxm.kext'
+          @haxm_kext_loc = '/Library/Extensions/intelhaxm.kext'
           found = File.exist?(@haxm_kext_loc)
           if found
             @haxm_kext_version = `kextstat | grep com.intel.kext.intelhaxm`.slice(/\(.*\)/)[1..-2]
