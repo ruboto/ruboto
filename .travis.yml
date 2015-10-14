@@ -2,9 +2,9 @@
 language: android
 
 sudo: false
-android:
-  components:
-    - build-tools-22.0.1
+#android:
+#  components:
+#    - build-tools-22.0.1
 
 os:
   - linux
