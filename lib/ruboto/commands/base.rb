@@ -500,11 +500,13 @@ module Ruboto
             if params['version'].value
               puts version
             else
-              puts %Q{
-                Ruboto -- Ruby for Android #{version}
-                Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruby-enabled Android app
-                Execute `ruboto --help` for other options
-              }
+              puts <<EOF
+
+    Ruboto -- Ruby for Android #{version}
+    Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruboto app
+    Execute `ruboto --help` for other options
+
+EOF
             end
           end
         end
