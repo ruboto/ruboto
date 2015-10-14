@@ -8,7 +8,7 @@ android:
 
 os:
   - linux
-  - osx
+#  - osx
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
@@ -66,8 +66,7 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-    os:
-      - osx
+#    os: osx
     - env: ANDROID_TARGET=19 RUBOTO_PLATFORM=FROM_GEM   TEST_PART=1of4 JRUBY_JARS_VERSION=STABLE
     - env: ANDROID_TARGET=19 RUBOTO_PLATFORM=FROM_GEM   TEST_PART=2of4 JRUBY_JARS_VERSION=STABLE
     - env: ANDROID_TARGET=19 RUBOTO_PLATFORM=FROM_GEM   TEST_PART=3of4 JRUBY_JARS_VERSION=STABLE
