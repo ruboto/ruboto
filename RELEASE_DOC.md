@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.3.0 released!
+Subject: [ANN] Ruboto 1.3.1 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.3.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.3.1.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,77 +8,82 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.3.0:
+New in version 1.3.1:
 
-It's been a long time since the last release.  We have had some problems
-getting the test matrix green at https://travis-ci.org/ruboto/ruboto and
-as there are still some combinations failing, we need help to fix them.
-If you have experience debugging on Android, please contribute.
-
-In the meantime, we have added support for JRuby up to 1.7.19 and Android
-up to 5.1.  There are still some bugs to sort out, but we are getting
-there  :)  Testing with JRuby 9000 has begun, but is currently failing.
-
-A new feature is the running of "src/environment.rb" if it is present
-right after JRuby initialization.  This enables loading of gems and code
-common across activities, broadcast receivers, and services.
-
-Use of Bundler has improved to allow gems that duplicate files in Ruby
-Stdlib like JSON, and allow local gems using the "path" option in the
-Gemfile.  Support for ActiveRecord has been updated to 4.1.
-
-Finally we have updated the homepage and wiki with a few changes.
-
-Thanks to all who have contributed!
+Bugfixes for the 1.3.0 release.
 
 API Changes:
 
-* Issue #689 Add support for Android 5 Lollipop
-* Issue #690 Update to JRuby 1.7.19
+* Issue #733 Remove support for RubotoCore 0.4.7
 
 Features:
 
-* Issue #647 Run environment.rb after JRuby initialization
-* Issue #696 Add support for local gems
-* Issue #699 Add support for ActiveRecord 4 and the thread_safe gem
-* Issue #701 Add support for ActiveRecord 4.1
+* Issue #720 Install 64 bit system images for Android 5
+* Issue #721 Create and start emulator with 64bit system image for
+  Android 5
+* Issue #741 Make setup accept build tools rc (danielpassos)
 
 Bugfixes:
 
-* Issue #627 Fix HTTPS access to GitHub
-* Issue #678 Update setup.rb (sardaukar)
-* Issue #679 Fix for finding the Platform SDK on OS X when using
-  homebrew
-* Issue #681 Warning after ruboto setup
-* Issue #700 Allow non-utf8 output in "rake log"
-* Issue #702 Exception running "ruboto setup -t 19 -y" on OS X 10.10
-* Issue #706 Avoid duplicate files in bundle vs stdlib
-* Issue #707 Choose the latest build-tools in "ruboto setup"
+* Issue #635 Gosu example is not working
+* Issue #668 Android API version above 15 not working
+* Issue #715 ruboto setup -y: FATAL -- : undefined method '[]' for
+  nil:NilClass (NoMethodError)
+* Issue #718 Haxm 10.9 daneb (daneb)
+* Issue #728 Fix haxm installation for MacOS  (phantomwhale)
+* Issue #729 (ArgumentError) unable to create proxy class for class
+  java.util.HashMap : null
+* Issue #734 ruboto setup problem
 
-Documentation:
+Performance:
 
-* Issue #676 Modification to Wiki for Mac OS Guide
-* Issue #677 Ruboto Main Page - misinformation?
+* Issue #642 generate java methods in the build process only for
+  implemented ruby met... (tek)
 
 Support:
 
-* Issue #590 Cannot open apk in emulator
-* Issue #680 Android SDK Command dx   : Not found
-* Issue #682 ruboto gen app only works if sdk api level 15 installed
+* Issue #631 ruby version problem
+* Issue #719 Webview addJavaScriptInterface
+* Issue #731 Quick Start Example
+* Issue #743 Help with LibGDX on Ruboto
+* Issue #746 ruboto setup - Java heap space
+  (Java::JavaLang::OutOfMemoryError)
 
 Community:
 
-* Issue #578 How can I help? (jaunesarmiento)
-* Issue #581 How can I help? (bobquest33)
+* Issue #589 How can I help? (devaroop)
+* Issue #640 How can I help? (sg552)
+* Issue #651 How can I help? (arantessergio)
+* Issue #659 How can I help?
+* Issue #662 How can I help? (aripoya)
+* Issue #665 How can I help?
+* Issue #683 How can I help?
+* Issue #684 How can I help?
+* Issue #685 How can I help?
+* Issue #694 How can I help?
+* Issue #704 How can I help?
+* Issue #725 How can I help?
+* Issue #730 How can I help?
+
+Pull requests:
+
+* Issue #740 rake log task detects activity start on lollipop (gfowley)
 
 Internal:
 
-* Issue #709 Remove swap manipulation and sudo (BanzaiMan)
-* Issue #711 Test JRuby 1.7.20.dev, 1.7.19, 1.7.15, and 1.7.13. (donv)
+* Issue #724 Get travis-ci GREEN! (donv)
+
+Rejected:
+
+* Issue #367 Remove support for running in Ruby 1.8 mode
+
+Other:
+
+* Issue #692 --with-jruby argument not working correctly
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=36
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=38
 
 
 Installation:
