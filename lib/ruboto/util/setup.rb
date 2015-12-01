@@ -610,10 +610,6 @@ module Ruboto
         end
       end
 
-      def upgrade_haxm
-        puts "Upgrading HAXM"
-      end
-
       def install_platform(accept_all, api_level)
         puts "Android platform SDK for #{api_level} not found."
         unless accept_all
