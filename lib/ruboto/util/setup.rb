@@ -17,10 +17,10 @@ module Ruboto
       # Core Set up Method
       #
 
-      def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK])
+      def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK], update_haxm = false)
         @platform_sdk_loc = {}
         api_levels = [project_api_level, *api_levels].compact.uniq
-        install_all(accept_all, api_levels) unless check_all(api_levels)
+        install_all(accept_all, api_levels, update_haxm) unless check_all(api_levels)
         config_path(accept_all)
       end
 
@@ -272,14 +272,14 @@ module Ruboto
       # Install Methods
       #
 
-      def install_all(accept_all, api_levels)
+      def install_all(accept_all, api_levels, update_haxm)
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
 
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
-        install_haxm(accept_all) unless @haxm_kext_loc
+        install_haxm(accept_all) unless @haxm_kext_loc || update_haxm.empty?
 
         if @android_loc
           api_levels.each do |api_level|
@@ -608,6 +608,10 @@ module Ruboto
             end
           end
         end
+      end
+
+      def upgrade_haxm
+        puts "Upgrading HAXM"
       end
 
       def install_platform(accept_all, api_level)
