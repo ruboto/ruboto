@@ -280,7 +280,7 @@ module Ruboto
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
         install_haxm(accept_all) unless @haxm_kext_loc 
-        download_and_upgrade_haxm(update_haxm) unless update_haxm.empty?
+        download_and_upgrade_haxm unless update_haxm.empty?
 
         if @android_loc
           api_levels.each do |api_level|
@@ -582,7 +582,7 @@ module Ruboto
         end
       end
 
-      def download_and_upgrade_haxm(update_haxm)
+      def download_and_upgrade_haxm
       end
 
       def install_haxm(accept_all)
