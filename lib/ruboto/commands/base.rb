@@ -65,10 +65,7 @@ module Ruboto
                 cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
                 validate { |t| t =~ API_LEVEL_PATTERN }
               }
-              option('upgrade-haxm', 'u') {
-                description 'Upgrades Intel HAXM'
-                argument :optional
-              }
+              
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.'
                 argument :optional
