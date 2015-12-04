@@ -583,6 +583,8 @@ module Ruboto
       end
 
       def download_and_upgrade_haxm
+        print "Downloading Intel HAXM... \r"
+        uri = URI("https://software.intel.com/sites/default/files/haxm-macosx_r05.zip")
       end
 
       def install_haxm(accept_all)
