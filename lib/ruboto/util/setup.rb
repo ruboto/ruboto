@@ -7,6 +7,7 @@ module Ruboto
       include Ruboto::Util::Verify
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
+      ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
       SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
@@ -105,11 +106,11 @@ module Ruboto
         end
       end
 
-      def get_tools_version(type='tool')
+      def get_tools_version(type='tool',repo_url = REPOSITORY_URL)
         require 'rexml/document'
         require 'open-uri'
 
-        doc = REXML::Document.new(open(REPOSITORY_URL))
+        doc = REXML::Document.new(open(repo_url))
         doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
@@ -538,19 +539,29 @@ module Ruboto
         end
       end
 
+      def download_third_party(filename, uri)
+        print "Downloading #{filename}: \r"
+        uri = URI("#{uri}/#{filename}")
+        process_download(filename, uri)
+      end
+
       def download(asdk_file_name)
         print "Downloading #{asdk_file_name}: \r"
         uri = URI("http://dl.google.com/android/#{asdk_file_name}")
+        process_download(asdk_file_name, uri)
+      end
+
+      def process_download(filename, uri)
         body = ''
         Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
           length = response['Content-Length'].to_i
           response.read_body do |fragment|
             body << fragment
-            print "Downloading #{asdk_file_name}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
+            print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
           end
           puts
         end
-        File.open(asdk_file_name, 'wb') { |f| f << body }
+        File.open(filename, 'wb') { |f| f << body }
       end
 
       def unzip(accept_all, asdk_file_name)
@@ -582,9 +593,35 @@ module Ruboto
         end
       end
 
-      def download_and_upgrade_haxm
+      def get_new_haxm_filename
+        version = get_tools_version('extra', ADDONS_URL)
+        haxm_file_name = ''
+
+        case android_package_os_id
+              when MAC_OS_X
+                haxm_file_name = "haxm-macosx_#{version}.zip"
+              when WINDOWS
+                os = "windows"
+                haxm_file_name = "haxm-windows_#{version}.zip"
+              else
+                raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+              end
+        end
+
+        haxm_file_name
+      end
+
+      def download_haxm
+        uri = 'https://software.intel.com/sites/default/files/managed/dd/'
+        download_third_party(haxm_file_name, uri)
+        unzip(accept_all, haxm_file_name)
+        FileUtils.rm_f haxm_file_name
+      end
+
+      def download_and_upgrade_haxm(accept_all)
         print "Downloading Intel HAXM... \r"
-        uri = URI("https://software.intel.com/sites/default/files/haxm-macosx_r05.zip")
+        download_haxm get_new_haxm_filename
+        install_haxm(accept_all)
       end
 
       def install_haxm(accept_all)
