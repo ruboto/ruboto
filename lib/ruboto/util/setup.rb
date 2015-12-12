@@ -1,5 +1,6 @@
 require 'ruboto/sdk_versions'
 require 'ruboto/util/verify'
+require 'byebug'
 
 module Ruboto
   module Util
@@ -280,8 +281,8 @@ module Ruboto
 
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
-        install_haxm(accept_all) unless @haxm_kext_loc 
-        download_and_upgrade_haxm unless upgrade_haxm.empty?
+        install_haxm(accept_all) unless @haxm_kext_loc
+        download_and_upgrade_haxm(true) unless upgrade_haxm.empty?
 
         if @android_loc
           api_levels.each do |api_level|
@@ -452,312 +453,312 @@ module Ruboto
         header.gsub! /expires=.{3},/, ''
         header.split(',').each do |cookie|
           cookie_value = cookie.strip.slice(/^.*?;/).chomp(';')
-          if cookie_value =~ /^(.*?)=(.*)$/
-            name = $1
-            @cookies.delete_if { |c| c =~ /^#{name}=/ }
-          end
-          @cookies << cookie_value unless cookie_value =~ /^.*?=$/
+        if cookie_value =~ /^(.*?)=(.*)$/
+          name = $1
+          @cookies.delete_if { |c| c =~ /^#{name}=/ }
         end
-        @cookies.uniq!
+        @cookies << cookie_value unless cookie_value =~ /^.*?=$/
       end
+      @cookies.uniq!
+    end
 
-      def process_response(response)
-        store_cookie(response)
-        if response.code == '302'
-          redirect_url = response['location']
-          puts "Following redirect to #{redirect_url}"
-          url = URI.parse(redirect_url)
-          if redirect_url =~ /^http:\/\//
-            Net::HTTP.start(url.host, url.port) do |http|
-              response = http.get(redirect_url, cookie_header)
-              response.body
-            end
-          else
-            http = Net::HTTP.new(url.host, url.port)
-            http.use_ssl = true
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    def process_response(response)
+      store_cookie(response)
+      if response.code == '302'
+        redirect_url = response['location']
+        puts "Following redirect to #{redirect_url}"
+        url = URI.parse(redirect_url)
+        if redirect_url =~ /^http:\/\//
+          Net::HTTP.start(url.host, url.port) do |http|
             response = http.get(redirect_url, cookie_header)
             response.body
           end
-          return process_response(response)
-        elsif response.code != '200'
-          raise "Got response code #{response.code}"
+        else
+          http = Net::HTTP.new(url.host, url.port)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          response = http.get(redirect_url, cookie_header)
+          response.body
         end
-        response
+        return process_response(response)
+      elsif response.code != '200'
+        raise "Got response code #{response.code}"
       end
+      response
+    end
 
-      def install_android_sdk(accept_all)
-        unless @android_loc
-          puts 'Android package installer not found.'
-          unless accept_all
-            print 'Would you like to download and install it? (Y/n): '
-            a = STDIN.gets.chomp.upcase
-          end
-          if accept_all || a == 'Y' || a.empty?
-            Dir.chdir File.expand_path('~/') do
-              case android_package_os_id
-              when MAC_OS_X
-                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
-                download(asdk_file_name)
-                unzip(accept_all, asdk_file_name)
-                FileUtils.rm_f asdk_file_name
-              when LINUX
-                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.tgz"
-                download asdk_file_name
-                system "tar -xzf #{asdk_file_name}"
-                FileUtils.rm_f asdk_file_name
-              when WINDOWS
-                # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
-                #set IS_ELEVATED=0
-                #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
-                #if %IS_ELEVATED%==0 (
-                #    echo You must run the command prompt as administrator to install.
-                #    exit /b 1
-                #)
-
-                asdk_file_name = "installer_r#{get_android_sdk_version}-#{android_package_os_id}.exe"
-                download(asdk_file_name)
-                puts "Installing #{asdk_file_name}..."
-                system "#{WINDOWS_ELEVATE_CMD} #{asdk_file_name}"
-                raise "Unexpected exit code while installing the Android SDK: #{$?.exitstatus}" unless $? == 0
-                FileUtils.rm_f asdk_file_name
-                return
-              else
-                raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
-              end
-            end
-          end
-          check_for_android_sdk
-          unless @android_loc.nil?
-            ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+'/..').gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-            puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
-            if windows?
-              system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
-            end
-            @missing_paths << "#{File.dirname(@android_loc)}"
-          end
-        end
-      end
-
-      def download_third_party(filename, uri)
-        print "Downloading #{filename}: \r"
-        uri = URI("#{uri}/#{filename}")
-        process_download(filename, uri)
-      end
-
-      def download(asdk_file_name)
-        print "Downloading #{asdk_file_name}: \r"
-        uri = URI("http://dl.google.com/android/#{asdk_file_name}")
-        process_download(asdk_file_name, uri)
-      end
-
-      def process_download(filename, uri)
-        body = ''
-        Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
-          length = response['Content-Length'].to_i
-          response.read_body do |fragment|
-            body << fragment
-            print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
-          end
-          puts
-        end
-        File.open(filename, 'wb') { |f| f << body }
-      end
-
-      def unzip(accept_all, asdk_file_name)
-        require 'zip'
-        Zip::File.open(asdk_file_name) do |zipfile|
-          zipfile.each do |f|
-            f.restore_permissions = true
-            f.extract { accept_all }
-          end
-        end
-      end
-
-      def install_android_tools(accept_all)
-        if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil? || @haxm_installer_loc.nil?)
-          puts 'Android tools not found.'
-          unless accept_all
-            print 'Would you like to download and install them? (Y/n): '
-            a = STDIN.gets.chomp.upcase
-          end
-          if accept_all || a == 'Y' || a.empty?
-            android_cmd = windows? ? 'android.bat' : 'android'
-            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
-            update_sdk(update_cmd, accept_all)
-            check_for_build_tools
-            check_for_platform_tools
-            check_for_emulator
-            check_for_haxm
-          end
-        end
-      end
-
-      def get_new_haxm_filename
-        version = get_tools_version('extra', ADDONS_URL)
-        haxm_file_name = ''
-
-        case android_package_os_id
-              when MAC_OS_X
-                haxm_file_name = "haxm-macosx_#{version}.zip"
-              when WINDOWS
-                os = "windows"
-                haxm_file_name = "haxm-windows_#{version}.zip"
-              else
-                raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
-              end
-        end
-
-        haxm_file_name
-      end
-
-      def download_haxm
-        uri = 'https://software.intel.com/sites/default/files/managed/dd/'
-        download_third_party(haxm_file_name, uri)
-        unzip(accept_all, haxm_file_name)
-        FileUtils.rm_f haxm_file_name
-      end
-
-      def download_and_upgrade_haxm(accept_all)
-        print "Downloading Intel HAXM... \r"
-        download_haxm get_new_haxm_filename
-        install_haxm(accept_all)
-      end
-
-      def install_haxm(accept_all)
-        if @haxm_installer_loc && @haxm_kext_loc.nil?
-          puts 'HAXM not installed.'
-          unless accept_all
-            print 'Would you like to install HAXM? (Y/n): '
-            a = STDIN.gets.chomp.upcase
-          end
-          if accept_all || a == 'Y' || a.empty?
-            case android_package_os_id
-            when MAC_OS_X
-              puts "Mounting the HAXM install image"
-              system "hdiutil attach #{@haxm_installer_loc}"
-              fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
-              puts "Starting the HAXM installer.  Sudo password required."
-              system "sudo -S installer -pkg #{fileName} -target /"
-            when LINUX
-              puts '    HAXM installation on Linux is not supported, yet.'
-              return
-            when WINDOWS
-              cmd = @haxm_installer_loc.gsub('/', "\\")
-              puts 'Running the HAXM installer'
-              system %Q{#{WINDOWS_ELEVATE_CMD} "#{cmd}"}
-              raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
-              return
-            end
-          end
-        end
-      end
-
-      def install_platform(accept_all, api_level)
-        puts "Android platform SDK for #{api_level} not found."
+    def install_android_sdk(accept_all)
+      unless @android_loc
+        puts 'Android package installer not found.'
         unless accept_all
           print 'Would you like to download and install it? (Y/n): '
           a = STDIN.gets.chomp.upcase
         end
         if accept_all || a == 'Y' || a.empty?
-          android_cmd = windows? ? 'android.bat' : 'android'
+          Dir.chdir File.expand_path('~/') do
+            case android_package_os_id
+            when MAC_OS_X
+              asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
+              download(asdk_file_name)
+              unzip(accept_all, asdk_file_name)
+              FileUtils.rm_f asdk_file_name
+            when LINUX
+              asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.tgz"
+              download asdk_file_name
+              system "tar -xzf #{asdk_file_name}"
+              FileUtils.rm_f asdk_file_name
+            when WINDOWS
+              # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
+              #set IS_ELEVATED=0
+              #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
+              #if %IS_ELEVATED%==0 (
+              #    echo You must run the command prompt as administrator to install.
+              #    exit /b 1
+              #)
 
-          # FIXME(uwe):  Does this pattern work for all api levels?
-          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
-          # EMXIF
-
-          update_sdk(update_cmd, accept_all)
-          check_for_android_platform(api_level)
-        end
-      end
-
-      def update_sdk(update_cmd, accept_all)
-        if accept_all
-          IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
-            begin
-              output = ''.encode(Encoding::BINARY)
-              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
-              STDOUT.sync = true
-              cmd_io.each_char do |text|
-                print text
-                output << text
-                if output =~ question_pattern
-                  cmd_io.puts 'y'
-                  output.sub! question_pattern, ''
-                end
-              end
-            rescue Errno::EIO
-              # This probably just means that the process has finished giving output.
-            end
-          end
-        else
-          system update_cmd
-        end
-      end
-
-      #########################################
-      #
-      # Path Config Method
-      #
-
-      def config_path(accept_all)
-        unless @missing_paths.empty?
-          puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
-          if windows?
-            @missing_paths.each do |path|
-              puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
-            end
-            old_path = ENV['PATH'].split(';')
-            new_path = (@missing_paths.map { |path| path.gsub '/', '\\' } + old_path).uniq.join(';')
-            if new_path.size <= 1024
-              system %Q{setx PATH "#{new_path}"}
+              asdk_file_name = "installer_r#{get_android_sdk_version}-#{android_package_os_id}.exe"
+              download(asdk_file_name)
+              puts "Installing #{asdk_file_name}..."
+              system "#{WINDOWS_ELEVATE_CMD} #{asdk_file_name}"
+              raise "Unexpected exit code while installing the Android SDK: #{$?.exitstatus}" unless $? == 0
+              FileUtils.rm_f asdk_file_name
+              return
             else
-              puts "\nYour path is HUGE:  #{new_path.size} characters.  It cannot be saved permanently:\n\n"
-              puts new_path.gsub(';', "\n")
-              puts
-            end
-          else
-            @missing_paths.each do |path|
-              puts %Q{    export PATH="#{path}:$PATH"}
-            end
-            puts
-            unless accept_all
-              print "\nWould you like to append these lines to your configuration script? (Y/n): "
-              a = STDIN.gets.chomp.upcase
-            end
-            if accept_all || a == 'Y' || a.empty?
-              unless accept_all
-                print "What script do you use to configure your PATH? (#{path_setup_file}): "
-                a = STDIN.gets.chomp.downcase
-              end
-              rubotorc = '~/.rubotorc'
-              File.open(File.expand_path(rubotorc), 'w') do |f|
-                (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each do |path|
-                  f << %Q{PATH="#{path}:$PATH"\n}
-                end
-              end
-              config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
-              unless File.exist? config_file_name
-                puts "Your path configuration script (#{config_file_name}) does not exist, Ruboto will create a new one."
-                system "touch #{config_file_name}"
-              end
-
-              old_config = File.read(config_file_name)
-              new_config = old_config.dup
-              new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
-              new_config << "\n\n# BEGIN Ruboto setup\n"
-              new_config << "source #{rubotorc}\n"
-              new_config << "# END Ruboto setup\n\n"
-              File.open(config_file_name, 'wb') { |f| f << new_config }
-              puts "Updated #{config_file_name} to load the #{rubotorc} config file."
-              puts 'Please close your command window and reopen, or run'
-              puts
-              puts "    source #{rubotorc}"
-              puts
+              raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
             end
           end
+        end
+        check_for_android_sdk
+        unless @android_loc.nil?
+          ENV['ANDROID_HOME'] = (File.expand_path File.dirname(@android_loc)+'/..').gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+          puts "Setting the ANDROID_HOME environment variable to #{ENV['ANDROID_HOME']}"
+          if windows?
+            system %Q{setx ANDROID_HOME "#{ENV['ANDROID_HOME']}"}
+          end
+          @missing_paths << "#{File.dirname(@android_loc)}"
         end
       end
     end
-  end
-end
+
+    def download_third_party(filename, uri)
+      puts "Downloading #{uri}/#{filename} \r"
+      uri = URI("#{uri}/#{filename}")
+      process_download(filename, uri)
+    end
+
+    def download(asdk_file_name)
+      print "Downloading #{asdk_file_name}: \r"
+      uri = URI("http://dl.google.com/android/#{asdk_file_name}")
+      process_download(asdk_file_name, uri)
+    end
+
+    def process_download(filename, uri)
+      body = ''
+      byebug
+      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
+        length = response['Content-Length'].to_i
+        response.read_body do |fragment|
+          body << fragment
+          print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
+        end
+        puts
+      end
+      File.open(filename, 'wb') { |f| f << body }
+    end
+
+    def unzip(accept_all, asdk_file_name)
+      require 'zip'
+      Zip::File.open(asdk_file_name) do |zipfile|
+        zipfile.each do |f|
+          f.restore_permissions = true
+          f.extract { accept_all }
+        end
+      end
+    end
+
+    def install_android_tools(accept_all)
+      if @android_loc and (@dx_loc.nil? || @adb_loc.nil? || @emulator_loc.nil? || @haxm_installer_loc.nil?)
+        puts 'Android tools not found.'
+        unless accept_all
+          print 'Would you like to download and install them? (Y/n): '
+          a = STDIN.gets.chomp.upcase
+        end
+        if accept_all || a == 'Y' || a.empty?
+          android_cmd = windows? ? 'android.bat' : 'android'
+          update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
+          update_sdk(update_cmd, accept_all)
+          check_for_build_tools
+          check_for_platform_tools
+          check_for_emulator
+          check_for_haxm
+        end
+      end
+    end
+
+    def get_new_haxm_filename
+      version = get_tools_version('extra', ADDONS_URL)
+      version.gsub!(/\./, '_')
+      haxm_file_name = ''
+
+      case android_package_os_id
+      when MAC_OS_X
+        haxm_file_name = "haxm-macosx_v#{version}.zip"
+      when WINDOWS
+        os = "windows"
+        haxm_file_name = "haxm-windows_v#{version}.zip"
+      else
+        raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+      end
+      haxm_file_name
+    end
+
+    def download_haxm(accept_all, haxm_file_name)
+      uri = 'https://software.intel.com/sites/default/files/managed/dd/21'
+      download_third_party(haxm_file_name, uri)
+      unzip(accept_all, haxm_file_name)
+      FileUtils.rm_f haxm_file_name
+    end
+
+    def download_and_upgrade_haxm(accept_all)
+      print "Downloading Intel HAXM... \r"
+      download_haxm(accept_all, get_new_haxm_filename)
+      install_haxm(accept_all)
+    end
+
+    def install_haxm(accept_all)
+      if @haxm_installer_loc && @haxm_kext_loc.nil?
+        puts 'HAXM not installed.'
+        unless accept_all
+          print 'Would you like to install HAXM? (Y/n): '
+          a = STDIN.gets.chomp.upcase
+        end
+        if accept_all || a == 'Y' || a.empty?
+          case android_package_os_id
+          when MAC_OS_X
+            puts "Mounting the HAXM install image"
+            system "hdiutil attach #{@haxm_installer_loc}"
+            fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+            puts "Starting the HAXM installer.  Sudo password required."
+            system "sudo -S installer -pkg #{fileName} -target /"
+          when LINUX
+            puts '    HAXM installation on Linux is not supported, yet.'
+            return
+          when WINDOWS
+            cmd = @haxm_installer_loc.gsub('/', "\\")
+            puts 'Running the HAXM installer'
+            system %Q{#{WINDOWS_ELEVATE_CMD} "#{cmd}"}
+                      raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
+                      return
+                      end
+                      end
+                      end
+                      end
+
+                      def install_platform(accept_all, api_level)
+                        puts "Android platform SDK for #{api_level} not found."
+                        unless accept_all
+                          print 'Would you like to download and install it? (Y/n): '
+                          a = STDIN.gets.chomp.upcase
+                        end
+                        if accept_all || a == 'Y' || a.empty?
+                          android_cmd = windows? ? 'android.bat' : 'android'
+
+                          # FIXME(uwe):  Does this pattern work for all api levels?
+                          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
+                          # EMXIF
+
+                          update_sdk(update_cmd, accept_all)
+                          check_for_android_platform(api_level)
+                        end
+                      end
+
+                      def update_sdk(update_cmd, accept_all)
+                        if accept_all
+                          IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
+                            begin
+                              output = ''.encode(Encoding::BINARY)
+                              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+                              STDOUT.sync = true
+                              cmd_io.each_char do |text|
+                                print text
+                                output << text
+                                if output =~ question_pattern
+                                  cmd_io.puts 'y'
+                                  output.sub! question_pattern, ''
+                                end
+                              end
+                            rescue Errno::EIO
+                              # This probably just means that the process has finished giving output.
+                            end
+                          end
+                        else
+                          system update_cmd
+                        end
+                      end
+
+                      #########################################
+                      #
+                      # Path Config Method
+                      #
+
+                      def config_path(accept_all)
+                        unless @missing_paths.empty?
+                          puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
+                          if windows?
+                            @missing_paths.each do |path|
+                              puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
+                            end
+                            old_path = ENV['PATH'].split(';')
+                            new_path = (@missing_paths.map { |path| path.gsub '/', '\\' } + old_path).uniq.join(';')
+                            if new_path.size <= 1024
+                              system %Q{setx PATH "#{new_path}"}
+                            else
+                              puts "\nYour path is HUGE:  #{new_path.size} characters.  It cannot be saved permanently:\n\n"
+                              puts new_path.gsub(';', "\n")
+                              puts
+                            end
+                          else
+                            @missing_paths.each do |path|
+                              puts %Q{    export PATH="#{path}:$PATH"}
+                            end
+                            puts
+                            unless accept_all
+                              print "\nWould you like to append these lines to your configuration script? (Y/n): "
+                              a = STDIN.gets.chomp.upcase
+                            end
+                            if accept_all || a == 'Y' || a.empty?
+                              unless accept_all
+                                print "What script do you use to configure your PATH? (#{path_setup_file}): "
+                                a = STDIN.gets.chomp.downcase
+                              end
+                              rubotorc = '~/.rubotorc'
+                              File.open(File.expand_path(rubotorc), 'w') do |f|
+                                (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each do |path|
+                                  f << %Q{PATH="#{path}:$PATH"\n}
+                                end
+                              end
+                              config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
+                              unless File.exist? config_file_name
+                                puts "Your path configuration script (#{config_file_name}) does not exist, Ruboto will create a new one."
+                                system "touch #{config_file_name}"
+                              end
+
+                              old_config = File.read(config_file_name)
+                              new_config = old_config.dup
+                              new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
+                              new_config << "\n\n# BEGIN Ruboto setup\n"
+                              new_config << "source #{rubotorc}\n"
+                              new_config << "# END Ruboto setup\n\n"
+                              File.open(config_file_name, 'wb') { |f| f << new_config }
+                              puts "Updated #{config_file_name} to load the #{rubotorc} config file."
+                              puts 'Please close your command window and reopen, or run'
+                              puts
+                              puts "    source #{rubotorc}"
+                              puts
+                            end
+                          end
+                        end
+                      end
+                      end
+                      end
+                      end
