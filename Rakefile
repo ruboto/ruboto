@@ -501,17 +501,16 @@ end
 
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshots do
-  download_host = 'lafo.ssw.uni-linz.ac.at'
-  index = Net::HTTP.get(download_host, "/graalvm/")
-  all_gems = index.scan(%r{(jruby-jars-.*?.gem).*?</td>\s*<td.*?</td>\s*<td.*?>\s*(.*?)</td>})
-  current_gems = [all_gems.select{|a| a[1].to_i > 0}.map{|a| a[0]}.
-          uniq.sort_by{|v| Gem::Version.new(v[11..-5])}.last]
-  current_gems << index.scan(/jruby-jars-1\.7\..*?.gem/).uniq.
-      sort_by{|v| Gem::Version.new(v[11..-5])}.last
+  download_host = 's3.amazonaws.com'
+  download_dir = "/ci.jruby.org"
+  index = Net::HTTP.get(download_host, download_dir)
+  all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
+  master_gem = all_gems.last
+  stable_gem = all_gems.first
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
-  current_gems.compact.each do |gem|
+  [[master_gem, 'master'], [stable_gem, 'jruby-1_7']].each do |gem, branch|
     print "Downloading #{gem}: \r"
-    uri = URI("http://#{download_host}/graalvm/#{gem}")
+    uri = URI("http://#{download_host}#{download_dir}/snapshots/#{branch}/#{gem}")
     done = 0
     body = ''
     Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
