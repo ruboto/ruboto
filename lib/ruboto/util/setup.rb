@@ -77,6 +77,10 @@ module Ruboto
         android_package_os_id == WINDOWS
       end
 
+      def android_haxm_directory
+      	Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager')][0]
+      end
+
       def android_package_directory
         return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
         File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
@@ -543,7 +547,8 @@ module Ruboto
     def download_third_party(filename, uri)
       puts "Downloading #{uri}/#{filename} \r"
       uri = URI("#{uri}/#{filename}")
-      process_download(filename, uri)
+      puts "File will be saved to #{android_haxm_directory}/#{filename}"
+      process_download("#{android_haxm_directory}/#{filename}", uri)
     end
 
     def download(asdk_file_name)
@@ -554,24 +559,22 @@ module Ruboto
 
     def process_download(filename, uri)
       body = ''
-      byebug
       Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
         length = response['Content-Length'].to_i
         response.read_body do |fragment|
           body << fragment
           print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
         end
-        puts
       end
       File.open(filename, 'wb') { |f| f << body }
     end
 
-    def unzip(accept_all, asdk_file_name)
+    def unzip(accept_all, asdk_file_name, extract_to='.')
       require 'zip'
       Zip::File.open(asdk_file_name) do |zipfile|
         zipfile.each do |f|
           f.restore_permissions = true
-          f.extract { accept_all }
+          f.extract("#{extract_to}/#{f.name}") { accept_all }
         end
       end
     end
@@ -597,35 +600,37 @@ module Ruboto
 
     def get_new_haxm_filename
       version = get_tools_version('extra', ADDONS_URL)
-      version.gsub!(/\./, '_')
+      zip_version = version.gsub(/\./, '_')
       haxm_file_name = ''
 
       case android_package_os_id
       when MAC_OS_X
-        haxm_file_name = "haxm-macosx_v#{version}.zip"
+        haxm_file_name = "haxm-macosx_v#{zip_version}.zip"
       when WINDOWS
-        os = "windows"
-        haxm_file_name = "haxm-windows_v#{version}.zip"
+        haxm_file_name = "haxm-windows_v#{zip_version}.zip"
       else
         raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
       end
-      haxm_file_name
+      return haxm_file_name, version
     end
 
     def download_haxm(accept_all, haxm_file_name)
       uri = 'https://software.intel.com/sites/default/files/managed/dd/21'
       download_third_party(haxm_file_name, uri)
-      unzip(accept_all, haxm_file_name)
-      FileUtils.rm_f haxm_file_name
+      unzip(accept_all, "#{android_haxm_directory}/#{haxm_file_name}", "#{android_haxm_directory}")
+      FileUtils.rm_f "#{android_haxm_directory}/#{haxm_file_name}"
     end
 
     def download_and_upgrade_haxm(accept_all)
       print "Downloading Intel HAXM... \r"
-      download_haxm(accept_all, get_new_haxm_filename)
-      install_haxm(accept_all)
+      filename, version = get_new_haxm_filename
+      download_haxm(accept_all, filename)
+      install_haxm(accept_all, version)
     end
 
-    def install_haxm(accept_all)
+    def install_haxm(accept_all, custom_version=nil)
+      filename = nil
+      haxm_file_override =  "IntelHAXM_#{custom_version}.dmg" unless custom_version.nil?
       if @haxm_installer_loc && @haxm_kext_loc.nil?
         puts 'HAXM not installed.'
         unless accept_all
@@ -636,8 +641,16 @@ module Ruboto
           case android_package_os_id
           when MAC_OS_X
             puts "Mounting the HAXM install image"
-            system "hdiutil attach #{@haxm_installer_loc}"
-            fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+            byebug
+            if custom_version.nil?
+            	system "hdiutil attach #{@haxm_installer_loc}"
+            	fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+        	else
+        		system "hdiutil attach #{android_haxm_directory}/#{haxm_file_override}"
+        		#TODO Invalid option here when installing
+        		filename = Dir["/Volumes/IntelHAXM_#{custom_version}/#{haxm_file_override.gsub(/\.dmg/, '.mpkg')}"]
+        	end
+            
             puts "Starting the HAXM installer.  Sudo password required."
             system "sudo -S installer -pkg #{fileName} -target /"
           when LINUX
@@ -647,118 +660,118 @@ module Ruboto
             cmd = @haxm_installer_loc.gsub('/', "\\")
             puts 'Running the HAXM installer'
             system %Q{#{WINDOWS_ELEVATE_CMD} "#{cmd}"}
-                      raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
-                      return
-                      end
-                      end
-                      end
-                      end
+            raise "Unexpected return code: #{$?.exitstatus}" unless $? == 0
+            return
+          end
+        end
+      end
+    end
 
-                      def install_platform(accept_all, api_level)
-                        puts "Android platform SDK for #{api_level} not found."
-                        unless accept_all
-                          print 'Would you like to download and install it? (Y/n): '
-                          a = STDIN.gets.chomp.upcase
-                        end
-                        if accept_all || a == 'Y' || a.empty?
-                          android_cmd = windows? ? 'android.bat' : 'android'
+    def install_platform(accept_all, api_level)
+      puts "Android platform SDK for #{api_level} not found."
+      unless accept_all
+        print 'Would you like to download and install it? (Y/n): '
+        a = STDIN.gets.chomp.upcase
+      end
+      if accept_all || a == 'Y' || a.empty?
+        android_cmd = windows? ? 'android.bat' : 'android'
 
-                          # FIXME(uwe):  Does this pattern work for all api levels?
-                          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
-                          # EMXIF
+        # FIXME(uwe):  Does this pattern work for all api levels?
+        update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
+        # EMXIF
 
-                          update_sdk(update_cmd, accept_all)
-                          check_for_android_platform(api_level)
-                        end
-                      end
+        update_sdk(update_cmd, accept_all)
+        check_for_android_platform(api_level)
+      end
+    end
 
-                      def update_sdk(update_cmd, accept_all)
-                        if accept_all
-                          IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
-                            begin
-                              output = ''.encode(Encoding::BINARY)
-                              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
-                              STDOUT.sync = true
-                              cmd_io.each_char do |text|
-                                print text
-                                output << text
-                                if output =~ question_pattern
-                                  cmd_io.puts 'y'
-                                  output.sub! question_pattern, ''
-                                end
-                              end
-                            rescue Errno::EIO
-                              # This probably just means that the process has finished giving output.
-                            end
-                          end
-                        else
-                          system update_cmd
-                        end
-                      end
+    def update_sdk(update_cmd, accept_all)
+      if accept_all
+        IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
+          begin
+            output = ''.encode(Encoding::BINARY)
+            question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+            STDOUT.sync = true
+            cmd_io.each_char do |text|
+              print text
+              output << text
+              if output =~ question_pattern
+                cmd_io.puts 'y'
+                output.sub! question_pattern, ''
+              end
+            end
+          rescue Errno::EIO
+            # This probably just means that the process has finished giving output.
+          end
+        end
+      else
+        system update_cmd
+      end
+    end
 
-                      #########################################
-                      #
-                      # Path Config Method
-                      #
+    #########################################
+    #
+    # Path Config Method
+    #
 
-                      def config_path(accept_all)
-                        unless @missing_paths.empty?
-                          puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
-                          if windows?
-                            @missing_paths.each do |path|
-                              puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
-                            end
-                            old_path = ENV['PATH'].split(';')
-                            new_path = (@missing_paths.map { |path| path.gsub '/', '\\' } + old_path).uniq.join(';')
-                            if new_path.size <= 1024
-                              system %Q{setx PATH "#{new_path}"}
-                            else
-                              puts "\nYour path is HUGE:  #{new_path.size} characters.  It cannot be saved permanently:\n\n"
-                              puts new_path.gsub(';', "\n")
-                              puts
-                            end
-                          else
-                            @missing_paths.each do |path|
-                              puts %Q{    export PATH="#{path}:$PATH"}
-                            end
-                            puts
-                            unless accept_all
-                              print "\nWould you like to append these lines to your configuration script? (Y/n): "
-                              a = STDIN.gets.chomp.upcase
-                            end
-                            if accept_all || a == 'Y' || a.empty?
-                              unless accept_all
-                                print "What script do you use to configure your PATH? (#{path_setup_file}): "
-                                a = STDIN.gets.chomp.downcase
-                              end
-                              rubotorc = '~/.rubotorc'
-                              File.open(File.expand_path(rubotorc), 'w') do |f|
-                                (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each do |path|
-                                  f << %Q{PATH="#{path}:$PATH"\n}
-                                end
-                              end
-                              config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
-                              unless File.exist? config_file_name
-                                puts "Your path configuration script (#{config_file_name}) does not exist, Ruboto will create a new one."
-                                system "touch #{config_file_name}"
-                              end
+    def config_path(accept_all)
+      unless @missing_paths.empty?
+        puts "\nYou are missing some paths.  Execute these lines to add them:\n\n"
+        if windows?
+          @missing_paths.each do |path|
+            puts %Q{    set PATH="#{path.gsub '/', '\\'};%PATH%"}
+          end
+          old_path = ENV['PATH'].split(';')
+          new_path = (@missing_paths.map { |path| path.gsub '/', '\\' } + old_path).uniq.join(';')
+          if new_path.size <= 1024
+            system %Q{setx PATH "#{new_path}"}
+          else
+            puts "\nYour path is HUGE:  #{new_path.size} characters.  It cannot be saved permanently:\n\n"
+            puts new_path.gsub(';', "\n")
+            puts
+          end
+        else
+          @missing_paths.each do |path|
+            puts %Q{    export PATH="#{path}:$PATH"}
+          end
+          puts
+          unless accept_all
+            print "\nWould you like to append these lines to your configuration script? (Y/n): "
+            a = STDIN.gets.chomp.upcase
+          end
+          if accept_all || a == 'Y' || a.empty?
+            unless accept_all
+              print "What script do you use to configure your PATH? (#{path_setup_file}): "
+              a = STDIN.gets.chomp.downcase
+            end
+            rubotorc = '~/.rubotorc'
+            File.open(File.expand_path(rubotorc), 'w') do |f|
+              (@existing_paths + @missing_paths - %w(/usr/bin)).uniq.sort.each do |path|
+                f << %Q{PATH="#{path}:$PATH"\n}
+              end
+            end
+            config_file_name = File.expand_path("~/#{a.nil? || a.empty? ? path_setup_file : a}")
+            unless File.exist? config_file_name
+              puts "Your path configuration script (#{config_file_name}) does not exist, Ruboto will create a new one."
+              system "touch #{config_file_name}"
+            end
 
-                              old_config = File.read(config_file_name)
-                              new_config = old_config.dup
-                              new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
-                              new_config << "\n\n# BEGIN Ruboto setup\n"
-                              new_config << "source #{rubotorc}\n"
-                              new_config << "# END Ruboto setup\n\n"
-                              File.open(config_file_name, 'wb') { |f| f << new_config }
-                              puts "Updated #{config_file_name} to load the #{rubotorc} config file."
-                              puts 'Please close your command window and reopen, or run'
-                              puts
-                              puts "    source #{rubotorc}"
-                              puts
-                            end
-                          end
-                        end
-                      end
-                      end
-                      end
-                      end
+            old_config = File.read(config_file_name)
+            new_config = old_config.dup
+            new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
+            new_config << "\n\n# BEGIN Ruboto setup\n"
+            new_config << "source #{rubotorc}\n"
+            new_config << "# END Ruboto setup\n\n"
+            File.open(config_file_name, 'wb') { |f| f << new_config }
+            puts "Updated #{config_file_name} to load the #{rubotorc} config file."
+            puts 'Please close your command window and reopen, or run'
+            puts
+            puts "    source #{rubotorc}"
+            puts
+          end
+        end
+      end
+    end
+  end
+end
+end
