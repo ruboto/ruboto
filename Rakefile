@@ -509,7 +509,7 @@ task :get_jruby_jars_snapshots do
   current_gems << index.scan(/jruby-jars-1\.7\..*?.gem/).uniq.
       sort_by{|v| Gem::Version.new(v[11..-5])}.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
-  current_gems.each do |gem|
+  current_gems.compact.each do |gem|
     print "Downloading #{gem}: \r"
     uri = URI("http://#{download_host}/graalvm/#{gem}")
     done = 0
