@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipFile;
 
 /**
@@ -114,7 +115,7 @@ public class FrameworkHack {
     // https://android.googlesource.com/platform/libcore/+/master/libdvm/src/main/java/dalvik/system/BaseDexClassLoader.java
     // https://android.googlesource.com/platform/libcore/+/master/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
     public static void appendDexListImplICS(ArrayList<File> jarFiles, PathClassLoader pcl, File optDir,
-                                            boolean kitkatPlus) throws Exception {
+                                            boolean kitkatPlus, boolean marshmallowPlus) throws Exception {
         if(debug) {
             Log.d(TAG, "appendDexListImplICS(" + jarFiles);
         }
@@ -139,8 +140,11 @@ public class FrameworkHack {
         int jarCount = jarFiles.size();
         Object newDexElemArray = Array.newInstance(clazzElement, orgDexCount + jarCount);
         System.arraycopy(objOrgDexElements, 0, newDexElemArray, 0, orgDexCount);
-        Method mMakeDexElements = null;
-        if (kitkatPlus) {
+        final Method mMakeDexElements;
+        if (marshmallowPlus) {
+            mMakeDexElements =
+                    dplClass.getDeclaredMethod("makePathElements", List.class, File.class, List.class);
+        } else if (kitkatPlus) {
             mMakeDexElements =
                     dplClass.getDeclaredMethod("makeDexElements", ArrayList.class, File.class, ArrayList.class);
         } else {

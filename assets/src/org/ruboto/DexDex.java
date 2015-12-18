@@ -50,8 +50,8 @@ public class DexDex {
     private static final String TAG = "DexDex";
 
     private static final int SDK_INT_ICS = 14;
-
     private static final int SDK_INT_KITKAT = 19;
+    private static final int SDK_INT_MARSHMALLOW = 23;
 
     private static final int BUF_SIZE = 8 * 1024;
     public static final int PROGRESS_COMPLETE = 100;
@@ -256,8 +256,9 @@ public class DexDex {
                 FrameworkHack.appendDexListImplUnderICS(jarsOfDex, pcl, dexDir);
             } else { // ICS+
                 boolean kitkatPlus = Build.VERSION.SDK_INT >= SDK_INT_KITKAT;
+                boolean marshmallowPlus = Build.VERSION.SDK_INT >= SDK_INT_MARSHMALLOW;
                 ArrayList<File> jarFiles = DexDex.strings2Files(jarsOfDex);
-                FrameworkHack.appendDexListImplICS(jarFiles, pcl, dexDir, kitkatPlus);
+                FrameworkHack.appendDexListImplICS(jarFiles, pcl, dexDir, kitkatPlus, marshmallowPlus);
             }
             // update theAppended if succeeded to prevent duplicated classpath entry
             for (String jarName : names) {
