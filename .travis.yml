@@ -87,7 +87,12 @@ script:
   - ./run_tests.sh
 
 notifications:
-  irc: "irc.freenode.org#ruboto"
+  irc:
+    channels:
+      - "irc.freenode.org#ruboto"
+    use_notice: true
+    skip_join: true
+
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/fe0d532fe5bef5b7288c
