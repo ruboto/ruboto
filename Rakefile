@@ -548,25 +548,29 @@ task '.travis.yml' do
   [
       ['CURRENT', [nil]],
       ['FROM_GEM', [:MASTER, :STABLE]],
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.19', '1.7.13']],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.22', '1.7.19', '1.7.13']],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
       # FIXME(uwe):  Nettbuss uses api level 15.
       # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
-      [22, 19, 17, 16, 15].each do |api|
+      [23, 22, 21, 19, 17, 16, 15].each do |api|
         (1..test_parts).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
           if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
               v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
-              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.
+              (api == 23 && platform != 'STANDALONE') || # FIXME(uwe):  Remove when Android 6.0 is green.
               api == 21 || # FIXME(uwe):  Remove when Android 5.0 is green.
               api == 17 || # FIXME(uwe):  Remove when Android 4.2 is green.
               api == 16 || # FIXME(uwe):  Remove when Android 4.1 is green.
               false
             next
-          elsif v == :STABLE || # FIXME(uwe):  Remove when 1.7.20 supports RSS and upper case package names.
-              platform == 'FROM_GEM' # FIXME(uwe): Remove when new RubotoCore is green.
+          elsif (v == :STABLE && platform != 'FROM_GEM' && api != 15) || # FIXME(uwe):  Remove when 1.7.20 supports RSS and upper case package names.
+              platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
+              api == 23 || # FIXME(uwe):  Remove when Android 6.0 is green.
+              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.
+              v == '1.7.22' || # FIXME(uwe):  Remove when jruby-jars 1.7.22 is green.
+              false
             allow_failures << line.gsub('-', '- env:')
           end
           matrix << line

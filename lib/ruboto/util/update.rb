@@ -538,8 +538,8 @@ module Ruboto
                     'org/jruby/truffle/runtime/*.class',
                     'org/jruby/truffle/translator',
                 ]
-              elsif gem_version >= Gem::Version.new('1.7.20.dev')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.20
+              elsif gem_version >= Gem::Version.new('1.7.23.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
                 excluded_core_packages = [
                     '**/*.sh',
                     '**/*Aix*',
@@ -561,6 +561,58 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
+                    'java', # WHAT?!  There should be no java or javax classes inside jruby-jars!
+                    'jni',
+                    'jnr/constants/platform/fake',
+                    'jnr/enxio',
+                    'jnr/ffi/annotations',
+                    'jnr/ffi/byref',
+                    'jnr/ffi/mapper',
+                    'jnr/ffi/provider',
+                    'jnr/ffi/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    'jnr/x86asm',
+                    'org/jruby/ant',
+                    'org/jruby/cext',
+                    'org/jruby/compiler/impl/BaseBodyCompiler*',
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo',
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/AbstractMemory*',
+                    'org/jruby/ext/ffi/Enums*',
+                    'org/jruby/ext/ffi/io',
+                    'org/jruby/ext/ffi/jffi',
+                    'org/jruby/javasupport/bsf',
+                    'org/yecht',
+                    'yaml.rb',
+                ]
+              elsif gem_version >= Gem::Version.new('1.7.22')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.22
+                excluded_core_packages = [
+                    '**/*.sh',
+                    '**/*Aix*',
+                    '**/*Darwin*',
+                    '**/*darwin*',
+                    '**/*FreeBSD*',
+                    '**/*freebsd*',
+                    '**/*MacOS*',
+                    '**/*OpenBSD*',
+                    '**/*openbsd*',
+                    '**/*Solaris*',
+                    '**/*sunos*',
+                    '**/*Windows*',
+                    '**/*windows*',
+                    'META-INF',
+                    'com/headius/invokebinder',
+                    'com/headius/options/example',
+                    'com/kenai/constantine',
+                    'com/kenai/jffi',
+                    'com/kenai/jnr/x86asm',
+                    'com/martiansoftware',
+                    'java', # WHAT?!  There should be no java or javax classes inside jruby-jars!
                     'jni',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
