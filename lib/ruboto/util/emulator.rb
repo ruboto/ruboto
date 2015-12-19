@@ -105,14 +105,13 @@ module Ruboto
             has_x86 = abis.find { |a| a =~ /x86/ }
             has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
 
-            # FIXME(uwe): The x86 emulator does not respect the heap setting and
-            # restricts to a 16MB heap on Android 2.3 which will crash any
-            # Ruboto app.  Remove the first "if" below when heap setting works
-            # on x86 emulator.
-            # https://code.google.com/p/android/issues/detail?id=37597
-            # https://code.google.com/p/android/issues/detail?id=61596
-            if sdk_level.to_i == 10
-              abi_opt = '--abi armeabi'
+            # FIXME(uwe): Remove this check when HAXM is available on travis
+            # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
+            # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
+            # HAXM is not available on travis-ci.
+            if ENV['TRAVIS'] == 'true' && sdk_level.to_i >= 22
+              abi_opt = '--abi armeabi-v7a'
+              # EMXIF
             elsif has_x86
               if has_x86_64
                 abi_opt = '--abi x86_64'
@@ -122,7 +121,6 @@ module Ruboto
             else
               abi_opt = '--abi armeabi-v7a'
             end
-            # EMXIF
 
             skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/HVGA/hardware.ini"
             if File.exists?(skin_filename)
