@@ -648,7 +648,7 @@ module Ruboto
         	else
         		system "hdiutil attach #{android_haxm_directory}/#{haxm_file_override}"
         		#TODO Invalid option here when installing
-        		filename = Dir["/Volumes/IntelHAXM_#{custom_version}/#{haxm_file_override.gsub(/\.dmg/, '.mpkg')}"]
+        		fileName = Dir["/Volumes/IntelHAXM_#{custom_version}/IntelHAXM_#{custom_version}.mpkg"][0]
         	end
             
             puts "Starting the HAXM installer.  Sudo password required."
