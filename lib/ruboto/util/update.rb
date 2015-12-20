@@ -538,22 +538,17 @@ module Ruboto
                     'org/jruby/truffle/runtime/*.class',
                     'org/jruby/truffle/translator',
                 ]
-              elsif gem_version >= Gem::Version.new('1.7.23.dev')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
+              elsif gem_version >= Gem::Version.new('1.7.24.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.24
                 excluded_core_packages = [
-                    '**/*.sh',
                     '**/*Aix*',
                     '**/*Darwin*',
-                    '**/*darwin*',
-                    '**/*FreeBSD*',
-                    '**/*freebsd*',
+                     '**/*FreeBSD*',
                     '**/*MacOS*',
                     '**/*OpenBSD*',
-                    '**/*openbsd*',
                     '**/*Solaris*',
                     '**/*sunos*',
                     '**/*Windows*',
-                    '**/*windows*',
                     'META-INF',
                     'com/headius/invokebinder',
                     'com/headius/options/example',
@@ -561,7 +556,6 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
-                    'java', # WHAT?!  There should be no java or javax classes inside jruby-jars!
                     'jni',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
@@ -587,24 +581,18 @@ module Ruboto
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/javasupport/bsf',
                     'org/yecht',
-                    'yaml.rb',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.22')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.22
                 excluded_core_packages = [
-                    '**/*.sh',
                     '**/*Aix*',
                     '**/*Darwin*',
-                    '**/*darwin*',
                     '**/*FreeBSD*',
-                    '**/*freebsd*',
                     '**/*MacOS*',
                     '**/*OpenBSD*',
-                    '**/*openbsd*',
                     '**/*Solaris*',
                     '**/*sunos*',
                     '**/*Windows*',
-                    '**/*windows*',
                     'META-INF',
                     'com/headius/invokebinder',
                     'com/headius/options/example',
@@ -612,7 +600,6 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
-                    'java', # WHAT?!  There should be no java or javax classes inside jruby-jars!
                     'jni',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
@@ -638,7 +625,6 @@ module Ruboto
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/javasupport/bsf',
                     'org/yecht',
-                    'yaml.rb',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.19')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.19
