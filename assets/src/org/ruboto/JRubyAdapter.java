@@ -306,7 +306,6 @@ public class JRubyAdapter {
                 // TODO(uwe):  Add a way to display startup progress.
                 put("$application_context", appContext.getApplicationContext());
                 runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  puts e\nend");
-                // runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  java.lang.System.out.println(e)\nend");
 
                 initialized = true;
             } catch (ClassNotFoundException e) {
