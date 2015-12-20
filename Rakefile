@@ -569,7 +569,7 @@ task '.travis.yml' do
               (platform == 'FROM_GEM' && (v != :STABLE || api != 15)) || # FIXME(uwe): Remove when new RubotoCore is green.
               api == 23 || # FIXME(uwe):  Remove when Android 6.0 is green.
               api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.
-              v == '1.7.22' || # FIXME(uwe):  Remove when jruby-jars 1.7.22 is green.
+              (v == '1.7.22' && api != 15) || # FIXME(uwe):  Remove when jruby-jars 1.7.22 is green.
               false
             allow_failures << line.gsub('-', '- env:')
           end
