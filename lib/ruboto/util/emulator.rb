@@ -122,14 +122,15 @@ module Ruboto
               abi_opt = '--abi armeabi-v7a'
             end
 
-            skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/HVGA/hardware.ini"
+            skin = 'HVGA'
+            skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
             if File.exists?(skin_filename)
               old_skin_config = File.read(skin_filename)
               new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
               File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
             end
 
-            puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s HVGA -d "Nexus One"`
+            puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s #{skin} -d "Nexus One"`
 
             if $? != 0
               puts 'Failed to create AVD.'
