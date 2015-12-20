@@ -8,6 +8,7 @@ module Ruboto
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
       ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin/
       ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
+      ON_TRAVIS = ENV['TRAVIS'] == 'true'
 
       def sdk_level_name(sdk_level)
         Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level.to_i] || sdk_level
@@ -109,7 +110,7 @@ module Ruboto
             # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
             # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
             # HAXM is not available on travis-ci.
-            if ENV['TRAVIS'] == 'true' && sdk_level.to_i >= 22
+            if ON_TRAVIS && sdk_level.to_i >= 22
               abi_opt = '--abi armeabi-v7a'
               # EMXIF
             elsif has_x86
@@ -209,6 +210,7 @@ module Ruboto
             end
           else
             puts 'Unable to start the emulator.'
+            exit 1 if ON_TRAVIS
           end
         end
 
