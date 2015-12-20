@@ -91,63 +91,7 @@ module Ruboto
           heap_size = large_heap ? 256 : 48
 
           unless File.exists? avd_home
-            puts "Creating AVD #{avd_name}"
-
-            target = `android list target`.split(/----------\n/).
-                find { |l| l =~ /android-#{sdk_level}/ }
-
-            if target.nil?
-              puts "Target android-#{sdk_level} not found.  You should run"
-              puts "\n    ruboto setup -y -t #{sdk_level}\n\nto install it."
-              exit 3
-            end
-
-            abis = target.slice(/(?<=ABIs : ).*/).split(', ')
-            has_x86 = abis.find { |a| a =~ /x86/ }
-            has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
-
-            # FIXME(uwe): Remove this check when HAXM is available on travis
-            # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
-            # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
-            # HAXM is not available on travis-ci.
-            if ON_TRAVIS && sdk_level.to_i >= 22
-              abi_opt = '--abi armeabi-v7a'
-              # EMXIF
-            elsif has_x86
-              if has_x86_64
-                abi_opt = '--abi x86_64'
-              else
-                abi_opt = '--abi x86'
-              end
-            else
-              abi_opt = '--abi armeabi-v7a'
-            end
-
-            skin = 'HVGA'
-            skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
-            if File.exists?(skin_filename)
-              old_skin_config = File.read(skin_filename)
-              new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-              File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
-            end
-
-            puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s #{skin} -d "Nexus One"`
-
-            if $? != 0
-              puts 'Failed to create AVD.'
-              exit 3
-            end
-            # avd_config_file_name = "#{avd_home}/config.ini"
-            # old_avd_config = File.read(avd_config_file_name)
-            # new_avd_config = old_avd_config.dup
-            # new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-            # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
-            # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
-            # add_property(new_avd_config, 'hw.mainKeys', 'no')
-            # add_property(new_avd_config, 'hw.sdCard', 'yes')
-            # File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
-
-            new_snapshot = true
+            new_snapshot = create_avd(avd_name, heap_size, new_snapshot, sdk_level)
           end
 
           # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
@@ -245,6 +189,66 @@ EOF
         system 'adb logcat > adb_logcat.log &'
 
         puts "Emulator #{avd_name} started OK."
+      end
+
+      def create_avd(avd_name, heap_size, new_snapshot, sdk_level)
+        puts "Creating AVD #{avd_name}"
+
+        target = `android list target`.split(/----------\n/).
+            find { |l| l =~ /android-#{sdk_level}/ }
+
+        if target.nil?
+          puts "Target android-#{sdk_level} not found.  You should run"
+          puts "\n    ruboto setup -y -t #{sdk_level}\n\nto install it."
+          exit 3
+        end
+
+        abis = target.slice(/(?<=ABIs : ).*/).split(', ')
+        has_x86 = abis.find { |a| a =~ /x86/ }
+        has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
+
+        # FIXME(uwe): Remove this check when HAXM is available on travis
+        # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
+        # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
+        # HAXM is not available on travis-ci.
+        if ON_TRAVIS && sdk_level.to_i >= 22
+          abi_opt = '--abi armeabi-v7a'
+          # EMXIF
+        elsif has_x86
+          if has_x86_64
+            abi_opt = '--abi x86_64'
+          else
+            abi_opt = '--abi x86'
+          end
+        else
+          abi_opt = '--abi armeabi-v7a'
+        end
+
+        skin = 'HVGA'
+        skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
+        if File.exists?(skin_filename)
+          old_skin_config = File.read(skin_filename)
+          new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+          File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
+        end
+
+        puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s #{skin} -d "Nexus One"`
+
+        if $? != 0
+          puts 'Failed to create AVD.'
+          exit 3
+        end
+        # avd_config_file_name = "#{avd_home}/config.ini"
+        # old_avd_config = File.read(avd_config_file_name)
+        # new_avd_config = old_avd_config.dup
+        # new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
+        # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
+        # add_property(new_avd_config, 'hw.mainKeys', 'no')
+        # add_property(new_avd_config, 'hw.sdCard', 'yes')
+        # File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
+
+        new_snapshot = true
       end
 
       def device_ready?
