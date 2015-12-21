@@ -1,6 +1,5 @@
 require 'ruboto/sdk_versions'
 require 'ruboto/util/verify'
-require 'byebug'
 
 module Ruboto
   module Util
@@ -641,7 +640,6 @@ module Ruboto
           case android_package_os_id
           when MAC_OS_X
             puts "Mounting the HAXM install image"
-            byebug
             if custom_version.nil?
             	system "hdiutil attach #{@haxm_installer_loc}"
             	fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
