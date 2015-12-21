@@ -76,13 +76,13 @@ module Ruboto
         android_package_os_id == WINDOWS
       end
 
-      def android_haxm_directory
-+       Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager')][0]
-+      end
-
       def android_package_directory
         return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
         File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
+      end
+
+      def android_haxm_directory
+        Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager')][0]
       end
 
       def package_installer
@@ -489,6 +489,7 @@ module Ruboto
         response
       end
 
+
       def install_android_sdk(accept_all)
         unless @android_loc
           puts 'Android package installer not found.'
@@ -543,23 +544,24 @@ module Ruboto
       end
 
       def download_third_party(filename, uri)
-+       puts "Downloading #{uri}/#{filename} \r"
-+       uri = URI("#{uri}/#{filename}")
-+       puts "File will be saved to #{android_haxm_directory}/#{filename}"
-+       process_download("#{android_haxm_directory}/#{filename}", uri)
-+     end
+        print "Downloading #{uri}/#{filename} \r"
+        uri = URI("#{uri}/#{filename}")
+        puts "File will be saved to #{android_haxm_directory}/#{filename}"
+        process_download("#{android_haxm_directory}/#{filename}", uri)
+      end
 
       def process_download(filename, uri)
-  +      body = ''
-  +      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
-  +        length = response['Content-Length'].to_i
-  +        response.read_body do |fragment|
-  +          body << fragment
-  +          print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
-           end
-         end
-  +      File.open(filename, 'wb') { |f| f << body }
-  +    end
+        body = ''
+        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
+          length = response['Content-Length'].to_i
+          response.read_body do |fragment|
+            body << fragment
+            print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
+          end
+        end
+        File.open(filename, 'wb') { |f| f << body }
+      end
+
 
       def download(asdk_file_name)
         print "Downloading #{asdk_file_name}: \r"
@@ -595,6 +597,29 @@ module Ruboto
             check_for_haxm
           end
         end
+      end
+
+      def get_new_haxm_filename
+        version = get_tools_version('extra', ADDONS_URL)
+        zip_version = version.gsub(/\./, '_')
+        haxm_file_name = ''
+
+        case android_package_os_id
+        when MAC_OS_X
+          haxm_file_name = "haxm-macosx_v#{zip_version}.zip"
+        when WINDOWS
+          haxm_file_name = "haxm-windows_v#{zip_version}.zip"
+        else
+          raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+        end
+        return haxm_file_name, version
+      end
+
+      def download_and_upgrade_haxm(accept_all)
+        print "Downloading Intel HAXM... \r"
+        filename, version = get_new_haxm_filename
+        download_haxm(accept_all, filename)
+        install_haxm(accept_all, version)
       end
 
       def install_haxm(accept_all)
