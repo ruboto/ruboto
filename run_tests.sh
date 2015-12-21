@@ -27,6 +27,7 @@ BOSSPID=$$
   BASHPID=`bash $t`
   rm $t
   if [[ "$TRAVIS" = "true" ]] ; then
+    echo "Wake travis every $PROGRESS_INTERVAL seconds"
     timeout $TIMEOUT bash -c -- "while true; do sleep $PROGRESS_INTERVAL ; printf '...';done"
   else
     sleep $TIMEOUT
