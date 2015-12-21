@@ -470,7 +470,7 @@ file BUILD_XML_FILE => RUBOTO_CONFIG_FILE do
 
   ant_script.gsub!(/\s*#{start_marker}.*?#{end_marker}\s*/m, '')
   # FIXME(uwe): Remove condition when we stop supporting Android 4.0 and older.
-  if sdk_level >= 16
+  if sdk_level >= 15
     unless ant_script.gsub!(/\s*(<\/project>)/, "\n\n#{dx_override}\n\n\\1")
       raise 'Bad ANT script'
     end

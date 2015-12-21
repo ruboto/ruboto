@@ -410,7 +410,7 @@ namespace :platform do
   end
 
   desc 'Generate the Ruboto Core platform project'
-  task :project => PLATFORM_PROJECT
+  task project: PLATFORM_PROJECT
 
   file PLATFORM_PROJECT do
     sh "git clone --depth 1 https://github.com/ruboto/ruboto-core.git #{PLATFORM_PROJECT}"
@@ -420,7 +420,7 @@ namespace :platform do
   end
 
   desc 'Generate a Ruboto Core platform debug apk'
-  task :debug => PLATFORM_DEBUG_APK
+  task debug: PLATFORM_DEBUG_APK
 
   task PLATFORM_DEBUG_APK do
     Rake::Task[PLATFORM_PROJECT].invoke
@@ -435,7 +435,7 @@ namespace :platform do
   end
 
   desc 'Generate a Ruboto Core platform release apk'
-  task :release => PLATFORM_RELEASE_APK
+  task release: PLATFORM_RELEASE_APK
 
   file PLATFORM_RELEASE_APK => PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
@@ -486,7 +486,7 @@ namespace :platform do
   end
 
   desc 'Install the Ruboto Core platform debug apk'
-  task :install => PLATFORM_PROJECT do
+  task install: PLATFORM_PROJECT do
     Dir.chdir(PLATFORM_PROJECT) do
       sh 'rake install'
     end
