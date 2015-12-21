@@ -20,12 +20,17 @@ killtree() {
 
 # BEGIN TIMEOUT #
 TIMEOUT=3000 # 50 minutes
+PROGRESS_INTERVAL=300 # 5 minutes
 BOSSPID=$$
 (
   t="/tmp/$$.sh" ; echo 'echo $PPID' > $t
   BASHPID=`bash $t`
   rm $t
-  sleep $TIMEOUT
+  if [[ "$TRAVIS" = "true" ]] ; then
+    timeout $TIMEOUT bash -c -- "while true; do sleep $PROGRESS_INTERVAL ; printf '...';done"
+  else
+    sleep $TIMEOUT
+  fi
   echo
   echo "Test timed out after $TIMEOUT seconds."
   echo

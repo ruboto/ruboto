@@ -33,8 +33,8 @@ module Ruboto
         new_snapshot = false
 
         if `adb devices` =~ /emulator-5554/
-          t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK\n/)
-          t.waitfor(/^OK\n/)
+          t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK\n|^KO:/)
+          t.waitfor(/Android Console:/)
           output = ''
           t.cmd('avd name') { |c| output << c }
           t.close
@@ -47,7 +47,8 @@ module Ruboto
               puts "Emulator #{running_avd_name} is running."
             end
           else
-            raise "Unexpected response from emulator: #{output.inspect}"
+            puts "Unexpected response from emulator: #{output.inspect}"
+            puts "Assuming wrong emulator is running."
           end
         else
           puts 'No emulator is running.'
