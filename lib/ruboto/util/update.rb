@@ -168,6 +168,10 @@ module Ruboto
           return false
         end
 
+        # FIXME(uwe): Remove when JRuby 9000 works with Ruboto
+        version ||= ENV['JRUBY_JARS_VERSION'] || '~>1.7.13'
+        # EMXIF
+
         install_jruby_jars_gem(version)
         begin
           gem('jruby-jars', version) if version

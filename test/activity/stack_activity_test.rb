@@ -15,15 +15,17 @@ end
 # ANDROID: 15, PLATFORM: STANDALONE, JRuby: 1.7.0    '[28, 33, 51, 68]' expected, but got '[28, 33, 47, 64]'
 # ANDROID: 16, PLATFORM: 0.5.6,      JRuby: 1.7.3    '[28, 33, 45, 62]' expected, but got '[28, 33, 44, 61]'
 # ANDROID: 16, PLATFORM: 0.6.0,      JRuby: 9000.dev '[28, 33, 45, 62]' expected, but got '[28, 33, 45, 63]'
-# ANDROID: 19, PLATFORM: STANDALONE, JRuby: 1.7.20-SNAPSHOT '[28, 33, 43, 60]' expected, but got '[28, 33, 44, 61]'
+# ANDROID: 19, PLATFORM: STANDALONE, JRuby: 1.7.20   '[28, 33, 43, 60]' expected, but got '[28, 33, 44, 61]'
 # ANDROID: 20, PLATFORM: 1.0.2,      JRuby: 1.7.12   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
 # ANDROID: 21, PLATFORM: 1.0.2,      JRuby: 1.7.12   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
-# ANDROID: 22, PLATFORM: STANDALONE, JRuby: 1.7.20-SNAPSHOT '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
+# ANDROID: 22, PLATFORM: STANDALONE, JRuby: 1.7.20   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
+# ANDROID: 23, PLATFORM: STANDALONE, JRuby: 1.7.19   '[28, 33, 43, 60]' expected, but got '[26, 31, 40, 57]'
 test('stack depth') do |activity|
   os_offset =
       case android.os.Build::VERSION::SDK_INT
       when 13 then [1, 1, 1, 1]
       when (15..19) then [0, 0, 1, 1]
+      when 23 then [-2, -2, -3, -3]
       else [0, 0, 0, 0]
       end
   jruby_offset =
