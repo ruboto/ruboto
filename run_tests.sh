@@ -19,7 +19,7 @@ killtree() {
 }
 
 # BEGIN TIMEOUT #
-TIMEOUT=3000 # 50 minutes
+TIMEOUT=6000 # 1hour 20 minutes
 PROGRESS_INTERVAL=300 # 5 minutes
 BOSSPID=$$
 (
@@ -30,6 +30,7 @@ BOSSPID=$$
     echo "Wake travis every $PROGRESS_INTERVAL seconds"
     timeout $TIMEOUT bash -c -- "while true; do sleep $PROGRESS_INTERVAL ; printf '...';done"
   else
+    echo "Set timeout to $TIMEOUT seconds."
     sleep $TIMEOUT
   fi
   echo

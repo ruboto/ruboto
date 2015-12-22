@@ -471,7 +471,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
+              if gem_version >= Gem::Version.new('9.0.5.0.SNAPSHOT')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -492,6 +492,7 @@ module Ruboto
                     'com/martiansoftware',
                     'com/oracle/nfi',
                     'com/oracle/truffle',
+                    'java',
                     'jni',
                     'jnr/constants/platform/darwin',
                     'jnr/constants/platform/fake',
@@ -538,8 +539,10 @@ module Ruboto
                     'org/jruby/truffle/runtime/*.class',
                     'org/jruby/truffle/translator',
                 ]
-              elsif gem_version >= Gem::Version.new('1.7.24.dev')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.24
+              elsif gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
+                raise "Unsupported jruby-jars version: #{gem_version}"
+              elsif gem_version >= Gem::Version.new('1.7.23.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
                 excluded_core_packages = [
                     '**/*Aix*',
                     '**/*Darwin*',
@@ -601,7 +604,6 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
-                    'java',
                     'jni',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
