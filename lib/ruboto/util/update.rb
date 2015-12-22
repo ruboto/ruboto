@@ -217,7 +217,7 @@ module Ruboto
 
       def install_jruby_jars_gem(jruby_jars_version = ENV['JRUBY_JARS_VERSION'])
         if jruby_jars_version
-          version_requirement = " -v #{jruby_jars_version}"
+          version_requirement = " -v '#{jruby_jars_version}'"
         end
         `gem query -i -n jruby-jars#{version_requirement}`
         unless $? == 0
@@ -471,7 +471,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
+              if gem_version >= Gem::Version.new('9.0.5.0.SNAPSHOT')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -492,6 +492,7 @@ module Ruboto
                     'com/martiansoftware',
                     'com/oracle/nfi',
                     'com/oracle/truffle',
+                    'java',
                     'jni',
                     'jnr/constants/platform/darwin',
                     'jnr/constants/platform/fake',
@@ -538,22 +539,64 @@ module Ruboto
                     'org/jruby/truffle/runtime/*.class',
                     'org/jruby/truffle/translator',
                 ]
-              elsif gem_version >= Gem::Version.new('1.7.20.dev')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.20
+              elsif gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
+                raise "Unsupported jruby-jars version: #{gem_version}"
+              elsif gem_version >= Gem::Version.new('1.7.23.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
                 excluded_core_packages = [
-                    '**/*.sh',
                     '**/*Aix*',
                     '**/*Darwin*',
-                    '**/*darwin*',
-                    '**/*FreeBSD*',
-                    '**/*freebsd*',
+                     '**/*FreeBSD*',
                     '**/*MacOS*',
                     '**/*OpenBSD*',
-                    '**/*openbsd*',
                     '**/*Solaris*',
                     '**/*sunos*',
                     '**/*Windows*',
-                    '**/*windows*',
+                    'META-INF',
+                    'com/headius/invokebinder',
+                    'com/headius/options/example',
+                    'com/kenai/constantine',
+                    'com/kenai/jffi',
+                    'com/kenai/jnr/x86asm',
+                    'com/martiansoftware',
+                    'java',
+                    'jni',
+                    'jnr/constants/platform/fake',
+                    'jnr/enxio',
+                    'jnr/ffi/annotations',
+                    'jnr/ffi/byref',
+                    'jnr/ffi/mapper',
+                    'jnr/ffi/provider',
+                    'jnr/ffi/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    'jnr/x86asm',
+                    'org/jruby/ant',
+                    'org/jruby/cext',
+                    'org/jruby/compiler/impl/BaseBodyCompiler*',
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo',
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/AbstractMemory*',
+                    'org/jruby/ext/ffi/Enums*',
+                    'org/jruby/ext/ffi/io',
+                    'org/jruby/ext/ffi/jffi',
+                    'org/jruby/javasupport/bsf',
+                    'org/yecht',
+                ]
+              elsif gem_version >= Gem::Version.new('1.7.22')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.22
+                excluded_core_packages = [
+                    '**/*Aix*',
+                    '**/*Darwin*',
+                    '**/*FreeBSD*',
+                    '**/*MacOS*',
+                    '**/*OpenBSD*',
+                    '**/*Solaris*',
+                    '**/*sunos*',
+                    '**/*Windows*',
                     'META-INF',
                     'com/headius/invokebinder',
                     'com/headius/options/example',
@@ -586,7 +629,6 @@ module Ruboto
                     'org/jruby/ext/ffi/jffi',
                     'org/jruby/javasupport/bsf',
                     'org/yecht',
-                    'yaml.rb',
                 ]
               elsif gem_version >= Gem::Version.new('1.7.19')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.19
