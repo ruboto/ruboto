@@ -23,9 +23,12 @@ TIMEOUT=6000 # 1hour 20 minutes
 PROGRESS_INTERVAL=300 # 5 minutes
 BOSSPID=$$
 (
-  t="/tmp/$$.sh" ; echo 'echo $PPID' > $t
-  BASHPID=`bash $t`
-  rm $t
+  if [ "${BASH_VERSINFO[0]}" -lt 4 ] ; then
+    echo "Setting BASHPID for bash < v4"
+    t="/tmp/$$.sh" ; echo 'echo $PPID' > $t
+    BASHPID=`bash $t`
+    rm $t
+  fi
   if [[ "$TRAVIS" = "true" ]] ; then
     echo "Wake travis every $PROGRESS_INTERVAL seconds"
     timeout $TIMEOUT bash -c -- "while true; do sleep $PROGRESS_INTERVAL ; printf '...';done"
