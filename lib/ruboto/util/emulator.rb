@@ -57,6 +57,7 @@ module Ruboto
         # FIXME(uwe):  Change use of "killall" to use the Ruby Process API
         loop do
           emulator_opts = '-partition-size 256'
+          emulator_opts << ' -noskin'
           emulator_opts << ' -no-snapshot-load' if no_snapshot
           if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
             emulator_opts << ' -no-window -no-audio'
@@ -92,15 +93,9 @@ module Ruboto
           heap_size = large_heap ? 256 : 48
 
           unless File.exists? avd_home
-            new_snapshot = create_avd(avd_name, heap_size, new_snapshot, sdk_level)
+            create_avd(avd_home, avd_name, heap_size, sdk_level)
+            new_snapshot = true
           end
-
-          # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
-          # if File.exists?(hw_config_file_name)
-          #   old_hw_config = File.read(hw_config_file_name)
-          #   new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-          #   File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
-          # end
 
           puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
           system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
@@ -192,7 +187,7 @@ EOF
         puts "Emulator #{avd_name} started OK."
       end
 
-      def create_avd(avd_name, heap_size, new_snapshot, sdk_level)
+      def create_avd(avd_home, avd_name, heap_size, sdk_level)
         puts "Creating AVD #{avd_name}"
 
         target = `android list target`.split(/----------\n/).
@@ -226,12 +221,14 @@ EOF
         end
 
         skin = 'HVGA'
-        skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
-        if File.exists?(skin_filename)
-          old_skin_config = File.read(skin_filename)
-          new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-          File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
-        end
+        # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
+        # if File.exists?(skin_filename)
+        #   old_skin_config = File.read(skin_filename)
+        #   new_skin_config = old_skin_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        #   add_property(new_skin_config, 'hw.mainKeys', 'no')
+        #   add_property(new_skin_config, 'hw.lcd.density', '160')
+        #   File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
+        # end
 
         puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s #{skin} -d "Nexus One"`
 
@@ -239,17 +236,24 @@ EOF
           puts 'Failed to create AVD.'
           exit 3
         end
-        # avd_config_file_name = "#{avd_home}/config.ini"
-        # old_avd_config = File.read(avd_config_file_name)
-        # new_avd_config = old_avd_config.dup
-        # new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        avd_config_file_name = "#{avd_home}/config.ini"
+        old_avd_config = File.read(avd_config_file_name)
+        new_avd_config = old_avd_config.dup
+        new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
         # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
         # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
-        # add_property(new_avd_config, 'hw.mainKeys', 'no')
+        # add_property(new_avd_config, 'hw.keyboard.lid', 'no')
+        add_property(new_avd_config, 'hw.lcd.density', '160')
+        add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
-        # File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
+        File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
 
-        new_snapshot = true
+        # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
+        # if File.exists?(hw_config_file_name)
+        #   old_hw_config = File.read(hw_config_file_name)
+        #   new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        #   File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
+        # end
       end
 
       def device_ready?
