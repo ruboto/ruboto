@@ -3,25 +3,19 @@ require_relative 'test_helper'
 class ArjdbcTest < Minitest::Test
   def setup
     generate_app bundle: [
-            [:activerecord, '<4.2.0'],
-            :'activerecord-jdbc-adapter',
-            :sqldroid,
-        ]
+        [:activerecord, '<4.2.0'],
+        :'activerecord-jdbc-adapter',
+        :sqldroid,
+    ]
   end
 
   def teardown
     cleanup_app
   end
 
-# FIXME(uwe):  Weird total app crash when running these tests together
-# FIXME(uwe):  Remove when we stop testing api level <= 15
-# FIXME(uwe):  or the stupid crash has been resolved
-  unless RubotoTest::ANDROID_OS <= 15 || has_stupid_crash
-    # EMXIF
-
-    def test_arjdbc
-      Dir.chdir APP_DIR do
-        File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
+  def test_arjdbc
+    Dir.chdir APP_DIR do
+      File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/widget'
 require 'ruboto/util/stack'
 
@@ -94,7 +88,7 @@ class RubotoTestAppActivity
 end
 EOF
 
-        File.open('test/src/ruboto_test_app_activity_test.rb', 'w') { |f| f << <<EOF }
+      File.open('test/src/ruboto_test_app_activity_test.rb', 'w') { |f| f << <<EOF }
 activity Java::org.ruboto.test_app.RubotoTestAppActivity
 
 setup do |activity|
@@ -114,14 +108,17 @@ test("activity starts") do |activity|
 end
 EOF
 
-      end
-
-      run_app_tests
     end
 
-  # FIXME(uwe):  Remove when we stop testing api level <= 15
-  # FIXME(uwe):  or the stupid crash has been resolved
-  end
+    run_app_tests
+  end unless
+      # FIXME(uwe):  Weird total app crash when running these tests together
+      # FIXME(uwe):  Remove when we stop testing api level <= 15
+      # FIXME(uwe):  or the stupid crash has been resolved
+      RubotoTest::ANDROID_OS <= 15 || has_stupid_crash ||
+          # EMXIF
+          # FIXME(uwe):  remove when we stop supporting JRuby 1.7.22
+          # https://github.com/jruby/jruby/issues/3401
+          JRUBY_JARS_VERSION == Gem::Version.new('1.7.22')
   # EMXIF
-
 end
