@@ -59,6 +59,7 @@ Support:
 * Issue #670 emulator
 * Issue #736 rake install error
 * Issue #739 Game Frameworks?
+* Issue #750 Deploy ruboto within Gnuroot debian linux under Android OS
 * Issue #752 can't install ruboto with ruby gems in windows 10.
 
 Community:
