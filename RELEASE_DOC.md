@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.3.1 released!
+Subject: [ANN] Ruboto 1.4.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.3.1.
+The Ruboto team is pleased to announce the release of Ruboto 1.4.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,82 +8,76 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.3.1:
+New in version 1.4.0:
 
-Bugfixes for the 1.3.0 release.
+This release adds support for JRuby 1.7.22 and improves the installation
+of HAXM.  `ruboto setup --update` will now update an existing HAXM
+installation if a new version is available for download.
+
+Support for Android 2.3 has been dropped, and Android 4.1 is now the
+default api level when creating new apps.
 
 API Changes:
 
-* Issue #733 Remove support for RubotoCore 0.4.7
+* Issue #687 Drop support for Android 2.3 api level 10
+* Issue #688 Set Android 4.1 api level 16 as default api level for new
+  apps
+* Issue #770 Support jruby 1.7.22 (donv)
 
 Features:
 
-* Issue #720 Install 64 bit system images for Android 5
-* Issue #721 Create and start emulator with 64bit system image for
-  Android 5
-* Issue #741 Make setup accept build tools rc (danielpassos)
+* Issue #722 Start emulator without skin for "ruboto emulator"
+* Issue #756 Allow "ruboto setup --update" to update HAXM if a new
+  version is available
 
 Bugfixes:
 
-* Issue #635 Gosu example is not working
-* Issue #668 Android API version above 15 not working
-* Issue #715 ruboto setup -y: FATAL -- : undefined method '[]' for
-  nil:NilClass (NoMethodError)
-* Issue #718 Haxm 10.9 daneb (daneb)
-* Issue #728 Fix haxm installation for MacOS  (phantomwhale)
-* Issue #729 (ArgumentError) unable to create proxy class for class
-  java.util.HashMap : null
-* Issue #734 ruboto setup problem
-
-Performance:
-
-* Issue #642 generate java methods in the build process only for
-  implemented ruby met... (tek)
+* Issue #634 Can't add jar files to proyect. Can't start the proyect
+  with jars added
+* Issue #638 Extra installs to build on Ubuntu 64 bit
+* Issue #655 "--with-jruby" seems to do its job, but then I still need
+  to download and install Ruboto Core on device
+* Issue #663 Minimal Gosu code fails.
+* Issue #664 Bundler can't see personal gems/Locally installed gems do
+  not get put on projects(only global).
+* Issue #669 Keep on restarting new emulator
+* Issue #686 Can't run on Real device with Android 5.0
+* Issue #703 The HAXM installer for OS X has changed name
+* Issue #712 can´t install ruboto
+* Issue #716 New App with no custom code terminates directly after start
+  (java.lang.NoSuchMethodException: makeDexElements).
+* Issue #717 ruboto setup -y - FATAL -- : undefined method 'slice' for
+  nil:NilClass
+* Issue #742 Accept Android plataform tools rc in setup
+* Issue #747 Running the emulator often hangs when run without
+  "--no-snapshot"
+* Issue #759 "ruboto gen jruby" should install jruby-jars ~>1.7
+* Issue #765 'rake boing' fails for multiple updated files
 
 Support:
 
-* Issue #631 ruby version problem
-* Issue #719 Webview addJavaScriptInterface
-* Issue #731 Quick Start Example
-* Issue #743 Help with LibGDX on Ruboto
-* Issue #746 ruboto setup - Java heap space
-  (Java::JavaLang::OutOfMemoryError)
+* Issue #670 emulator
+* Issue #736 rake install error
+* Issue #739 Game Frameworks?
+* Issue #752 can't install ruboto with ruby gems in windows 10.
 
 Community:
 
-* Issue #589 How can I help? (devaroop)
-* Issue #640 How can I help? (sg552)
-* Issue #651 How can I help? (arantessergio)
-* Issue #659 How can I help?
-* Issue #662 How can I help? (aripoya)
-* Issue #665 How can I help?
-* Issue #683 How can I help?
-* Issue #684 How can I help?
-* Issue #685 How can I help?
-* Issue #694 How can I help?
-* Issue #704 How can I help?
-* Issue #725 How can I help?
-* Issue #730 How can I help?
-
-Pull requests:
-
-* Issue #740 rake log task detects activity start on lollipop (gfowley)
+* Issue #766 Reduce noise on #ruboto channel from travis
+* Issue #771 How can I help? (ChaosCat)
 
 Internal:
 
-* Issue #724 Get travis-ci GREEN! (donv)
-
-Rejected:
-
-* Issue #367 Remove support for running in Ruby 1.8 mode
-
-Other:
-
-* Issue #692 --with-jruby argument not working correctly
+* Issue #757 Release 1.4.0
+* Issue #767 TypeError: can't convert nil into String when running
+  Ruboto tests
+* Issue #769 Fetch jruby-jars snapshots from http://ci.jruby.org/ for
+  testing
+* Issue #772 Db haxm dark (daneb)
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=38
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=39
 
 
 Installation:

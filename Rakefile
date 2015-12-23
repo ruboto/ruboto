@@ -132,7 +132,7 @@ def get_github_issues
   raise "Milestone for version #{Ruboto::VERSION} not found." unless milestone_entry
   milestone = milestone_entry['number']
 
-  uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=closed&per_page=1000")
+  uri = URI("#{base_uri}/issues?milestone=#{milestone}&state=all&per_page=1000")
   req = Net::HTTP::Get.new(uri.request_uri)
   res = https.start { |http| http.request(req) }
   issues = YAML.load(res.body).sort_by { |i| i['number'] }

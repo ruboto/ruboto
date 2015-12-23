@@ -1,10 +1,15 @@
-Subject: [ANN] Ruboto 1.3.1 release candidate
+Subject: [ANN] Ruboto 1.4.0 release candidate
 
 Hi all!
 
-The Ruboto 1.3.1 release candidate is now available.
+The Ruboto 1.4.0 release candidate is now available.
 
-Bugfixes for the 1.3.0 release.
+This release adds support for JRuby 1.7.22 and improves the installation
+of HAXM.  `ruboto setup --update` will now update an existing HAXM
+installation if a new version is available for download.
+
+Support for Android 2.3 has been dropped, and Android 4.1 is now the
+default api level when creating new apps.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
