@@ -8,6 +8,7 @@ module Ruboto
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
       SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
+      ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
       WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
@@ -17,10 +18,10 @@ module Ruboto
       # Core Set up Method
       #
 
-      def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK])
+      def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK], upgrade_haxm = false)
         @platform_sdk_loc = {}
         api_levels = [project_api_level, *api_levels].compact.uniq
-        install_all(accept_all, api_levels) unless check_all(api_levels)
+        install_all(accept_all, api_levels, upgrade_haxm) unless check_all(api_levels)
         config_path(accept_all)
       end
 
@@ -80,6 +81,10 @@ module Ruboto
         File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
       end
 
+      def android_haxm_directory
+        Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager')][0]
+      end
+
       def package_installer
         case android_package_os_id
         when LINUX
@@ -105,11 +110,11 @@ module Ruboto
         end
       end
 
-      def get_tools_version(type='tool')
+      def get_tools_version(type='tool', repo_url = REPOSITORY_URL)
         require 'rexml/document'
         require 'open-uri'
 
-        doc = REXML::Document.new(open(REPOSITORY_URL))
+        doc = REXML::Document.new(open(repo_url))
         doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
@@ -272,7 +277,7 @@ module Ruboto
       # Install Methods
       #
 
-      def install_all(accept_all, api_levels)
+      def install_all(accept_all, api_levels, upgrade_haxm)
         install_java(accept_all) unless @java_loc && @javac_loc
         install_ant(accept_all) unless @ant_loc
         install_android_sdk(accept_all) unless @android_loc
@@ -484,6 +489,7 @@ module Ruboto
         response
       end
 
+
       def install_android_sdk(accept_all)
         unless @android_loc
           puts 'Android package installer not found.'
@@ -537,27 +543,39 @@ module Ruboto
         end
       end
 
-      def download(asdk_file_name)
-        print "Downloading #{asdk_file_name}: \r"
-        uri = URI("http://dl.google.com/android/#{asdk_file_name}")
+      def download_third_party(filename, uri)
+        print "Downloading #{uri}/#{filename} \r"
+        uri = URI("#{uri}/#{filename}")
+        puts "File will be saved to #{android_haxm_directory}/#{filename}"
+        process_download("#{android_haxm_directory}/#{filename}", uri)
+      end
+
+      def process_download(filename, uri)
         body = ''
-        Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
+        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
           length = response['Content-Length'].to_i
           response.read_body do |fragment|
             body << fragment
-            print "Downloading #{asdk_file_name}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
+            print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
           end
-          puts
         end
-        File.open(asdk_file_name, 'wb') { |f| f << body }
+        File.open(filename, 'wb') { |f| f << body }
       end
 
-      def unzip(accept_all, asdk_file_name)
+
+      def download(asdk_file_name)
+        print "Downloading #{asdk_file_name}: \r"
+        uri = URI("http://dl.google.com/android/#{asdk_file_name}")
+        process_download(asdk_file_name, uri)
+      end
+
+
+      def unzip(accept_all, asdk_file_name, extract_to='.')
         require 'zip'
         Zip::File.open(asdk_file_name) do |zipfile|
           zipfile.each do |f|
             f.restore_permissions = true
-            f.extract { accept_all }
+            f.extract("#{extract_to}/#{f.name}") { accept_all }
           end
         end
       end
@@ -579,6 +597,29 @@ module Ruboto
             check_for_haxm
           end
         end
+      end
+
+      def get_new_haxm_filename
+        version = get_tools_version('extra', ADDONS_URL)
+        zip_version = version.gsub(/\./, '_')
+        haxm_file_name = ''
+
+        case android_package_os_id
+        when MAC_OS_X
+          haxm_file_name = "haxm-macosx_v#{zip_version}.zip"
+        when WINDOWS
+          haxm_file_name = "haxm-windows_v#{zip_version}.zip"
+        else
+          raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
+        end
+        return haxm_file_name, version
+      end
+
+      def download_and_upgrade_haxm(accept_all)
+        print "Downloading Intel HAXM... \r"
+        filename, version = get_new_haxm_filename
+        download_haxm(accept_all, filename)
+        install_haxm(accept_all, version)
       end
 
       def install_haxm(accept_all)
