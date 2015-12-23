@@ -285,6 +285,7 @@ module Ruboto
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
         install_haxm(accept_all) unless @haxm_kext_loc
+        download_and_upgrade_haxm(true) unless upgrade_haxm.empty?
 
         if @android_loc
           api_levels.each do |api_level|
@@ -609,10 +610,20 @@ module Ruboto
           haxm_file_name = "haxm-macosx_v#{zip_version}.zip"
         when WINDOWS
           haxm_file_name = "haxm-windows_v#{zip_version}.zip"
+        when LINUX
+          puts 'HAXM installation on Linux is not supported, yet.'
+          return
         else
           raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
         end
         return haxm_file_name, version
+      end
+
+      def download_haxm(accept_all, haxm_file_name)
+        uri = 'https://software.intel.com/sites/default/files/managed/dd/21'
+        download_third_party(haxm_file_name, uri)
+        unzip(accept_all, "#{android_haxm_directory}/#{haxm_file_name}", "#{android_haxm_directory}")
+        FileUtils.rm_f "#{android_haxm_directory}/#{haxm_file_name}"
       end
 
       def download_and_upgrade_haxm(accept_all)
@@ -622,7 +633,9 @@ module Ruboto
         install_haxm(accept_all, version)
       end
 
-      def install_haxm(accept_all)
+      def install_haxm(accept_all, custom_version=nil)
+        filename = nil
+        haxm_file_override =  "IntelHAXM_#{custom_version}.dmg" unless custom_version.nil?
         if @haxm_installer_loc && @haxm_kext_loc.nil?
           puts 'HAXM not installed.'
           unless accept_all
@@ -633,8 +646,13 @@ module Ruboto
             case android_package_os_id
             when MAC_OS_X
               puts "Mounting the HAXM install image"
-              system "hdiutil attach #{@haxm_installer_loc}"
-              fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+              if custom_version.nil?
+                system "hdiutil attach #{@haxm_installer_loc}"
+                fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
+              else
+                system "hdiutil attach #{android_haxm_directory}/#{haxm_file_override}"
+                fileName = Dir["/Volumes/IntelHAXM_#{custom_version}/IntelHAXM_#{custom_version}.mpkg"][0]
+              end
               puts "Starting the HAXM installer.  Sudo password required."
               system "sudo -S installer -pkg #{fileName} -target /"
             when LINUX

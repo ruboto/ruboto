@@ -449,8 +449,12 @@ module Ruboto
               description 'answer "yes" to all interactive questions.  Will automatically install needed components.'
             }
 
+            option('upgrade', 'u') {
+                description 'upgrades intel haxm'
+            }
+
             def run
-              setup_ruboto(params['yes'].value, params['target'].values)
+              setup_ruboto(params['yes'].value, params['target'].values, params['upgrade'].values)
             end
           end
 
