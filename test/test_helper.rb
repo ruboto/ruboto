@@ -8,6 +8,7 @@ require 'yaml'
 require 'ruboto/sdk_versions'
 require 'ruboto/sdk_locations'
 require 'ruboto/util/update'
+require 'ruboto/util/setup'
 
 module RubotoTest
   include Ruboto::SdkVersions
