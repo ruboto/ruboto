@@ -568,7 +568,6 @@ task '.travis.yml' do
               false
             next
           elsif platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
-              (v == '1.7.22' && api != 15) || # FIXME(uwe):  Remove when jruby-jars 1.7.22 is green.
               false
             allow_failures << line.gsub('-', '- env:')
           end
