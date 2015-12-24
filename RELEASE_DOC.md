@@ -64,6 +64,7 @@ Support:
 
 Community:
 
+* Issue #762 How can I help? (juanjogeta)
 * Issue #766 Reduce noise on #ruboto channel from travis
 * Issue #771 How can I help? (ChaosCat)
 
