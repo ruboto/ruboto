@@ -540,9 +540,9 @@ task '.travis.yml' do
   matrix = ''
   allow_failures = ''
 
-  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss
+  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2016.
   # FIXME(uwe):  JRuby 1.7.19:  RSS? => RubotoGenTest#test_activity_tests => Native crash
-  # FIXME(uwe):  JRuby 1.7.20:  Fails on RSS and upper case package names
+  # FIXME(uwe):  JRuby 1.7.22:  OK except https://github.com/jruby/jruby/issues/3401
   # FIXME(uwe):  RubotoCore (CURRENT) is missing thread_safe
   # FIXME(uwe):  Test all of these that work
   [

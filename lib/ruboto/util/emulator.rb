@@ -95,6 +95,10 @@ module Ruboto
           unless File.exists? avd_home
             create_avd(avd_home, avd_name, heap_size, sdk_level)
             new_snapshot = true
+          else
+            # FIXME(uwe):  Patch old emulator AVDs.  Remove December 2016.
+            patch_config_ini(avd_home, heap_size)
+            # EMXIF
           end
 
           puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
@@ -236,6 +240,17 @@ EOF
           puts 'Failed to create AVD.'
           exit 3
         end
+        patch_config_ini(avd_home, heap_size)
+
+        # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
+        # if File.exists?(hw_config_file_name)
+        #   old_hw_config = File.read(hw_config_file_name)
+        #   new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        #   File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
+        # end
+      end
+
+      def patch_config_ini(avd_home, heap_size)
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
         new_avd_config = old_avd_config.dup
@@ -247,13 +262,6 @@ EOF
         add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
         File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
-
-        # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
-        # if File.exists?(hw_config_file_name)
-        #   old_hw_config = File.read(hw_config_file_name)
-        #   new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-        #   File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
-        # end
       end
 
       def device_ready?

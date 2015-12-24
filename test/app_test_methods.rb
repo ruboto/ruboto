@@ -38,6 +38,11 @@ module AppTestMethods
 
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
+      # FIXME(uwe):  Remove when we stop testing JRuby 1.7.22 or api level 19
+      next if file =~ /rss/ && (JRUBY_JARS_VERSION == Gem::Version.new('1.7.22')) &&
+          RUBOTO_PLATFORM == 'STANDALONE' && ANDROID_OS == 19
+      # EMXIF
+
       # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.20.dev
       next if file =~ /rss/ && (JRUBY_JARS_VERSION < Gem::Version.new('1.7.20.dev'))
       # EMXIF
