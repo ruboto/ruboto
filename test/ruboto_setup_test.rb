@@ -22,10 +22,12 @@ class RubotoSetupTest < Minitest::Test
   end
 
   def test_if_haxm_download_still_exists?
-    filename, version = get_new_haxm_filename
-    uri = URI.parse("#{HAXM_URL}/#{filename}")
-    res = Net::HTTP.get_response(uri)
-    assert_equal 200, res.code.to_i
+    filename, version = get_new_haxm_filename 
+    unless (filename.empty? || version.empty?)
+      uri = URI.parse("#{HAXM_URL}/#{filename}")
+      res = Net::HTTP.get_response(uri)
+      assert_equal 200, res.code.to_i
+    end
   end
 
   def test_if_regex_still_applies_to_sdk
