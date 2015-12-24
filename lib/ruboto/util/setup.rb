@@ -612,7 +612,7 @@ module Ruboto
           haxm_file_name = "haxm-windows_v#{zip_version}.zip"
         when LINUX
           puts 'HAXM installation on Linux is not supported, yet.'
-          return
+          version = ''
         else
           raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
         end
