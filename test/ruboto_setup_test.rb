@@ -22,7 +22,7 @@ class RubotoSetupTest < Minitest::Test
   end
 
   def test_if_haxm_download_still_exists?
-    filename, version = get_new_haxm_filename 
+    filename, version = get_new_haxm_filename
     unless (filename.empty? || version.empty?)
       uri = URI.parse("#{HAXM_URL}/#{filename}")
       res = Net::HTTP.get_response(uri)
@@ -41,8 +41,10 @@ class RubotoSetupTest < Minitest::Test
     include Ruboto::Util::Setup
     it 'should get the new HAXM file name and version' do
       filename, version = get_new_haxm_filename
-      filename.must_match /haxm-(.*)\.zip/
-      version.must_match /\d\.\d\.\d/
+      unless (filename.empty? || version.empty?)
+        filename.must_match /haxm-(.*)\.zip/
+        version.must_match /\d\.\d\.\d/
+      end
     end
   end
 
