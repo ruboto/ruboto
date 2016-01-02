@@ -541,8 +541,8 @@ module Ruboto
                 ]
               elsif gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
                 raise "Unsupported jruby-jars version: #{gem_version}"
-              elsif gem_version >= Gem::Version.new('1.7.23.dev')
-                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
+              elsif gem_version >= Gem::Version.new('1.7.24.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.24
                 excluded_core_packages = [
                     '**/*Aix*',
                     '**/*Darwin*',
@@ -559,7 +559,6 @@ module Ruboto
                     'com/kenai/jffi',
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
-                    'java',
                     'jni',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
@@ -586,50 +585,12 @@ module Ruboto
                     'org/jruby/javasupport/bsf',
                     'org/yecht',
                 ]
+              elsif gem_version >= Gem::Version.new('1.7.23')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.23
+                excluded_core_packages = %w(**/*Aix* **/*Darwin* **/*FreeBSD* **/*MacOS* **/*OpenBSD* **/*Solaris* **/*sunos* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware java jni jnr/constants/platform/fake jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht)
               elsif gem_version >= Gem::Version.new('1.7.22')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.22
-                excluded_core_packages = [
-                    '**/*Aix*',
-                    '**/*Darwin*',
-                    '**/*FreeBSD*',
-                    '**/*MacOS*',
-                    '**/*OpenBSD*',
-                    '**/*Solaris*',
-                    '**/*sunos*',
-                    '**/*Windows*',
-                    'META-INF',
-                    'com/headius/invokebinder',
-                    'com/headius/options/example',
-                    'com/kenai/constantine',
-                    'com/kenai/jffi',
-                    'com/kenai/jnr/x86asm',
-                    'com/martiansoftware',
-                    'jni',
-                    'jnr/constants/platform/fake',
-                    'jnr/enxio',
-                    'jnr/ffi/annotations',
-                    'jnr/ffi/byref',
-                    'jnr/ffi/mapper',
-                    'jnr/ffi/provider',
-                    'jnr/ffi/util',
-                    'jnr/ffi/Struct$*',
-                    'jnr/ffi/types',
-                    'jnr/x86asm',
-                    'org/jruby/ant',
-                    'org/jruby/cext',
-                    'org/jruby/compiler/impl/BaseBodyCompiler*',
-                    'org/jruby/compiler/util',
-                    'org/jruby/demo',
-                    'org/jruby/embed/bsf',
-                    'org/jruby/embed/jsr223',
-                    'org/jruby/embed/osgi',
-                    'org/jruby/ext/ffi/AbstractMemory*',
-                    'org/jruby/ext/ffi/Enums*',
-                    'org/jruby/ext/ffi/io',
-                    'org/jruby/ext/ffi/jffi',
-                    'org/jruby/javasupport/bsf',
-                    'org/yecht',
-                ]
+                excluded_core_packages = %w(**/*Aix* **/*Darwin* **/*FreeBSD* **/*MacOS* **/*OpenBSD* **/*Solaris* **/*sunos* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/fake jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht)
               elsif gem_version >= Gem::Version.new('1.7.19')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.19
                 excluded_core_packages = %w(**/*.sh **/*Darwin* **/*Solaris* **/*windows* **/*Windows* META-INF com/headius/invokebinder com/headius/options/example com/kenai/constantine com/kenai/jffi com/kenai/jnr/x86asm com/martiansoftware jni jnr/constants/platform/darwin jnr/constants/platform/fake jnr/constants/platform/freebsd jnr/constants/platform/openbsd jnr/constants/platform/sunos jnr/enxio jnr/ffi/annotations jnr/ffi/byref jnr/ffi/mapper jnr/ffi/provider jnr/ffi/util jnr/ffi/Struct$* jnr/ffi/types jnr/posix/Aix* jnr/posix/FreeBSD* jnr/posix/MacOS* jnr/posix/OpenBSD* jnr/x86asm org/jruby/ant org/jruby/cext org/jruby/compiler/impl/BaseBodyCompiler* org/jruby/compiler/util org/jruby/demo org/jruby/embed/bsf org/jruby/embed/jsr223 org/jruby/embed/osgi org/jruby/ext/ffi/AbstractMemory* org/jruby/ext/ffi/Enums* org/jruby/ext/ffi/io org/jruby/ext/ffi/jffi org/jruby/javasupport/bsf org/yecht yaml.rb)

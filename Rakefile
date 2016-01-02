@@ -506,7 +506,8 @@ task :get_jruby_jars_snapshots do
   index = Net::HTTP.get(download_host, download_dir)
   all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
   master_gem = all_gems.last
-  stable_gem = all_gems.first
+  stable_gems = all_gems.grep /-1\.7\./
+  stable_gem = stable_gems.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
   [[master_gem, 'master'], [stable_gem, 'jruby-1_7']].each do |gem, branch|
     print "Downloading #{gem}: \r"
@@ -543,7 +544,6 @@ task '.travis.yml' do
   # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2016.
   # FIXME(uwe):  JRuby 1.7.19:  RSS? => RubotoGenTest#test_activity_tests => Native crash
   # FIXME(uwe):  JRuby 1.7.22:  OK except https://github.com/jruby/jruby/issues/3401
-  # FIXME(uwe):  RubotoCore (CURRENT) is missing thread_safe
   # FIXME(uwe):  Test all of these that work
   [
       ['CURRENT', [nil]],
@@ -558,7 +558,6 @@ task '.travis.yml' do
         (1..test_parts).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
           if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
-              (v == :STABLE && platform != 'FROM_GEM' && api != 15) || # FIXME(uwe):  Remove when 1.7 branch is green.
               v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
               api == 23 || # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
               api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
@@ -568,6 +567,7 @@ task '.travis.yml' do
               false
             next
           elsif platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
+              v == :STABLE || # FIXME(uwe):  Remove when 1.7 branch is green.
               false
             allow_failures << line.gsub('-', '- env:')
           end

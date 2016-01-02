@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (1.4.0)
+    ruboto (1.4.1.dev)
       main (~> 5.2)
       rake (~> 10.0)
       rubyzip (~> 1.0)
@@ -21,7 +21,7 @@ GEM
       pry (>= 0.9)
     map (6.5.5)
     method_source (0.8.2)
-    minitest (5.5.1)
+    minitest (5.8.3)
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
