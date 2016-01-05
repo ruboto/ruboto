@@ -269,11 +269,14 @@ EOF
       end
 
       def add_property(new_avd_config, property_name, value)
-        pattern = /^#{property_name}=.*$/
+        pattern = /^#{property_name}=(.*)$/
         property = "#{property_name}=#{value}"
         if new_avd_config =~ pattern
-          new_avd_config.gsub! pattern, property
-          puts "Changed property: #{property}"
+          if $1 != value
+            puts "$1: #{$1.inspect}"
+            new_avd_config.gsub! pattern, property
+            puts "Changed property: #{property}"
+          end
         else
           new_avd_config << "#{property}\n"
           puts "Added property: #{property}"
