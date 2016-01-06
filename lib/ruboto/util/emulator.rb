@@ -48,7 +48,7 @@ module Ruboto
             end
           else
             puts "Unexpected response from emulator: #{output.inspect}"
-            puts "Assuming wrong emulator is running."
+            puts 'Assuming wrong emulator is running.'
           end
         else
           puts 'No emulator is running.'
@@ -273,7 +273,6 @@ EOF
         property = "#{property_name}=#{value}"
         if new_avd_config =~ pattern
           if $1 != value
-            puts "$1: #{$1.inspect}"
             new_avd_config.gsub! pattern, property
             puts "Changed property: #{property}"
           end
