@@ -560,7 +560,7 @@ task '.travis.yml' do
           if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
               v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
               api == 23 || # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
-              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
+              (api == 22 && platform == 'STANDALONE' && v == :STABLE) || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
               api == 21 || # FIXME(uwe):  Remove when Android 5.0 is green.
               api == 17 || # FIXME(uwe):  Remove when Android 4.2 is green.
               api == 16 || # FIXME(uwe):  Remove when Android 4.1 is green.
@@ -568,6 +568,7 @@ task '.travis.yml' do
             next
           elsif platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
               v == :STABLE || # FIXME(uwe):  Remove when 1.7 branch is green.
+              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
               false
             allow_failures << line.gsub('-', '- env:')
           end
