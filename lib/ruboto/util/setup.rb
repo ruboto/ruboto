@@ -658,15 +658,6 @@ module Ruboto
         install_haxm(accept_all, version)
       end
 
-      # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
-      def uninstall_old_haxm
-        if File.exist?('/System/Library/Extensions/intelhaxm.kext')
-          puts "Uninstalling old HAXM version: #{@haxm_kext_version}  Sudo password required."
-          system 'sudo /System/Library/Extensions/intelhaxm.kext/Contents/Resources/uninstall.sh'
-        end
-      end
-      # EMXIF
-
       def install_haxm(accept_all, custom_version=nil)
         haxm_file_override =  "IntelHAXM_#{custom_version}.dmg" unless custom_version.nil?
         if @haxm_installer_loc && (@haxm_kext_loc.nil? || haxm_old?)
@@ -687,11 +678,6 @@ module Ruboto
           if accept_all || a == 'Y' || a.empty?
             case android_package_os_id
             when MAC_OS_X
-
-              # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
-              uninstall_old_haxm
-              # EMXIF
-
               puts 'Mounting the HAXM install image'
               if custom_version.nil?
                 system "hdiutil attach #{@haxm_installer_loc}"
