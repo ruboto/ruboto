@@ -21,7 +21,7 @@ module Ruboto
       def setup_ruboto(accept_all, api_levels = [SdkVersions::DEFAULT_TARGET_SDK], upgrade_haxm = false)
         @platform_sdk_loc = {}
         api_levels = [project_api_level, *api_levels].compact.uniq
-        install_all(accept_all, api_levels, upgrade_haxm) unless check_all(api_levels)
+        install_all(accept_all, api_levels, upgrade_haxm) unless check_all(api_levels, upgrade_haxm)
         config_path(accept_all)
       end
 
@@ -111,11 +111,13 @@ module Ruboto
       end
 
       def get_tools_version(type='tool', repo_url = REPOSITORY_URL)
+        puts type
         require 'rexml/document'
         require 'open-uri'
 
         doc = REXML::Document.new(open(repo_url))
         doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
+          puts t.elements.to_a.map(&:text)
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
           micro = t.elements['sdk:micro']
@@ -161,7 +163,7 @@ module Ruboto
       # Check Methods
       #
 
-      def check_all(api_levels)
+      def check_all(api_levels, update = false)
         @existing_paths ||= []
         @missing_paths ||= []
 
@@ -179,9 +181,18 @@ module Ruboto
         @missing_paths.uniq!
 
         puts
-        ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && @haxm_kext_loc && @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
+        ok = @java_loc && @javac_loc && @ant_loc && @android_loc && @emulator_loc && haxm_ok?(update) &&
+            @adb_loc && @dx_loc && @platform_sdk_loc.all? { |_, path| !path.nil? }
         puts "    #{ok ? '*** Ruboto setup is OK! ***' : '!!! Ruboto setup is NOT OK !!!'}\n\n"
         ok
+      end
+
+      def haxm_ok?(update)
+        @haxm_kext_loc && !(update && haxm_old?)
+      end
+
+      def haxm_old?
+        @haxm_kext_version != @haxm_installer_version
       end
 
       def check_for_emulator
@@ -194,24 +205,38 @@ module Ruboto
         when MAC_OS_X
           @haxm_kext_loc = '/Library/Extensions/intelhaxm.kext'
           found = File.exist?(@haxm_kext_loc)
+
+          # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
+          unless found
+            @haxm_kext_loc = '/System/Library/Extensions/intelhaxm.kext'
+            found = File.exist?(@haxm_kext_loc)
+          end
+          # EMXIF
+
           if found
             @haxm_kext_version = `kextstat | grep com.intel.kext.intelhaxm`.slice(/\(.*\)/)[1..-2]
           else
             @haxm_kext_loc = nil
           end
 
-          os_x_version = `sw_vers -productVersion`
-          if Gem::Version.new(os_x_version) > Gem::Version.new('10.9')
-            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')][0]
-          else
-            @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')][0]
-          end
+          @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM_*.dmg')][0]
 
-          @haxm_installer_version = @haxm_installer_loc.scan(/\d+/).join('.')[0..4] unless @haxm_installer_loc.nil? || @haxm_installer_loc.empty?
-          if @haxm_kext_version == @haxm_installer_version
-            puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? "Found" : 'Not found')}"
-          else
+          # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
+          if @haxm_installer_loc.nil?
+            os_x_version = `sw_vers -productVersion`
+            if Gem::Version.new(os_x_version) > Gem::Version.new('10.9')
+              @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_above*.dmg')][0]
+            else
+              @haxm_installer_loc = Dir[File.join(android_package_directory, 'extras', 'intel', 'Hardware_Accelerated_Execution_Manager', 'IntelHAXM*_below*.dmg')][0]
+            end
+          end
+          # EMXIF
+
+          @haxm_installer_version = File.basename(@haxm_installer_loc).scan(/\d+/).join('.') unless @haxm_installer_loc.nil? || @haxm_installer_loc.empty?
+          if haxm_old?
             puts "#{'%-25s' % 'Intel HAXM'}: Old   #{@haxm_kext_version}/#{@haxm_installer_version}"
+          else
+            puts "#{'%-25s' % 'Intel HAXM'}: #{(found ? 'Found' : 'Not found')}"
           end
         when LINUX
           @haxm_installer_loc = 'Not supported, yet.'
@@ -284,8 +309,8 @@ module Ruboto
 
         # build-tools, platform-tools, tools, and haxm
         install_android_tools(accept_all) unless @dx_loc && @adb_loc && @emulator_loc && @haxm_installer_loc
-        install_haxm(accept_all) unless @haxm_kext_loc
-        download_and_upgrade_haxm(true) unless upgrade_haxm.empty?
+        install_haxm(accept_all) unless haxm_ok?(upgrade_haxm)
+        # download_and_upgrade_haxm(true) if upgrade_haxm
 
         if @android_loc
           api_levels.each do |api_level|
@@ -590,7 +615,7 @@ module Ruboto
           end
           if accept_all || a == 'Y' || a.empty?
             android_cmd = windows? ? 'android.bat' : 'android'
-            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
+            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
@@ -633,19 +658,41 @@ module Ruboto
         install_haxm(accept_all, version)
       end
 
+      # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
+      def uninstall_old_haxm
+        if File.exist?('/System/Library/Extensions/intelhaxm.kext')
+          puts "Uninstalling old HAXM version: #{@haxm_kext_version}  Sudo password required."
+          system 'sudo /System/Library/Extensions/intelhaxm.kext/Contents/Resources/uninstall.sh'
+        end
+      end
+      # EMXIF
+
       def install_haxm(accept_all, custom_version=nil)
-        filename = nil
         haxm_file_override =  "IntelHAXM_#{custom_version}.dmg" unless custom_version.nil?
-        if @haxm_installer_loc && @haxm_kext_loc.nil?
-          puts 'HAXM not installed.'
+        if @haxm_installer_loc && (@haxm_kext_loc.nil? || haxm_old?)
+          if @haxm_kext_loc.nil?
+            puts 'HAXM not installed.'
+          else
+            puts "HAXM is old: #{@haxm_kext_version} / #{@haxm_installer_version}"
+          end
+
           unless accept_all
-            print 'Would you like to install HAXM? (Y/n): '
+            if @haxm_kext_loc.nil?
+              print 'Would you like to install HAXM? (Y/n): '
+            else
+              print 'Would you like to update HAXM? (Y/n): '
+            end
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
             case android_package_os_id
             when MAC_OS_X
-              puts "Mounting the HAXM install image"
+
+              # FIXME(uwe): Remove when we stop supporting old HAXM installer versions, like mid 2016.
+              uninstall_old_haxm
+              # EMXIF
+
+              puts 'Mounting the HAXM install image'
               if custom_version.nil?
                 system "hdiutil attach #{@haxm_installer_loc}"
                 fileName = Dir['/Volumes/IntelHAXM*/IntelHAXM*.mpkg'][0]
@@ -653,7 +700,7 @@ module Ruboto
                 system "hdiutil attach #{android_haxm_directory}/#{haxm_file_override}"
                 fileName = Dir["/Volumes/IntelHAXM_#{custom_version}/IntelHAXM_#{custom_version}.mpkg"][0]
               end
-              puts "Starting the HAXM installer.  Sudo password required."
+              puts 'Starting the HAXM installer.  Sudo password required.'
               system "sudo -S installer -pkg #{fileName} -target /"
             when LINUX
               puts '    HAXM installation on Linux is not supported, yet.'
