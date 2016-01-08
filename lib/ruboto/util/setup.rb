@@ -264,7 +264,7 @@ module Ruboto
       end
 
       def check_for_android_platform(api_level)
-        @platform_sdk_loc[api_level] = File.expand_path "#{@android_loc}/../../platforms/#{api_level}"
+        @platform_sdk_loc[api_level] = File.expand_path "#{android_package_directory}/platforms/#{api_level}"
         found = File.exist? @platform_sdk_loc[api_level]
         @platform_sdk_loc[api_level] = nil unless found
         puts "#{'%-25s' % "Platform SDK #{api_level}"}: #{(found ? 'Found' : 'Not found')}"
