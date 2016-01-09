@@ -111,13 +111,11 @@ module Ruboto
       end
 
       def get_tools_version(type='tool', repo_url = REPOSITORY_URL)
-        puts type
         require 'rexml/document'
         require 'open-uri'
 
         doc = REXML::Document.new(open(repo_url))
         doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
-          puts t.elements.to_a.map(&:text)
           major = t.elements['sdk:major']
           minor = t.elements['sdk:minor']
           micro = t.elements['sdk:micro']
