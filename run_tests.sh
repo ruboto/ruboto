@@ -19,7 +19,7 @@ killtree() {
 }
 
 # BEGIN TIMEOUT #
-TIMEOUT=6000 # 1hour 20 minutes
+TIMEOUT=7200 # 2 hourAllow testss
 PROGRESS_INTERVAL=300 # 5 minutes
 BOSSPID=$$
 (

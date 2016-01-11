@@ -454,7 +454,7 @@ module Ruboto
             }
 
             def run
-              setup_ruboto(params['yes'].value, params['target'].values, params['upgrade'].values)
+              setup_ruboto(params['yes'].value, params['target'].values, params['upgrade'].value)
             end
           end
 
