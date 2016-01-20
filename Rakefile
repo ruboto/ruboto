@@ -548,7 +548,7 @@ task '.travis.yml' do
   [
       ['CURRENT', [nil]],
       ['FROM_GEM', [:MASTER, :STABLE]],
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.22', '1.7.19', '1.7.13']],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.24', '1.7.13']],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
@@ -567,7 +567,7 @@ task '.travis.yml' do
               false
             next
           elsif platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
-              v == :STABLE || # FIXME(uwe):  Remove when 1.7 branch is green.
+              (v == :STABLE && (platform != 'STANDALONE' || api != 15)) || # FIXME(uwe):  Remove when 1.7 branch is green.
               api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
               false
             allow_failures << line.gsub('-', '- env:')
