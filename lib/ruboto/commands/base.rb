@@ -449,12 +449,22 @@ module Ruboto
               description 'answer "yes" to all interactive questions.  Will automatically install needed components.'
             }
 
-            option('upgrade', 'u') {
-                description 'upgrades intel haxm'
+            option('update', 'u') {
+                description 'updates intel haxm'
+            }
+
+            option('upgrade') {
+                description 'DEPRECATED:  Use --update instead'
             }
 
             def run
-              setup_ruboto(params['yes'].value, params['target'].values, params['upgrade'].value)
+              update = params['update'].value
+
+              # FIXME(uwe): Remove after Ruboto 1.5.0 is released
+              update ||= params['upgrade'].value
+              # EMXIF
+
+              setup_ruboto(params['yes'].value, params['target'].values, update)
             end
           end
 
