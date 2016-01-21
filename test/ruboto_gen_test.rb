@@ -81,45 +81,41 @@ class RubotoGenTest < Minitest::Test
   # APK was 10109.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 1.7.19
   # APK was  7040.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.20
   # APK was  8938.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 1.7.20
-  # APK was  6689.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 10, JRuby: 9000.dev
-  # APK was  7012.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 16, JRuby: 9000.dev
-  # APK was  8015.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 17, JRuby: 9000.dev
-  # APK was  8232.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 19, JRuby: 9000.dev
-  # APK was  7126.9KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 9.0.0.0.pre1
-  # APK was  8571.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 21, JRuby: 9.0.0.0.pre1
-  # APK was  4633.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 22, JRuby: 9.0.0.0.SNAPSHOT
   # APK was  6999.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.22
+  # APK was  8501.5KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 23, JRuby: 1.7.22
   # APK was  7006.1KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.23
   # APK was  7083.4KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.24
+  # APK was  7081.8KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 15, JRuby: 1.7.25.dev
+  # APK was  4633.2KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 22, JRuby: 9.0.0.0.SNAPSHOT
+  # APK was  8762.6KB.  PLATFORM: STANDALONE, ANDROID_TARGET: 23, JRuby: 9.0.5.0.SNAPSHOT
+
+
+  LIMITS = {
+      '~>9.0.5.0.SNAPSHOT' => ANDROID_TARGET <= 15 ? 7200 : 9800.0,
+      '~>1.7.24' => ANDROID_TARGET <= 15 ? 7200 : 9000.0,
+      '~>1.7.22' => ANDROID_TARGET <= 15 ? 7200 : 9000.0,
+      '1.7.20' => ANDROID_TARGET <= 15 ? 8000 : 9000.0,
+      '1.7.19' => 8000.0,
+      '1.7.18' => 10100.0,
+      '1.7.17' => 9999.0,
+      '1.7.15' => 8000.0,
+      '1.7.14' => 9800.0,
+      '1.7.13' => 8000.0,
+      '1.7.12' => 9800.0,
+      '~>1.7.5' => 8800.0,
+      '1.7.4' => 8500.0,
+  }
+
   def test_new_apk_size_is_within_limits
     apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / 1024
-    version = "  PLATFORM: #{RUBOTO_PLATFORM}"
-    version << ", ANDROID_TARGET: #{ANDROID_TARGET}"
+    version_string = "  PLATFORM: #{RUBOTO_PLATFORM}"
+    version_string << ", ANDROID_TARGET: #{ANDROID_TARGET}"
     if RUBOTO_PLATFORM == 'STANDALONE'
-      upper_limit = {
-          '1.7.4' => 8500.0,
-          '1.7.5' => 8800.0,
-          '1.7.6' => 8800.0,
-          '1.7.8' => 8800.0,
-          '1.7.9' => 8800.0,
-          '1.7.10' => 8800.0,
-          '1.7.11' => 8800.0,
-          '1.7.12' => 9800.0,
-          '1.7.13' => 8000.0,
-          '1.7.14' => 9800.0,
-          '1.7.15' => 8000.0,
-          '1.7.17' => 9999.0,
-          '1.7.18' => 10100.0,
-          '1.7.19' => 8000.0,
-          '1.7.20' => ANDROID_TARGET <= 15 ? 8000 : 9000.0,
-          '1.7.22' => ANDROID_TARGET <= 15 ? 7200 : 9000.0,
-          '1.7.23' => ANDROID_TARGET <= 15 ? 7200 : 9000.0,
-          '1.7.24' => ANDROID_TARGET <= 15 ? 7200 : 9000.0,
-          '9.0.0.0.dev' => 8300.0,
-          '9.0.0.0.pre1' => 8600.0,
-          '9.0.0.0.SNAPSHOT' => 5000.0,
-      }[JRUBY_JARS_VERSION.to_s] || 15 ? 7200 : 9800.0
-      version << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
+      upper_limit = LIMITS.each do |version_spec, value|
+        break value if Gem::Requirement.new(version_spec) =~ JRUBY_JARS_VERSION
+      end
+      raise "Unknown JRuby version: #{JRUBY_JARS_VERSION}" if upper_limit == LIMITS
+      version_string << ", JRuby: #{JRUBY_JARS_VERSION.to_s}"
     else
       upper_limit = {
           10 => 67.0,
@@ -131,8 +127,8 @@ class RubotoGenTest < Minitest::Test
       }[ANDROID_TARGET] || 76.0
     end
     lower_limit = upper_limit * 0.8
-    assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version}"
-    assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}KB: #{'%.1f' % apk_size.floor(1)}KB.  You should lower the limit.#{version}"
+    assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}KB: #{'%.1f' % apk_size.ceil(1)}KB.#{version_string}"
+    assert apk_size >= lower_limit, "APK was smaller than #{'%.1f' % lower_limit}KB: #{'%.1f' % apk_size.floor(1)}KB.  You should lower the limit.#{version_string}"
   end
 
   def test_gen_subclass
@@ -268,7 +264,7 @@ end
 EOF
 
       File.open('res/layout/list_item.xml', 'w') { |f| f << <<EOF }
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version_string="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"

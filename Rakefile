@@ -542,8 +542,6 @@ task '.travis.yml' do
   allow_failures = ''
 
   # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2016.
-  # FIXME(uwe):  JRuby 1.7.19:  RSS? => RubotoGenTest#test_activity_tests => Native crash
-  # FIXME(uwe):  JRuby 1.7.22:  OK except https://github.com/jruby/jruby/issues/3401
   # FIXME(uwe):  Test all of these that work
   [
       ['CURRENT', [nil]],
@@ -558,8 +556,8 @@ task '.travis.yml' do
         (1..test_parts).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
           if v == :MASTER || # FIXME(uwe):  Remove when master branch is green.
-              v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
               api == 23 || # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
+              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
               (api == 22 && platform == 'STANDALONE' && v == :STABLE) || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
               api == 21 || # FIXME(uwe):  Remove when Android 5.0 is green.
               api == 17 || # FIXME(uwe):  Remove when Android 4.2 is green.
@@ -568,7 +566,7 @@ task '.travis.yml' do
             next
           elsif platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
               (v == :STABLE && (platform != 'STANDALONE' || api != 15)) || # FIXME(uwe):  Remove when 1.7 branch is green.
-              api == 22 || # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
+              v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
               false
             allow_failures << line.gsub('-', '- env:')
           end
