@@ -263,7 +263,7 @@ end
 EOF
 
       File.open('res/layout/list_item.xml', 'w') { |f| f << <<EOF }
-<?xml version_string="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
