@@ -541,6 +541,51 @@ module Ruboto
                 ]
               elsif gem_version >= Gem::Version.new('9.0.0.0.SNAPSHOT')
                 raise "Unsupported jruby-jars version: #{gem_version}"
+              elsif gem_version >= Gem::Version.new('1.7.25.dev')
+                # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.25
+                excluded_core_packages = [
+                    '**/*Aix*',
+                    '**/*Darwin*',
+                     '**/*FreeBSD*',
+                    '**/*MacOS*',
+                    '**/*OpenBSD*',
+                    '**/*Solaris*',
+                    '**/*sunos*',
+                    'META-INF',
+                    'com/headius/invokebinder',
+                    'com/headius/options/example',
+                    'com/kenai/constantine',
+                    'com/kenai/jffi',
+                    'com/kenai/jnr/x86asm',
+                    'com/martiansoftware',
+                    'jni',
+                    'jnr/**/*windows*',
+                    'jnr/constants/platform/fake',
+                    'jnr/enxio',
+                    'jnr/ffi/annotations',
+                    'jnr/ffi/byref',
+                    'jnr/ffi/mapper',
+                    'jnr/ffi/provider',
+                    'jnr/ffi/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    'jnr/x86asm',
+                    'org/jruby/**/*windows*',
+                    'org/jruby/ant',
+                    'org/jruby/cext',
+                    'org/jruby/compiler/impl/BaseBodyCompiler*',
+                    'org/jruby/compiler/util',
+                    'org/jruby/demo',
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/AbstractMemory*',
+                    'org/jruby/ext/ffi/Enums*',
+                    'org/jruby/ext/ffi/io',
+                    'org/jruby/ext/ffi/jffi',
+                    'org/jruby/javasupport/bsf',
+                    'org/yecht',
+                ]
               elsif gem_version >= Gem::Version.new('1.7.24.dev')
                 # TODO(uwe): Remove when we stop supporting jruby-jars 1.7.24
                 excluded_core_packages = [
@@ -559,6 +604,7 @@ module Ruboto
                     'com/kenai/jnr/x86asm',
                     'com/martiansoftware',
                     'jni',
+                    'jnr/**/*windows*',
                     'jnr/constants/platform/fake',
                     'jnr/enxio',
                     'jnr/ffi/annotations',
@@ -568,7 +614,6 @@ module Ruboto
                     'jnr/ffi/util',
                     'jnr/ffi/Struct$*',
                     'jnr/ffi/types',
-                    'jnr/**/*windows*',
                     'jnr/x86asm',
                     'org/jruby/**/*windows*',
                     'org/jruby/ant',
