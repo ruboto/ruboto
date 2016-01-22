@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.4.0 released!
+Subject: [ANN] Ruboto 1.4.1 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.4.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.4.1.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,78 +8,44 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.4.0:
+New in version 1.4.1:
 
-This release adds support for JRuby 1.7.22 and improves the installation
-of HAXM.  `ruboto setup --update` will now update an existing HAXM
-installation if a new version is available for download.
-
-Support for Android 2.3 has been dropped, and Android 4.1 is now the
-default api level when creating new apps.
-
-API Changes:
-
-* Issue #687 Drop support for Android 2.3 api level 10
-* Issue #688 Set Android 4.1 api level 16 as default api level for new
-  apps
-* Issue #770 Support jruby 1.7.22 (donv)
+Bugfixes for the 1.4.0 release.
 
 Features:
 
-* Issue #722 Start emulator without skin for "ruboto emulator"
-* Issue #756 Allow "ruboto setup --update" to update HAXM if a new
-  version is available
+* Issue #779 Differentiate the default dex heap size for 32-bit systems
+* Issue #780 Update "rake log" to handle output from Android 6.0
+* Issue #782 Do not commit the keystore by default
+* Issue #789 Add support for JRuby 1.7.24
 
 Bugfixes:
 
-* Issue #634 Can't add jar files to proyect. Can't start the proyect
-  with jars added
-* Issue #638 Extra installs to build on Ubuntu 64 bit
-* Issue #655 "--with-jruby" seems to do its job, but then I still need
-  to download and install Ruboto Core on device
-* Issue #663 Minimal Gosu code fails.
-* Issue #664 Bundler can't see personal gems/Locally installed gems do
-  not get put on projects(only global).
-* Issue #669 Keep on restarting new emulator
-* Issue #686 Can't run on Real device with Android 5.0
-* Issue #703 The HAXM installer for OS X has changed name
-* Issue #712 can´t install ruboto
-* Issue #716 New App with no custom code terminates directly after start
-  (java.lang.NoSuchMethodException: makeDexElements).
-* Issue #717 ruboto setup -y - FATAL -- : undefined method 'slice' for
-  nil:NilClass
-* Issue #742 Accept Android plataform tools rc in setup
-* Issue #747 Running the emulator often hangs when run without
-  "--no-snapshot"
-* Issue #759 "ruboto gen jruby" should install jruby-jars ~>1.7
-* Issue #765 'rake boing' fails for multiple updated files
+* Issue #783 Don't report changing emulator properties when they are not
+  actually changed
+* Issue #784 Improve haxm install with/without "-y" and "--upgrade"
+  options (donv)
+* Issue #785 Setup never finds Platform SDK
+* Issue #786 Use $ANDROID_HOME instead of android executable location to
+  find platforms (ahills)
+* Issue #790 Fix "--update" option for "ruboto setup"
+
+Performance:
+
+* Issue #787 Refresh the benchmark server layout and design
 
 Support:
 
-* Issue #670 emulator
-* Issue #736 rake install error
-* Issue #739 Game Frameworks?
-* Issue #750 Deploy ruboto within Gnuroot debian linux under Android OS
-* Issue #752 can't install ruboto with ruby gems in windows 10.
-
-Community:
-
-* Issue #762 How can I help? (juanjogeta)
-* Issue #766 Reduce noise on #ruboto channel from travis
-* Issue #771 How can I help? (ChaosCat)
+* Issue #749 Invalid maximum heap size: -Xmx4096M
+* Issue #761 JDK 7
 
 Internal:
 
-* Issue #757 Release 1.4.0
-* Issue #767 TypeError: can't convert nil into String when running
-  Ruboto tests
-* Issue #769 Fetch jruby-jars snapshots from http://ci.jruby.org/ for
-  testing
-* Issue #772 Db haxm dark (daneb)
+* Issue #773 Release 1.4.1
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=39
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=40
 
 
 Installation:
