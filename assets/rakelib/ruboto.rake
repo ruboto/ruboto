@@ -755,7 +755,8 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   # Expand JARs
   Dir.chdir gem_path do
     Dir['*'].each do |gem_lib|
-      Dir.chdir "#{gem_lib}/lib" do
+      require_path = gem_lib =~ /^ruby-debug-\d/ ? 'cli' : 'lib'
+      Dir.chdir "#{gem_lib}/#{require_path}" do
         Dir['**/*.jar'].each do |jar|
           unless jar =~ /sqlite-jdbc/
             puts "Expanding #{gem_lib} #{jar} into #{BUNDLE_JAR}"
@@ -825,6 +826,20 @@ rescue Exception
   raise
 end
             END_CODE
+          elsif jar =~ %r{ruby_debug.jar$}
+            jar_load_code = <<-END_CODE
+require 'jruby'
+puts 'Starting Ruby Debug Service'
+public
+Java::RubyDebugService.new.basicLoad(JRuby.runtime)
+            END_CODE
+            # (GF) add internet permission required to run debug service
+            unless manifest.root.elements["uses-permission[@android:name='android.permission.INTERNET']"]
+              REXML::Comment.new " INTERNET permission required for debugging. Remove for release build if not required. ", manifest.root
+              manifest.root.add_element 'uses-permission', { 'android:name' => 'android.permission.INTERNET' }
+              File.open( MANIFEST_FILE, 'w' ) { |file| manifest.write file, 4 }
+              puts "Added INTERNET permission required for debugging to AndroidManifest.xml"
+            end
           else
             jar_load_code = ''
           end
@@ -880,7 +895,8 @@ end
 
   FileUtils.rm_f BUNDLE_JAR
   Dir["#{gem_path}/*"].each_with_index do |gem_dir, i|
-    `jar #{i == 0 ? 'c' : 'u'}f "#{BUNDLE_JAR}" -C "#{gem_dir}/lib" .`
+    require_path = gem_dir =~ /ruby-debug-\d/ ? 'cli' : 'lib' 
+    `jar #{i == 0 ? 'c' : 'u'}f "#{BUNDLE_JAR}" -C "#{gem_dir}/#{require_path}" .`
   end
   FileUtils.rm_rf BUNDLE_PATH
 end
