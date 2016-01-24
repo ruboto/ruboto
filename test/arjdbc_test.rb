@@ -3,7 +3,7 @@ require_relative 'test_helper'
 class ArjdbcTest < Minitest::Test
   def setup
     generate_app bundle: [
-        [:activerecord, '<4.2.0'],
+        [:activerecord, '~>4.2.5'],
         :'activerecord-jdbc-adapter',
         :sqldroid,
     ]

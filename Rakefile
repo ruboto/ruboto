@@ -512,11 +512,12 @@ task :get_jruby_jars_snapshots do
   [[master_gem, 'master'], [stable_gem, 'jruby-1_7']].each do |gem, branch|
     print "Downloading #{gem}: \r"
     uri = URI("http://#{download_host}#{download_dir}/snapshots/#{branch}/#{gem}")
-    done = 0
-    body = ''
     Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
       if response.code == '200'
         length = response['Content-Length'].to_i
+        timestamp = response['Last-Modified'] # Sat, 23 Jan 2016 05:52:03 GMT'
+        body = ''
+        done = 0
         response.read_body do |fragment|
           body << fragment
           done += fragment.length
@@ -525,12 +526,15 @@ task :get_jruby_jars_snapshots do
             print "Downloading #{gem}: #{done / 1024}/#{length / 1024}KB #{progress}%\r"
           end
         end
+        unless body.empty?
+          File.write(gem, body)
+          FileUtils.touch gem, mtime: Time.parse(timestamp)
+        end
         puts
       else
         raise "Unexpected HTTP response code: #{response.code.inspect}"
       end
     end
-    File.open(gem, 'wb') { |f| f << body } unless body.empty?
   end
 end
 
@@ -564,9 +568,7 @@ task '.travis.yml' do
           next if api == 17 # FIXME(uwe):  Remove when Android 4.2 is green.
           next if api == 16 # FIXME(uwe):  Remove when Android 4.1 is green.
 
-          if platform == 'FROM_GEM' || # FIXME(uwe): Remove when new RubotoCore is green.
-              (v == :STABLE && (platform != 'STANDALONE' || api != 15)) || # FIXME(uwe):  Remove when 1.7 branch is green.
-              v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
+          if v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
               false
             allow_failures << line.gsub('-', '- env:')
           end
