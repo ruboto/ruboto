@@ -936,6 +936,45 @@ task :log, [:filter] do |t, args|
   end
 end
 
+namespace :debugger do
+
+  GEM_SOURCE = "source 'https://rubygems.org'"
+  DEBUGGER_GEMS = [
+    [ 'columnize',       '~> 0.9.0' ],
+    [ 'linecache',       '~> 1.3.1' ],
+    [ 'ruby-debug-base', '~> 0.10.6' ],
+    [ 'ruby-debug',      '~> 0.10.6' ],
+  ]
+
+  # TODO(gf): use development group ? - will have to be included by debug task
+  # task :add_to_gemfile do
+  # GEM_FILE
+  # end
+
+  # desc 'Add debugging gems to Gemfile and update bundle.jar'
+  # task bundle: :add_to_gemfile do
+  # end
+
+  # task :remove_from_gemfile do
+  # end
+
+  # desc 'Remove debugging gems from Gemfile and update bundle.jar'
+  # task unbundle: :remove_from_gemfile do
+  # end
+  
+  desc 'Connect debugger client to app, accepts rdebug arguments after "--"'
+  task :run do
+    sep = ARGV.index('--')
+    args = sep ? ARGV[sep+1..-1] : []
+    wait_for_valid_device
+    system "adb forward tcp:8989 tcp:8989"
+    system "adb forward tcp:8990 tcp:8990"
+    system "adb forward --list"
+    system "rdebug --client #{args.join ' '}"
+  end
+
+end
+
 # Methods
 
 def sdk_level
