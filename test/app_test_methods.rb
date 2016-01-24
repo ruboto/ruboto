@@ -55,6 +55,10 @@ module AppTestMethods
       next if file =~ /dir_and_file/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.4.dev'))
       # EMXIF
 
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
+      next if file =~ /read_source_file/ && (JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13'))
+      # EMXIF
+
       # FIXME(uwe):  Remove when we stop testing api level < 11
       next if file =~ /fragment/ && ANDROID_OS < 11
       # EMXIF

@@ -568,8 +568,7 @@ task '.travis.yml' do
           next if api == 17 # FIXME(uwe):  Remove when Android 4.2 is green.
           next if api == 16 # FIXME(uwe):  Remove when Android 4.1 is green.
 
-          if v == '1.7.13' || # FIXME(uwe):  Remove when 1.7.13 is green.
-              false
+          if false
             allow_failures << line.gsub('-', '- env:')
           end
           matrix << line
