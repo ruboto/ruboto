@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (1.4.1.dev)
+    ruboto (1.4.2.dev)
       main (~> 5.2)
       rake (~> 10.0)
       rubyzip (~> 1.0)
@@ -13,24 +13,33 @@ GEM
     chronic (0.10.2)
     coderay (1.1.0)
     fattr (2.2.2)
+    ffi (1.9.10-java)
     main (5.3.2)
       arrayfields (>= 4.7.4)
       chronic (>= 0.6.2)
       fattr (>= 2.2.0)
       map (>= 5.1.0)
       pry (>= 0.9)
-    map (6.5.5)
+    map (6.6.0)
     method_source (0.8.2)
     minitest (5.8.3)
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rake (10.4.2)
+    pry (0.10.3-java)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+      spoon (~> 0.0)
+    rake (10.5.0)
     rubyzip (1.1.7)
     slop (3.6.0)
+    spoon (0.0.4)
+      ffi
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
