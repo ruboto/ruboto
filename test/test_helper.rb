@@ -15,6 +15,8 @@ module RubotoTest
   include Ruboto::SdkLocations
   include Ruboto::Util::Update
 
+  ON_LINUX = RbConfig::CONFIG['host_os'].downcase.include?('linux')
+
   PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
   $LOAD_PATH << PROJECT_DIR
 
@@ -92,9 +94,8 @@ module RubotoTest
   # FIXME(uwe): Remove when stupid crash is resolved
   def has_stupid_crash
     require 'rbconfig'
-    ANDROID_OS <= 15 &&
-        JRUBY_JARS_VERSION >= Gem::Version.new('1.7.19') &&
-        RbConfig::CONFIG['host_os'].downcase.include?('linux')
+    ANDROID_OS <= 15 && JRUBY_JARS_VERSION >= Gem::Version.new('1.7.19') &&
+        ON_LINUX
   end
   # EMXIF
 

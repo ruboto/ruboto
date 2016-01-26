@@ -38,21 +38,22 @@ module AppTestMethods
 
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
-      # FIXME(uwe):  Remove when we stop testing JRuby 1.7.24 or api level 19
-      next if file =~ /rss/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.24') &&
-          (RUBOTO_PLATFORM == 'STANDALONE' || RUBOTO_PLATFORM == 'CURRENT') && ANDROID_OS == 19
+      # FIXME(uwe):  Remove when we stop testing JRuby 1.7.25 or api level 19
+      next if file =~ /rss/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.25') &&
+          (RUBOTO_PLATFORM == 'STANDALONE' || RUBOTO_PLATFORM == 'CURRENT') &&
+          ANDROID_OS == 19 && ON_LINUX
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing api level < 16
       # FIXME(uwe):  Remove when we release RubotoCore with SSL included
       next if file =~ /ssl/ && (ANDROID_OS < 16 ||
           RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM' ||
-          JRUBY_JARS_VERSION < Gem::Version.new('1.7.13') ||
-          JRUBY_JARS_VERSION < Gem::Version.new('9.0.0.0.SNAPSHOT')) # FIXME(uwe): JRuby 9K should contain the SSLSocket fix.
+          JRUBY_JARS_VERSION < Gem::Version.new('1.7.13')
+      )
       # EMXIF
 
-      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.4.dev
-      next if file =~ /dir_and_file/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION < Gem::Version.new('1.7.4.dev'))
+      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.13
+      next if file =~ /dir_and_file/ && (RUBOTO_PLATFORM == 'CURRENT' || JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13'))
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13

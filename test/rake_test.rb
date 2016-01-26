@@ -20,8 +20,6 @@ class RakeTest < Minitest::Test
       s2 = File.read(test_filename)
       s2.gsub!(/What hath Matz wrought\?/, 'This text was changed by script!')
       File.open(test_filename, 'w') { |f| f << s2 }
-
-      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
     end
     run_app_tests
 
@@ -32,26 +30,31 @@ class RakeTest < Minitest::Test
     assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
   end
 
+  def test_that_apk_is_not_built_if_nothing_has_changed
+    Dir.chdir APP_DIR do
+      apk_timestamp = apk_mtime
+      system 'rake debug'
+      assert apk_timestamp == apk_mtime, 'APK should not have been rebuilt'
+    end
+  end
+
   # FIXME(uwe):  This is actually a case where we want to just update the Ruby
   # source file instead of rebuilding the apk.
   def test_that_apk_is_built_if_only_one_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
-      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
-      sleep 1
-      FileUtils.touch 'src/ruboto_test_app_activity.rb'
-      sleep 1
+      apk_timestamp = apk_mtime
+      FileUtils.touch 'src/ruboto_test_app_activity.rb', mtime: apk_timestamp + 1
       system 'rake debug'
-      assert apk_timestamp != File.mtime("bin/#{APP_NAME}-debug.apk"),
-          'APK should have been rebuilt'
+      assert apk_timestamp != apk_mtime, 'APK should have been rebuilt'
     end
   end
 
   def test_that_apk_is_built_if_only_one_non_ruby_source_file_has_changed
     Dir.chdir APP_DIR do
-      apk_timestamp = File.mtime("bin/#{APP_NAME}-debug.apk")
-      FileUtils.touch 'src/not_ruby_source.properties'
+      apk_timestamp = apk_mtime
+      FileUtils.touch 'src/not_ruby_source.properties', mtime: apk_timestamp + 1
       system 'rake debug'
-      assert apk_timestamp != File.mtime("bin/#{APP_NAME}-debug.apk"),
+      assert apk_timestamp != apk_mtime,
           'APK should have been rebuilt'
     end
   end
@@ -87,6 +90,12 @@ class RakeTest < Minitest::Test
       raise "'rake install' exited with code #$?" unless $? == 0
     end
     system 'adb logcat >> adb_logcat.log&' if File.exists?('adb_logcat.log')
+  end
+
+  private
+
+  def apk_mtime
+    File.mtime("bin/#{APP_NAME}-debug.apk")
   end
 
 end
