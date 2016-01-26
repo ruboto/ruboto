@@ -224,6 +224,7 @@ def cleanup_jars
       print "#{File.basename(j).chomp('.jar')}..."
       system "jar xf #{j}"
       FileUtils.rm j
+
       if ENV['STRIP_INVOKERS']
         invokers = Dir['**/*$INVOKER$*.class']
         if invokers.size > 0
@@ -281,8 +282,9 @@ def cleanup_jars
         jar_load_code = ''
       end
 
-      File.open("#{j}.rb", 'w') { |f| f << jar_load_code }
-      File.open("#{j}.jar.rb", 'w') { |f| f << jar_load_code }
+      File.write("#{j}", jar_load_code)
+      File.write("#{j}.rb", jar_load_code)
+      File.write("#{j}.jar.rb", jar_load_code)
     end
     unless cmd_line_jar_found
       puts "\nWARNING:  No command line jar filtered.  Has it changed?"
