@@ -9,6 +9,10 @@ namespace :debugger do
     [ 'ruby-debug',      '~> 0.10.6' ],
   ]
 
+  task :local_jruby_required do
+    raise "JRuby required for debugging" unless RUBY_ENGINE == 'jruby'
+  end
+
   # TODO: (gf) use development or custom 'debug' group ? - will have to be included by debug task, and excluded for release
   task :add_to_gemfile do
     add_debugger_to_gemfile
@@ -19,7 +23,7 @@ namespace :debugger do
   end
 
   desc 'Add debugging gems to Gemfile, Gemfile.apk, and update bundle.jar'
-  task bundle: [ :add_to_gemfile, :local_bundle, '^bundle' ]
+  task bundle: [ :local_jruby_required, :add_to_gemfile, :local_bundle, '^bundle' ]
 
   task :remove_from_gemfile do
     remove_debugger_from_gemfile
