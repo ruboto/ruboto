@@ -1,26 +1,29 @@
 require_relative 'test_helper'
 
-class DebuggerTest < Minitest::Test
+# need JRuby jars for: Java::RubyDebugService.new.basicLoad(JRuby.runtime)
+if RUBOTO_PLATFORM == 'STANDALONE'
 
-  DEBUGGER_GEMS = [
-    [ 'columnize',       '~> 0.9.0' ],
-    [ 'linecache',       '~> 1.3.1' ],
-    [ 'ruby-debug-base', '~> 0.10.6' ],
-    [ 'ruby-debug',      '~> 0.10.6' ],
-  ]
+  class DebuggerTest < Minitest::Test
 
-  def setup
-    generate_app bundle: DEBUGGER_GEMS
-  end
+    DEBUGGER_GEMS = [
+      [ 'columnize',       '~> 0.9.0' ],
+      [ 'linecache',       '~> 1.3.1' ],
+      [ 'ruby-debug-base', '~> 0.10.6' ],
+      [ 'ruby-debug',      '~> 0.10.6' ],
+    ]
 
-  def teardown
-    cleanup_app
-  end
+    def setup
+      generate_app bundle: DEBUGGER_GEMS
+    end
 
-  def test_app_runs
-    Dir.chdir APP_DIR do
-      File.open('src/ruboto_test_app_activity.rb', 'w') do |file|
-        file << <<EOF 
+    def teardown
+      cleanup_app
+    end
+
+    def test_app_runs
+      Dir.chdir APP_DIR do
+        File.open('src/ruboto_test_app_activity.rb', 'w') do |file|
+          file << <<EOF 
 require 'ruboto/widget'
 require 'ruboto/util/toast'
 require 'ruboto/util/stack'
@@ -73,16 +76,17 @@ class RubotoTestAppActivity
 
 end
 EOF
+        end
+      end
+      run_app_tests
+    end
+
+    if RUBY_ENGINE == 'jruby'
+      def test_app_debugs
+        # TODO: local JRuby for android builds on Travis CI
       end
     end
-    run_app_tests
-  end
 
-  if RUBY_ENGINE == 'jruby'
-    def test_app_debugs
-      # TODO: local JRuby for android builds on Travis CI
-    end
   end
 
 end
-
