@@ -266,6 +266,7 @@ def cleanup_jars
         puts "Patching OpenSSL"
         FileUtils.rm 'org/jruby/ext/openssl/OpenSSL.class'
         FileUtils.mkdir_p '../../../src/org/jruby/ext/openssl'
+        require 'ruboto'
         FileUtils.cp "#{Ruboto::ASSETS}/src/org/jruby/ext/openssl/OpenSSL.java",
             '../../../src/org/jruby/ext/openssl/OpenSSL.java'
         puts '*' * 80
