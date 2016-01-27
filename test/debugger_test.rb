@@ -37,7 +37,7 @@ class DebuggingActivity
     set_title 'Domo arigato, Mr Ruboto!'
 
     # Debugger.wait_connection = true
-    Debugger.start_remote         
+    # Debugger.start_remote         
 
     # Thread.start do
     #   debugger
