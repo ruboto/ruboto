@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
 # need JRuby jars for: Java::RubyDebugService.new.basicLoad(JRuby.runtime)
-if RUBOTO_PLATFORM == 'STANDALONE'
+if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
 
   class DebuggerTest < Minitest::Test
 
