@@ -424,10 +424,6 @@ module Ruboto
 
       def update_ruboto(force=nil)
         source_files_pattern = 'ruboto{.rb,/**/*}'
-        # FIXME(uwe): Remove before Ruboto release!
-        # FIXME(uwe): Remove after jruby-openssl 0.9.16 is added to the jruby-1_7 branch
-        source_files_pattern = '{org/jruby/**/*,ruboto{.rb,/**/*}}'
-        # EMXIF
         new_sources_dir = Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}"
         new_sources = Dir.chdir(new_sources_dir) { Dir[source_files_pattern] }.
             select { |f| !(File.directory?("#{new_sources_dir}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }

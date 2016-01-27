@@ -260,7 +260,15 @@ def cleanup_jars
         END_CODE
       elsif j =~ %r{jopenssl.jar$}
         # FIXME(uwe): Use our own patched version of OpenSSL until jruby-openssl 0.9.16 is released
+        # FIXME(uwe): Remove before Ruboto release!
+        # FIXME(uwe): Remove after jruby-openssl 0.9.16 is added to the jruby-1_7 branch
+        puts '*' * 80
+        puts "Patching OpenSSL"
         FileUtils.rm 'org/jruby/ext/openssl/OpenSSL.class'
+        FileUtils.mkdir_p '../../../src/org/jruby/ext/openssl'
+        FileUtils.cp "#{Ruboto::ASSETS}/src/org/jruby/ext/openssl/OpenSSL.java",
+            '../../../src/org/jruby/ext/openssl/OpenSSL.java'
+        puts '*' * 80
         # EMXIF
         jar_load_code = <<-END_CODE
           require 'jruby'
