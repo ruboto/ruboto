@@ -181,6 +181,12 @@ def remove_unneeded_parts_of_stdlib
   end
 end
 
+def add_fake_jar(source_file, jar_load_code)
+  File.write(source_file, jar_load_code)
+  open("#{File.dirname(source_file)}/.jrubydir", 'a') { |f| f.puts File.basename source_file }
+end
+private :add_fake_jar
+
 def cleanup_jars
   Dir.chdir 'new' do
     cmd_line_jar_found = false
@@ -253,6 +259,9 @@ def cleanup_jars
           Java::json.ext.ParserService.new.basicLoad(JRuby.runtime)
         END_CODE
       elsif j =~ %r{jopenssl.jar$}
+        # FIXME(uwe): Use our own patched version of OpenSSL until jruby-openssl 0.9.16 is released
+        FileUtils.rm 'org/jruby/ext/openssl/OpenSSL.class'
+        # EMXIF
         jar_load_code = <<-END_CODE
           require 'jruby'
           puts 'Starting JOpenSSL Service'
@@ -280,11 +289,11 @@ def cleanup_jars
         END_CODE
       else
         jar_load_code = ''
+        add_fake_jar("#{j}", jar_load_code)
       end
 
-      File.write("#{j}", jar_load_code)
-      File.write("#{j}.rb", jar_load_code)
-      File.write("#{j}.jar.rb", jar_load_code)
+      add_fake_jar("#{j}.rb", jar_load_code)
+      # add_fake_jar("#{j}.jar.rb", jar_load_code)
     end
     unless cmd_line_jar_found
       puts "\nWARNING:  No command line jar filtered.  Has it changed?"
