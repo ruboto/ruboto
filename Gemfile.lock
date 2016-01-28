@@ -3,6 +3,7 @@ PATH
   specs:
     ruboto (1.4.2.dev)
       main (~> 5.2)
+      net-telnet (~> 0.1.1)
       rake (~> 10.0)
       rubyzip (~> 1.0)
 
@@ -19,9 +20,10 @@ GEM
       fattr (>= 2.2.0)
       map (>= 5.1.0)
       pry (>= 0.9)
-    map (6.5.5)
+    map (6.6.0)
     method_source (0.8.2)
     minitest (5.8.3)
+    net-telnet (0.1.1)
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -38,4 +40,4 @@ DEPENDENCIES
   ruboto!
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

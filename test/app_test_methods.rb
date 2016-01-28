@@ -15,10 +15,13 @@ module AppTestMethods
       # FIXME(uwe):  We should try using YAML as well
       assert_code 'YamlLoads', "require 'yaml'" unless has_stupid_crash
 
-      assert_code 'ReadSourceFile', 'File.read(__FILE__)'
-      # noinspection RubyExpressionInStringInspection
-      assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
-      assert_code('RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView') unless has_stupid_crash
+      # FIXME(uwe):  Remove condition when we stop testing api level <= 15 or JRuby <= 1.7.13
+      unless ANDROID_OS <= 15 && ON_LINUX && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13')
+        assert_code 'ReadSourceFile', 'File.read(__FILE__)'
+        # noinspection RubyExpressionInStringInspection
+        assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
+        assert_code('RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView') unless has_stupid_crash
+      end
     end
     run_activity_tests('activity')
   end
@@ -39,25 +42,30 @@ module AppTestMethods
   def run_activity_tests(activity_dir)
     Dir[File.expand_path("#{activity_dir}/*", File.dirname(__FILE__))].each do |file|
       # FIXME(uwe):  Remove when we stop testing JRuby 1.7.25 or api level 19
-      next if file =~ /rss/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.25') &&
+      next if file =~ /rss|ssl/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.25') &&
           ANDROID_OS == 19 && ON_LINUX
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing api level < 16
       # FIXME(uwe):  Remove when we release RubotoCore with SSL included
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
       next if file =~ /ssl/ && (ANDROID_OS < 16 ||
-          JRUBY_JARS_VERSION < Gem::Version.new('1.7.13') ||
+          JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13') ||
           RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM'
       )
       # EMXIF
 
-      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.13
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
       next if file =~ /dir_and_file/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13')
       # EMXIF
 
       # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
       next if file =~ /read_source_file/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13')
       # EMXIF
+
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
+            next if file =~ /button|fragment|json|margins|navigation|no_on_create|padding|psych|rss|spinner|stack|startup_exception|subclass/ &&
+                ANDROID_OS <= 15 && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13') && ON_LINUX
 
       # FIXME(uwe):  Weird total app crash when running these tests together
       # FIXME(uwe):  Remove when we stop testing api level <= 15

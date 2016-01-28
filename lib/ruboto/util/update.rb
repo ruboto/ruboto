@@ -217,7 +217,7 @@ module Ruboto
 
       def install_jruby_jars_gem(jruby_jars_version = ENV['JRUBY_JARS_VERSION'])
         if jruby_jars_version
-          version_requirement = " -v '#{jruby_jars_version}'"
+          version_requirement = %{ -v "#{jruby_jars_version}"}
         end
         `gem query -i -n jruby-jars#{version_requirement}`
         unless $? == 0
