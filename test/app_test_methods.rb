@@ -45,13 +45,14 @@ module AppTestMethods
 
       # FIXME(uwe):  Remove when we stop testing api level < 16
       # FIXME(uwe):  Remove when we release RubotoCore with SSL included
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
       next if file =~ /ssl/ && (ANDROID_OS < 16 ||
-          JRUBY_JARS_VERSION < Gem::Version.new('1.7.13') ||
+          JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13') ||
           RUBOTO_PLATFORM == 'CURRENT' || RUBOTO_PLATFORM == 'FROM_GEM'
       )
       # EMXIF
 
-      # FIXME(uwe):  Remove when we stop testing JRuby < 1.7.13
+      # FIXME(uwe):  Remove when we stop testing JRuby <= 1.7.13
       next if file =~ /dir_and_file/ && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13')
       # EMXIF
 
