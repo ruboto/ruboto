@@ -1,10 +1,31 @@
 ###################################
 #
-# heap_alloc
+# emulator
 #   
+#    Specifies which emulator to use when running `ruboto emulator`.
+#
+# emulator:
+#
+#   Name of the AVD to be used.  It will be created if not already present.
+#   default: "Android_#{android_version}"
+#
+#   name: Android_4.0.3_tablet
+#
+#   Name of the Android device to be used as template.  Setting this options
+#   disables the "skin" option on AVD creation and starts the emualtor without
+#   the "-no-skin" option.
+#
+#   default: Nexus One
+#
+#   device: Nexus 10
+
+###################################
+#
+# heap_alloc
+#
 #    Forces the heap to grow by a number of megabytes.
 #    Can result in improved start-up performance because
-#      it prevents the heap from growing through smaller 
+#      it prevents the heap from growing through smaller
 #      increments.
 #
 # heap_alloc: 13

@@ -5,6 +5,8 @@ require 'ruboto/sdk_locations'
 module Ruboto
   module Util
     module Emulator
+      include Ruboto::Util::Verify
+
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
       ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin/
       ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
@@ -29,7 +31,9 @@ module Ruboto
           emulator_cmd = 'emulator-arm'
         end
 
-        avd_name = "Android_#{sdk_level_name(sdk_level)}"
+        emulator_config = verify_ruboto_config['emulator']
+        avd_name = (emulator_config && emulator_config['name']) || "Android_#{sdk_level_name(sdk_level)}"
+        android_device = (emulator_config && emulator_config['device']) || "Nexus One"
         new_snapshot = false
 
         if `adb devices` =~ /emulator-5554/
@@ -57,7 +61,7 @@ module Ruboto
         # FIXME(uwe):  Change use of "killall" to use the Ruby Process API
         loop do
           emulator_opts = '-partition-size 256'
-          emulator_opts << ' -noskin'
+          emulator_opts << ' -noskin' unless android_device
           emulator_opts << ' -no-snapshot-load' if no_snapshot
           if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
             emulator_opts << ' -no-window -no-audio'
@@ -93,7 +97,7 @@ module Ruboto
           heap_size = large_heap ? 256 : 48
 
           unless File.exists? avd_home
-            create_avd(avd_home, avd_name, heap_size, sdk_level)
+            create_avd(avd_home, avd_name, android_device, heap_size, sdk_level)
             new_snapshot = true
           else
             # FIXME(uwe):  Patch old emulator AVDs.  Remove December 2016.
@@ -191,7 +195,7 @@ EOF
         puts "Emulator #{avd_name} started OK."
       end
 
-      def create_avd(avd_home, avd_name, heap_size, sdk_level)
+      def create_avd(avd_home, avd_name, android_device, heap_size, sdk_level)
         puts "Creating AVD #{avd_name}"
 
         target = `android list target`.split(/----------\n/).
@@ -224,7 +228,7 @@ EOF
           abi_opt = '--abi armeabi-v7a'
         end
 
-        skin = 'HVGA'
+        skin = android_device ? nil : 'HVGA'
         # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
         # if File.exists?(skin_filename)
         #   old_skin_config = File.read(skin_filename)
@@ -234,7 +238,7 @@ EOF
         #   File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
         # end
 
-        puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M -s #{skin} -d "Nexus One"`
+        puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M #{"-s #{skin}" if skin} -d "#{android_device}"`
 
         if $? != 0
           puts 'Failed to create AVD.'
