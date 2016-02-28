@@ -18,6 +18,12 @@
 #   default: Nexus One
 #
 #   device: Nexus 10
+#
+#   Name of the Android emulator skin to use when creating the AVD.
+#
+#   default: HVGA
+#
+#   skin: HVGA
 
 ###################################
 #

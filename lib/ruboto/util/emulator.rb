@@ -228,7 +228,12 @@ EOF
           abi_opt = '--abi armeabi-v7a'
         end
 
-        skin = android_device ? nil : 'HVGA'
+        ruboto_config_filename = 'ruboto.yml'
+        if File.exists?(ruboto_config_filename)
+          ruboto_config = YAML.read(ruboto_config_filename)
+          skin = ruboto_config['emulator']['skin']
+        end
+        skin ||= android_device ? nil : 'HVGA'
         # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
         # if File.exists?(skin_filename)
         #   old_skin_config = File.read(skin_filename)
