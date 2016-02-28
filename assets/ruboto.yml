@@ -1,10 +1,8 @@
 ###################################
 #
-# emulator
-#   
-#    Specifies which emulator to use when running `ruboto emulator`.
-#
 # emulator:
+#
+#   Specifies which emulator to use when running `ruboto emulator`.
 #
 #   Name of the AVD to be used.  It will be created if not already present.
 #   default: "Android_#{android_version}"
@@ -12,18 +10,23 @@
 #   name: Android_4.0.3_tablet
 #
 #   Name of the Android device to be used as template.  Setting this options
-#   disables the "skin" option on AVD creation and starts the emualtor without
+#   disables the "skin" option on AVD creation and starts the emulator without
 #   the "-no-skin" option.
-#
 #   default: Nexus One
 #
 #   device: Nexus 10
 #
 #   Name of the Android emulator skin to use when creating the AVD.
-#
 #   default: HVGA
 #
 #   skin: HVGA
+#
+# Example:
+#
+# emulator:
+#   name: Android_4.0.3_tablet # default: "Android_#{android_version}"
+#   device: Nexus 10           # default: Nexus One
+#   skin: HVGA                 # default: HVGA
 
 ###################################
 #
