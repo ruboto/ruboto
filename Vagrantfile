@@ -35,7 +35,7 @@ Vagrant.configure(2) do |config|
       su - vagrant -c 'curl -sSL https://get.rvm.io | bash -s stable --ruby'
       su - vagrant -c 'mkdir -p ruboto'
       su - vagrant -c 'rsync -acPuv --exclude adb_logcat.log --exclude /tmp /vagrant/* ruboto/'
-      sudo apt-get autoremove
+      sudo apt-get -y autoremove
     SHELL
   end
 
