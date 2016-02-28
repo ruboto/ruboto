@@ -555,18 +555,14 @@ file APK_FILE => APK_DEPENDENCIES do |t|
   build_apk(t, false)
 end
 
-# FIXME(uwe): Simplify when we stop supporting 32-bit development environments
-DEFAULT_MIN_DX_HEAP_SIZE = RbConfig::CONFIG['host_cpu'] =~ /86/ ? 3072 : 4096
-# EMXIF
-MINIMUM_DX_HEAP_SIZE = (ENV['DX_HEAP_SIZE'] && ENV['DX_HEAP_SIZE'].to_i) || DEFAULT_MIN_DX_HEAP_SIZE
 task :patch_dex do
   DX_FILENAMES.each do |dx_filename|
     new_dx_content = File.read(dx_filename).dup
     xmx_pattern = ON_WINDOWS ? /^set defaultXmx=-Xmx(\d+)(M|m|G|g|T|t)/ : /^defaultMx="-Xmx(\d+)(M|m|G|g|T|t)"/
     if new_dx_content =~ xmx_pattern &&
-        ($1.to_i * 1024 ** {M: 2, G: 3, T: 4}[$2.upcase.to_sym]) < MINIMUM_DX_HEAP_SIZE*1024**2
-      puts "Increasing max heap space from #{$1}#{$2} to #{MINIMUM_DX_HEAP_SIZE}M in #{dx_filename}"
-      new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{MINIMUM_DX_HEAP_SIZE}M} : %Q{defaultMx="-Xmx#{MINIMUM_DX_HEAP_SIZE}M"}
+        ($1.to_i * 1024 ** {M: 2, G: 3, T: 4}[$2.upcase.to_sym]) < dex_heap_size*1024**2
+      puts "Increasing max heap space from #{$1}#{$2} to #{dex_heap_size}M in #{dx_filename}"
+      new_xmx_value = ON_WINDOWS ? %Q{set defaultXmx=-Xmx#{dex_heap_size}M} : %Q{defaultMx="-Xmx#{dex_heap_size}M"}
       new_dx_content.sub!(xmx_pattern, new_xmx_value)
       File.open(dx_filename, 'w') { |f| f << new_dx_content } rescue puts "\n!!! Unable to increase dx heap size !!!\n\n"
     end
@@ -996,4 +992,17 @@ end
 def stop_app
   output = `adb shell ps | grep #{package} | awk '{print $2}' | xargs adb shell kill`
   output !~ /Operation not permitted/
+end
+
+def dex_heap_size
+  # FIXME(uwe): Simplify when we stop supporting 32-bit development environments
+  default   = RbConfig::CONFIG['host_cpu'] =~ /86/ ? 3072 : 4096
+  heap_size = ruboto_config_file[:dex_heap_size]
+  # EMXIF
+  @heap_size ||= (ENV['DX_HEAP_SIZE'] && ENV['DX_HEAP_SIZE'].to_i) || (heap_size && heap_size.to_i) || default
+end
+
+def ruboto_config_file
+  return {} unless File.exist? RUBOTO_CONFIG_FILE
+  @ruboto_config_file ||= (YAML.load(File.read(RUBOTO_CONFIG_FILE)) || {})
 end
