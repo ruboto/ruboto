@@ -265,7 +265,7 @@ EOF
         new_avd_config = old_avd_config.dup
         new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) do |m|
           if $1.to_i < heap_size
-            puts "Changed property: vm.heapSize=#{heap_size}"
+            puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
             "vm.heapSize=#{heap_size}"
           else
             m

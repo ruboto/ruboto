@@ -683,6 +683,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
     old_verbose, $VERBOSE = $VERBOSE, nil
     begin
       Object.const_set('RUBY_ENGINE', 'jruby')
+      Object.const_set('JRUBY_VERSION', '7.7.7') unless defined?(JRUBY_VERSION)
     ensure
       $VERBOSE = old_verbose
     end
