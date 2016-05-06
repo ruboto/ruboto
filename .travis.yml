@@ -4,8 +4,9 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools-23.0.1
-
+    - build-tools-23.0.3
+    - platform-tools
+    - tools
 os:
   - linux
 #  - osx

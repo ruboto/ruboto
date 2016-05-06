@@ -230,8 +230,8 @@ EOF
 
         ruboto_config_filename = 'ruboto.yml'
         if File.exists?(ruboto_config_filename)
-          ruboto_config = YAML.read(ruboto_config_filename)
-          skin = ruboto_config['emulator']['skin']
+          ruboto_config = YAML.load_file(ruboto_config_filename)
+          skin = ruboto_config['emulator'] && ruboto_config['emulator']['skin']
         end
         skin ||= android_device ? nil : 'HVGA'
         # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
