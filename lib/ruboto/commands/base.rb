@@ -110,8 +110,61 @@ module Ruboto
                   exit_failure!
                 end
                 Dir.chdir path do
+                  FileUtils.rm_f "build.xml" # we keep everything else, but we want Gradle, not Ant.
+                  template = <<EOF
+// The below variables:
+// - signingStoreLocation
+// - signingStorePassword
+// - signingStoreKeyAlias
+// - signingStoreKeyPassword
+// are usually defined in `~/.gradle/gradle.properties`,
+// allowing us to sign a release apk, intended to be put in the play store
+
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.0.0'
+  }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+  compileSdkVersion 21
+  buildToolsVersion "21.0.2"
+
+  defaultConfig {
+    targetSdkVersion 21
+    multiDexEnabled true
+  }
+  signingConfigs {
+    release {
+      storeFile file(signingStoreLocation)
+      storePassword signingStorePassword
+      keyAlias signingKeyAlias
+      keyPassword signingKeyPassword
+    }
+  }
+  buildTypes.release.signingConfig = signingConfigs.release
+}
+
+dependencies {
+  compile 'com.android.support:multidex:1.0.0'
+}
+
+EOF
+                  File.write 'build.gradle', template
+                  system 'gradle wrapper' # generate `gradlew` script
+                  unless $? == 0
+                    puts 'Gradle is required!'
+                    puts 'Get it from http://gradle.org/gradle-download/'
+                    exit_failure!
+                  end
                   FileUtils.rm_f "src/#{package.gsub '.', '/'}/#{activity}.java"
-                  puts "Removed file #{"src/#{package.gsub '.', '/'}/#{activity}"}.java"
+                  puts "Removed file src/#{package.gsub '.', '/'}/#{activity}.java"
                   FileUtils.rm_f 'res/layout/main.xml'
                   puts 'Removed file res/layout/main.xml'
                   verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2').gsub(/([a-z\d])([A-Z])/, '\1 \2')
@@ -171,7 +224,7 @@ module Ruboto
               argument('class') {
                 required
                 alternatives = Dir[File.join(Ruboto::ASSETS, 'src/Inheriting*.java')].map { |f| File.basename(f)[10..-6] } - %w(Class)
-                description "the Android Class that you want: #{alternatives[0..-2].map { |c| "#{c}, " }}or #{alternatives[-1]}"
+                description "the Android Class that you want: #{alternatives[0..-2].map { |c| \"#{c}, \" }}or #{alternatives[-1]}"
                 validate { |v| alternatives.include? v }
               }
 
