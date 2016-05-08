@@ -173,7 +173,7 @@ EOF
                   unless $? == 0
                     puts 'Gradle is required!'
                     puts 'Get it from http://gradle.org/gradle-download/'
-                    exit_failure!
+                    throw "Gradle is required."
                   end
                   FileUtils.rm_f "src/#{package.gsub '.', '/'}/#{activity}.java"
                   puts "Removed file src/#{package.gsub '.', '/'}/#{activity}.java"
