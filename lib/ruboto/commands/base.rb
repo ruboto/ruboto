@@ -133,13 +133,21 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 21
-  buildToolsVersion "21.0.2"
+  compileSdkVersion 23
+  buildToolsVersion "23.0.2"
 
   defaultConfig {
-    targetSdkVersion 21
+    targetSdkVersion 23
     multiDexEnabled true
+    archivesBaseName = new XmlParser().parse("res/values/strings.xml").resources.string["@app_name"]
   }
+
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+    }
+  }
+
   signingConfigs {
     release {
       storeFile file(signingStoreLocation)
@@ -148,12 +156,16 @@ android {
       keyPassword signingKeyPassword
     }
   }
+
+
   buildTypes.release.signingConfig = signingConfigs.release
 }
 
 dependencies {
   compile 'com.android.support:multidex:1.0.0'
 }
+
+
 
 EOF
                   File.write 'build.gradle', template
