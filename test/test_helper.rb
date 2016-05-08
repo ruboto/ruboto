@@ -200,7 +200,7 @@ class Minitest::Test
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
     #    template_dir << "_ruby_version_#{ruby_version.to_s.gsub('.', '_')}" if ruby_version
     template_dir << "_example_#{example}" if example
-    template_dir << "_bundle_#{[*bundle].map(&:to_s).join('_').gsub(/[{}\[\]'",:=~<>\/ ]+/, '_')}" if bundle
+    template_dir << "_bundle_#{[*bundle].map(&:to_s).join('_').gsub(/[{}\[\]',:=~<>\/ ]+/, '_')}" if bundle
     template_dir << '_updated' if update
     template_dir << '_standalone' if standalone
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
@@ -245,7 +245,6 @@ class Minitest::Test
           if included_stdlibs || excluded_stdlibs || heap_alloc
             sleep 1
             write_ruboto_yml(included_stdlibs, excluded_stdlibs, heap_alloc, ruby_version)
-            system 'rake build_xml jruby_adapter'
           end
           if standalone
             system "#{RUBOTO_CMD} gen jruby #{JRUBY_JARS_VERSION}"

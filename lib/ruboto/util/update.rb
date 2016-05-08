@@ -19,13 +19,6 @@ module Ruboto
 
       def update_android(target_level = nil)
         root = Dir.getwd
-        build_xml_file = "#{root}/build.xml"
-        if File.exists? build_xml_file
-          ant_script = File.read(build_xml_file)
-          name = REXML::Document.new(ant_script).root.attributes['name']
-        else
-          name = File.basename(root)
-        end
         update_project_properties_target_level("#{root}/project.properties", target_level)
         system "android update project -p #{root} -n #{name} --subprojects"
         raise "android update project failed with return code #{$?}" unless $? == 0
@@ -414,7 +407,6 @@ module Ruboto
           FileUtils.touch 'ruboto.yml'
         end
         Dir['src/*_activity.rb'].each { |f| FileUtils.touch(f) }
-        system 'rake build_xml jruby_adapter ruboto_activity'
       end
 
       def read_ruboto_version
