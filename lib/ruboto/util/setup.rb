@@ -7,7 +7,7 @@ module Ruboto
       include Ruboto::Util::Verify
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
-      SDK_DOWNLOAD_PAGE = 'http://developer.android.com/sdk/index.html?hl=sk'
+      SDK_DOWNLOAD_PAGE = 'https://developer.android.com/studio/index.html'
       ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
