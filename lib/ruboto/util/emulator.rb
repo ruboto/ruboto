@@ -21,7 +21,7 @@ module Ruboto
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
           if ON_MAC_OS_X
-            emulator_cmd = '-m "emulator64-(arm|x86)"'
+            emulator_cmd = '-m "emulator64-(crash-service|arm|x86)"'
           elsif ON_LINUX
             emulator_cmd = '-r "emulator64-(arm|x86)"'
           else
