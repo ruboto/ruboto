@@ -7,8 +7,9 @@ module Ruboto
       include Ruboto::Util::Verify
       REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
-      SDK_DOWNLOAD_PAGE = 'https://developer.android.com/studio/index.html'
       ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
+      SDK_DOWNLOAD_PAGE = 'https://developer.android.com/studio/index.html'
+      HAXM_URL = 'https://software.intel.com/sites/default/files/managed/38/16'
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
       WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
@@ -643,8 +644,7 @@ module Ruboto
       end
 
       def download_haxm(accept_all, haxm_file_name)
-        uri = 'https://software.intel.com/sites/default/files/managed/dd/21'
-        download_third_party(haxm_file_name, uri)
+        download_third_party(haxm_file_name, HAXM_URL)
         unzip(accept_all, "#{android_haxm_directory}/#{haxm_file_name}", "#{android_haxm_directory}")
         FileUtils.rm_f "#{android_haxm_directory}/#{haxm_file_name}"
       end
