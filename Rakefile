@@ -550,7 +550,7 @@ task '.travis.yml' do
   [
       ['CURRENT', [nil]],
       ['FROM_GEM', [:MASTER, :STABLE]],
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.25', '1.7.24', '1.7.13']],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.25', '1.7.13']],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
@@ -560,7 +560,6 @@ task '.travis.yml' do
         (1..test_parts).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
 
-          next if v == :MASTER # FIXME(uwe):  Remove when master branch is green.
           next if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
           next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 22 && platform == 'STANDALONE' && v == :STABLE # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
@@ -568,7 +567,7 @@ task '.travis.yml' do
           next if api == 17 # FIXME(uwe):  Remove when Android 4.2 is green.
           next if api == 16 # FIXME(uwe):  Remove when Android 4.1 is green.
 
-          if v == '1.7.25'
+          if v == :MASTER || v == :STABLE
             allow_failures << line.gsub('-', '- env:')
           end
           matrix << line
