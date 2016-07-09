@@ -4,11 +4,6 @@ require 'net/http'
 class RubotoSetupTest < Minitest::Test
   include Ruboto::Util::Setup
 
-  SDK_DOWNLOAD_PAGE = 'https://developer.android.com/studio/index.html'
-  REPOSITORY_BASE = 'http://dl-ssl.google.com/android/repository'
-  ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
-  HAXM_URL = 'https://software.intel.com/sites/default/files/managed/dd/21'
-
   def test_if_sdk_page_still_exists?
     uri = URI.parse(SDK_DOWNLOAD_PAGE)
     res = Net::HTTP.get_response(uri)

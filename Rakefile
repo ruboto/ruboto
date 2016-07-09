@@ -541,7 +541,7 @@ end
 task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
-  test_parts = 4
+  test_parts = 3
   matrix = ''
   allow_failures = ''
 
@@ -550,11 +550,11 @@ task '.travis.yml' do
   [
       ['CURRENT', [nil]],
       ['FROM_GEM', [:MASTER, :STABLE]],
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.24', '1.7.13']],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.25', '1.7.24', '1.7.13']],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
-      # FIXME(uwe):  Nettbuss uses api level 15.  Keep for 2016.
+      # FIXME(uwe):  Nettbuss uses api level 15.  Keep for 2017.
       # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
       [23, 22, 21, 19, 17, 16, 15].each do |api|
         (1..test_parts).each do |n|
@@ -568,7 +568,7 @@ task '.travis.yml' do
           next if api == 17 # FIXME(uwe):  Remove when Android 4.2 is green.
           next if api == 16 # FIXME(uwe):  Remove when Android 4.1 is green.
 
-          if false
+          if v == '1.7.25'
             allow_failures << line.gsub('-', '- env:')
           end
           matrix << line

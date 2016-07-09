@@ -21,7 +21,7 @@ module Ruboto
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
           if ON_MAC_OS_X
-            emulator_cmd = '-m "emulator64-(arm|x86)"'
+            emulator_cmd = '-m "emulator64-(crash-service|arm|x86)"'
           elsif ON_LINUX
             emulator_cmd = '-r "emulator64-(arm|x86)"'
           else
@@ -230,8 +230,8 @@ EOF
 
         ruboto_config_filename = 'ruboto.yml'
         if File.exists?(ruboto_config_filename)
-          ruboto_config = YAML.read(ruboto_config_filename)
-          skin = ruboto_config['emulator']['skin']
+          ruboto_config = YAML.load_file(ruboto_config_filename)
+          skin = ruboto_config['emulator'] && ruboto_config['emulator']['skin']
         end
         skin ||= android_device ? nil : 'HVGA'
         # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
@@ -263,7 +263,14 @@ EOF
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
         new_avd_config = old_avd_config.dup
-        new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
+        new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) do |m|
+          if $1.to_i < heap_size
+            puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
+            "vm.heapSize=#{heap_size}"
+          else
+            m
+          end
+        end
         # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
         # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
         # add_property(new_avd_config, 'hw.keyboard.lid', 'no')
