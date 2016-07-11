@@ -6,7 +6,7 @@ android:
   components:
     - build-tools-23.0.3
     - platform-tools
-    - tools
+    - tools-25.1.7
 jdk: oraclejdk8
 os:
   - linux
@@ -24,6 +24,9 @@ env:
   global:
     - DX_HEAP_SIZE=2048
     - RUBOTO_UPDATE_EXAMPLES=0
+    - TEST_SCRIPT=test/minimal_app_test.rb
+    - TEST_NAME=test_minimal_apk_succeeds_tests
+
 
   matrix:
     - ANDROID_TARGET=19 RUBOTO_PLATFORM=STANDALONE TEST_PART=1of3 JRUBY_JARS_VERSION=MASTER
