@@ -548,8 +548,8 @@ task '.travis.yml' do
   # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2016.
   # FIXME(uwe):  Test all of these that work
   [
-      ['CURRENT', [nil]],
-      ['FROM_GEM', [:MASTER, :STABLE]],
+      # ['CURRENT', [nil]],                # Running standalone is the most important way now
+      # ['FROM_GEM', [:MASTER, :STABLE]], # Running standalone is the most important way now
       ['STANDALONE', [:MASTER, :STABLE, '1.7.25', '1.7.13']],
   ].each do |platform, versions|
     versions.each do |v|
