@@ -2,6 +2,10 @@
 [![Build Status](https://travis-ci.org/ruboto/ruboto.svg?branch=master)](https://travis-ci.org/ruboto/ruboto)
 [![Code Climate](https://codeclimate.com/github/ruboto/ruboto.svg)](https://codeclimate.com/github/ruboto/ruboto)
 
+<div style="float: right">
+[![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.x.x/dist/gratipay.png)](https://gratipay.com/ruboto/)
+</div>
+
 Ruboto (JRuby on Android) is a platform for developing full stand-alone apps for
 Android using the Ruby language and libraries.  It includes support libraries
 and generators for creating projects, classes, tests, and more.  The complete
