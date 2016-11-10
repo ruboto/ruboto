@@ -1,6 +1,4 @@
-<a href="https://gratipay.com/ruboto/" class="rich-diff-level-one">
-<img src="https://camo.githubusercontent.com/dcd1e367172f3fa649a334e1ee6fb334f16ed8d8/68747470733a2f2f63646e2e7261776769742e636f6d2f67726174697061792f67726174697061792d62616467652f322e782e782f646973742f67726174697061792e706e67" alt="Support via Gratipay" data-canonical-src="https://cdn.rawgit.com/gratipay/gratipay-badge/2.x.x/dist/gratipay.png" align="right" style="max-width:100%;">
-</a>
+<a href="https://gratipay.com/ruboto/" class="rich-diff-level-one"><img src="https://camo.githubusercontent.com/dcd1e367172f3fa649a334e1ee6fb334f16ed8d8/68747470733a2f2f63646e2e7261776769742e636f6d2f67726174697061792f67726174697061792d62616467652f322e782e782f646973742f67726174697061792e706e67" alt="Support via Gratipay" data-canonical-src="https://cdn.rawgit.com/gratipay/gratipay-badge/2.x.x/dist/gratipay.png" align="right" style="max-width:100%;"></a>
 
 [![Gem Version](https://badge.fury.io/rb/ruboto.svg)](http://badge.fury.io/rb/ruboto)
 [![Build Status](https://travis-ci.org/ruboto/ruboto.svg?branch=master)](https://travis-ci.org/ruboto/ruboto)
