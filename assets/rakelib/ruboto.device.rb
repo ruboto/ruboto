@@ -30,7 +30,8 @@ def package_installed?(package_name, apk_file)
 end
 
 def scripts_path(package)
-  @sdcard_path ||= "/mnt/sdcard/Android/data/#{package}/files/scripts"
+  app_data_path = `adb shell run-as org.ruboto.test_app pwd`.chomp
+  @sdcard_path ||= "#{app_data_path}/files/scripts"
 end
 
 def mark_update(time = Time.now)
@@ -75,7 +76,7 @@ def install_apk(package, apk_file)
     output = nil
     install_retry_count = 0
     begin
-      timeout install_timeout do
+      Timeout.timeout install_timeout do
         output = `adb install -r "#{apk_file}" 2>&1`
       end
     rescue Timeout::Error

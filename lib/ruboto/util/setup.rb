@@ -9,7 +9,6 @@ module Ruboto
       REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-10.xml"
       ADDONS_URL = "#{REPOSITORY_BASE}/extras/intel/addon.xml"
       SDK_DOWNLOAD_PAGE = 'https://developer.android.com/studio/index.html'
-      HAXM_URL = 'https://software.intel.com/sites/default/files/managed/38/16'
 
       RUBOTO_GEM_ROOT = File.expand_path '../../../..', __FILE__
       WINDOWS_ELEVATE_CMD = "#{RUBOTO_GEM_ROOT}/bin/elevate_32.exe -c -w"
@@ -111,23 +110,27 @@ module Ruboto
         end
       end
 
-      def get_tools_version(type='tool', repo_url = REPOSITORY_URL)
+      def get_tools_version(type='tool', repo_url = REPOSITORY_URL, host_os = nil)
         require 'rexml/document'
         require 'open-uri'
 
         doc = REXML::Document.new(open(repo_url))
-        doc.root.elements.to_a("sdk:#{type}/sdk:revision").map do |t|
-          major = t.elements['sdk:major']
-          minor = t.elements['sdk:minor']
-          micro = t.elements['sdk:micro']
-          prev = t.elements['sdk:preview']
+        doc.root.elements.to_a("sdk:#{type}").map do |t|
+          r = t.elements['sdk:revision']
+          major = r.elements['sdk:major']
+          minor = r.elements['sdk:minor']
+          micro = r.elements['sdk:micro']
+          prev = r.elements['sdk:preview']
           next if prev
+          url = t.elements['sdk:archives/sdk:archive/sdk:url'].text
+          pkg_host_os = t.elements['sdk:archives/sdk:archive/sdk:host-os'].text
+          next if host_os && pkg_host_os != host_os
           version = major.text
           version += ".#{minor.text}" if minor
           version += ".#{micro.text}" if micro
           version += "_rc#{prev.text}" if prev
-          version
-        end.compact.sort_by { |v| Gem::Version.new(v.gsub('_', '.')) }.last
+          [version, url]
+        end.compact.sort_by { |v| Gem::Version.new(v[0].gsub('_', '.')) }.last
       end
 
       def get_android_sdk_version
@@ -625,26 +628,21 @@ module Ruboto
       end
 
       def get_new_haxm_filename
-        version = get_tools_version('extra', ADDONS_URL)
-        zip_version = version.gsub(/\./, '_')
-        haxm_file_name = ''
-
         case android_package_os_id
-        when MAC_OS_X
-          haxm_file_name = "haxm-macosx_v#{zip_version}.zip"
-        when WINDOWS
-          haxm_file_name = "haxm-windows_v#{zip_version}.zip"
+        when MAC_OS_X, WINDOWS
+          version, file_name = get_tools_version('extra', ADDONS_URL, android_package_os_id)
         when LINUX
           puts 'HAXM installation on Linux is not supported, yet.'
-          version = ''
+          file_name = version = ''
         else
           raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
         end
-        return haxm_file_name, version
+
+        return file_name, version
       end
 
       def download_haxm(accept_all, haxm_file_name)
-        download_third_party(haxm_file_name, HAXM_URL)
+        download_third_party(haxm_file_name, ADDONS_URL)
         unzip(accept_all, "#{android_haxm_directory}/#{haxm_file_name}", "#{android_haxm_directory}")
         FileUtils.rm_f "#{android_haxm_directory}/#{haxm_file_name}"
       end
