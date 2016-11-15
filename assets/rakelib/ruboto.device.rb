@@ -109,7 +109,7 @@ def install_apk(package, apk_file)
   output = nil
   install_retry_count = 0
   begin
-    timeout install_timeout do
+    Timeout.timeout install_timeout do
       output = `adb install "#{apk_file}" 2>&1`
     end
   rescue Timeout::Error
