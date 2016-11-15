@@ -12,10 +12,11 @@ fi
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
-ANDROID_TARGETS="23 22 21 19 17 16 15" # We should cover at least 90% of the market
-PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
+ANDROID_TARGETS="23 22 21 19 17 15" # We should cover at least 90% of the market
+# PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
+PLATFORM_MODES="STANDALONE"
 # FIXME(uwe): Add $MASTER when fixed: https://github.com/ruboto/ruboto/issues/737
-STANDALONE_JRUBY_VERSIONS="$STABLE 1.7.24 1.7.13"
+STANDALONE_JRUBY_VERSIONS="1.7.24 1.7.13"
 FROM_GEM_JRUBY_VERSIONS="$STABLE"
 # EMXIF
 RUBOTO_UPDATE_EXAMPLES=1
