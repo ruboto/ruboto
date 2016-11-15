@@ -989,7 +989,7 @@ end
 # Triggers reload of updated scripts and restart of the current activity
 def reload_scripts(scripts)
   s = scripts.map { |s| s.gsub(/[&;]/) { |m| "&#{m[0]}" } }.join(';')
-  cmd = %Q{adb shell am broadcast -a android.intent.action.VIEW -e reload '#{s}'}
+  cmd = %Q{adb shell "am broadcast -a android.intent.action.VIEW -e reload '#{s}'"}
   puts cmd
   system cmd
 end

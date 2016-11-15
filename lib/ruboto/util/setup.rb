@@ -791,7 +791,7 @@ module Ruboto
 
               old_config = File.read(config_file_name)
               new_config = old_config.dup
-              new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, ''
+              new_config.gsub! /\n*# BEGIN Ruboto setup\n.*?\n# END Ruboto setup\n*/m, "\n\n"
               new_config << "\n\n# BEGIN Ruboto setup\n"
               new_config << "source #{rubotorc}\n"
               new_config << "# END Ruboto setup\n\n"

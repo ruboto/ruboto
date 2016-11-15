@@ -547,6 +547,7 @@ module Ruboto
                     'jni',
                     'jnr/**/*windows*',
                     'jnr/constants/platform/fake',
+                    'jnr/enxio',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
                     'jnr/ffi/mapper',

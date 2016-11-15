@@ -10,6 +10,7 @@
 class Object
   def with_large_stack(opts = {}, &block)
     opts = {:size => opts} if opts.is_a? Integer
+    opts = {:name => opts} if opts.is_a? String
     opts = {:name => 'Block with large stack'}.update(opts)
     exception = nil
     result = nil
@@ -23,6 +24,7 @@ end
 class Thread
   def self.with_large_stack(opts = {}, &block)
     opts = {:size => opts} if opts.is_a? Integer
+    opts = {:name => opts} if opts.is_a? String
     stack_size_kb = opts.delete(:size) || 64
     name = opts.delete(:name) || 'Thread with large stack'
     raise "Unknown option(s): #{opts.inspect}" unless opts.empty?
