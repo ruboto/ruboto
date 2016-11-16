@@ -4,7 +4,7 @@ PATH
     ruboto (1.5.0.dev)
       main (~> 5.2)
       net-telnet (~> 0.1.1)
-      rake (~> 10.0)
+      rake (~> 11.3)
       rubyzip (~> 1.0)
 
 GEM
@@ -13,7 +13,7 @@ GEM
     arrayfields (4.9.2)
     chronic (0.10.2)
     coderay (1.1.1)
-    fattr (2.2.2)
+    fattr (2.3.0)
     main (5.3.2)
       arrayfields (>= 4.7.4)
       chronic (>= 0.6.2)
@@ -24,11 +24,11 @@ GEM
     method_source (0.8.2)
     minitest (5.8.4)
     net-telnet (0.1.1)
-    pry (0.10.3)
+    pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rake (10.5.0)
+    rake (11.3.0)
     rubyzip (1.2.0)
     slop (3.6.0)
 
@@ -40,4 +40,4 @@ DEPENDENCIES
   ruboto!
 
 BUNDLED WITH
-   1.11.2
+   1.13.6

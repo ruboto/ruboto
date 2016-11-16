@@ -251,19 +251,25 @@ EOF
         end
         patch_config_ini(avd_home, heap_size)
 
-        # hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
-        # if File.exists?(hw_config_file_name)
-        #   old_hw_config = File.read(hw_config_file_name)
-        #   new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) { |m| $1.to_i < heap_size ? "vm.heapSize=#{heap_size}" : m }
-        #   File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
-        # end
+        hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
+        if File.exists?(hw_config_file_name)
+          old_hw_config = File.read(hw_config_file_name)
+          new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) do |m|
+            if $1.to_i < heap_size
+              puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
+              "vm.heapSize=#{heap_size}"
+            else
+              m
+            end
+          end
+          File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
+        end
       end
 
       def patch_config_ini(avd_home, heap_size)
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
-        new_avd_config = old_avd_config.dup
-        new_avd_config.gsub!(/vm.heapSize=([0-9]*)/) do |m|
+        new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) do |m|
           if $1.to_i < heap_size
             puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
             "vm.heapSize=#{heap_size}"
