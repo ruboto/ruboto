@@ -1,4 +1,5 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
+require_relative '../assets/rakelib/ruboto.device'
 
 class RakeTest < Minitest::Test
   def setup
@@ -27,7 +28,7 @@ class RakeTest < Minitest::Test
     # assert_equal apk_timestamp, File.mtime("bin/#{APP_NAME}-debug.apk"), 'APK should not have been rebuilt'
     # EMXIF
 
-    assert_match %r{^/sdcard/Android/data/#{PACKAGE}/files/scripts$}, `adb shell ls -d /sdcard/Android/data/#{PACKAGE}/files/scripts`.chomp
+    assert_match %r{^#{scripts_path(PACKAGE)}$}, `adb shell ls -d #{scripts_path(PACKAGE)}`.chomp
   end
 
   def test_that_apk_is_not_built_if_nothing_has_changed

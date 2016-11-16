@@ -31,6 +31,9 @@ end
 
 def scripts_path(package)
   app_data_path = `adb shell run-as org.ruboto.test_app pwd`.chomp
+  # if $? != 0 || app_data_path =~ /No such file or directory/
+  #   app_data_path = "/mnt/sdcard/Android/data/#{package}"
+  # end
   @sdcard_path ||= "#{app_data_path}/files/scripts"
 end
 
