@@ -274,8 +274,8 @@ EOF
         # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
         # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
         # add_property(new_avd_config, 'hw.keyboard.lid', 'no')
-        add_property(new_avd_config, 'hw.lcd.density', '160')
-        add_property(new_avd_config, 'hw.mainKeys', 'no')
+        # add_property(new_avd_config, 'hw.lcd.density', '160')
+        # add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
         File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
       end

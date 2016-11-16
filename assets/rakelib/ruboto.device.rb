@@ -29,15 +29,19 @@ def package_installed?(package_name, apk_file)
       installed_timestamp >= File.mtime(apk_file))
 end
 
+# the scripts path is different on different Android versions and devices...
 def scripts_path(package)
-  app_data_path = `adb shell 'echo $EXTERNAL_STORAGE/Android/data/#{package}'`.chomp
-  if $? != 0 || !device_path_exists?(app_data_path)
-    app_data_path = `adb shell run-as #{package} pwd`.chomp
-    if $? != 0 || !device_path_exists?(app_data_path)
+  external_storage = `adb shell 'echo $EXTERNAL_STORAGE'`.chomp
+  app_data_path = "#{external_storage}/Android/data/#{package}"
+  if external_storage.empty?
+    puts "external storage not found: #{app_data_path.inspect}"
+    app_data_path = `adb shell run-as #{package} pwd`
+    if app_data_path =~ /Permission denied/
+      puts "internal storage not found: #{app_data_path.inspect}"
       app_data_path = "/mnt/sdcard/Android/data/#{package}"
     end
   end
-  @sdcard_path ||= "#{app_data_path}/files/scripts"
+  "#{app_data_path}/files/scripts"
 end
 
 def mark_update(time = Time.now)
@@ -145,26 +149,18 @@ def uninstall_apk(package_name, apk_file)
   end
 end
 
-def update_scripts(package)
-  # FIXME(uwe): Simplify when we stop supporting Android 2.3
-  if sdk_level < 15
-    scripts_path(package).split('/').tap do |parts|
-      parts.size.times do |i|
-        path = parts[0..i].join('/')
-        puts(`adb shell mkdir #{path}`) unless device_path_exists?(path)
-      end
-    end
-  else
-    unless device_path_exists?(scripts_path(package))
-      puts(`adb shell run-as #{package} mkdir -p #{scripts_path(package)}`)
-    end
-  end
-  # EMXIF
+def make_device_path(package, path)
+  puts `adb shell #{"run-as #{package}" if sdk_level >= 23} mkdir -p #{path}`
+  device_path_exists?(path)
+end
 
-  unless device_path_exists?(scripts_path(package))
-    raise "Unable to create device scripts dir: #{scripts_path(package)}"
+def update_scripts(package)
+  scripts_path = scripts_path(package)
+  if !device_path_exists?(scripts_path) && !make_device_path(package, scripts_path)
+    raise "Unable to create device scripts dir: #{scripts_path}"
   end
-  last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
+  mark_time = File.exists?(UPDATE_MARKER_FILE) ? File.read(UPDATE_MARKER_FILE) : '1970-01-01T00:00:00'
+  last_update = Time.parse(mark_time)
   Dir.chdir('src') do
     source_files = Dir['**/*.rb']
     changed_files = source_files.select { |f| !File.directory?(f) && File.mtime(f) >= last_update && f !~ /~$/ }
@@ -172,7 +168,7 @@ def update_scripts(package)
       puts 'Pushing files to apk public file area:'
       changed_files.each do |script_file|
         print "#{script_file}: "; $stdout.flush
-        system "adb push #{script_file} #{scripts_path(package)}/#{script_file}"
+        system "adb push #{script_file} #{scripts_path}/#{script_file}"
       end
       mark_update
       return changed_files
