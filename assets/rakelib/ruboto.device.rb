@@ -31,9 +31,9 @@ end
 
 def scripts_path(package)
   app_data_path = `adb shell 'echo $EXTERNAL_STORAGE/Android/data'`.chomp
-  if $? != 0
+  if $? != 0 || !device_path_exists?(app_data_path)
     app_data_path = `adb shell run-as #{package} pwd`.chomp
-    if $? != 0
+    if $? != 0 || !device_path_exists?(app_data_path)
       app_data_path = "/mnt/sdcard/Android/data/#{package}"
     end
   end
@@ -155,7 +155,9 @@ def update_scripts(package)
       end
     end
   else
-    puts(`adb shell mkdir -p #{scripts_path(package)}`) unless device_path_exists?(scripts_path(package))
+    unless device_path_exists?(scripts_path(package))
+      puts(`adb shell run-as #{package} mkdir -p #{scripts_path(package)}`)
+    end
   end
   # EMXIF
 
