@@ -30,7 +30,7 @@ def package_installed?(package_name, apk_file)
 end
 
 def scripts_path(package)
-  app_data_path = `adb shell 'echo $EXTERNAL_STORAGE/Android/data'`.chomp
+  app_data_path = `adb shell 'echo $EXTERNAL_STORAGE/Android/data/#{package}'`.chomp
   if $? != 0 || !device_path_exists?(app_data_path)
     app_data_path = `adb shell run-as #{package} pwd`.chomp
     if $? != 0 || !device_path_exists?(app_data_path)
