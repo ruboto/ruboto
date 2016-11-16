@@ -161,7 +161,9 @@ def update_scripts(package)
   end
   # EMXIF
 
-  raise "Unable to create device scripts dir: #{scripts_path(package)}" unless device_path_exists?(scripts_path(package))
+  unless device_path_exists?(scripts_path(package))
+    raise "Unable to create device scripts dir: #{scripts_path(package)}"
+  end
   last_update = File.exists?(UPDATE_MARKER_FILE) ? Time.parse(File.read(UPDATE_MARKER_FILE)) : Time.parse('1970-01-01T00:00:00')
   Dir.chdir('src') do
     source_files = Dir['**/*.rb']
