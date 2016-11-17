@@ -545,7 +545,7 @@ task '.travis.yml' do
   matrix = ''
   allow_failures = ''
 
-  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2016.
+  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2017.
   # FIXME(uwe):  Test all of these that work
   [
       # ['CURRENT', [nil]],                # Running standalone is the most important way now
@@ -556,20 +556,20 @@ task '.travis.yml' do
       # FIXME(uwe):  Test the newest and most common api levels
       # FIXME(uwe):  Nettbuss uses api level 15.  Keep for 2017.
       # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
-      [23, 22, 21, 19, 17, 15].each do |api|
+      [24, 23, 22, 21, 19, 15].each do |api|
         (1..test_parts).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
 
-          next if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
+          next if v == :MASTER || v == :STABLE
           next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 22 && platform == 'STANDALONE' && v == :STABLE # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 21 # FIXME(uwe):  Remove when Android 5.0 is green.
-          next if api == 17 # FIXME(uwe):  Remove when Android 4.2 is green.
 
-          if v == :MASTER || v == :STABLE
-            # allow_failures << line.gsub('-', '- env:')
-            next
-          end
+          next if v == '1.7.13' && api > 19
+
+          (allow_failures << line.gsub('-', '- env:')) if api == 24 # FIXME(uwe):  Remove when Android 7.0 is green.
+          (allow_failures << line.gsub('-', '- env:')) if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
+
           matrix << line
         end
       end
