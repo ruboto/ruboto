@@ -341,45 +341,31 @@ module Ruboto
 
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
-          # FIXME(uwe):  Remove the special case 'L' when Android L is released.
-          if target == 'L'
-            min_sdk = 'L'
+          sdk_element = verify_manifest.elements['uses-sdk']
+          if project_api_level
+            min_sdk ||= project_api_level
+            target ||= project_api_level
+          elsif sdk_element
+            min_sdk ||= sdk_element.attributes['android:minSdkVersion']
+            target ||= sdk_element.attributes['android:targetSdkVersion']
           else
-            sdk_element = verify_manifest.elements['uses-sdk']
-            if project_api_level
-              min_sdk ||= project_api_level
-              target ||= project_api_level
-            elsif sdk_element
-              min_sdk ||= sdk_element.attributes['android:minSdkVersion']
-              target ||= sdk_element.attributes['android:targetSdkVersion']
-            else
-              min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
-              target ||= MINIMUM_SUPPORTED_SDK_LEVEL
-            end
-
-            # FIXME(uwe): Remove the L special case when Android L has been released
-            if min_sdk == 'L'
-              puts "Android L detected."
-            elsif min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-              min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
-            end
-
-            if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-              target = MINIMUM_SUPPORTED_SDK_LEVEL
-            end
+            min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
+            target ||= MINIMUM_SUPPORTED_SDK_LEVEL
           end
-          # EMXIF
+
+          if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+            min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
+          end
+
+          if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+            target = MINIMUM_SUPPORTED_SDK_LEVEL
+          end
 
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
 
-          # FIXME(uwe): Simplify when we stop supporting Android 2.3.x
-          # FIXME(uwe): Simplify when Android L is released
-          if min_sdk == 'L' || min_sdk.to_i >= 11
-            app_element.attributes['android:hardwareAccelerated'] ||= 'true'
-            app_element.attributes['android:largeHeap'] ||= 'true'
-          end
-          # EMXIF
+          app_element.attributes['android:hardwareAccelerated'] ||= 'true'
+          app_element.attributes['android:largeHeap'] ||= 'true'
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoActivity']"]
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}
