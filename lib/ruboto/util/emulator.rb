@@ -261,34 +261,29 @@ EOF
         hw_config_file_name = "#{avd_home}/hardware-qemu.ini"
         if File.exists?(hw_config_file_name)
           old_hw_config = File.read(hw_config_file_name)
-          new_hw_config = old_hw_config.gsub(/vm.heapSize=([0-9]*)/) do |m|
-            if $1.to_i < heap_size
-              puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
-              "vm.heapSize=#{heap_size}"
-            else
-              m
-            end
-          end
+          new_hw_config = old_hw_config.dup
+          update_heap_size(new_hw_config, heap_size)
           File.write(hw_config_file_name, new_hw_config) if new_hw_config != old_hw_config
+        end
+      end
+
+      def update_heap_size(new_hw_config, heap_size)
+        old_heap = read_property(new_hw_config, 'vm.heapSize')
+        if old_heap.nil? || old_heap.to_i < heap_size
+          add_property(new_hw_config, 'vm.heapSize', heap_size)
         end
       end
 
       def patch_config_ini(avd_home, heap_size)
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
-        new_avd_config = old_avd_config.gsub(/vm.heapSize=([0-9]*)/) do |m|
-          if $1.to_i < heap_size
-            puts "Changed property: vm.heapSize=#{heap_size} (was #{$1})"
-            "vm.heapSize=#{heap_size}"
-          else
-            m
-          end
-        end
+        new_avd_config = old_avd_config.dup
+        update_heap_size(new_avd_config, heap_size)
         # add_property(new_avd_config, 'hw.device.manufacturer', 'Generic')
         # add_property(new_avd_config, 'hw.device.name', '3.2" HVGA slider (ADP1)')
         # add_property(new_avd_config, 'hw.keyboard.lid', 'no')
         # add_property(new_avd_config, 'hw.lcd.density', '160')
-        # add_property(new_avd_config, 'hw.mainKeys', 'no')
+        add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
         File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
       end
@@ -297,17 +292,23 @@ EOF
         `adb get-state`.gsub(/^WARNING:.*$/, '').chomp == 'device'
       end
 
-      def add_property(new_avd_config, property_name, value)
+      def read_property(config, property_name)
         pattern = /^#{property_name}=(.*)$/
-        property = "#{property_name}=#{value}"
-        if new_avd_config =~ pattern
-          if $1 != value
-            new_avd_config.gsub! pattern, property
-            puts "Changed property: #{property}"
+        config =~ pattern
+        $1
+      end
+
+      def add_property(config, property_name, value)
+        pattern = /^#{property_name}=(.*)$/
+        new_property = "#{property_name}=#{value}"
+        if (old_property = read_property(config, property_name))
+          if old_property != value
+            config.gsub! pattern, new_property
+            puts "Changed property: #{new_property} (was #{old_property.inspect})"
           end
         else
-          new_avd_config << "#{property}\n"
-          puts "Added property: #{property}"
+          config << "#{new_property}\n"
+          puts "Added property: #{new_property}"
         end
       end
     end
