@@ -232,7 +232,7 @@ EOF
         ruboto_config_filename = 'ruboto.yml'
         if File.exists?(ruboto_config_filename)
           ruboto_config = YAML.load_file(ruboto_config_filename)
-          skin = ruboto_config['emulator'] && ruboto_config['emulator']['skin']
+          skin = ruboto_config && ruboto_config['emulator'] && ruboto_config['emulator']['skin']
         end
         skin ||= '768x1280'
         # skin_filename = "#{Ruboto::SdkLocations::ANDROID_HOME}/platforms/android-#{sdk_level}/skins/#{skin}/hardware.ini"
