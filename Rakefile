@@ -286,7 +286,6 @@ EOF
       old_blog_posts = Dir[RELEASE_BLOG_GLOB] - [RELEASE_BLOG]
       sh "git rm -f #{old_blog_posts.join(' ')}" unless old_blog_posts.empty?
       File.write(RELEASE_BLOG, header + release_doc)
-      sh "git add -f #{RELEASE_BLOG}"
     end
   end
 end
@@ -365,10 +364,10 @@ task :release => [:clean, README_FILE, :release_docs, :gem] do
   output = `git status --porcelain`
   raise "Workspace not clean!\n#{output}" unless output.empty?
   Dir.chdir WEB_DIR do
+    sh "git add -f #{RELEASE_BLOG}"
+    `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}" -- #{RELEASE_BLOG}`
     output = `git status --porcelain`
     raise "Web workspace not clean!\n#{output}" unless output.empty?
-    sh "git add -f #{RELEASE_BLOG}"
-    `git commit -m "* Added release blog for Ruboto #{Ruboto::VERSION}"`
     sh 'git push'
   end
   sh "git tag #{Ruboto::VERSION}"
