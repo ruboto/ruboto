@@ -62,7 +62,7 @@ module Ruboto
         loop do
           emulator_opts = '-partition-size 256'
           emulator_opts << ' -noskin' unless android_device
-          emulator_opts << ' -no-snapshot-load' if no_snapshot
+          emulator_opts << ' -no-snapshot' if no_snapshot
           if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
             emulator_opts << ' -no-window -no-audio'
           end
@@ -93,23 +93,14 @@ module Ruboto
 
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
           manifest_file = 'AndroidManifest.xml'
-
-          # FIXME: (uwe) remove debug output
-          puts manifest_file
-          p(File.exists?(manifest_file))
-          p(File.read(manifest_file) =~ /largeHeap/) if File.exists?(manifest_file)
-          # EMXIF
-
           large_heap = (!File.exists?(manifest_file)) || (File.read(manifest_file) =~ /largeHeap/)
           heap_size = large_heap ? 256 : 64
 
-          unless File.exists? avd_home
+          if File.exists? avd_home
+            patch_config_ini(avd_home, heap_size, no_snapshot)
+          else
             create_avd(avd_home, avd_name, android_device, heap_size, sdk_level)
             new_snapshot = true
-          else
-            # FIXME(uwe):  Patch old emulator AVDs.  Remove December 2016.
-            patch_config_ini(avd_home, heap_size)
-            # EMXIF
           end
 
           puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
@@ -132,7 +123,7 @@ module Ruboto
           `killall -0 #{emulator_cmd} 2> /dev/null`
           if $? != 0
             puts 'Unable to start the emulator.  Retrying without loading snapshot.'
-            system "emulator -no-snapshot-load -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
+            system "emulator -no-snapshot -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
             10.times do |i|
               `killall -0 #{emulator_cmd} 2> /dev/null`
               if $? == 0
@@ -274,7 +265,7 @@ EOF
         end
       end
 
-      def patch_config_ini(avd_home, heap_size)
+      def patch_config_ini(avd_home, heap_size, no_snapshot)
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
         new_avd_config = old_avd_config.dup
@@ -285,6 +276,7 @@ EOF
         # add_property(new_avd_config, 'hw.lcd.density', '160')
         add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
+        add_property(new_avd_config, 'snapshot.present', (!no_snapshot).to_s)
         File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
       end
 
