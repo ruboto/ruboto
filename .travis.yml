@@ -4,7 +4,7 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools
+    - build-tools-25.0.0
     - platform-tools
     - tools
 jdk: oraclejdk8
