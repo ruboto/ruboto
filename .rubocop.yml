@@ -1,0 +1,64 @@
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  TargetRubyVersion: 2.1
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  Include:
+    - 'Gemfile'
+    - 'Rakefile'
+  Exclude:
+    - 'tmp/**/*'
+
+Style/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+  IndentationWidth: 4
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/Encoding:
+  Enabled: true
+
+Style/FirstParameterIndentation:
+  IndentationWidth: 4
+
+Style/FormatString:
+  EnforcedStyle: percent
+
+Style/IndentArray:
+  IndentationWidth: 4
+
+# Configuration parameters: EnforcedStyle, SupportedStyles, IndentationWidth.
+# SupportedStyles: special_inside_parentheses, consistent, align_braces
+Style/IndentHash:
+  IndentationWidth: 4
+
+Style/IndentAssignment:
+  IndentationWidth: 4
+
+Style/Lambda:
+  EnforcedStyle: literal
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+  IndentationWidth: 4
+
+Style/MultilineOperationIndentation:
+  EnforcedStyle: indented
+  IndentationWidth: 4
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/PerlBackrefs:
+  Enabled: false
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/VariableNumber:
+  Enabled: false
