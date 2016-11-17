@@ -265,7 +265,7 @@ EOF
         end
       end
 
-      def patch_config_ini(avd_home, heap_size, no_snapshot)
+      def patch_config_ini(avd_home, heap_size, no_snapshot = nil)
         avd_config_file_name = "#{avd_home}/config.ini"
         old_avd_config = File.read(avd_config_file_name)
         new_avd_config = old_avd_config.dup
@@ -276,7 +276,9 @@ EOF
         # add_property(new_avd_config, 'hw.lcd.density', '160')
         add_property(new_avd_config, 'hw.mainKeys', 'no')
         # add_property(new_avd_config, 'hw.sdCard', 'yes')
-        add_property(new_avd_config, 'snapshot.present', (!no_snapshot).to_s)
+        unless no_snapshot.nil?
+          add_property(new_avd_config, 'snapshot.present', (!no_snapshot).to_s)
+        end
         File.write(avd_config_file_name, new_avd_config) if new_avd_config != old_avd_config
       end
 
