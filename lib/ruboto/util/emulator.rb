@@ -209,14 +209,7 @@ EOF
         has_x86 = abis.find { |a| a =~ /x86/ }
         has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
 
-        # FIXME(uwe): Remove this check when HAXM is available on travis
-        # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
-        # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
-        # HAXM is not available on travis-ci.
-        if ON_TRAVIS && sdk_level.to_i >= 22
-          abi_opt = '--abi armeabi-v7a'
-          # EMXIF
-        elsif has_x86
+        if has_x86
           if has_x86_64
             abi_opt = '--abi x86_64'
           else
