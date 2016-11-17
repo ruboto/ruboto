@@ -93,9 +93,13 @@ module Ruboto
 
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
           manifest_file = 'AndroidManifest.xml'
+
+          # FIXME: (uwe) remove debug output
           puts manifest_file
-          p(!File.exists?(manifest_file))
-          p(File.read(manifest_file) =~ /largeHeap/)
+          p(File.exists?(manifest_file))
+          p(File.read(manifest_file) =~ /largeHeap/) if File.exists?(manifest_file)
+          # EMXIF
+
           large_heap = (!File.exists?(manifest_file)) || (File.read(manifest_file) =~ /largeHeap/)
           heap_size = large_heap ? 256 : 64
 
