@@ -206,6 +206,7 @@ EOF
         end
 
         abis = target.slice(/(?<=ABIs : ).*/).split(', ')
+        puts "Available abis: #{abis.inspect}"
         has_x86 = abis.find { |a| a =~ /x86/ }
         has_x86_64 = has_x86 && abis.find { |a| a =~ /x86_64/ }
 
