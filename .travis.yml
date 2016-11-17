@@ -4,9 +4,9 @@ language: android
 sudo: false
 android:
   components:
+    - tools # needs to be first to get new package versions
     - build-tools-25.0.0
     - platform-tools
-    - tools
 jdk: oraclejdk8
 os:
   - linux
