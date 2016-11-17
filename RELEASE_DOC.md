@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.4.1 released!
+Subject: [ANN] Ruboto 1.5.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.4.1.
+The Ruboto team is pleased to announce the release of Ruboto 1.5.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,44 +8,59 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.4.1:
+New in version 1.5.0:
 
-Bugfixes for the 1.4.0 release.
+We now have properly working Ruby SSL and HTTPS!  You need jruby-jars
+1.7.25 and Android 4.4 or better :)
+
+API Changes:
+
+* Issue #713 Add support for Android 5.1 Lollipop
+* Issue #768 Add support for Android 6.0 Marshmallow
 
 Features:
 
-* Issue #779 Differentiate the default dex heap size for 32-bit systems
-* Issue #780 Update "rake log" to handle output from Android 6.0
-* Issue #782 Do not commit the keystore by default
-* Issue #789 Add support for JRuby 1.7.24
+* Issue #791 Update RubotoCore to ActiveRecord 4.2
+* Issue #792 Set emulator name in ruboto.yml
+* Issue #795 Set emulator device name in ruboto.yml
+* Issue #797 Set emulator skin name in ruboto.yml
+* Issue #798 ruboto.yml emulator config (donv)
+* Issue #805 Add support for the new emulator 2.0
 
 Bugfixes:
 
-* Issue #783 Don't report changing emulator properties when they are not
-  actually changed
-* Issue #784 Improve haxm install with/without "-y" and "--upgrade"
-  options (donv)
-* Issue #785 Setup never finds Platform SDK
-* Issue #786 Use $ANDROID_HOME instead of android executable location to
-  find platforms (ahills)
-* Issue #790 Fix "--update" option for "ruboto setup"
-
-Performance:
-
-* Issue #787 Refresh the benchmark server layout and design
+* Issue #726 Any reference to net/https throws LoadError for
+  org/bouncycastle/bcpkix-jdk15on/1.47/bcpkix-jdk15on-1.47
+* Issue #793 Fix OpenSSL
+* Issue #796 Adds a setting in "ruboto.yml" for the desired
+  dex_heap_size (lucasallan)
+* Issue #807 Fix SDK_DOWNLOAD_PAGE link (LucianoPC)
 
 Support:
 
-* Issue #749 Invalid maximum heap size: -Xmx4096M
-* Issue #761 JDK 7
+* Issue #802 java.lang.UnsupportedOperationException: can't load this
+  type of class file
+* Issue #803 (NoMethodError) undefined method 'current' for
+  Java::JavaLang::Thread:Class
+
+Community:
+
+* Issue #666 Set up donations and sponsoring of the Ruboto project
+
+Pull requests:
+
+* Issue #794 Test ssl (donv)
+* Issue #812 Set ANDROID_EMULATOR_FORCE_32BIT to fix broken build
+  (celeduc)
 
 Internal:
 
-* Issue #773 Release 1.4.1
+* Issue #775 Release 1.5.0
+* Issue #808 Bug fixes (donv)
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=40
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=41
 
 
 Installation:
