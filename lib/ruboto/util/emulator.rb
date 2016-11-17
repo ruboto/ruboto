@@ -214,13 +214,15 @@ EOF
         # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
         # HAXM is not available on travis-ci.
         if ON_TRAVIS && sdk_level.to_i >= 22
-          abi_opt = '--abi armeabi-v7a'
-          # EMXIF
-        elsif has_x86
+          has_x86_64 = nil
+        end
+        # EMXIF
+
+        if has_x86
           if has_x86_64
-            abi_opt = '--abi x86_64'
+            abi_opt = "--abi #{has_x86_64}"
           else
-            abi_opt = '--abi x86'
+            abi_opt = "--abi #{has_x86}"
           end
         else
           abi_opt = '--abi armeabi-v7a'
