@@ -822,6 +822,24 @@ rescue Exception
   raise
 end
             END_CODE
+          elsif jar =~ %r{concurrent_ruby_ext.jar$}
+            puts "Adding JRuby extension library initialization."
+            jar_load_code = <<-END_CODE
+require 'jruby'
+puts 'Starting ConcurrentRubyExtService'
+public
+begin
+  with_large_stack(2048) do
+    Java::ConcurrentRubyExtService.new.basicLoad(JRuby.runtime)
+  end
+rescue Exception
+  puts "Exception starting ConcurrentRubyExtService"
+  puts "\#{$!.class} \#{$!.message}"
+  puts $!
+  puts $!.backtrace.join("\n")
+  raise
+end
+            END_CODE
           else
             jar_load_code = ''
           end
