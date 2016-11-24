@@ -707,8 +707,12 @@ module Ruboto
         if accept_all || a == 'Y' || a.empty?
           android_cmd = windows? ? 'android.bat' : 'android'
 
-          # FIXME(uwe):  Does this pattern work for all api levels?
-          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},sys-img-x86-#{api_level.downcase},sys-img-x86_64-#{api_level.downcase},sys-img-armeabi-v7a-#{api_level.downcase} --all"
+          # FIXME: (uwe) Change to only install the best image for this system corresponding to the abi chosen when creating an emulator
+          level = api_level[/\d+/]
+          abi_list = %w(x86 x86_64 armeabi-v7a arm64-v8a).product(%w(android google_apis))
+              .map{|arch, vendor| "sys-img-#{arch}-#{vendor}-#{level}"}
+          puts "Installing #{abi_list}"
+          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},#{abi_list.join(',')} --all"
           # EMXIF
 
           update_sdk(update_cmd, accept_all)
