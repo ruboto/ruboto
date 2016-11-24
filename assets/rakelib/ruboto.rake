@@ -231,16 +231,8 @@ file File.basename(MANIFEST_FILE) => MANIFEST_FILE
 file MANIFEST_FILE => PROJECT_PROPS_FILE do
   old_manifest = File.read(MANIFEST_FILE)
   manifest = old_manifest.dup
-
-  # FIXME(uwe):  Remove 'L' special case when Android L has been released.
-  if sdk_level == 21
-    manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#{$1}L#{$2}" }
-    manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#{$1}L#{$2}" }
-  else
-    manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#{$1}#{sdk_level}#{$2}" }
-    manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#{$1}#{sdk_level}#{$2}" }
-  end
-  # EMXIF
+  manifest.sub!(/(android:minSdkVersion=').*?(')/) { "#{$1}#{sdk_level}#{$2}" }
+  manifest.sub!(/(android:targetSdkVersion=').*?(')/) { "#{$1}#{sdk_level}#{$2}" }
 
   if manifest != old_manifest
     puts "\nUpdating #{File.basename MANIFEST_FILE} with target from #{File.basename PROJECT_PROPS_FILE}\n\n"
@@ -938,7 +930,7 @@ end
 # Methods
 
 def sdk_level
-  File.read(PROJECT_PROPS_FILE).scan(/(?:target=android-)(\d+)/)[0][0].to_i
+  File.read(PROJECT_PROPS_FILE).scan(/(?:target=(?:android|google_apis)-)(\d+)/)[0][0].to_i
 end
 
 def strings(name)

@@ -19,10 +19,10 @@ module Ruboto
       include Ruboto::SdkVersions
       include Ruboto::Util::Verify
 
-      # FIXME(uwe): Remove "L" special case
-      API_LEVEL_PATTERN = /^android-(\d+|L)$/
-      API_NUMBER_PATTERN = /(\d+|L)/
-      # EMXIF
+      API_LEVEL_PATTERN = /^(android|google_apis)-(\d+)$/
+      API_NUMBER_PATTERN = /^(\d+)$/
+      VERSION_HELP_TEXT = "(e.g., 'android-19' or '19' for kitkat, " \
+          "'google_apis-23' for Android 6.0 with Google APIs)"
 
       def self.main
         Main do
@@ -55,13 +55,13 @@ module Ruboto
               option('target', 't') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
-                description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
+                description "Android version to target #{VERSION_HELP_TEXT}"
                 cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
                 validate { |t| t =~ API_LEVEL_PATTERN }
               }
               option('min-sdk') {
                 argument :required
-                description "Minimum android version supported. (e.g., 'android-19' or '19' for kitkat)"
+                description "Minimum android version supported. #{VERSION_HELP_TEXT}"
                 cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
                 validate { |t| t =~ API_LEVEL_PATTERN }
               }
@@ -95,11 +95,13 @@ module Ruboto
                 force = params['force'].value
 
                 abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if !force && File.exists?(path)
-                abort "Target must match android-<number>: got #{target}" unless target =~ API_LEVEL_PATTERN
+                unless target =~ API_LEVEL_PATTERN
+                  abort "Target must match #{API_LEVEL_PATTERN}: got #{target}"
+                end
 
-                # FIXME(uwe): Remove the 'L' special case when Android L has been released
-                abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1 == 'L' || $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
-                # EMXIF
+                if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}"
+                end
 
                 root = File.expand_path(path)
                 puts "\nGenerating Android app #{name} in #{root}..."
@@ -359,7 +361,7 @@ module Ruboto
               # FIXME(uwe): Change to cast to integer for better comparison
               option('target', 't') {
                 argument :required
-                description "Android version to target (e.g., 'android-19' or '19' for kitkat)"
+                description "Android version to target #{VERSION_HELP_TEXT}"
                 cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
                 validate { |t| t =~ API_LEVEL_PATTERN }
               }
@@ -387,11 +389,13 @@ module Ruboto
                 end
 
                 if (target = params['target'].value)
-                  abort "Target must match android-<number>: got #{target}" unless target =~ API_LEVEL_PATTERN
+                  unless target =~ API_LEVEL_PATTERN
+                    abort "Target must match #{API_LEVEL_PATTERN}: got #{target}"
+                  end
 
-                  # FIXME(uwe):  Remove the 'L' special case when Android L has been released.
-                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}" unless $1 == 'L' || $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
-                  # EMXIF
+                  unless $2.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL
+                    abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}"
+                  end
 
                   target_level = target[API_NUMBER_PATTERN]
                   update_android(target_level)
@@ -437,7 +441,7 @@ module Ruboto
             include Ruboto::Util::Setup
 
             option('target', 't') {
-              description 'sets the target Android API level to set up for (example: -t android-16)'
+              description "sets the target Android API level to set up for #{VERSION_HELP_TEXT}"
               argument :required
               default DEFAULT_TARGET_SDK
               arity -1

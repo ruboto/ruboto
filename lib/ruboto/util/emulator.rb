@@ -10,7 +10,7 @@ module Ruboto
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
       ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin/
       ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
-      ON_TRAVIS = ENV['TRAVIS'] == 'true'
+      ON_TRAVIS = ENV['TRAVIS'] == 'true' # TODO: (uwe) Maybe check "/dev/kvm" ?
 
       def sdk_level_name(sdk_level)
         Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level.to_i] || sdk_level
@@ -21,7 +21,7 @@ module Ruboto
         STDOUT.sync = true
         if RbConfig::CONFIG['host_cpu'] == 'x86_64'
           if ON_MAC_OS_X
-            emulator_cmd = '-m "emulator64-(crash-service|arm|x86)"'
+            emulator_cmd = '-m "emulator64-(crash-service|arm|x86)|qemu-system-x86_64"'
           elsif ON_LINUX
             emulator_cmd = '-r "emulator64-(arm|x86)"'
           else
@@ -36,23 +36,26 @@ module Ruboto
         android_device = (emulator_config && emulator_config['device']) || "Nexus One"
         new_snapshot = false
 
-        if `adb devices` =~ /emulator-5554/
-          t = Net::Telnet.new('Host' => 'localhost', 'Port' => 5554, 'Prompt' => /^OK\n|^KO:/)
-          t.waitfor(/Android Console:/)
-          output = ''
-          t.cmd('avd name') { |c| output << c }
-          t.close
-          if output =~ /(.*)\nOK\n/
-            running_avd_name = $1
-            if running_avd_name == avd_name
-              puts "Emulator #{avd_name} is already running."
-              return
+        running_emulators = `adb devices`.scan(/emulator-(\d+)/)
+        if running_emulators.any?
+          running_emulators.each do |port, _|
+            t = Net::Telnet.new('Host' => 'localhost', 'Port' => port, 'Prompt' => /^OK\n|^KO:/)
+            t.waitfor(/Android Console:/)
+            output = ''
+            t.cmd('avd name') { |c| output << c }
+            if output =~ /(.*)\nOK\n/
+              running_avd_name = $1
+              if running_avd_name == avd_name
+                puts "Emulator #{avd_name} is already running."
+                return
+              else
+                puts "Emulator #{running_avd_name} is running."
+              end
             else
-              puts "Emulator #{running_avd_name} is running."
+              puts "Unexpected response from emulator: #{output.inspect}"
+              puts 'Assuming wrong emulator is running.'
             end
-          else
-            puts "Unexpected response from emulator: #{output.inspect}"
-            puts 'Assuming wrong emulator is running.'
+            t.close
           end
         else
           puts 'No emulator is running.'
@@ -67,29 +70,7 @@ module Ruboto
             emulator_opts << ' -no-window -no-audio'
           end
 
-          `killall -0 #{emulator_cmd} 2> /dev/null`
-          if $? == 0
-            `killall #{emulator_cmd}`
-            10.times do |i|
-              `killall -0 #{emulator_cmd} 2> /dev/null`
-              if $? != 0
-                break
-              end
-              if i == 3
-                print 'Waiting for emulator to die: ...'
-              elsif i > 3
-                print '.'
-              end
-              sleep 1
-            end
-            puts
-            `killall -0 #{emulator_cmd} 2> /dev/null`
-            if $? == 0
-              puts 'Emulator still running.'
-              `killall -9 #{emulator_cmd}`
-              sleep 1
-            end
-          end
+          kill_all_emulators(emulator_cmd)
 
           avd_home = "#{ENV['HOME'].gsub('\\', '/')}/.android/avd/#{avd_name}.avd"
           manifest_file = 'AndroidManifest.xml'
@@ -193,6 +174,32 @@ EOF
         puts "Emulator #{avd_name} started OK."
       end
 
+      def kill_all_emulators(emulator_cmd)
+        `killall -0 #{emulator_cmd} 2> /dev/null`
+        if $? == 0
+          `killall #{emulator_cmd}`
+          10.times do |i|
+            `killall -0 #{emulator_cmd} 2> /dev/null`
+            if $? != 0
+              break
+            end
+            if i == 3
+              print 'Waiting for emulator to die: ...'
+            elsif i > 3
+              print '.'
+            end
+            sleep 1
+          end
+          puts
+          `killall -0 #{emulator_cmd} 2> /dev/null`
+          if $? == 0
+            puts 'Emulator still running.'
+            `killall -9 #{emulator_cmd}`
+            sleep 1
+          end
+        end
+      end
+
       def create_avd(avd_home, avd_name, android_device, heap_size, sdk_level)
         puts "Creating AVD #{avd_name}"
 
@@ -216,6 +223,7 @@ EOF
         # HAXM is not available on travis-ci.
         if ON_TRAVIS && sdk_level.to_i >= 22
           has_x86_64 = nil
+          has_x86 = nil
         end
         # EMXIF
 
