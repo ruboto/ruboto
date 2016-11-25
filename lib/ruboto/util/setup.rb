@@ -709,7 +709,9 @@ module Ruboto
 
           # FIXME: (uwe) Change to only install the best image for this system corresponding to the abi chosen when creating an emulator
           level = api_level[/\d+/]
-          abi_list = %w(x86 x86_64 armeabi-v7a arm64-v8a).product(%w(android google_apis))
+          arches = %w(x86 x86_64 armeabi-v7a arm64-v8a)
+          arches -= %w(x86 x86_64) if ON_TRAVIS && sdk_level.to_i >= 22 # TODO: (uwe) Remove when travis can run x86 images
+          abi_list = arches.product(%w(android google_apis))
               .map{|arch, vendor| "sys-img-#{arch}-#{vendor}-#{level}"}
           puts "Installing #{abi_list}"
           update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},#{abi_list.join(',')} --all"

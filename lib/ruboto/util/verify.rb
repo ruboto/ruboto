@@ -4,6 +4,8 @@ require 'yaml'
 module Ruboto
   module Util
     module Verify
+      ON_TRAVIS = ENV['TRAVIS'] == 'true' # TODO: (uwe) Maybe check "/dev/kvm" ?
+
       ###########################################################################
       #
       # Verify the presence of important components

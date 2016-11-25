@@ -10,7 +10,6 @@ module Ruboto
       ON_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/i)
       ON_MAC_OS_X = RbConfig::CONFIG['host_os'] =~ /^darwin/
       ON_LINUX = RbConfig::CONFIG['host_os'] =~ /linux/
-      ON_TRAVIS = ENV['TRAVIS'] == 'true' # TODO: (uwe) Maybe check "/dev/kvm" ?
 
       def sdk_level_name(sdk_level)
         Ruboto::SdkVersions::API_LEVEL_TO_VERSION[sdk_level.to_i] || sdk_level
