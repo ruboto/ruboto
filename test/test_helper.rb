@@ -1,6 +1,7 @@
 lib = File.dirname(File.dirname(__FILE__)) + '/lib'
 $:.unshift(lib) unless $:.include?(lib)
-require 'bundler/setup'
+require 'rubygems'
+gem "minitest"
 require 'minitest/autorun'
 require 'fileutils'
 require 'yaml'
