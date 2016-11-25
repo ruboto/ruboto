@@ -38,25 +38,32 @@ module Ruboto
 
         running_emulators = `adb devices`.scan(/emulator-(\d+)/)
         if running_emulators.any?
+          desired_emulator_is_running = false
           running_emulators.each do |port, _|
             t = Net::Telnet.new('Host' => 'localhost', 'Port' => port, 'Prompt' => /^OK\n|^KO:/)
-            t.waitfor(/Android Console:/)
-            output = ''
-            t.cmd('avd name') { |c| output << c }
+            intro = t.waitfor(/^OK\n/)
+            if %r{Android Console: you can find your <auth_token> in\s+'(?<auth_file>.*)'} =~ intro
+              auth_token = File.read auth_file
+              t.cmd("auth #{auth_token}")
+            end
+            output = t.cmd('avd name')
             if output =~ /(.*)\nOK\n/
               running_avd_name = $1
               if running_avd_name == avd_name
                 puts "Emulator #{avd_name} is already running."
-                return
+                desired_emulator_is_running = true
               else
-                puts "Emulator #{running_avd_name} is running."
+                puts "Stopping #{running_avd_name} emulator."
+                t.cmd('kill')
               end
             else
               puts "Unexpected response from emulator: #{output.inspect}"
               puts 'Assuming wrong emulator is running.'
+              t.cmd('kill')
             end
             t.close
           end
+          return if desired_emulator_is_running
         else
           puts 'No emulator is running.'
         end
@@ -294,7 +301,7 @@ EOF
       end
 
       def device_ready?
-        `adb get-state`.gsub(/^WARNING:.*$/, '').chomp == 'device'
+        `adb get-state 2>&1`.gsub(/^WARNING:.*$/, '').chomp == 'device'
       end
 
       def read_property(config, property_name)

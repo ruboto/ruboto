@@ -51,7 +51,6 @@ module Ruboto
                 argument :required
                 description 'Path to where you want your app.  Defaults to the last part of the package name.'
               }
-              # FIXME(uwe): Change to cast to integer for better comparison
               option('target', 't') {
                 argument :required
                 defaults DEFAULT_TARGET_SDK
@@ -486,7 +485,7 @@ module Ruboto
               argument :required
               default(api_level) if api_level
               cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
-              validate { |t| t =~ API_LEVEL_PATTERN && sdk_level_name($1.to_i) }
+              validate { |t| t =~ API_LEVEL_PATTERN && sdk_level_name($2.to_i) }
             }
 
             option('no-snapshot', 's') {

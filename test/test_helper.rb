@@ -1,7 +1,6 @@
 lib = File.dirname(File.dirname(__FILE__)) + '/lib'
 $:.unshift(lib) unless $:.include?(lib)
-require 'rubygems'
-gem "minitest"
+require 'bundler/setup'
 require 'minitest/autorun'
 require 'fileutils'
 require 'yaml'
@@ -55,18 +54,7 @@ module RubotoTest
   def self.version_from_device
     puts 'Reading OS version from device/emulator'
     system 'adb wait-for-device'
-    IO.popen('adb bugreport').each_line do |line|
-      if line =~ /sdk-eng (.*?) .*? .*? test-keys/
-        version = $1
-        api_level = VERSION_TO_API_LEVEL[version]
-        raise "Unknown version: #{version}" if api_level.nil?
-        return "android-#{api_level}"
-      end
-      if line =~ /\[ro\.build\.version\.sdk\]: \[(\d+)\]/
-        return $1
-      end
-    end
-    raise 'Unable to read device/emulator apilevel'
+    `adb shell getprop ro.build.version.sdk`
   end
 
   def uninstall_jruby_jars_gem
@@ -256,6 +244,8 @@ class Minitest::Test
 
       Dir.chdir APP_DIR do
         write_android_manifest
+        sleep 1
+        FileUtils.touch('project.properties')
         File.write('res/layout/dummy_layout.xml', <<-EOF)
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
