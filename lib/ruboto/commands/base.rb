@@ -20,7 +20,7 @@ module Ruboto
       include Ruboto::Util::Verify
 
       API_LEVEL_PATTERN = /^(android|google_apis)-(\d+)$/
-      API_NUMBER_PATTERN = /^(\d+)$/
+      API_NUMBER_PATTERN = /(\d+)/
       VERSION_HELP_TEXT = "(e.g., 'android-19' or '19' for kitkat, " \
           "'google_apis-23' for Android 6.0 with Google APIs)"
 

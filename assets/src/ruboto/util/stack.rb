@@ -31,8 +31,8 @@ class Thread
     block_with_logging = proc do
       begin
         block.call
-      rescue Exception
-        STDERR.puts "Exception in #{name}: #{$!}\n#{$!.backtrace.join("\n")}"
+      rescue Exception => e
+        STDERR.puts "Exception in #{name}: #{e.class} #{e}\n#{e.backtrace.join("\n")}"
         raise
       end
     end

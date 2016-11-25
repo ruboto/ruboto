@@ -457,7 +457,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.0.5.0.SNAPSHOT')
+              if gem_version >= Gem::Version.new('9.0.5.0')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
