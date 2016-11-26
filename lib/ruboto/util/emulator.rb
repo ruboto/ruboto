@@ -228,6 +228,7 @@ EOF
         # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
         # HAXM is not available on travis-ci.
         if ON_TRAVIS && sdk_level.to_i >= 22
+          abis.reject!{|a| a =~ /x86/}
           has_x86_64 = nil
           has_x86 = nil
         end
@@ -240,7 +241,7 @@ EOF
             abi_opt = "--abi #{has_x86}"
           end
         else
-          abi_opt = '--abi armeabi-v7a'
+          abi_opt = "--abi #{abis.first || 'armeabi-v7a'}"
         end
 
         ruboto_config_filename = 'ruboto.yml'
