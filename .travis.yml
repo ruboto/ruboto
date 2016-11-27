@@ -19,7 +19,7 @@ before_install:
   - MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
-  - if [ "$ANDROID_TARGET" == "23" ] ; then ls -l $ANDROID_HOME/platforms ; rm -rf $ANDROID_HOME/platforms/android-{8,1*} ; fi
+  - if [ "$ANDROID_TARGET" == "23" ] ; then ls -l $ANDROID_HOME/platforms ; rm -rf $ANDROID_HOME/platforms/android-1* ; ls -l $ANDROID_HOME/platforms ; fi
 
 env:
   global:
