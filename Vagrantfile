@@ -36,6 +36,7 @@ Vagrant.configure(2) do |config|
       su - vagrant -c 'mkdir -p ruboto'
       su - vagrant -c 'rsync -acPuv --exclude adb_logcat.log --exclude /tmp /vagrant/* ruboto/'
       sudo apt-get -y autoremove
+      sudo timedatectl set-timezone #{Time.now.zone}
     SHELL
   end
 

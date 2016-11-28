@@ -538,10 +538,13 @@ task :get_jruby_jars_snapshots do
   end
 end
 
+def test_parts(api)
+  (api == 23) ? 6 : 3
+end
+
 task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
-  test_parts = 3
   matrix = ''
   allow_failures = ''
 
@@ -557,8 +560,8 @@ task '.travis.yml' do
       # FIXME(uwe):  Nettbuss uses api level 15.  Keep for 2017.
       # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
       [25, 24, 23, 22, 21, 19, 15].each do |api|
-        (1..test_parts).each do |n|
-          line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
+        (1..test_parts(api)).each do |n|
+          line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts(api)}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
 
           next if v == :MASTER || v == :STABLE
           next if api == 25 # FIXME(uwe):  Remove when Android 7.1 is green.  No runnable ABIs on travis.
