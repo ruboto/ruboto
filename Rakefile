@@ -556,9 +556,8 @@ task '.travis.yml' do
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
-      # FIXME(uwe):  Nettbuss uses api level 15.  Keep for 2017.
       # FIXME(uwe):  https://github.com/ruboto/ruboto/issues/426
-      [25, 24, 23, 22, 21, 19, 15].each do |api|
+      [25, 24, 23, 22, 21, 19].each do |api|
         (1..test_parts(api)).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts(api)}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
 
@@ -568,8 +567,6 @@ task '.travis.yml' do
           next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 22 && platform == 'STANDALONE' && v == :STABLE # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 21 # FIXME(uwe):  Remove when Android 5.0 is green.
-
-          next if v == '1.7.13' && api > 19
 
           (allow_failures << line.gsub('-', '- env:')) if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
 
