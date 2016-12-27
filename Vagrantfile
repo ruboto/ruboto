@@ -27,7 +27,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define 'ubuntu' do |ubuntu|
-    ubuntu.vm.box = 'ubuntu/trusty64'
+    ubuntu.vm.box = 'ubuntu/precise64'
     ubuntu.vm.provision :shell, inline: create_swap(1536)
     ubuntu.vm.provision :shell, inline: <<-SHELL
       sudo apt-get -y install git libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1

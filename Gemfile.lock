@@ -4,7 +4,7 @@ PATH
     ruboto (1.5.1.dev)
       main (~> 5.2)
       net-telnet (~> 0.1.1)
-      rake (~> 11.3)
+      rake (>= 11.3, < 13)
       rubyzip (~> 1.0)
 
 GEM
@@ -22,13 +22,13 @@ GEM
       pry (>= 0.9)
     map (6.6.0)
     method_source (0.8.2)
-    minitest (5.9.1)
+    minitest (5.10.1)
     net-telnet (0.1.1)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rake (11.3.0)
+    rake (12.0.0)
     rubyzip (1.2.0)
     slop (3.6.0)
 

@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.default_executable = 'ruboto'
   s.add_runtime_dependency 'main', '~>5.2'
   s.add_runtime_dependency 'net-telnet', '~>0.1.1'
-  s.add_runtime_dependency 'rake', '~>11.3'
+  s.add_runtime_dependency 'rake', '>=11.3', '<13'
   s.add_runtime_dependency 'rubyzip', '~>1.0'
   s.add_development_dependency 'minitest', '~>5.5'
 
