@@ -53,7 +53,7 @@ echo "PIDs: Boss: $BOSSPID, Timer: $TIMERPID"
 trap "killtree $TIMERPID" EXIT
 # END TIMEOUT #
 
-rake install
+rake reinstall
 ruboto setup -y -t $ANDROID_TARGET
 source ~/.rubotorc
 

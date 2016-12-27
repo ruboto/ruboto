@@ -73,7 +73,8 @@ module Ruboto
           emulator_opts << ' -noskin' unless android_device
           emulator_opts << ' -no-snapshot' if no_snapshot
           if !ON_MAC_OS_X && !ON_WINDOWS && ENV['DISPLAY'].nil?
-            emulator_opts << ' -no-window -no-audio'
+            emulator_opts << ' -no-window'
+            ENV['QEMU_AUDIO_DRV'] = 'none'
           end
 
           kill_all_emulators(emulator_cmd)
@@ -91,7 +92,13 @@ module Ruboto
           end
 
           puts "Start emulator #{avd_name}#{' without snapshot' if no_snapshot}"
-          system "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
+          start_cmd = "emulator -avd #{avd_name} #{emulator_opts} #{'&' unless ON_WINDOWS}"
+
+          # FIXME: (uwe) Remove debug
+          puts start_cmd
+          # EMXIF
+
+          system start_cmd
           return if ON_WINDOWS
 
           3.times do |i|
@@ -227,7 +234,8 @@ EOF
         # FIXME(uwe): or the x86(_64) emulators don't require HAXM anymore
         # Newer Android SDK tools (V24) require HAXM to run x86 emulators.
         # HAXM is not available on travis-ci.
-        if ON_TRAVIS && sdk_level.to_i >= 22
+        avoid_x86 = ON_TRAVIS && sdk_level.to_i >= 22
+        if avoid_x86
           abis.reject!{|a| a =~ /x86/}
           has_x86_64 = nil
           has_x86 = nil
@@ -259,7 +267,7 @@ EOF
         #   File.write(skin_filename, new_skin_config) if new_skin_config != old_skin_config
         # end
 
-        puts `echo no | android create avd -a -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M #{"-s #{skin}" if skin} -d "#{android_device}"`
+        puts `echo no | android create avd #{'-a' unless avoid_x86} -n #{avd_name} -t android-#{sdk_level} #{abi_opt} -c 64M #{"-s #{skin}" if skin} -d "#{android_device}"`
 
         if $? != 0
           puts 'Failed to create AVD.'

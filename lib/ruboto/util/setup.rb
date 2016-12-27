@@ -617,7 +617,7 @@ module Ruboto
           end
           if accept_all || a == 'Y' || a.empty?
             android_cmd = windows? ? 'android.bat' : 'android'
-            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
+            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')[0]},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
