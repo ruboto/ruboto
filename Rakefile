@@ -548,12 +548,11 @@ task '.travis.yml' do
   matrix = ''
   allow_failures = ''
 
-  # FIXME(uwe):  JRuby 1.7.13 works for Nettbuss.  Keep for 2017.
   # FIXME(uwe):  Test all of these that work
   [
       # ['CURRENT', [nil]],                # Running standalone is the most important way now
       # ['FROM_GEM', [:MASTER, :STABLE]], # Running standalone is the most important way now
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.25', '1.7.13']],
+      ['STANDALONE', [:MASTER, :STABLE, '1.7.25']],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels

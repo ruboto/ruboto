@@ -12,8 +12,8 @@ fi
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
-# FIXME: (uwe) Test api level 25 in vagrant when abi arre available
-if [[ "$TRAVIS" = "true" ]] ; then
+# FIXME: (uwe) Test api level 25 in vagrant when abi are available
+if [[ "$TRAVIS" = "true" ]] ; then # Vagrant
   ANDROID_TARGETS="24 23 21 19 15" # We should cover at least 90% of the market
 else
   ANDROID_TARGETS="25 24 23 21 19 15" # We should cover at least 90% of the market
@@ -23,7 +23,7 @@ fi
 # PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 PLATFORM_MODES="STANDALONE"
 # FIXME(uwe): Add $MASTER when fixed: https://github.com/ruboto/ruboto/issues/737
-STANDALONE_JRUBY_VERSIONS="1.7.25 1.7.13"
+STANDALONE_JRUBY_VERSIONS="1.7.25"
 FROM_GEM_JRUBY_VERSIONS="$STABLE"
 # EMXIF
 RUBOTO_UPDATE_EXAMPLES=0
