@@ -40,7 +40,13 @@ module Ruboto
           desired_emulator_is_running = false
           running_emulators.each do |port, _|
             t = Net::Telnet.new('Host' => 'localhost', 'Port' => port, 'Prompt' => /^OK\n|^KO:/)
-            intro = t.waitfor(/^OK\n/)
+            begin
+              intro = t.waitfor(/^OK\n/)
+            rescue Net::ReadTimeout
+              puts "Timeout waiting for emulator intro."
+              kill_emulator(t)
+              next
+            end
             if %r{Android Console: you can find your <auth_token> in\s+'(?<auth_file>.*)'} =~ intro
               auth_token = File.read auth_file
               t.cmd("auth #{auth_token}")
@@ -49,16 +55,21 @@ module Ruboto
             if output =~ /(.*)\nOK\n/
               running_avd_name = $1
               if running_avd_name == avd_name
-                puts "Emulator #{avd_name} is already running."
-                desired_emulator_is_running = true
+                if desired_emulator_is_running
+                  puts "Stopping duplicate #{running_avd_name} emulator."
+                  kill_emulator(t)
+                else
+                  puts "Emulator #{avd_name} is already running."
+                  desired_emulator_is_running = true
+                end
               else
                 puts "Stopping #{running_avd_name} emulator."
-                t.cmd('kill')
+                kill_emulator(t)
               end
             else
               puts "Unexpected response from emulator: #{output.inspect}"
               puts 'Assuming wrong emulator is running.'
-              t.cmd('kill')
+              kill_emulator(t)
             end
             t.close
           end
@@ -185,6 +196,14 @@ EOF
         system 'adb logcat > adb_logcat.log &'
 
         puts "Emulator #{avd_name} started OK."
+      end
+
+      def kill_emulator(telnet)
+        begin
+          telnet.cmd('kill')
+        rescue Errno::ECONNRESET
+          puts "Emulator reset connection."
+        end
       end
 
       def kill_all_emulators(emulator_cmd)

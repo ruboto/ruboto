@@ -489,7 +489,6 @@ module Ruboto
             }
 
             option('no-snapshot', 's') {
-              extend Ruboto::Util::Emulator
               description 'do not use a snapshot when starting the emulator'
             }
 
