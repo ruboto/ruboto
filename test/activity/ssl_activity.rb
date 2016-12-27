@@ -29,7 +29,7 @@ class SslActivity
         @open_uri_thread.join
         run_on_ui_thread { @response_view.text = 'open-uri loaded OK!' }
         puts 'before open'
-        open('https://google.com/', ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do |f|
+        open('https://www.google.com/', ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do |f|
           puts 'inside open'
           body = f.read
           puts 'body'
@@ -39,7 +39,7 @@ class SslActivity
           run_on_ui_thread { @response_view.text = heading }
         end
       rescue Exception
-        puts "Exception resdum: #{$!.class} #{$!.message}"
+        puts "Exception resume: #{$!.class} #{$!.message}"
         run_on_ui_thread { @response_view.text = $!.to_s }
       end
     end

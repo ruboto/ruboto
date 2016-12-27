@@ -4,6 +4,7 @@ require 'net/http'
 class RubotoSetupTest < Minitest::Test
   include Ruboto::Util::Setup
 
+  # TODO: (uwe) The following tests verify internals of Ruboto setup.  Should test API instead.
   def test_if_sdk_page_still_exists?
     uri = URI.parse(SDK_DOWNLOAD_PAGE)
     res = Net::HTTP.get_response(uri)
@@ -26,10 +27,10 @@ class RubotoSetupTest < Minitest::Test
   end
 
   def test_if_regex_still_applies_to_sdk
-    regex = '(\>installer_.*.exe)'
+    regex = '(\>tools_r.*.zip)'
     page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
     link = page_content.scan(/#{regex}/).to_s
-    assert_match /\d+(\.\d+)?(\.\d+)?/, link
+    assert_match /\d+(\.\d+)?(\.\d+)?/, link, page_content
   end
 
   describe 'Upgrade HAXM' do

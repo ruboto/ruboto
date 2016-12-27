@@ -91,6 +91,7 @@ def start_activity_by_button(activity, button_id, activity_class_name = 'org.rub
     waitForIdleSync
     puts 'wait_for_monitor_with_timeout'
     current_activity = monitor.wait_for_activity_with_timeout(10000)
+    puts "current_activity: #{current_activity.inspect}"
   ensure
     removeMonitor(monitor)
   end

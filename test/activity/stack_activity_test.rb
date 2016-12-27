@@ -20,12 +20,13 @@ end
 # ANDROID: 21, PLATFORM: 1.0.2,      JRuby: 1.7.12   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
 # ANDROID: 22, PLATFORM: STANDALONE, JRuby: 1.7.20   '[28, 33, 44, 61]' expected, but got '[28, 33, 43, 60]'
 # ANDROID: 23, PLATFORM: STANDALONE, JRuby: 1.7.19   '[28, 33, 43, 60]' expected, but got '[26, 31, 40, 57]'
+# ANDROID: 25, PLATFORM: STANDALONE, JRuby: 1.7.25   '[28, 33, 43, 60]' expected, but got '[26, 31, 40, 57]
 test('stack depth') do |activity|
   os_offset =
       case android.os.Build::VERSION::SDK_INT
       when 13 then [1, 1, 1, 1]
       when (15..19) then [0, 0, 1, 1]
-      when 23 then [-2, -2, -3, -3]
+      when (23..25) then [-2, -2, -3, -3]
       else [0, 0, 0, 0]
       end
   jruby_offset =

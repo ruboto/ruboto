@@ -44,13 +44,7 @@ module RubotoTest
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join TMP_DIR, APP_NAME
 
-  # FIXME(uwe):  Remove special case when Android L has been released.
-  if (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'] =~ /(?:android-)?L/)
-    ANDROID_TARGET = 'L'
-  else
-    ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
-  end
-  # EMXIF
+  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
 
   def self.version_from_device
     puts 'Reading OS version from device/emulator'
@@ -92,10 +86,6 @@ module RubotoTest
 
   ANDROID_OS = (ENV['ANDROID_OS'] || version_from_device).slice(/\d+/).to_i
 
-  # FIXME(uwe): Remove when Android L has been released
-  ANDROID_OS = 21 if ANDROID_OS == 0
-  # EMXIF
-
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
 
@@ -112,14 +102,7 @@ module RubotoTest
   elsif ENV['JRUBY_JARS_VERSION']
     JRUBY_JARS_VERSION = Gem::Version.new(ENV['JRUBY_JARS_VERSION'])
   else
-    # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
-      gem_spec = Gem::Specification.find_by_path 'jruby-jars'
-    else
-      gem_spec = Gem.searcher.find('jruby-jars')
-    end
-    # EMXIF
-
+    gem_spec = Gem::Specification.find_by_path 'jruby-jars'
     raise StandardError.new("Can't find Gem specification jruby-jars.") unless gem_spec
     JRUBY_JARS_VERSION = gem_spec.version
   end

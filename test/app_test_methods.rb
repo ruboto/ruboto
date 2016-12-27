@@ -72,6 +72,14 @@ module AppTestMethods
       next if file =~ /button|fragment|margins|navigation|psych|rss|spinner|startup_exception|subclass/ && has_stupid_crash
       # EMXIF
 
+      # FIXME(uwe):  Crash when compiling proxy classes...investigate!
+      next if file =~ /dialog_fragment|ssl|subclass/ && ANDROID_OS == 24
+      # EMXIF
+
+      # FIXME(uwe):  Remove when we stop testing Android <= 5.0
+      next if file =~ /ssl/ && ANDROID_OS <= 21
+      # EMXIF
+
       if file =~ /_test.rb$/
         next unless file =~ /#{ENV['ACTIVITY_TEST_PATTERN']}/
         snake_name = file.chomp('_test.rb')
