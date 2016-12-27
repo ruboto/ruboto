@@ -11,10 +11,11 @@ module Ruboto
       # Verify the presence of important components
       #
 
-      def verify_manifest
-        return @manifest if @manifest
-        abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" unless
-        File.exists? 'AndroidManifest.xml'
+      def verify_manifest(reload: false)
+        return @manifest if @manifest && !reload
+        unless File.exists? 'AndroidManifest.xml'
+          abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app"
+        end
         @manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
       end
 
