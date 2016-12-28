@@ -121,4 +121,4 @@ EOF
           # https://github.com/jruby/jruby/issues/3401
           JRUBY_JARS_VERSION == Gem::Version.new('1.7.22')
   # EMXIF
-end
+end unless RubotoTest::ANDROID_OS == 24 # FIXME: (uwe) remove check when crash is fixed or we stop supporting Android 7.0

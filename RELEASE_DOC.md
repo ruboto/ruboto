@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.5.0 released!
+Subject: [ANN] Ruboto 1.6.0 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.5.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.6.0.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,59 +8,47 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.5.0:
+New in version 1.6.0:
 
-We now have properly working Ruby SSL and HTTPS!  You need jruby-jars
-1.7.25 and Android 4.4 or better :)
+In this release we add support for Android 7.0 and 7.1 "Nougat" and update
+the Android SDK to level 25.
 
 API Changes:
 
-* Issue #713 Add support for Android 5.1 Lollipop
-* Issue #768 Add support for Android 6.0 Marshmallow
+* Issue #816 Set default api level for new apps to 19 (Android 4.4
+  KitKat)
+* Issue #821 Update to Android SDK Tools 25
+* Issue #826 Rename 'assert_matches' to 'assert_match' for Minitest
+  compatibility
 
 Features:
 
-* Issue #791 Update RubotoCore to ActiveRecord 4.2
-* Issue #792 Set emulator name in ruboto.yml
-* Issue #795 Set emulator device name in ruboto.yml
-* Issue #797 Set emulator skin name in ruboto.yml
-* Issue #798 ruboto.yml emulator config (donv)
-* Issue #805 Add support for the new emulator 2.0
+* Issue #815 Add support for Android 7 Nougat
+* Issue #817 Add support for Android 7.1
+* Issue #819 Add support for concurrent-ruby gem
+* Issue #820 Reload scripts with large stack during 'rake boing'
 
 Bugfixes:
 
-* Issue #726 Any reference to net/https throws LoadError for
-  org/bouncycastle/bcpkix-jdk15on/1.47/bcpkix-jdk15on-1.47
-* Issue #793 Fix OpenSSL
-* Issue #796 Adds a setting in "ruboto.yml" for the desired
-  dex_heap_size (lucasallan)
-* Issue #807 Fix SDK_DOWNLOAD_PAGE link (LucianoPC)
+* Issue #813 ArgumentError creating new emulator image (AVD)
+* Issue #818 Error when creating a new emulator image for an app with
+  empty ruboto.yml
 
 Support:
 
-* Issue #802 java.lang.UnsupportedOperationException: can't load this
-  type of class file
-* Issue #803 (NoMethodError) undefined method 'current' for
-  Java::JavaLang::Thread:Class
-
-Community:
-
-* Issue #666 Set up donations and sponsoring of the Ruboto project
-
-Pull requests:
-
-* Issue #794 Test ssl (donv)
-* Issue #812 Set ANDROID_EMULATOR_FORCE_32BIT to fix broken build
-  (celeduc)
+* Issue #809 [Solved] JRuby 1.7.22 and Crosswalk issue (multidex)
+  Verification error in java.io.File[]
+  org.jruby.util.JRubyFile.listRoots()
+* Issue #822 How well does Ruboto work with Shoes 4?
 
 Internal:
 
-* Issue #775 Release 1.5.0
-* Issue #808 Bug fixes (donv)
+* Issue #828 More test parts (donv)
+* Issue #829 Use the new authenticated protocol to manage emulators
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=41
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=42
 
 
 Installation:

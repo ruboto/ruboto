@@ -1,11 +1,11 @@
-Subject: [ANN] Ruboto 1.5.0 release candidate
+Subject: [ANN] Ruboto 1.6.0 release candidate
 
 Hi all!
 
-The Ruboto 1.5.0 release candidate is now available.
+The Ruboto 1.6.0 release candidate is now available.
 
-We now have properly working Ruby SSL and HTTPS!  You need jruby-jars
-1.7.25 and Android 4.4 or better :)
+In this release we add support for Android 7.0 and 7.1 "Nougat" and update
+the Android SDK to level 25.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 

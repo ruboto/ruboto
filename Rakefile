@@ -563,12 +563,13 @@ task '.travis.yml' do
 
           next if v == :MASTER || v == :STABLE
           next if api == 25 # FIXME(uwe):  Remove when Android 7.1 is green.  No runnable ABIs on travis.
-          next if api == 24 # FIXME(uwe):  Remove when Android 7.0 is green.  No space left on device on travis.
+          # next if api == 24 # FIXME(uwe):  Remove when Android 7.0 is green.  No space left on device on travis.
+          next if api == 23 # FIXME(uwe):  Remove when Android 7.0 is green.  No space left on device on travis.
           next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 22 && platform == 'STANDALONE' && v == :STABLE # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
           next if api == 21 # FIXME(uwe):  Remove when Android 5.0 is green.
 
-          (allow_failures << line.gsub('-', '- env:')) if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
+          (allow_failures << line.gsub('-', '- env:')) if api == 24 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
 
           matrix << line
         end

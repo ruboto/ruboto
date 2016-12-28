@@ -1,8 +1,5 @@
 require File.expand_path('test_helper', File.dirname(__FILE__))
 
-# FIXME(uwe):  Remove check when we stop supporting Android < 4.0.3
-if RubotoTest::ANDROID_OS >= 15 || RubotoTest::RUBOTO_PLATFORM != 'STANDALONE'
-
 class SqldroidTest < Minitest::Test
   def setup
     generate_app :bundle => :sqldroid
@@ -74,7 +71,4 @@ EOF
     run_app_tests
   end
 
-end
-
-end
-# EMXIF
+end if RubotoTest::ANDROID_OS != 24 # FIXME: (uwe) Remove check when the proxy compile is fixed

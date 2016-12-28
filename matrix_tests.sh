@@ -14,9 +14,9 @@ MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
 # FIXME: (uwe) Test api level 25 in vagrant when abi are available
 if [[ "$TRAVIS" = "true" ]] ; then # Vagrant
-  ANDROID_TARGETS="24 23 21 19 15" # We should cover at least 90% of the market
+  ANDROID_TARGETS="24 23 21 19" # We should cover at least 90% of the market
 else
-  ANDROID_TARGETS="25 24 23 21 19 15" # We should cover at least 90% of the market
+  ANDROID_TARGETS="25 24 23 21 19" # We should cover at least 90% of the market
 fi
 # EMXIF
 
@@ -36,23 +36,23 @@ RUBOTO_UPDATE_EXAMPLES=0
 export ANDROID_OS ANDROID_TARGET RUBOTO_PLATFORM RUBOTO_UPDATE_EXAMPLES
 export ACTIVITY_TEST_PATTERN STRIP_INVOKERS TEST_NAME TEST_PART TEST_SCRIPT
 
-for ANDROID_TARGET in $ANDROID_TARGETS ; do
-  ANDROID_OS=$ANDROID_TARGET
+for ANDROID_TARGET in ${ANDROID_TARGETS} ; do
+  ANDROID_OS=${ANDROID_TARGET}
 
-  for RUBOTO_PLATFORM in $PLATFORM_MODES ; do
+  for RUBOTO_PLATFORM in ${PLATFORM_MODES} ; do
     if [ "$RUBOTO_PLATFORM" == "STANDALONE" ] ; then
-      jruby_versions=$STANDALONE_JRUBY_VERSIONS
+      jruby_versions=${STANDALONE_JRUBY_VERSIONS}
     elif [ "$RUBOTO_PLATFORM" == "FROM_GEM" ] ; then
-      jruby_versions=$FROM_GEM_JRUBY_VERSIONS
+      jruby_versions=${FROM_GEM_JRUBY_VERSIONS}
     elif [ "$RUBOTO_PLATFORM" == "CURRENT" ] ; then
       jruby_versions="CURRENT"
     fi
-    for JRUBY_JARS_VERSION in $jruby_versions ; do
-      if [ $RUBOTO_PLATFORM == "CURRENT" ] ; then
+    for JRUBY_JARS_VERSION in ${jruby_versions} ; do
+      if [ ${RUBOTO_PLATFORM} == "CURRENT" ] ; then
         unset JRUBY_JARS_VERSION
       else
         export JRUBY_JARS_VERSION
-        if [ $RUBOTO_PLATFORM == "FROM_GEM" ] ; then
+        if [ ${RUBOTO_PLATFORM} == "FROM_GEM" ] ; then
           rake platform:clean
         fi
       fi
@@ -76,8 +76,8 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
         fi
         rvm --version
         unset JRUBY_HOME
-        rvm install $RVM
-        rvm use $RVM
+        rvm install ${RVM}
+        rvm use ${RVM}
         echo -n
       fi
 
@@ -95,8 +95,8 @@ for ANDROID_TARGET in $ANDROID_TARGETS ; do
 
       if [ "$TEST_RC" != "0" ] ; then
         echo -ne "\033]0;FAILED $ANDROID_TARGET $RUBOTO_PLATFORM $JRUBY_JARS_VERSION\007"
-        echo Tests exited with code $TEST_RC
-        exit $TEST_RC
+        echo Tests exited with code ${TEST_RC}
+        exit ${TEST_RC}
       fi
     done
   done
