@@ -1,10 +1,19 @@
 Contributing
 ============
 
-Want to contribute? Great! Meet us in #ruboto on irc.freenode.net, fork the
-project and start coding!
+Want to contribute? Great!  We look forward to what you can do.
+ 
+## Communication
 
-"But I don't understand it well enough to contribute by forking the project!"
+Meet us in #ruboto on irc.freenode.net or on [https://gitter.im/ruboto/ruboto]
+or on the Google Group.
+
+## How to contribute
+
+Fork the project and start coding!  :)
+
+    "But I don't understand it well enough to contribute by forking the project!"
+
 That's fine. Equally helpful:
 
 * Use Ruboto and tell us how it could be better.
