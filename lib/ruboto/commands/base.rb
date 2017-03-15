@@ -90,6 +90,7 @@ module Ruboto
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
                 with_jruby = params['with-jruby'].value
+                with_jruby = '1.7.25' unless with_jruby.is_a?(Gem::Version)
                 ruby_version = params['ruby-version'].value
                 force = params['force'].value
 
@@ -143,6 +144,7 @@ module Ruboto
                   log_action('Generating the default Activity and script') do
                     generate_inheriting_file 'Activity', activity, package
                   end
+                  FileUtils.touch 'bin/classes2.dex'
                 end
 
                 puts "\nHello, #{name}\n"
