@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (1.6.0)
+    ruboto (1.6.1)
       main (~> 5.2)
       net-telnet (~> 0.1.1)
       rake (>= 11.3, < 13)
@@ -29,7 +29,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rake (12.0.0)
-    rubyzip (1.2.0)
+    rubyzip (1.2.1)
     slop (3.6.0)
 
 PLATFORMS
@@ -40,4 +40,4 @@ DEPENDENCIES
   ruboto!
 
 BUNDLED WITH
-   1.13.6
+   1.13.7

@@ -78,7 +78,14 @@ module Ruboto
 
       def android_package_directory
         return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
-        File.join File.expand_path('~'), windows? ? 'AppData/Local/Android/android-sdk' : "android-sdk-#{android_package_os_id}"
+        user_dir = if windows?
+          'AppData/Local/Android/android-sdk'
+        elsif File.exist? "android-sdk-#{android_package_os_id}"
+          "android-sdk-#{android_package_os_id}"
+        else
+          "android-sdk"
+        end
+        File.join File.expand_path('~'), user_dir
       end
 
       def android_haxm_directory
@@ -139,25 +146,9 @@ module Ruboto
 
         # Get's the Page to Scrape
         page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
-
-        case android_package_os_id
-        when MAC_OS_X
-          regex = '(\>android-sdk.*macosx.zip)'
-        when LINUX
-          regex = '(\>android-sdk.*.tgz)'
-        when WINDOWS
-          regex = '(\>installer_.*.exe)'
-        else
-          raise "Unknown host os: #{android_package_os_id}"
-        end
-
-        link = page_content.scan(/#{regex}/)
-        raise "SDK link cannot be found on download page: #{SDK_DOWNLOAD_PAGE}" if link.nil?
-
-        version = link.to_s.match(/r(\d+.)?(\d+.)?(\d+)/)[0]
-        raise "SDK version cannot be determined from download page: #{SDK_DOWNLOAD_PAGE}" if version.nil?
-
-        version.delete! 'r'
+        links = page_content.scan(/>tools_r(\d+\.\d+\.\d+)-#{android_package_os_id}.zip</)
+        raise "SDK link cannot be found on download page: #{SDK_DOWNLOAD_PAGE}" if links.empty?
+        links[0][0]
       end
 
       #########################################
@@ -529,35 +520,12 @@ module Ruboto
           end
           if accept_all || a == 'Y' || a.empty?
             Dir.chdir File.expand_path('~/') do
-              case android_package_os_id
-              when MAC_OS_X
-                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
+              FileUtils.mkdir_p android_package_directory
+              Dir.chdir android_package_directory do
+                asdk_file_name = "tools_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
                 download(asdk_file_name)
                 unzip(accept_all, asdk_file_name)
                 FileUtils.rm_f asdk_file_name
-              when LINUX
-                asdk_file_name = "android-sdk_r#{get_android_sdk_version}-#{android_package_os_id}.tgz"
-                download asdk_file_name
-                system "tar -xzf #{asdk_file_name}"
-                FileUtils.rm_f asdk_file_name
-              when WINDOWS
-                # FIXME(uwe):  Detect and warn if we are not "elevated" with adminstrator rights.
-                #set IS_ELEVATED=0
-                #whoami /groups | findstr /b /c:"Mandatory Label\High Mandatory Level" | findstr /c:"Enabled group" > nul: && set IS_ELEVATED=1
-                #if %IS_ELEVATED%==0 (
-                #    echo You must run the command prompt as administrator to install.
-                #    exit /b 1
-                #)
-
-                asdk_file_name = "installer_r#{get_android_sdk_version}-#{android_package_os_id}.exe"
-                download(asdk_file_name)
-                puts "Installing #{asdk_file_name}..."
-                system "#{WINDOWS_ELEVATE_CMD} #{asdk_file_name}"
-                raise "Unexpected exit code while installing the Android SDK: #{$?.exitstatus}" unless $? == 0
-                FileUtils.rm_f asdk_file_name
-                return
-              else
-                raise "Unknown host os: #{RbConfig::CONFIG['host_os']}"
               end
             end
           end
@@ -589,19 +557,21 @@ module Ruboto
             print "Downloading #{filename}: #{body.length / 1024**2}MB/#{length / 1024**2}MB #{(body.length * 100) / length}%\r"
           end
         end
+        puts
         File.open(filename, 'wb') { |f| f << body }
       end
 
 
-      def download(asdk_file_name)
-        print "Downloading #{asdk_file_name}: \r"
-        uri = URI("http://dl.google.com/android/#{asdk_file_name}")
-        process_download(asdk_file_name, uri)
+      def download(file_name)
+        print "Downloading #{file_name}: \r"
+        uri = URI("https://dl.google.com/android/repository/#{file_name}")
+        process_download(file_name, uri)
       end
 
 
       def unzip(accept_all, asdk_file_name, extract_to='.')
         require 'zip'
+        puts "Unzipping #{asdk_file_name.inspect}"
         Zip::File.open(asdk_file_name) do |zipfile|
           zipfile.each do |f|
             f.restore_permissions = true

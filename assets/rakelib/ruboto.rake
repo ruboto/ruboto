@@ -664,9 +664,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
 
     # Override RUBY_ENGINE (we can bundle from MRI for JRuby)
     Gem.platforms = [Gem::Platform::RUBY, Gem::Platform.new("universal-dalvik-#{sdk_level}"), Gem::Platform.new('universal-java')]
-    ENV['GEM_HOME'] = BUNDLE_PATH
-    ENV['GEM_PATH'] = BUNDLE_PATH
-    Gem.paths = BUNDLE_PATH
+    Gem.paths = {'GEM_HOME' => BUNDLE_PATH, 'GEM_PATH' => BUNDLE_PATH}
     Gem.refresh
     old_verbose, $VERBOSE = $VERBOSE, nil
     begin
