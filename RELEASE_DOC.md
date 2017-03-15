@@ -1,6 +1,6 @@
-Subject: [ANN] Ruboto 1.6.0 released!
+Subject: [ANN] Ruboto 1.6.1 released!
 
-The Ruboto team is pleased to announce the release of Ruboto 1.6.0.
+The Ruboto team is pleased to announce the release of Ruboto 1.6.1.
 
 Ruboto (JRuby on Android) is a platform for developing full stand-alone
 apps for Android using the Ruby language and libraries.  It includes
@@ -8,47 +8,27 @@ support libraries and generators for creating projects, classes, tests,
 and more.  The complete APIs of Android, Java, and Ruby are available to
 you using the Ruby language.
 
-New in version 1.6.0:
+New in version 1.6.1:
 
-In this release we add support for Android 7.0 and 7.1 "Nougat" and update
-the Android SDK to level 25.
-
-API Changes:
-
-* Issue #816 Set default api level for new apps to 19 (Android 4.4
-  KitKat)
-* Issue #821 Update to Android SDK Tools 25
-* Issue #826 Rename 'assert_matches' to 'assert_match' for Minitest
-  compatibility
+This is a maintenance release following changes in the Android tooling.
 
 Features:
 
-* Issue #815 Add support for Android 7 Nougat
-* Issue #817 Add support for Android 7.1
-* Issue #819 Add support for concurrent-ruby gem
-* Issue #820 Reload scripts with large stack during 'rake boing'
+* Issue #836 Add JRuby jars to new projects by default
 
 Bugfixes:
 
-* Issue #813 ArgumentError creating new emulator image (AVD)
-* Issue #818 Error when creating a new emulator image for an app with
-  empty ruboto.yml
-
-Support:
-
-* Issue #809 [Solved] JRuby 1.7.22 and Crosswalk issue (multidex)
-  Verification error in java.io.File[]
-  org.jruby.util.JRubyFile.listRoots()
-* Issue #822 How well does Ruboto work with Shoes 4?
+* Issue #806 Ruboto setup fails: get_android_sdk_version
+* Issue #811 Package installer error
+* Issue #824 undefined method '[]' for nil:NilClass (NoMethodError)
 
 Internal:
 
-* Issue #828 More test parts (donv)
-* Issue #829 Use the new authenticated protocol to manage emulators
+* Issue #827 Assume multi-dex on first build
 
 You can find a complete list of issues here:
 
-* https://github.com/ruboto/ruboto/issues?state=closed&milestone=42
+* https://github.com/ruboto/ruboto/issues?state=closed&milestone=43
 
 
 Installation:

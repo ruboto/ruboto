@@ -1,11 +1,10 @@
-Subject: [ANN] Ruboto 1.6.0 release candidate
+Subject: [ANN] Ruboto 1.6.1 release candidate
 
 Hi all!
 
-The Ruboto 1.6.0 release candidate is now available.
+The Ruboto 1.6.1 release candidate is now available.
 
-In this release we add support for Android 7.0 and 7.1 "Nougat" and update
-the Android SDK to level 25.
+This is a maintenance release following changes in the Android tooling.
 
 As always we need your help and feedback to ensure the quality of the release.  Please install the release candidate using
 
