@@ -115,6 +115,10 @@ View.class_eval do
       getLayoutParams.height = View.convert_constant(height)
       puts "\nDEPRECATION: The ':height' option is deprecated.  Use :layout => {:height => XX} instead."
     end
+    
+    if weight = params.delete(:weight)
+      getLayoutParams.weight = View.convert_constant(weight)
+    end
 
     if (margins = params.delete(:margins))
       getLayoutParams.set_margins(*margins)
