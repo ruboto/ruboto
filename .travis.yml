@@ -28,6 +28,7 @@ env:
   global:
     - DX_HEAP_SIZE=2048
     - RUBOTO_UPDATE_EXAMPLES=0
+    - ANDROID_EMULATOR_FORCE_32BIT=true
 
   matrix:
 
