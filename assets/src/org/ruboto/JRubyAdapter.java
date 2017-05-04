@@ -223,7 +223,7 @@ public class JRubyAdapter {
                 //
 
                 // FIXME(uwe): Simplify when we stop support for JRuby 1.7.x
-                final String jrubyHome = (jrubyVersion.startsWith("9.0.0.0") ?
+                final String jrubyHome = (jrubyVersion.startsWith("9.") ?
                         "jar:" : "file:") + apkName + "!/jruby.home";
                 // EMXIF
 

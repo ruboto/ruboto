@@ -68,6 +68,8 @@ public class SplashActivity extends Activity {
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
             System.exit(0);
+        } else {
+            hideProgress();
         }
     }
     

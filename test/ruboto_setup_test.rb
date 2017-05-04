@@ -27,7 +27,7 @@ class RubotoSetupTest < Minitest::Test
   end
 
   def test_if_regex_still_applies_to_sdk
-    regex = '(\>tools_r.*.zip)'
+    regex = '(\>sdk-tools-windows-.*.zip)'
     page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
     link = page_content.scan(/#{regex}/).to_s
     assert_match /\d+(\.\d+)?(\.\d+)?/, link, page_content
