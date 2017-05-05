@@ -35,3 +35,11 @@ We have set up a matrix test that tests multiple configuations on the emulator:
 
 All branches and pull requests on GitHub are also tested on
 [https://travis-ci.org/ruboto/ruboto](https://travis-ci.org/ruboto/ruboto).
+
+## Chores
+
+Ruboto uses linkedin/dexmaker to generate classes at runtime.  It should be downloaded from
+
+https://bintray.com/linkedin/maven/dexmaker
+
+and be placed in `assets/libs/dexmaker-x.y.z.jar` when new versiopns are available and useful.

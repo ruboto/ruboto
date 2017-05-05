@@ -10,6 +10,8 @@ module Ruboto
       include Ruboto::SdkVersions
       include Ruboto::SdkLocations
 
+      DEXMAKER_JAR = 'dexmaker-2.2.0.jar'
+      DX_JAR = 'dx.jar'
       TARGET_VERSION_REGEXP = /^(target=android-)(\d+)$/
 
       ###########################################################################
@@ -205,7 +207,7 @@ module Ruboto
           end
         end
 
-        log_action('Copying dx.jar to libs') do
+        log_action("Copying #{DX_JAR} to libs") do
           copier.copy 'libs'
         end
 
@@ -238,7 +240,7 @@ module Ruboto
         FileUtils.rm(Dir['libs/dexmaker*.jar'])
         # EMXIF
 
-        jar_file = Dir.glob('libs/dx.jar')[0]
+        jar_file = Dir.glob("libs/#{DX_JAR}")[0]
 
         # FIXME(uwe): Remove when we stop updating from Ruboto 0.10.0 and older.
         jruby_present = !!Dir.glob('libs/jruby-core-*.jar')[0]
@@ -248,7 +250,7 @@ module Ruboto
         return if !jar_file && !force
 
         copier = AssetCopier.new Ruboto::ASSETS, File.expand_path('.')
-        log_action('Copying dx.jar to libs') { copier.copy 'libs' }
+        log_action("Copying #{DX_JAR} to libs") { copier.copy 'libs' }
       end
 
       def update_assets(old_version = nil)
@@ -481,7 +483,6 @@ module Ruboto
                     'jnr/constants/platform/fake',
                     'jnr/constants/platform/freebsd',
                     'jnr/constants/platform/openbsd',
-                    'jnr/constants/platform/sunos',
                     # 'jnr/enxio',
                     'jnr/ffi/annotations',
                     'jnr/ffi/byref',
@@ -499,7 +500,6 @@ module Ruboto
                     'org/jruby/ant',
                     # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
                     # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
-                    'org/jruby/demo',
                     'org/jruby/embed/bsf',
                     'org/jruby/embed/jsr223',
                     'org/jruby/embed/osgi',
@@ -687,9 +687,9 @@ module Ruboto
                 exit 1
               end
               android_jar.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              class_path = ['.', "#{Ruboto::ASSETS}/libs/dx.jar"].join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"].join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
               sources = "#{Ruboto::GEM_ROOT}/lib/*.java".gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              `javac -source 1.6 -target 1.6 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
+              `javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
               raise 'Compile failed' unless $? == 0
 
               `jar -cf ..#{File::ALT_SEPARATOR || File::SEPARATOR}#{jruby_core} .`
@@ -712,18 +712,16 @@ module Ruboto
         system 'rake libs:reconfigure_stdlib'
       end
 
-      # - Removes unneeded code from dx.jar
       def reconfigure_dx_jar
-        dx_jar = 'dx.jar'
         Dir.chdir 'libs' do
-          log_action("Removing unneeded classes from #{dx_jar}") do
+          log_action("Removing unneeded classes from #{DX_JAR}") do
             FileUtils.rm_rf 'tmp'
             Dir.mkdir 'tmp'
             Dir.chdir 'tmp' do
-              FileUtils.move "../#{dx_jar}", '.'
-              `jar -xf #{dx_jar}`
-              raise "Unpacking dx.jar jar failed: #$?" unless $? == 0
-              File.delete dx_jar
+              FileUtils.move "../#{DX_JAR}", '.'
+              `jar -xf #{DX_JAR}`
+              raise "Unpacking #{DX_JAR} jar failed: #$?" unless $? == 0
+              File.delete DX_JAR
               #noinspection RubyLiteralArrayInspection
               excluded_core_packages = [
                   'com/android/dx/command',
@@ -733,8 +731,8 @@ module Ruboto
               excluded_core_packages.each do |i|
                 FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
               end
-              `jar -cf ../#{dx_jar} .`
-              raise "Creating repackaged dx.jar failed: #$?" unless $? == 0
+              `jar -cf ../#{DX_JAR} .`
+              raise "Creating repackaged #{DX_JAR} failed: #$?" unless $? == 0
             end
             FileUtils.remove_dir 'tmp', true
           end

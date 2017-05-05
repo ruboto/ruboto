@@ -72,10 +72,10 @@ public class ScriptLoader {
                             Log.d("Set class: " + rubyClass);
                             JRubyAdapter.put(component.getScriptInfo().getRubyClassName(), rubyClass);
 
-                            # FIXME(uwe): Workaround since setting the constant fails
+                            // FIXME(uwe): Workaround since setting the constant fails
                             JRubyAdapter.put("$" + component.getScriptInfo().getRubyClassName(), rubyClass);
                             JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + " = $" + component.getScriptInfo().getRubyClassName());
-                            # EMXIF
+                            // EMXIF
 
                             // FIXME(uwe):  Collect these threads in a ThreadGroup ?
                             Thread t = new Thread(null, new Runnable(){

@@ -197,7 +197,7 @@ class Minitest::Test
             FileUtils.touch 'libs/jruby-stdlib-x.x.x.jar'
             install_jruby_jars_gem
           else
-            FileUtils.rm(Dir['libs/{jruby-*.jar,dx.jar}'])
+            FileUtils.rm(Dir["libs/{jruby-*.jar,#{DX_JAR},#{DEXMAKER_JAR}"])
           end
         end
       else
