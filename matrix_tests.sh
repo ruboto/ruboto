@@ -1,12 +1,12 @@
 #!/bin/bash -e
 
-if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 2 ] ; then
-  echo JRuby-jars gems are missing.
-  rake get_jruby_jars_snapshots
+if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 1 ] ; then
+  echo JRuby-jars gem snapshot is missing.
+  rake get_jruby_jars_snapshot
 else
   if [ `find . -maxdepth 1 -mtime +1 -name "jruby-jars-*.gem" | wc -l` -ne 0 ] ; then
-    echo jruby-jars are old.
-    rake get_jruby_jars_snapshots
+    echo jruby-jars gem snapshot is old.
+    rake get_jruby_jars_snapshot
   fi
 fi
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
@@ -22,10 +22,8 @@ fi
 
 # PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 PLATFORM_MODES="STANDALONE"
-# FIXME(uwe): Add $MASTER when fixed: https://github.com/ruboto/ruboto/issues/737
-STANDALONE_JRUBY_VERSIONS="1.7.25"
-FROM_GEM_JRUBY_VERSIONS="$STABLE"
-# EMXIF
+STANDALONE_JRUBY_VERSIONS="$MASTER"
+FROM_GEM_JRUBY_VERSIONS="$MASTER"
 RUBOTO_UPDATE_EXAMPLES=0
 # STRIP_INVOKERS=1
 # TEST_PART=2of4

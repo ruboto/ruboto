@@ -500,16 +500,14 @@ namespace :platform do
 end
 
 desc 'Download the latest jruby-jars snapshot'
-task :get_jruby_jars_snapshots do
+task :get_jruby_jars_snapshot do
   download_host = 's3.amazonaws.com'
   download_dir = "/ci.jruby.org"
   index = Net::HTTP.get(download_host, download_dir)
   all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
   master_gem = all_gems.last
-  stable_gems = all_gems.grep /-1\.7\./
-  stable_gem = stable_gems.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
-  [[master_gem, 'master'], [stable_gem, 'jruby-1_7']].each do |gem, branch|
+  [[master_gem, 'master']].each do |gem, branch|
     print "Downloading #{gem}: \r"
     uri = URI("http://#{download_host}#{download_dir}/snapshots/#{branch}/#{gem}")
     Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
@@ -542,6 +540,10 @@ def test_parts(api)
   (api == 23) ? 6 : 3
 end
 
+def allow_failure(allow_failures, line)
+  (allow_failures << line.gsub('-', '- env:'))
+end
+
 task '.travis.yml' do
   puts "Regenerating #{'.travis.yml'}"
   source = File.read('.travis.yml')
@@ -551,8 +553,8 @@ task '.travis.yml' do
   # FIXME(uwe):  Test all of these that work
   [
       # ['CURRENT', [nil]],                # Running standalone is the most important way now
-      # ['FROM_GEM', [:MASTER, :STABLE]], # Running standalone is the most important way now
-      ['STANDALONE', [:MASTER, :STABLE, '1.7.25']],
+      # ['FROM_GEM', [:MASTER]], # Running standalone is the most important way now
+      ['STANDALONE', [:MASTER]],
   ].each do |platform, versions|
     versions.each do |v|
       # FIXME(uwe):  Test the newest and most common api levels
@@ -561,15 +563,14 @@ task '.travis.yml' do
         (1..test_parts(api)).each do |n|
           line = "    - ANDROID_TARGET=#{api} RUBOTO_PLATFORM=#{platform.ljust(10)} TEST_PART=#{n}of#{test_parts(api)}#{" JRUBY_JARS_VERSION=#{v}" if v}\n"
 
-          next if v == :MASTER || v == :STABLE
-          next if api == 25 # FIXME(uwe):  Remove when Android 7.1 is green.  No runnable ABIs on travis.
+          # next if api == 25 # FIXME(uwe):  Remove when Android 7.1 is green.  No runnable ABIs on travis.
           # next if api == 24 # FIXME(uwe):  Remove when Android 7.0 is green.  No space left on device on travis.
-          next if api == 23 # FIXME(uwe):  Remove when Android 7.0 is green.  No space left on device on travis.
-          next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
-          next if api == 22 && platform == 'STANDALONE' && v == :STABLE # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
-          next if api == 21 # FIXME(uwe):  Remove when Android 5.0 is green.
+          # next if api == 23 # FIXME(uwe):  Remove when Android 6.0 is green.  No space left on device on travis.
+          # next if api == 22 # FIXME(uwe):  Remove when Android 5.1 is green.  Must use slow ARM emulator due to missing HAXM.
+          # next if api == 21 # FIXME(uwe):  Remove when Android 5.0 is green.
 
-          (allow_failures << line.gsub('-', '- env:')) if api == 24 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
+          allow_failure(allow_failures, line) if v == :MASTER
+          # allow_failure(allow_failures, line) if api == 24 # FIXME(uwe):  Remove when Android 6.0 is green.  Unable to start emulator on travis.
 
           matrix << line
         end
