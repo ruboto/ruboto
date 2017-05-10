@@ -9,6 +9,10 @@ APK_FILE_REGEXP = /^-rw-r--r--(?:\s+\d+)?\s+(?:system|\d+\s+\d+)\s+(?:system|\d+
 PROJECT_DIR = File.expand_path('..', File.dirname(__FILE__))
 UPDATE_MARKER_FILE = File.join(PROJECT_DIR, 'bin', 'LAST_UPDATE')
 
+def device_api_level
+  @_device_api_level ||= `adb shell getprop ro.build.version.sdk`.to_i
+end
+
 # Determine if the package is installed.
 # Return true if the package is installed and is identical to the local package.
 # Return false if the package is installed, but differs from the local package.
@@ -75,7 +79,7 @@ end
 # Synchronize device system time with development system time.
 def set_device_time
   # TODO: (uwe) Remove when we stop supporting Android 6.0 and older
-  if sdk_level <= 23
+  if device_api_level <= 23
     return sh "adb shell date -s #{Time.now.strftime '%Y%m%d.%H%M%S'}"
   end
   # ODOT

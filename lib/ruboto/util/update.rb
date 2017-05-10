@@ -170,10 +170,6 @@ module Ruboto
           return false
         end
 
-        # FIXME(uwe): Remove when JRuby 9000 works with Ruboto
-        version ||= ENV['JRUBY_JARS_VERSION'] || '~>1.7.13'
-        # EMXIF
-
         install_jruby_jars_gem(version)
         begin
           gem('jruby-jars', version) if version
@@ -687,8 +683,15 @@ module Ruboto
                 exit 1
               end
               android_jar.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"].join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              sources = "#{Ruboto::GEM_ROOT}/lib/*.java".gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"]
+                  .join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              source_dirs = "#{Ruboto::GEM_ROOT}/lib/*.java"
+              # TODO(uwe): Remove when we stop zupporting Android 6.0 and below
+              if project_api_level.to_i < 24
+                source_dirs << " #{Ruboto::GEM_ROOT}/lib/overrides_below_24/*.java"
+              end
+              # ODOT
+              sources = source_dirs.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
               `javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
               raise 'Compile failed' unless $? == 0
 

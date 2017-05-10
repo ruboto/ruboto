@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruboto (1.6.1)
+    ruboto (2.0.0.dev)
       main (~> 5.2)
       net-telnet (~> 0.1.1)
       rake (>= 11.3, < 13)
@@ -40,4 +40,4 @@ DEPENDENCIES
   ruboto!
 
 BUNDLED WITH
-   1.13.7
+   1.14.6
