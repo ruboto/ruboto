@@ -26,6 +26,7 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
     # APK was 4.2MB.  JRuby: 9000.dev, ANDROID_TARGET: 10
     # APK was 4.2MB.  JRuby: 9000.dev, ANDROID_TARGET: 15
     # APK was 4.6MB.  JRuby: 9000.dev, ANDROID_TARGET: 16
+    # APK was 4.9MB.  JRuby: 9.1.9.0.SNAPSHOT, ANDROID_TARGET: 25
     def test_minimal_apk_is_within_limits
       apk_size = BigDecimal(File.size("#{APP_DIR}/bin/RubotoTestApp-debug.apk").to_s) / (1024 * 1024)
       upper_limit = {
@@ -38,8 +39,8 @@ if RubotoTest::RUBOTO_PLATFORM == 'STANDALONE'
           '1.7.14' => 4.4,
           '1.7.20' => 4.6,
           '1.7.24' => 4.7,
-          '9.0.0.0.dev' => 4.6,
-      }[JRUBY_JARS_VERSION.to_s] || 4.7
+          '9.1.9.0.SNAPSHOT' => 4.9,
+      }[JRUBY_JARS_VERSION.to_s] || 4.9
       lower_limit = upper_limit * 0.9
       version_message ="JRuby: #{JRUBY_JARS_VERSION}, ANDROID_TARGET: #{ANDROID_TARGET}"
       assert apk_size <= upper_limit, "APK was larger than #{'%.1f' % upper_limit}MB: #{'%.1f' % apk_size.ceil(1)}MB.  #{version_message}"

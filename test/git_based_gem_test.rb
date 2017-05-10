@@ -6,10 +6,10 @@ class GitBasedGemTest < Minitest::Test
   def setup
     generate_app
     Dir.chdir APP_DIR do
-      File.open('Gemfile.apk', 'w') do |f|
-        f << "source 'http://rubygems.org/'\n\n"
-        f << "gem 'uri_shortener', :git => 'https://github.com/Nyangawa/UriShortener.git'"
-      end
+      File.write('Gemfile.apk', <<~GEMFILE)
+        source 'http://rubygems.org/'
+        gem 'example_gem', github: 'ruboto/example_gem'
+      GEMFILE
     end
   end
 
@@ -17,18 +17,18 @@ class GitBasedGemTest < Minitest::Test
     cleanup_app
   end
 
-  def test_uri_shortener
+  def test_example_gem
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/widget'
-require 'uri_shortener'
+require 'example_gem'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView
 
 class RubotoTestAppActivity
   def onCreate(bundle)
     super
-    setTitle 'uri_shortener loaded OK!'
+    setTitle 'example_gem loaded OK!'
 
     self.content_view =
         linear_layout :orientation => :vertical, :gravity => :center do
@@ -52,7 +52,7 @@ setup do |activity|
 end
 
 test("activity starts") do |activity|
-  assert_equal 'uri_shortener loaded OK!', @text_view.text.to_s
+  assert_equal 'example_gem loaded OK!', @text_view.text.to_s
 end
 EOF
 
