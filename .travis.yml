@@ -14,7 +14,9 @@ os:
 
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
-  - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then rake get_jruby_jars_snapshot ; fi
+  # FIXME(uwe): Use the checked-in jruby-jars gem.  Activate when the åpatch is merged
+  #  - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then rake get_jruby_jars_snapshot ; fi
+  # EMXIF
   - MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
   # FIXME: (uwe) Remove files to make space for missing sysimg.  Remove this when the sysimg files are present.
