@@ -15,11 +15,9 @@ os:
 before_install:
   - export ANDROID_OS=$ANDROID_TARGET
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then rake get_jruby_jars_snapshot ; fi
-  - STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
   - MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
   - if [ "$JRUBY_JARS_VERSION" == "MASTER" ] ; then export JRUBY_JARS_VERSION=$MASTER ; fi
-  - if [ "$JRUBY_JARS_VERSION" == "STABLE" ] ; then export JRUBY_JARS_VERSION=$STABLE ; fi
-  # FIXME: (uwe) Remove files to make space for missing sysimg.  Remove this wehn the sysimg files are present.
+  # FIXME: (uwe) Remove files to make space for missing sysimg.  Remove this when the sysimg files are present.
   - if [ "$ANDROID_TARGET" == "23" ] ; then ls -l $ANDROID_HOME/platforms ; rm -rf $ANDROID_HOME/platforms/android-1* ; ls -l $ANDROID_HOME/platforms ; ls -l $ANDROID_HOME/system-images ; rm -rf $ANDROID_HOME/system-images/android-1* ; ls -l $ANDROID_HOME/system-images ; fi
   - if [ "$ANDROID_TARGET" == "24" ] ; then ls -l $ANDROID_HOME/platforms ; rm -rf $ANDROID_HOME/platforms/android-1* ; ls -l $ANDROID_HOME/platforms ; ls -l $ANDROID_HOME/system-images ; rm -rf $ANDROID_HOME/system-images/android-1* ; ls -l $ANDROID_HOME/system-images ; fi
   # EMXIF
