@@ -505,6 +505,11 @@ task :get_jruby_jars_snapshot do
   download_dir = "/ci.jruby.org"
   index = Net::HTTP.get(download_host, download_dir)
   all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
+
+  # FIXME(uwe): Remove when JRuby 9.2.0.0 snapshots are being built
+  all_gems.reject!{|g| g =~ /9.2.0.0/}
+  # EMXIF
+
   master_gem = all_gems.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
   [[master_gem, 'master']].each do |gem, branch|

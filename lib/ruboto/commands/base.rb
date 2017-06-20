@@ -90,7 +90,7 @@ module Ruboto
                 target = params['target'].value
                 min_sdk = params['min-sdk'].value || target
                 with_jruby = params['with-jruby'].value
-                with_jruby = '9.1.9.0.SNAPSHOT' unless with_jruby.is_a?(Gem::Version)
+                with_jruby = '9.1.11.0.SNAPSHOT' unless with_jruby.is_a?(Gem::Version)
                 ruby_version = params['ruby-version'].value
                 force = params['force'].value
 

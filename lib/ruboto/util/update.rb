@@ -455,7 +455,7 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.1.9.0.SNAPSHOT')
+              if gem_version >= Gem::Version.new('9.1.11.0.SNAPSHOT')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -686,7 +686,7 @@ module Ruboto
               class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"]
                   .join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
               source_dirs = "#{Ruboto::GEM_ROOT}/lib/*.java"
-              # TODO(uwe): Remove when we stop zupporting Android 6.0 and below
+              # TODO(uwe): Remove when we stop supporting Android 6.0 and below
               if project_api_level.to_i < 24
                 source_dirs << " #{Ruboto::GEM_ROOT}/lib/overrides_below_24/*.java"
               end
