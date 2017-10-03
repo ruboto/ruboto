@@ -63,8 +63,7 @@ module Ruboto
         when /^mswin32|windows|mingw32/
           WINDOWS
         else
-          ## Error
-          nil
+          raise "Unkown operating system: #{RbConfig::CONFIG['host_os'].inspect}"
         end
       end
 
@@ -79,12 +78,12 @@ module Ruboto
       def android_package_directory
         return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
         user_dir = if windows?
-          'AppData/Local/Android/android-sdk'
-        elsif File.exist? "android-sdk-#{android_package_os_id}"
-          "android-sdk-#{android_package_os_id}"
-        else
-          "android-sdk"
-        end
+                     'AppData/Local/Android/android-sdk'
+                   elsif File.exist? File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
+                     "android-sdk-#{android_package_os_id}"
+                   else
+                     "android-sdk"
+                   end
         File.join File.expand_path('~'), user_dir
       end
 
@@ -145,8 +144,24 @@ module Ruboto
         require 'uri'
 
         # Get's the Page to Scrape
-        page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
-        links = page_content.scan(/>tools_r(\d+\.\d+\.\d+)-#{android_package_os_id}.zip</)
+
+        # TODO(uwe):  Should use this, but I get certificate verification errors
+        # page_content = Net::HTTP.get(URI.parse(SDK_DOWNLOAD_PAGE))
+        # ODOT
+
+        # TODO(uwe): Using this instead.  Maybe use this as fallback with user confirmation?
+        require 'openssl'
+        uri = URI(SDK_DOWNLOAD_PAGE)
+        req = Net::HTTP::Get.new(uri.path)
+        res = Net::HTTP.start(uri.host, uri.port,
+            use_ssl: uri.scheme == 'https',
+            verify_mode: OpenSSL::SSL::VERIFY_NONE) do |https|
+          https.request(req)
+        end
+        page_content = res.body
+        # ODOT
+
+        links = page_content.scan(/>sdk-tools-#{android_package_os_id}-(\d+).zip</)
         raise "SDK link cannot be found on download page: #{SDK_DOWNLOAD_PAGE}" if links.empty?
         links[0][0]
       end
@@ -522,7 +537,7 @@ module Ruboto
             Dir.chdir File.expand_path('~/') do
               FileUtils.mkdir_p android_package_directory
               Dir.chdir android_package_directory do
-                asdk_file_name = "tools_r#{get_android_sdk_version}-#{android_package_os_id}.zip"
+                asdk_file_name = "sdk-tools-#{android_package_os_id}-#{get_android_sdk_version}.zip"
                 download(asdk_file_name)
                 unzip(accept_all, asdk_file_name)
                 FileUtils.rm_f asdk_file_name
@@ -550,7 +565,10 @@ module Ruboto
 
       def process_download(filename, uri)
         body = ''
-        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https').request_get(uri.path) do |response|
+        Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', verify_mode: OpenSSL::SSL::VERIFY_NONE).request_get(uri.path) do |response|
+          unless response.is_a?(Net::HTTPSuccess)
+            raise "Download failed: #{response.code} #{response.message}: #{response.body if response.response_body_permitted?}"
+          end
           length = response['Content-Length'].to_i
           response.read_body do |fragment|
             body << fragment
@@ -588,8 +606,16 @@ module Ruboto
             a = STDIN.gets.chomp.upcase
           end
           if accept_all || a == 'Y' || a.empty?
-            android_cmd = windows? ? 'android.bat' : 'android'
-            update_cmd = "#{android_cmd} --silent update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')[0]},extra-intel-Hardware_Accelerated_Execution_Manager,platform-tool,tool -a"
+
+            # TODO(uwe): Remove this when switching to `sdkmanager`
+            ENV['USE_SDK_WRAPPER'] = '1'
+            # silent_opt = '--silent'
+            silent_opt = nil
+            # haxm_filter = ',extra-intel-Hardware_Accelerated_Execution_Manager'
+            haxm_filter = nil
+            # ODOT
+
+            update_cmd = "#{android_cmd} #{silent_opt} update sdk --no-ui --filter build-tools-#{get_tools_version('build-tool')[0]}#{haxm_filter},platform-tool,tool -a"
             update_sdk(update_cmd, accept_all)
             check_for_build_tools
             check_for_platform_tools
@@ -597,6 +623,16 @@ module Ruboto
             check_for_haxm
           end
         end
+      end
+
+      # TODO(uwe): Remove when switching to sdkmanager
+      def android_cmd
+        windows? ? 'android.bat' : 'android'
+      end
+      # ODOT
+
+      def sdkmanager_cmd
+        windows? ? 'sdkmanager.bat' : 'sdkmanager'
       end
 
       def get_new_haxm_filename
@@ -677,18 +713,10 @@ module Ruboto
           a = STDIN.gets.chomp.upcase
         end
         if accept_all || a == 'Y' || a.empty?
-          android_cmd = windows? ? 'android.bat' : 'android'
-
-          # FIXME: (uwe) Change to only install the best image for this system corresponding to the abi chosen when creating an emulator
           level = api_level[/\d+/]
-          arches = %w(x86 x86_64 armeabi-v7a arm64-v8a)
-          arches -= %w(x86 x86_64) if ON_TRAVIS && level.to_i >= 22 # TODO: (uwe) Remove when travis can run x86 images
-          abi_list = arches.product(%w(android google_apis))
-              .map{|arch, vendor| "sys-img-#{arch}-#{vendor}-#{level}"}
-          puts "Installing #{abi_list}"
-          update_cmd = "#{android_cmd} update sdk --no-ui --filter #{api_level},#{abi_list.join(',')} --all"
-          # EMXIF
-
+          packages = `#{sdkmanager_cmd} --list`.scan(/\bsystem-images;android-#{level};.*?;[a-zA-z0-9-]+/)
+          puts "Installing #{packages}"
+          update_cmd = "#{sdkmanager_cmd} '#{packages.join("' '")}'"
           update_sdk(update_cmd, accept_all)
           check_for_android_platform(api_level)
         end
@@ -699,7 +727,7 @@ module Ruboto
           IO.popen(update_cmd, 'r+', external_encoding: Encoding::BINARY) do |cmd_io|
             begin
               output = ''.encode(Encoding::BINARY)
-              question_pattern = /.*Do you accept the license '[a-z-]+-[0-9a-f]{8}' \[y\/n\]: /m
+              question_pattern = /.*Accept\?\s*\(y\/N\): /m
               STDOUT.sync = true
               cmd_io.each_char do |text|
                 print text
