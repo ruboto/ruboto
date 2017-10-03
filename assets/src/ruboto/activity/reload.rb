@@ -11,9 +11,9 @@ module Ruboto::Activity::Reload
     filter = android.content.IntentFilter.new(android.content.Intent::ACTION_VIEW)
     registerReceiver(@ruboto_activity_reload_receiver, filter)
     Log.d 'Ruboto::Activity::Reload registered reload receiver'
-  rescue Exception
-    Log.e "Exception registering reload listener: #{$!.message}"
-    Log.e $!.backtrace.join("\n")
+  rescue Exception => e
+    Log.e "Exception registering reload listener: #{e.message}"
+    Log.e e.backtrace.join("\n")
   end
 
   def onPause
@@ -21,9 +21,9 @@ module Ruboto::Activity::Reload
     unregisterReceiver(@ruboto_activity_reload_receiver)
     @ruboto_activity_reload_receiver = nil
     Log.d 'Ruboto::Activity::Reload unregistered reload receiver'
-  rescue Exception
-    Log.e "Exception unregistering reload listener: #{$!.message}"
-    Log.e $!.backtrace.join("\n")
+  rescue Exception => e
+    Log.e "Exception unregistering reload listener: #{e.message}"
+    Log.e e.backtrace.join("\n")
   end
 
   def ruboto_activity_reload(scripts)
@@ -64,9 +64,9 @@ module Ruboto::Activity::Reload
       end
       Log.d 'reload complete.'
       true
-    rescue Exception
-      Log.e "Exception handling reload broadcast: #{$!.message}"
-      Log.e $!.backtrace.join("\n")
+    rescue Exception => e
+      Log.e "Exception handling reload broadcast: #{e.message}"
+      Log.e e.backtrace.join("\n")
     end
   end
 
