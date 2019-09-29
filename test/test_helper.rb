@@ -31,7 +31,7 @@ module RubotoTest
   end
 
   `gem query -i -n bundler`
-  system 'gem install bundler --no-ri --no-rdoc' unless $? == 0
+  system 'gem install bundler --no-document' unless $? == 0
   `bundle check`
   system 'bundle --system' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
@@ -70,7 +70,7 @@ module RubotoTest
   def install_ruboto_gem(version)
     version_requirement = "-v #{version}"
     `gem query -i -n ^ruboto$ #{version_requirement}`
-    system "gem install ruboto #{version_requirement} --no-ri --no-rdoc" unless $? == 0
+    system "gem install ruboto #{version_requirement} --no-document" unless $? == 0
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
 

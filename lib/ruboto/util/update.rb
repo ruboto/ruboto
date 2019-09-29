@@ -222,9 +222,9 @@ module Ruboto
           local_gem_dir = ENV['LOCAL_GEM_DIR'] || Dir.getwd
           local_gem_file = "#{local_gem_dir}/jruby-jars-#{jruby_jars_version}.gem"
           if File.exists?(local_gem_file)
-            system "gem install -l #{local_gem_file} --no-ri --no-rdoc"
+            system "gem install -l #{local_gem_file} --no-document"
           else
-            system "gem install -r jruby-jars#{version_requirement} --no-ri --no-rdoc"
+            system "gem install -r jruby-jars#{version_requirement} --no-document"
           end
         end
         raise "install of jruby-jars failed with return code #$?" unless $? == 0
