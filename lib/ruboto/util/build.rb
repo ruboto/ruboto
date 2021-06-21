@@ -2,23 +2,24 @@ module Ruboto
   module Util
     module Build
       include Verify
-      SCRIPTS_DIR = 'src'
+      SCRIPTS_DIR = 'app/src/main/resources'
 
       ###########################################################################
       #
       # Build Subclass or Interface:
       #
 
-      #
+      JAVA_SRC_DIR = "app/src/main/java"
+
       # build_file: Reads the src from the appropriate location,
       #   uses the substitutions hash to modify the contents,
       #   and writes to the new location
       #
       def build_file(src, package, name, substitutions, dest='.')
-        to = File.join(dest, "src/#{package.gsub('.', '/')}")
+        to = File.join(dest, "#{JAVA_SRC_DIR}/#{package.gsub('.', '/')}")
         Dir.mkdir(to) unless File.directory?(to)
 
-        text = File.read(File.expand_path(Ruboto::GEM_ROOT + "/assets/src/#{src}.java"))
+        text = File.read(File.expand_path(Ruboto::GEM_ROOT + "/assets/#{JAVA_SRC_DIR}/#{src}.java"))
         substitutions.each { |k, v| text.gsub!(k, v) }
 
         File.open(File.join(to, "#{name}.java"), 'w') { |f| f << text }

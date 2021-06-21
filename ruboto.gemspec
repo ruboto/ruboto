@@ -1,4 +1,3 @@
-require 'rake'
 require 'date'
 lib_path = File.expand_path('lib', File.dirname(__FILE__))
 $:.unshift(lib_path) unless $:.include?(lib_path)
@@ -16,16 +15,14 @@ Gem::Specification.new do |s|
   s.description = Ruboto::DESCRIPTION
   s.rubyforge_project = 'ruboto/ruboto'
   s.license = 'MIT'
-  s.files = FileList['[A-Z]*'].to_a.select{|f| f =~ /^[A-Z]/} + FileList['assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*'].to_a
+  s.files = Dir['[A-Z]*'].select{|f| f =~ /^[A-Z]/} + Dir['assets/**/{*,.*}', 'bin/*', 'lib/**/*', 'test/**/*']
   s.executables = %w(ruboto)
-  s.default_executable = 'ruboto'
-  s.add_runtime_dependency 'main', '~>5.2'
-  s.add_runtime_dependency 'net-telnet', '~>0.1.1'
+
+  s.add_runtime_dependency 'main', '~>6.0' # TODO(uwe): Switch to stdlib OptionParser for less depency
+  # s.add_runtime_dependency 'net-telnet', '~>0.1.1'
   s.add_runtime_dependency 'rake', '>=11.3', '<13'
   s.add_runtime_dependency 'rubyzip', '~>1.0'
-  s.add_development_dependency 'minitest', '~>5.5'
 
-  # jruby-jars is only necessary for standalone apps.
-  # It will be installed on demand.
-  # s.add_dependency('jruby-jars')
+  s.add_development_dependency 'minitest', '~>5.5'
+  s.add_development_dependency 'rubocop', '~>0.54.0'
 end

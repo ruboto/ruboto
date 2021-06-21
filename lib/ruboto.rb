@@ -1,7 +1,3 @@
-require 'ruboto/util/objectspace'
-# enable ObjectSpace in JRuby
-Ruboto.enable_objectspace
-
 require 'main'
 require 'fileutils'
 require 'rexml/document'

@@ -1,7 +1,6 @@
 package THE_PACKAGE;
 
 import java.io.IOException;
-
 import org.ruboto.ScriptLoader;
 
 public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {

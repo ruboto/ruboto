@@ -42,7 +42,10 @@ class Api
               # Add new api branches
               #
               when 18    then 'jb-mr2-release'
-              when 19    then 'kitkat-release'
+              when 19..20 then 'kitkat-release'
+              when 21..22 then 'lollipop-release'
+              when 23 then 'marshmallow-release'
+              when 24..25 then 'nougat-release'
               #
               ################################
               else       return nil
@@ -256,7 +259,7 @@ class ApiTag < CoreTag
 
   def self.compile_platforms()
     #Todo: Check to see if there is a newer repository
-    doc = REXML::Document.new(open('https://dl-ssl.google.com/android/repository/repository-8.xml'))
+    doc = REXML::Document.new(open('https://dl-ssl.google.com/android/repository/repository-12.xml'))
     #odoT
 
     # Look up the platform version names and max platform api_level
@@ -483,7 +486,7 @@ class ApiTag < CoreTag
     if data.size == 2
       value = nil
     elsif data.size == 3
-      value = data[3][0..-2]
+      value = data[2][0..-2]
     elsif data.size > 4 && data[4] == '//'
       value = data[3][0..-2]
     else

@@ -1,6 +1,6 @@
 #######################################################
 #
-# ruboto/util/stack.rb
+# ruboto/stack.rb
 #
 # Utility methods for running code in a separate 
 # thread with a larger stack.

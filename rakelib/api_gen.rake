@@ -19,7 +19,7 @@ namespace :apis do
 
     REPOSITORY_BASE = 'https://dl-ssl.google.com/android/repository'
     # Todo: Make sure there is not a newer repository
-    REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-8.xml"
+    REPOSITORY_URL = "#{REPOSITORY_BASE}/repository-12.xml"
     # odoT
 
     $stdout.sync = true

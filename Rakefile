@@ -11,7 +11,6 @@ require 'net/http'
 require 'net/https'
 require 'openssl'
 require 'yaml'
-require_relative 'assets/rakelib/ruboto.device'
 
 PLATFORM_PROJECT = File.expand_path('tmp/RubotoCore', File.dirname(__FILE__))
 PLATFORM_PACKAGE = 'org.ruboto.core'
@@ -501,21 +500,21 @@ end
 
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshot do
-  download_host = 's3.amazonaws.com'
-  download_dir = "/ci.jruby.org"
-  index = Net::HTTP.get(download_host, download_dir)
+  download_host = 'projectodd.ci.cloudbees.com'
+  download_dir = "view/JRuby/job/jruby-development-dist/lastSuccessfulBuild/artifact/release"
+
+  https = Net::HTTP.new(download_host, 443)
+  https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  req = Net::HTTP::Get.new("https://#{download_host}/#{download_dir}/")
+  index = https.start { |http| http.request(req) }.body
   all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
-
-  # FIXME(uwe): Remove when JRuby 9.2.0.0 snapshots are being built
-  all_gems.reject!{|g| g =~ /9.2.0.0/}
-  # EMXIF
-
-  master_gem = all_gems.last
+  gem = all_gems.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
-  [[master_gem, 'master']].each do |gem, branch|
-    print "Downloading #{gem}: \r"
-    uri = URI("http://#{download_host}#{download_dir}/snapshots/#{branch}/#{gem}")
-    Net::HTTP.new(uri.host, uri.port).request_get(uri.path) do |response|
+  print "Downloading #{gem}: \r"
+  req = Net::HTTP::Get.new("https://#{download_host}/#{download_dir}/#{gem}")
+  https.start do |http|
+    http.request(req) do |response|
       if response.code == '200'
         length = response['Content-Length'].to_i
         timestamp = response['Last-Modified'] # Sat, 23 Jan 2016 05:52:03 GMT'

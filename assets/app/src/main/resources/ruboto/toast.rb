@@ -1,6 +1,6 @@
 #######################################################
 #
-# ruboto/util/toast.rb
+# ruboto/toast.rb
 #
 # Utility methods for doing a toast.
 #

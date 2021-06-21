@@ -1,4 +1,5 @@
 require 'ruboto/activity'
+require 'ruboto/stack'
 
 module Ruboto::Activity::Reload
   import org.ruboto.Log

@@ -1,29 +1,30 @@
 #!/bin/bash -e
 
-if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 1 ] ; then
-  echo JRuby-jars gem snapshot is missing.
-  rake get_jruby_jars_snapshot
-else
-  if [ `find . -maxdepth 1 -mtime +1 -name "jruby-jars-*.gem" | wc -l` -ne 0 ] ; then
-    echo jruby-jars gem snapshot is old.
-    rake get_jruby_jars_snapshot
-  fi
-fi
+#if [ `find . -maxdepth 1 -name "jruby-jars-*.gem" | wc -l` -lt 1 ] ; then
+#  echo JRuby-jars gem snapshot is missing.
+#  rake get_jruby_jars_snapshot
+#else
+#  if [ `find . -maxdepth 1 -mtime +1 -name "jruby-jars-*.gem" | wc -l` -ne 0 ] ; then
+#    echo jruby-jars gem snapshot is old.
+#    rake get_jruby_jars_snapshot
+#  fi
+#fi
 STABLE=`ls jruby-jars-*.gem | head -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 MASTER=`ls jruby-jars-*.gem | tail -n 1 | cut -f 3 -d'-' | sed s/\\.gem//`
 
 # FIXME: (uwe) Test api level 25 in vagrant when abi are available
 if [[ "$TRAVIS" = "true" ]] ; then # Vagrant
-  ANDROID_TARGETS="24 23 21 19" # We should cover at least 90% of the market
+  ANDROID_TARGETS="24" # We should cover at least 90% of the market
 else
-  ANDROID_TARGETS="25 24 23 21 19" # We should cover at least 90% of the market
+  ANDROID_TARGETS="26 25 24" # We should cover at least 90% of the market
 fi
 # EMXIF
 
 # PLATFORM_MODES="CURRENT FROM_GEM STANDALONE"
 PLATFORM_MODES="STANDALONE"
-STANDALONE_JRUBY_VERSIONS="$MASTER"
-FROM_GEM_JRUBY_VERSIONS="$MASTER"
+#STANDALONE_JRUBY_VERSIONS="$MASTER $STABLE"
+STANDALONE_JRUBY_VERSIONS="9.2.0.0"
+FROM_GEM_JRUBY_VERSIONS="9.2.0.0"
 RUBOTO_UPDATE_EXAMPLES=0
 # STRIP_INVOKERS=1
 # TEST_PART=2of4

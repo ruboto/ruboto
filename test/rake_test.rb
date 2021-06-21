@@ -1,5 +1,4 @@
 require_relative 'test_helper'
-require_relative '../assets/rakelib/ruboto.device'
 
 class RakeTest < Minitest::Test
   def setup

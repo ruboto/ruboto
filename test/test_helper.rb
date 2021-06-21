@@ -26,7 +26,7 @@ module RubotoTest
     ENV['GEM_HOME'] = GEM_PATH
     ENV['GEM_PATH'] = GEM_PATH
     ENV['PATH'] = "#{GEM_PATH}/bin:#{ENV['PATH']}"
-    Gem.paths = GEM_PATH
+    Gem.paths = {'GEM_PATH' => GEM_PATH}
     Gem.refresh
   end
 
@@ -90,9 +90,6 @@ module RubotoTest
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
 
   RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
-
-  puts "ANDROID_HOME: #{ANDROID_HOME}"
-  puts "ANDROID_SDK_TOOLS_REVISION: #{ANDROID_TOOLS_REVISION}"
 
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
@@ -164,9 +161,9 @@ class Minitest::Test
     raise "Unknown options: #{options.inspect}" unless options.empty?
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
 
-    Dir.mkdir TMP_DIR unless File.exists? TMP_DIR
+    Dir.mkdir_p TMP_DIR
 
-    FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    FileUtils.rm_rf APP_DIR if File.exist? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}"
     template_dir << "_package_#{package}" if package != PACKAGE
     template_dir << "_heap_alloc_#{heap_alloc}" if heap_alloc
@@ -177,7 +174,7 @@ class Minitest::Test
     template_dir << '_standalone' if standalone
     template_dir << "_without_#{excluded_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if excluded_stdlibs
     template_dir << "_with_#{included_stdlibs.map { |ed| ed.gsub(/[.\/]/, '_') }.join('_')}" if included_stdlibs
-    if File.exists?(template_dir)
+    if File.exist?(template_dir)
       puts "Copying app from template #{template_dir}"
       FileUtils.cp_r template_dir, APP_DIR, :preserve => true
     else
@@ -256,7 +253,7 @@ class Minitest::Test
   end
 
   def cleanup_app
-    # FileUtils.rm_rf APP_DIR if File.exists? APP_DIR
+    # FileUtils.rm_rf APP_DIR if File.exist? APP_DIR
   end
 
   def run_app_tests

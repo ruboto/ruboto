@@ -26,130 +26,55 @@ module Ruboto
 
       def self.main
         Main do
+          mode 'init' do
+            require 'ruboto/util/update'
+            include Ruboto::Util::LogAction
+            include Ruboto::Util::Build
+            include Ruboto::Util::Update
+
+            option('path') {
+              # argument :required
+              description 'Path to where you want your app.  Defaults to the last part of the package name.'
+            }
+            option('with-jruby') {
+              description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.'
+              argument :optional
+              cast { |v| Gem::Version.new(v) }
+              validate { |v| Gem::Version.correct?(v) }
+            }
+            def run
+              path = params['path'].value || Dir.getwd
+              with_jruby = params['with-jruby'].value
+              with_jruby = '9.2.9.0' unless with_jruby.is_a?(Gem::Version)
+
+              root = File.expand_path(path)
+
+              abort "Path (#{path}) must be to a directory that already exists." unless Dir.exist?(root)
+
+              puts "\nInitializing Android app in #{root}..."
+
+              Dir.chdir root do
+                update_assets
+                update_ruboto true
+                # update_icons true
+                update_classes nil, 'exclude'
+                # if with_jruby
+                #   update_jruby true, with_jruby
+                #   # update_dx_jar true
+                # end
+                update_core_classes 'exclude'
+
+                # log_action('Generating the default Activity and script') do
+                #   generate_inheriting_file 'Activity', activity, package
+                # end
+                # FileUtils.touch 'bin/classes2.dex'
+              end
+
+              puts "\nRuboto app in #{path} initialized."
+            end
+          end
           mode 'gen' do
             require 'ruboto/util/update'
-
-            mode 'app' do
-              include Ruboto::Util::LogAction
-              include Ruboto::Util::Build
-              include Ruboto::Util::Update
-
-              option('package') {
-                required
-                argument :required
-                description 'Name of package. Must be unique for every app. A common pattern is yourtld.yourdomain.appname (Ex. org.ruboto.irb)'
-              }
-              option('name') {
-                argument :required
-                description 'Name of your app.  Defaults to the last part of the package name capitalized.'
-              }
-              option('activity') {
-                argument :required
-                description 'Name of your primary Activity.  Defaults to the name of the application with "Activity" appended.'
-              }
-              option('path') {
-                argument :required
-                description 'Path to where you want your app.  Defaults to the last part of the package name.'
-              }
-              option('target', 't') {
-                argument :required
-                defaults DEFAULT_TARGET_SDK
-                description "Android version to target #{VERSION_HELP_TEXT}"
-                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
-                validate { |t| t =~ API_LEVEL_PATTERN }
-              }
-              option('min-sdk') {
-                argument :required
-                description "Minimum android version supported. #{VERSION_HELP_TEXT}"
-                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
-                validate { |t| t =~ API_LEVEL_PATTERN }
-              }
-              option('with-jruby') {
-                description 'Install the JRuby jars in your libs directory.  Optionally set the JRuby version to install.  Otherwise the latest available version is installed.'
-                argument :optional
-                cast { |v| Gem::Version.new(v) }
-                validate { |v| Gem::Version.correct?(v) }
-              }
-              option('ruby-version') {
-                description 'Using what version of Ruby? (e.g., 1.8, 1.9, 2.0)'
-                argument :required
-                cast :float
-                validate { |rv| [1.8, 1.9, 2.0].include?(rv) }
-              }
-              option('force') {
-                description 'Force creation of project even if the path exists'
-                cast :boolean
-              }
-
-              def run
-                package = params['package'].value
-                name = params['name'].value || package.split('.').last.split('_').map { |s| s.capitalize }.join
-                name[0..0] = name[0..0].upcase
-                activity = params['activity'].value || "#{name}Activity"
-                path = params['path'].value || package.split('.').last
-                target = params['target'].value
-                min_sdk = params['min-sdk'].value || target
-                with_jruby = params['with-jruby'].value
-                with_jruby = '9.1.11.0.SNAPSHOT' unless with_jruby.is_a?(Gem::Version)
-                ruby_version = params['ruby-version'].value
-                force = params['force'].value
-
-                abort "Path (#{path}) must be to a directory that does not yet exist. It will be created." if !force && File.exists?(path)
-                unless target =~ API_LEVEL_PATTERN
-                  abort "Target must match #{API_LEVEL_PATTERN}: got #{target}"
-                end
-
-                if $2.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-                  abort "Minimum Android api level is #{MINIMUM_SUPPORTED_SDK}: got #{target}"
-                end
-
-                root = File.expand_path(path)
-                puts "\nGenerating Android app #{name} in #{root}..."
-                system "android create project -n #{name} -t #{target} -p #{path} -k #{package} -a #{activity}"
-                exit $?.to_i unless $? == 0
-                unless File.exists? path
-                  puts 'Android project was not created'
-                  exit_failure!
-                end
-                Dir.chdir path do
-                  FileUtils.rm_f "src/#{package.gsub '.', '/'}/#{activity}.java"
-                  puts "Removed file #{"src/#{package.gsub '.', '/'}/#{activity}"}.java"
-                  FileUtils.rm_f 'res/layout/main.xml'
-                  puts 'Removed file res/layout/main.xml'
-                  verify_strings.root.elements['string'].text = name.gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2').gsub(/([a-z\d])([A-Z])/, '\1 \2')
-                  File.open('res/values/strings.xml', 'w') { |f| verify_strings.document.write(f, 4) }
-                end
-                puts 'Done'
-
-                Dir.chdir root do
-                  update_manifest min_sdk[API_NUMBER_PATTERN], target[API_NUMBER_PATTERN], true
-                  update_test true, target[API_NUMBER_PATTERN]
-                  update_assets
-
-                  if ruby_version
-                    source = File.read('ruboto.yml')
-                    pattern = %r{^#? ?ruby_version: 1.9$}
-                    File.open('ruboto.yml', 'w') { |f| f << source.sub(pattern, "ruby_version: #{ruby_version}") }
-                  end
-
-                  update_ruboto true
-                  update_icons true
-                  update_classes nil, 'exclude'
-                  if with_jruby
-                    update_jruby true, with_jruby
-                    update_dx_jar true
-                  end
-                  update_core_classes 'exclude'
-
-                  log_action('Generating the default Activity and script') do
-                    generate_inheriting_file 'Activity', activity, package
-                  end
-                  FileUtils.touch 'bin/classes2.dex'
-                end
-
-                puts "\nHello, #{name}\n"
-              end
-            end
 
             mode 'jruby' do
               include Ruboto::Util::LogAction
@@ -505,15 +430,7 @@ module Ruboto
 
           # just running `ruboto`
           def run
-            # FIXME(uwe):  Simplify when we stop supporting rubygems < 1.8.0
-            if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.8.0')
-              gem_spec = Gem::Specification.find_by_path 'ruboto'
-            else
-              gem_spec = Gem.searcher.find('ruboto')
-            end
-            # EMXIF
-
-            version = gem_spec.version.version
+            version = Gem::Specification.find_by_name('ruboto').version.version
 
             if params['version'].value
               puts version
@@ -521,7 +438,7 @@ module Ruboto
               puts <<EOF
 
     Ruboto -- Ruby for Android #{version}
-    Execute `ruboto gen app --help` for instructions on how to generate a fresh Ruboto app
+    Execute `ruboto init to initialize an Android Studio project with Ruboto
     Execute `ruboto --help` for other options
 
 EOF

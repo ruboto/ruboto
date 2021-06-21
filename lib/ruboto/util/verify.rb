@@ -11,16 +11,18 @@ module Ruboto
       # Verify the presence of important components
       #
 
+      MANIFEST_FILE_NAME = 'app/src/main/AndroidManifest.xml'
+
       def verify_manifest(reload: false)
         return @manifest if @manifest && !reload
-        unless File.exists? 'AndroidManifest.xml'
+        unless File.exists? MANIFEST_FILE_NAME
           abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app"
         end
-        @manifest = REXML::Document.new(File.read('AndroidManifest.xml')).root
+        @manifest = REXML::Document.new(File.read(MANIFEST_FILE_NAME)).root
       end
 
       def save_manifest
-        File.open('AndroidManifest.xml', 'w') do |f|
+        File.open(MANIFEST_FILE_NAME, 'w') do |f|
           REXML::Formatters::OrderedAttributes.new(4).write(verify_manifest.document, f)
           f.puts
         end
@@ -54,6 +56,7 @@ module Ruboto
       end
 
       def verify_min_sdk
+        return 27
         return @min_sdk if @min_sdk
         verify_sdk_versions
         min_sdk_attr = @uses_sdk.attribute('android:minSdkVersion').value
@@ -62,6 +65,7 @@ module Ruboto
       end
 
       def verify_target_sdk
+        return 30
         return @target_sdk if @target_sdk
         verify_sdk_versions
         target_sdk_attr = @uses_sdk.attribute('android:targetSdkVersion').value

@@ -15,9 +15,9 @@ module Ruboto
         19 => '4.4.2', 21 => '5.0.1', 22 => '5.1', 23 => '6.0', 24 => '7.0', 25 => '7.1.1'
     }
 
-    MINIMUM_SUPPORTED_SDK_LEVEL = 15
+    MINIMUM_SUPPORTED_SDK_LEVEL = 27
     MINIMUM_SUPPORTED_SDK = "android-#{MINIMUM_SUPPORTED_SDK_LEVEL}"
-    DEFAULT_TARGET_SDK_LEVEL = 19
+    DEFAULT_TARGET_SDK_LEVEL = 30
     DEFAULT_TARGET_SDK = "android-#{DEFAULT_TARGET_SDK_LEVEL}"
   end
 end

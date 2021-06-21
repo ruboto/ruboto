@@ -76,15 +76,15 @@ module Ruboto
       end
 
       def android_package_directory
+        return ENV['ANDROID_SDK'] if ENV['ANDROID_SDK']
         return ENV['ANDROID_HOME'] if ENV['ANDROID_HOME']
-        user_dir = if windows?
-                     'AppData/Local/Android/android-sdk'
-                   elsif File.exist? File.join(File.expand_path('~'), "android-sdk-#{android_package_os_id}")
-                     "android-sdk-#{android_package_os_id}"
-                   else
-                     "android-sdk"
-                   end
-        File.join File.expand_path('~'), user_dir
+        adb_location = which('adb')
+        return File.dirname(File.dirname(Pathname.new(adb_location).realpath)) if adb_location
+        search_path = windows? ?
+            ['AppData/Local/Android/android-sdk'] :
+            %W(Library/Android/sdk android-sdk-#{android_package_os_id} android-sdk)
+        sdk_dir = search_path.find{|path| File.exist? File.join(File.expand_path('~'), path)}
+        File.join File.expand_path('~'), sdk_dir || search_path[0]
       end
 
       def android_haxm_directory
@@ -714,7 +714,7 @@ module Ruboto
         end
         if accept_all || a == 'Y' || a.empty?
           level = api_level[/\d+/]
-          packages = `#{sdkmanager_cmd} --list`.scan(/\bsystem-images;android-#{level};.*?;[a-zA-z0-9-]+/)
+          packages = `#{sdkmanager_cmd} --list`.scan(/\b(?:system-images|platforms);android-#{level}(?:;.*?;[a-zA-z0-9-]+)?/)
           puts "Installing #{packages}"
           update_cmd = "#{sdkmanager_cmd} '#{packages.join("' '")}'"
           update_sdk(update_cmd, accept_all)

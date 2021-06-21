@@ -250,23 +250,9 @@ module Ruboto
       end
 
       def update_assets(old_version = nil)
-        # FIXME(uwe):  Remove when we stop support for updating from Ruboto 1.1.0
-        old_extra_classes = 'assets/classes2.jar'
-        if old_version == '1.1.0' && File.exists?(old_extra_classes)
-          puts "Deleting old extra dex file #{old_extra_classes}."
-          File.delete(string)
-        end
-        # EMXIF
-
-        puts "\nCopying files:"
+        puts "\nCopying assets:"
         weak_copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.', false
-        %w{.gitignore Rakefile ruboto.yml}.each { |f| log_action(f) { weak_copier.copy f } }
-
-        # FIXME(uwe): Only present in Ruboto 1.0.3.  Remove when we stop supporting updating from Ruboto 1.0.3
-        FileUtils.mv('rakelib/stdlib.rake', 'rakelib/ruboto.stdlib.rake') if File.exists?('rakelib/stdlib.rake')
-        FileUtils.mv('rakelib/stdlib.yml', 'rakelib/ruboto.stdlib.yml') if File.exists?('rakelib/stdlib.yml')
-        FileUtils.mv('rakelib/stdlib_dependencies.rb', 'ruboto.stdlib.rb') if File.exists?('rakelib/stdlib_dependencies.rb')
-        # EMXIF
+        %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         %w{assets rakelib res/layout test}.each do |f|
@@ -398,7 +384,7 @@ module Ruboto
           FileUtils.touch 'ruboto.yml'
         end
         Dir['src/*_activity.rb'].each { |f| FileUtils.touch(f) }
-        system 'rake build_xml jruby_adapter ruboto_activity'
+        system 'rake ruboto_activity'
       end
 
       def read_ruboto_version
@@ -455,7 +441,63 @@ module Ruboto
               raise "Unpacking jruby-core jar failed: #$?" unless $? == 0
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
-              if gem_version >= Gem::Version.new('9.1.11.0.SNAPSHOT')
+
+              puts "New code!!!  gem_version: #{gem_version.inspect}"
+              puts "gem_version >= Gem::Version.new('9.2.0.0'): #{gem_version >= Gem::Version.new('9.2.0.0')}"
+
+              if gem_version >= Gem::Version.new('9.2.0.0')
+                #noinspection RubyLiteralArrayInspection
+                excluded_core_packages = [
+
+                    # FIXME(uwe): Exclude these packages?
+                    # '**/*Darwin*',
+                    # '**/*Solaris*',
+                    # '**/*windows*',
+                    # '**/*Windows*',
+                    # EMXIF
+
+                    'META-INF',
+                    # 'com/headius',
+                    # 'com/headius/invokebinder',
+                    'com/headius/options/example',
+                    'com/kenai/constantine',
+                    'com/kenai/jffi',
+                    'com/kenai/jnr/x86asm',
+                    'com/martiansoftware',
+                    'jni',
+                    'jnr/constants/platform/darwin',
+                    'jnr/constants/platform/fake',
+                    'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd',
+                    # 'jnr/enxio',
+                    'jnr/ffi/annotations',
+                    'jnr/ffi/byref',
+                    'jnr/ffi/mapper',
+                    'jnr/ffi/provider',
+                    'jnr/ffi/util',
+                    'jnr/ffi/Struct$*',
+                    'jnr/ffi/types',
+                    # 'jnr/netdb',
+                    'jnr/posix/Aix*',
+                    'jnr/posix/FreeBSD*',
+                    'jnr/posix/MacOS*',
+                    'jnr/posix/OpenBSD*',
+                    'jnr/x86asm',
+                    'org/jruby/ant',
+                    # 'org/jruby/compiler',      # Needed for initialization, but should not be necessary
+                    # 'org/jruby/compiler/impl', # Needed for initialization, but should not be necessary
+                    'org/jruby/embed/bsf',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                    'org/jruby/ext/ffi/Enums*',
+                    # 'org/jruby/ext/tracepoint',
+                    'org/jruby/javasupport/bsf',
+                    # 'org/jruby/management', # should be excluded
+                    # 'org/jruby/runtime/invokedynamic', # Should be excluded
+                    # 'org/jruby/runtime/opto',              # What is this?
+                    # 'org/jruby/runtime/opto/OptoFactory*', # What is this?
+                ]
+              elsif gem_version >= Gem::Version.new('9.1.11.0.SNAPSHOT')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -640,6 +682,8 @@ module Ruboto
                 raise "Unsupported JRuby version: #{jruby_core_version.inspect}."
               end
 
+              puts "remove packages..."
+
               excluded_core_packages.each do |i|
                 if File.directory? i
                   FileUtils.remove_dir(i, true) rescue puts "Failed to remove package: #{i} (#{$!})"
@@ -671,7 +715,10 @@ module Ruboto
               #end
 
               # Add our proxy class factory
-              android_jar = Dir["#{ANDROID_HOME.gsub("\\", '/')}/platforms/*/android.jar"][0]
+              android_jar = Dir["#{ANDROID_HOME.gsub("\\", '/')}/platforms/android-26/android.jar"][0]
+
+              puts "android_jar: #{android_jar.inspect}"
+
               unless android_jar
                 puts
                 puts '*' * 80
@@ -692,6 +739,7 @@ module Ruboto
               end
               # ODOT
               sources = source_dirs.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              puts "javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}"
               `javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
               raise 'Compile failed' unless $? == 0
 
@@ -701,18 +749,6 @@ module Ruboto
             FileUtils.remove_dir 'tmp', true
           end
         end
-      end
-
-      # - Moves ruby stdlib to the root of the jruby-stdlib jar
-      def reconfigure_jruby_stdlib(jruby_version)
-        # FIXME(uwe): Introduced in Ruboto 1.0.3.  Remove when we stop supporting upgrading from Ruboto 1.0.3.
-        unless File.exists?('rakelib/ruboto.stdlib.rake') || File.exists?('rakelib/stdlib.rake')
-          abort 'cannot find rakelib/ruboto.stdlib.rake; make sure you update your app (ruboto update app)'
-        end
-        # EMXIF
-
-        ENV['JRUBY_JARS_VERSION'] = jruby_version
-        system 'rake libs:reconfigure_stdlib'
       end
 
       def reconfigure_dx_jar

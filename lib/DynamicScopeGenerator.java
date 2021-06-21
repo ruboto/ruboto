@@ -12,9 +12,10 @@ import org.jruby.util.ClassDefiningClassLoader;
 import org.jruby.util.OneShotClassLoader;
 import org.jruby.util.collections.NonBlockingHashMapLong;
 
-import org.jruby.util.invoke.MethodHandle;
-import org.jruby.util.invoke.MethodHandles;
-import org.jruby.util.invoke.MethodType;
+import java.lang.ClassValue;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import java.io.IOException;
 import java.io.PrintStream;

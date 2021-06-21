@@ -61,7 +61,7 @@ ruboto emulator -t $ANDROID_TARGET --no-snapshot
 > adb_logcat.log
 
 (gem query -q -i -n ^bundler$ >/dev/null) || gem install bundler
-bundle install
+bundle check || bundle install
 
 export NOEXEC_DISABLE=1
 rake clean
