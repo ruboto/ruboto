@@ -255,7 +255,7 @@ module Ruboto
         %w{.gitignore Rakefile}.each { |f| log_action(f) { weak_copier.copy f } }
 
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        %w{assets rakelib res/layout test}.each do |f|
+        %w{assets rakelib}.each do |f|
           log_action(f) { copier.copy f }
         end
       end

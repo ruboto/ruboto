@@ -1,9 +1,7 @@
 package THE_PACKAGE;
 
 import java.io.IOException;
-
 import org.ruboto.Script;
-
 import android.app.ProgressDialog;
 import android.os.Bundle;
 
