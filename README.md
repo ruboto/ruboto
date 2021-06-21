@@ -11,6 +11,21 @@ regular Android Studio projects.
   * Choose "Phone and Tablet" and "No Activity" for the project template.
   * Choose "Java" for your language and "Minimum SDK" should be "API 27" or higher.
   * "Use legacy android.support libraries" ?  "No", for now.
+* Add the these dependencies to your `app/build.gradle` file:
+  ```groovy
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.linkedin.dexmaker:dexmaker:2.19.1'
+    implementation 'me.qmx.jitescript:jitescript:0.4.1'
+    implementation 'com.jakewharton.android.repackaged:dalvik-dx:7.1.0_r7'
+  ```
+* Add `app/gems.rb`
+  ```ruby
+  source 'https://rubygems.org/'
+
+  gem 'activerecord', '~>5.2'
+  gem 'activerecord-jdbc-adapter', '~>52.6'
+  gem 'sqldroid', '~>1.0'
+  ```
 * What next?
 
 ## Adding Ruboto to an existing Android Studio project
