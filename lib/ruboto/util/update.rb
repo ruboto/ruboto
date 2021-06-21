@@ -281,13 +281,14 @@ module Ruboto
         end
       end
 
-      JAVA_SRC_DIR = 'app/src/main/java'
-
       def update_classes(old_version, force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/*.java" }
+        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/jruby/**/*.java" }
+        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/java/**/*.java" }
+        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/sun/**/*.java" }
         log_action('Ruboto java test classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/test/*.java", 'test' }
-        Dir['src/**/*.java'].each do |f|
+        Dir["#{JAVA_SRC_DIR}/**/*.java"].each do |f|
           source_code = File.read(f)
           if source_code =~ /^\s*package\s+org.ruboto\s*;/
             next
@@ -385,7 +386,7 @@ module Ruboto
           sleep 1
           FileUtils.touch 'ruboto.yml'
         end
-        Dir['src/*_activity.rb'].each { |f| FileUtils.touch(f) }
+        Dir["#{SCRIPTS_DIR}/*_activity.rb"].each { |f| FileUtils.touch(f) }
         system 'rake ruboto_activity'
       end
 

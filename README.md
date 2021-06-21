@@ -100,6 +100,27 @@ regular Android Studio projects.
       cd app
       ./update_jruby_jar.sh
 
+* Generate the startup activity:
+
+      bundle exec ruboto gen class Activity --name StartupActivity
+
+* Add the startup activity intent filter to the new activity tag:
+  ```xml
+  <intent-filter>
+      <action android:name="android.intent.action.MAIN" />
+      <category android:name="android.intent.category.LAUNCHER" />
+      <action android:name="android.intent.action.VIEW" />
+  </intent-filter>
+  ```
+
+* Declare the SplashActivity in `app/src/main/AndroidManifest.xml`
+  ```xml
+  <activity
+      android:name='org.ruboto.SplashActivity'
+      android:configChanges='orientation|screenSize'
+      android:exported='false'
+      android:noHistory='true' />
+  ```
 * What next?
 
 ## Adding Ruboto to an existing Android Studio project

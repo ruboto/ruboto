@@ -2,14 +2,13 @@ module Ruboto
   module Util
     module Build
       include Verify
+      JAVA_SRC_DIR = 'app/src/main/java'
       SCRIPTS_DIR = 'app/src/main/resources'
 
       ###########################################################################
       #
       # Build Subclass or Interface:
       #
-
-      JAVA_SRC_DIR = "app/src/main/java"
 
       # build_file: Reads the src from the appropriate location,
       #   uses the substitutions hash to modify the contents,
@@ -158,8 +157,8 @@ module Ruboto
       #
       def generate_inheriting_file(klass, name, package = verify_package, script_name = "#{underscore(name)}.rb")
         dest = '.'
-        file = File.expand_path File.join(dest, "src/#{package.gsub('.', '/')}", "#{name}.java")
-        text = File.read(File.join(Ruboto::ASSETS, "src/Inheriting#{klass}.java"))
+        file = File.expand_path File.join(dest, "#{JAVA_SRC_DIR}/#{package.gsub('.', '/')}", "#{name}.java")
+        text = File.read(File.join(Ruboto::ASSETS, "#{JAVA_SRC_DIR}/Inheriting#{klass}.java"))
         file_existed = File.exists?(file)
         File.open(file, 'w') do |f|
           f << text.gsub('THE_PACKAGE', package).gsub("Sample#{klass}", name).gsub("Inheriting#{klass}", name).gsub("sample_#{underscore(klass)}.rb", script_name)
@@ -179,17 +178,17 @@ module Ruboto
           puts "Added file #{script_file}."
         end
 
-        test_file = File.expand_path("test/src/#{script_name.chomp('.rb')}_test.rb", dest)
-        unless File.exists? test_file
-          sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb"))
-          sample_test_source.gsub!('THE_PACKAGE', package)
-          sample_test_source.gsub!("Sample#{klass}", name)
-          sample_test_source.gsub!('SampleActivity', verify_activity)
-          File.open test_file, 'a' do |f|
-            f << sample_test_source
-          end
-          puts "Added file #{test_file}."
-        end
+        # test_file = File.expand_path("test/src/#{script_name.chomp('.rb')}_test.rb", dest)
+        # unless File.exists? test_file
+        #   sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb"))
+        #   sample_test_source.gsub!('THE_PACKAGE', package)
+        #   sample_test_source.gsub!("Sample#{klass}", name)
+        #   sample_test_source.gsub!('SampleActivity', verify_activity)
+        #   File.open test_file, 'a' do |f|
+        #     f << sample_test_source
+        #   end
+        #   puts "Added file #{test_file}."
+        # end
       end
 
       def methods_header
