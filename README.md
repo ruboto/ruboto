@@ -1,3 +1,24 @@
+# Ruboto 2
+
+Ruboto 2 is a redesign based on an [Android Studio](https://developer.android.com/studio/) workflow.
+This means that the JRuby and Ruboto components will integrate into the standard gradle tooling used by
+regular Android Studio projects.
+
+## Starting a new Ruboto project
+
+* Download and install [Android studio](https://developer.android.com/studio/).
+* Choose "Create New Project" in the startup screen.
+  * Choose "Phone and Tablet" and "No Activity" for the project template.
+  * Choose "Java" for your language and "Minimum SDK" should be "API 27" or higher.
+  * "Use legacy android.support libraries" ?  "No", for now.
+* What next?
+
+## Adding Ruboto to an existing Android Studio project
+
+HOWTO missing.  Pull requests welcome!
+
+# Ruboto 1.x
+
 [![Gem Version](https://badge.fury.io/rb/ruboto.svg)](http://badge.fury.io/rb/ruboto)
 [![Build Status](https://travis-ci.org/ruboto/ruboto.svg?branch=master)](https://travis-ci.org/ruboto/ruboto)
 [![Code Climate](https://codeclimate.com/github/ruboto/ruboto.svg)](https://codeclimate.com/github/ruboto/ruboto)
