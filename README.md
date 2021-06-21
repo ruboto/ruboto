@@ -309,6 +309,10 @@ regular Android Studio projects.
   gem 'sqldroid', '~>1.0'
   ```
 
+* Install the app gems:
+
+      jruby -S rake bundle
+
 * Add `app/update_jruby_jar.sh`:
   ```shell
   #!/usr/bin/env bash
