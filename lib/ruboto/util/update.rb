@@ -281,10 +281,12 @@ module Ruboto
         end
       end
 
+      JAVA_SRC_DIR = 'app/src/main/java'
+
       def update_classes(old_version, force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
-        log_action('Ruboto java classes') { copier.copy 'src/org/ruboto/*.java' }
-        log_action('Ruboto java test classes') { copier.copy 'src/org/ruboto/test/*.java', 'test' }
+        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/*.java" }
+        log_action('Ruboto java test classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/test/*.java", 'test' }
         Dir['src/**/*.java'].each do |f|
           source_code = File.read(f)
           if source_code =~ /^\s*package\s+org.ruboto\s*;/
@@ -378,7 +380,7 @@ module Ruboto
       end
 
       def update_core_classes(force = nil)
-        generate_core_classes(:class => 'all', :method_base => 'on', :method_include => '', :method_exclude => '', :force => force, :implements => '')
+        generate_core_classes(class: 'all', method_base: 'on', method_include: '', method_exclude: '', force: force, implements: '')
         if File.exists?('ruboto.yml')
           sleep 1
           FileUtils.touch 'ruboto.yml'
@@ -397,6 +399,7 @@ module Ruboto
         new_sources_dir = Ruboto::GEM_ROOT + "/assets/#{SCRIPTS_DIR}"
         new_sources = Dir.chdir(new_sources_dir) { Dir[source_files_pattern] }.
             select { |f| !(File.directory?("#{new_sources_dir}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }
+        FileUtils.mkdir_p SCRIPTS_DIR
         old_sources = Dir.chdir("#{SCRIPTS_DIR}") { Dir[source_files_pattern] }.
             select { |f| !(File.directory?("#{SCRIPTS_DIR}/#{f}") || File.basename(f) == '.' || File.basename(f) == '..') }
         obsolete_sources = old_sources - new_sources - %w(ruboto/version.rb)
