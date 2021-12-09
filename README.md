@@ -57,6 +57,9 @@ regular Android Studio projects.
   DOWNLOAD_DIR="$HOME/Downloads"
   DOWNLOADED_JAR="${DOWNLOAD_DIR}/${JAR_FILE}"
   
+  [ ! -d $HOME/Downloads ] && mkdir $HOME/Downloads  # Create the directory if we don't find it
+  [ ! -d ./libs ] && mkdir ./libs                    # Create the directory if we don't find it
+  
   cd libs
   rm -f bcpkix-jdk15on-*.jar bcprov-jdk15on-*.jar bctls-jdk15on-*.jar cparse-jruby.jar generator.jar jline-*.jar jopenssl.jar jruby-complete-*.jar parser.jar psych.jar readline.jar snakeyaml-*.jar
   
@@ -108,6 +111,7 @@ regular Android Studio projects.
 
 * Generate the startup activity:
 
+      cd ..
       bundle exec ruboto gen class Activity --name StartupActivity
 
 * Add the startup activity intent filter to the new activity tag:
