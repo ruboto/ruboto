@@ -160,7 +160,7 @@ class RubotoGenTest < Minitest::Test
 
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
-require 'ruboto/util/stack'
+require 'ruboto/stack'
 require 'ruboto/widget'
 
 ruboto_import_widgets :LinearLayout, :ListView, :TextView

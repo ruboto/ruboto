@@ -1,4 +1,4 @@
-require 'ruboto/util/toast'
+require 'ruboto/toast'
 
 # Services are complicated and don't really make sense unless you
 # show the interaction between the Service and other parts of your

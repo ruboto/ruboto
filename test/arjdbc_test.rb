@@ -17,7 +17,7 @@ class ArjdbcTest < Minitest::Test
     Dir.chdir APP_DIR do
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/widget'
-require 'ruboto/util/stack'
+require 'ruboto/stack'
 
 with_large_stack do
   require 'rubygems'

@@ -4,14 +4,21 @@ require 'yaml'
 module Ruboto
   module Util
     module Verify
-      ON_TRAVIS = ENV['TRAVIS'] == 'true' # TODO: (uwe) Maybe check "/dev/kvm" ?
-
       ###########################################################################
       #
       # Verify the presence of important components
       #
 
       MANIFEST_FILE_NAME = 'app/src/main/AndroidManifest.xml'
+      APP_BUILD_GRADLE_FILE_NAME = 'app/build.gradle'
+
+      def verify_app_build_gradle(reload: false)
+        return @app_build_gradle if @app_build_gradle && !reload
+        unless File.exist? APP_BUILD_GRADLE_FILE_NAME
+          abort "cannot find your #{APP_BUILD_GRADLE_FILE_NAME} to extract info from it. Make sure you're in the root directory of your app."
+        end
+        @app_build_gradle = File.read(APP_BUILD_GRADLE_FILE_NAME)
+      end
 
       def verify_manifest(reload: false)
         return @manifest if @manifest && !reload
@@ -39,8 +46,13 @@ module Ruboto
       end
 
       def verify_package
+        verify_app_build_gradle
+        @package ||= @app_build_gradle[/(?<=applicationId ")([^"]+)/]
+        return @package if @package
         verify_manifest
         @package ||= @manifest.attribute('package').value
+        abort "You must specify your application package name in #{APP_BUILD_GRADLE_FILE_NAME} or in the manifest." unless @package
+        @package
       end
 
       def verify_activity
@@ -51,7 +63,7 @@ module Ruboto
       def verify_sdk_versions
         verify_manifest
         @uses_sdk ||= @manifest.elements['uses-sdk']
-        abort "you must specify your sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @uses_sdk
+        abort "You must specify your sdk level in the manifest (e.g., <uses-sdk android:minSdkVersion='3' android:targetSdkVersion='8' />)" unless @uses_sdk
         @uses_sdk
       end
 

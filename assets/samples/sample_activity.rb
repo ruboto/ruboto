@@ -1,5 +1,5 @@
 require 'ruboto/widget'
-require 'ruboto/util/toast'
+require 'ruboto/toast'
 
 ruboto_import_widgets :Button, :LinearLayout, :TextView
 
