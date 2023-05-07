@@ -10,7 +10,7 @@ regular Android Studio projects.
 
 * Choose "Create New Project" in the startup screen.
   * Choose "Phone and Tablet" and "No Activity" for the project template.
-  * Choose "Java" for your language and "Minimum SDK" should be "API 27" or higher.
+  * Choose "Java" for your language and "Minimum SDK" should be "**API 27: Android 8.1 (Oreo)**" or higher.
 
 * Add a **jcenter** to the `dependencyResolutionManagement/repositories` section of your `settings.gradle` file:
   ```groovy
