@@ -7,10 +7,23 @@ regular Android Studio projects.
 ## Starting a new Ruboto project
 
 * Download and install [Android studio](https://developer.android.com/studio/).
+
 * Choose "Create New Project" in the startup screen.
   * Choose "Phone and Tablet" and "No Activity" for the project template.
   * Choose "Java" for your language and "Minimum SDK" should be "API 27" or higher.
   * "Use legacy android.support libraries" ?  "No", for now.
+
+* Add a **jcenter** to the `dependencyResolutionManagement/repositories` section of your `settings.gradle` file:
+  ```groovy
+  dependencyResolutionManagement {
+      ...
+      repositories {
+          ...
+          jcenter()
+      }
+  }
+  ```
+
 * Add the these dependencies to your `app/build.gradle` file:
   ```groovy
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -24,6 +37,12 @@ regular Android Studio projects.
 
   gem 'ruboto', '~>2.0.dev', git: 'https://github.com/ruboto/ruboto.git'
   ```
+
+* Ensure you are using JRuby on the command line
+
+  Create a `.ruby-version` file:
+
+      jruby
 
 * Initialize Ruboto:
 
