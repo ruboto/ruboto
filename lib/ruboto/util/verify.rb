@@ -47,7 +47,7 @@ module Ruboto
 
       def verify_package
         verify_app_build_gradle
-        @package ||= @app_build_gradle[/(?<=applicationId ")([^"]+)/]
+        @package ||= @app_build_gradle[/(?<=namespace ")([^"]+)/]
         return @package if @package
         verify_manifest
         @package ||= @manifest.attribute('package').value
