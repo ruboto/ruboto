@@ -32,7 +32,7 @@ class Thread
       begin
         block.call
       rescue Exception => e
-        STDERR.puts "Exception in #{name}: #{e.class} #{e}\n#{e.backtrace.join("\n")}"
+        STDERR.puts "Exception in #{name.inspect}: #{e.class} #{e}\n#{e.backtrace.join("\n")}"
         raise
       end
     end
