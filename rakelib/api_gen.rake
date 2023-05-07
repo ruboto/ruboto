@@ -24,7 +24,7 @@ namespace :apis do
 
     $stdout.sync = true
 
-    mkdir('apis') unless File.exists?('apis')
+    mkdir('apis') unless File.exist?('apis')
 
     print 'Getting 1 (1.0)...'
     file = open(Api.platform_url(1))

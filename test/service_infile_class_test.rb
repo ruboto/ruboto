@@ -19,7 +19,7 @@ class ServiceInfileClassTest < Minitest::Test
 
     Dir.chdir APP_DIR do
       activity_filename = "#{SRC_DIR}/ruboto_test_app_activity.rb"
-      assert File.exists? activity_filename
+      assert File.exist? activity_filename
       File.open(activity_filename, 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
 require 'ruboto/widget'
@@ -79,7 +79,7 @@ end
 EOF
 
       service_test_filename = "#{APP_DIR}/test/src/ruboto_test_app_activity_test.rb"
-      assert File.exists? service_test_filename
+      assert File.exist? service_test_filename
       File.open(service_test_filename, 'w') { |f| f << <<EOF }
 activity Java::org.ruboto.test_app.RubotoTestAppActivity
 

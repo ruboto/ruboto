@@ -22,7 +22,7 @@ module Ruboto
       def update_android(target_level = nil)
         root = Dir.getwd
         build_xml_file = "#{root}/build.xml"
-        if File.exists? build_xml_file
+        if File.exist? build_xml_file
           ant_script = File.read(build_xml_file)
           name = REXML::Document.new(ant_script).root.attributes['name']
         else
@@ -53,7 +53,7 @@ module Ruboto
 
       def update_test(force, target_level = nil)
         root = Dir.getwd
-        if !File.exists?("#{root}/test") || !File.exists?("#{root}/test/AndroidManifest.xml") || !File.exists?("#{root}/test/ant.properties")
+        if !File.exist?("#{root}/test") || !File.exist?("#{root}/test/AndroidManifest.xml") || !File.exist?("#{root}/test/ant.properties")
           name = verify_strings.root.elements['string'].text.gsub(' ', '')
           puts "\nGenerating Android test project #{name} in #{root}..."
           system %Q{android create test-project -m "#{root.gsub('"', '\"')}" -n "#{name}Test" -p "#{root.gsub('"', '\"')}/test"}
@@ -221,7 +221,7 @@ module Ruboto
         unless $? == 0
           local_gem_dir = ENV['LOCAL_GEM_DIR'] || Dir.getwd
           local_gem_file = "#{local_gem_dir}/jruby-jars-#{jruby_jars_version}.gem"
-          if File.exists?(local_gem_file)
+          if File.exist?(local_gem_file)
             system "gem install -l #{local_gem_file} --no-document"
           else
             system "gem install -r jruby-jars#{version_requirement} --no-document"
@@ -268,12 +268,12 @@ module Ruboto
           Dir["#{Ruboto::ASSETS}/res/drawable*/ic_launcher.png"].each do |f|
             src_dir = f.slice(/res\/drawable.*\//)
             dest_file = icon_path.sub('@drawable/', src_dir) + '.png'
-            if force || !File.exists?(dest_file)
+            if force || !File.exist?(dest_file)
               FileUtils.mkdir_p File.dirname(dest_file)
               FileUtils.cp(f, dest_file)
             end
             test_dest_file = 'test/' + test_icon_path.sub('@drawable/', src_dir) + '.png'
-            if force || !File.exists?(test_dest_file)
+            if force || !File.exist?(test_dest_file)
               FileUtils.mkdir_p File.dirname(test_dest_file)
               FileUtils.cp(f, test_dest_file)
             end
@@ -382,7 +382,7 @@ module Ruboto
 
       def update_core_classes(force = nil)
         generate_core_classes(class: 'all', method_base: 'on', method_include: '', method_exclude: '', force: force, implements: '')
-        if File.exists?('ruboto.yml')
+        if File.exist?('ruboto.yml')
           sleep 1
           FileUtils.touch 'ruboto.yml'
         end
@@ -392,7 +392,7 @@ module Ruboto
 
       def read_ruboto_version
         version_file = File.expand_path("./#{SCRIPTS_DIR}/ruboto/version.rb")
-        File.read(version_file).slice(/^\s*VERSION = '(.*?)'/, 1) if File.exists?(version_file)
+        File.read(version_file).slice(/^\s*VERSION = '(.*?)'/, 1) if File.exist?(version_file)
       end
 
       def update_ruboto(force=nil)
@@ -783,7 +783,7 @@ module Ruboto
       end
 
       def update_bundle
-        if File.exist?('Gemfile.apk') && File.exists?('libs/bundle.jar')
+        if File.exist?('Gemfile.apk') && File.exist?('libs/bundle.jar')
           FileUtils.rm 'libs/bundle.jar'
           system 'rake bundle'
         end

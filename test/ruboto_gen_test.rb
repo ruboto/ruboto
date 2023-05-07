@@ -15,7 +15,7 @@ class RubotoGenTest < Minitest::Test
 
   def test_gitignore_is_included_in_new_project
     Dir.chdir APP_DIR do
-      assert File.exists? '.gitignore'
+      assert File.exist? '.gitignore'
     end
   end
 
@@ -31,9 +31,9 @@ class RubotoGenTest < Minitest::Test
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name App1Activity"
       assert_equal 0, $?.exitstatus
-      assert File.exists?('src/org/ruboto/test_app/App1Activity.java')
-      assert File.exists?('src/app1_activity.rb')
-      assert File.exists?('test/src/app1_activity_test.rb')
+      assert File.exist?('src/org/ruboto/test_app/App1Activity.java')
+      assert File.exist?('src/app1_activity.rb')
+      assert File.exist?('test/src/app1_activity_test.rb')
     end
     run_app_tests
   end
@@ -42,9 +42,9 @@ class RubotoGenTest < Minitest::Test
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class activity --name VeryNewActivity"
       assert_equal 1, $?.exitstatus
-      assert !File.exists?('src/org/ruboto/test_app/VeryNewActivity.java')
-      assert !File.exists?('src/very_new_activity.rb')
-      assert !File.exists?('test/src/very_new_activity_test.rb')
+      assert !File.exist?('src/org/ruboto/test_app/VeryNewActivity.java')
+      assert !File.exist?('src/very_new_activity.rb')
+      assert !File.exist?('test/src/very_new_activity_test.rb')
       assert File.read('AndroidManifest.xml') !~ /VeryNewActivity/
     end
   end
@@ -135,9 +135,9 @@ class RubotoGenTest < Minitest::Test
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen subclass android.database.sqlite.SQLiteOpenHelper --name MyDatabaseHelper --method_base on"
       assert_equal 0, $?.exitstatus
-      assert File.exists?('src/org/ruboto/test_app/MyDatabaseHelper.java')
-      assert File.exists?('src/my_database_helper.rb')
-      assert File.exists?('test/src/my_database_helper_test.rb')
+      assert File.exist?('src/org/ruboto/test_app/MyDatabaseHelper.java')
+      assert File.exist?('src/my_database_helper.rb')
+      assert File.exist?('test/src/my_database_helper_test.rb')
       system 'rake debug'
       assert_equal 0, $?
     end
@@ -148,15 +148,15 @@ class RubotoGenTest < Minitest::Test
       system "#{RUBOTO_CMD} gen subclass android.widget.ArrayAdapter --name RubotoArrayAdapter --method_base all"
       assert_equal 0, $?.exitstatus
       java_source_file = 'src/org/ruboto/test_app/RubotoArrayAdapter.java'
-      assert File.exists?(java_source_file)
+      assert File.exist?(java_source_file)
 
       # FIXME(uwe):  Workaround for Ruboto Issue #246
       java_source = File.read(java_source_file)
       File.open(java_source_file, 'w') { |f| f << java_source.gsub(/^(public class .*ArrayAdapter) (.*ArrayAdapter)/, '\1<T> \2<T>').gsub(/T.class/, 'Object.class') }
       # EMXIF
 
-      assert File.exists?('src/ruboto_array_adapter.rb')
-      assert File.exists?('test/src/ruboto_array_adapter_test.rb')
+      assert File.exist?('src/ruboto_array_adapter.rb')
+      assert File.exist?('test/src/ruboto_array_adapter_test.rb')
 
       File.open('src/ruboto_test_app_activity.rb', 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
@@ -299,9 +299,9 @@ EOF
     Dir.chdir APP_DIR do
       system "#{RUBOTO_CMD} gen class Activity --name appActivity"
       assert_equal 0, $?.exitstatus
-      assert File.exists?('src/org/ruboto/test_app/AppActivity.java')
-      assert File.exists?('src/app_activity.rb')
-      assert File.exists?('test/src/app_activity_test.rb')
+      assert File.exist?('src/org/ruboto/test_app/AppActivity.java')
+      assert File.exist?('src/app_activity.rb')
+      assert File.exist?('test/src/app_activity_test.rb')
     end
   end
 

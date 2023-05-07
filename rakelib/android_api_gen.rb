@@ -316,9 +316,9 @@ class ApiTag < CoreTag
   def read_platform(number)
     @number = number
 
-    if File.exists?("apis/#{@number}.txt")
+    if File.exist?("apis/#{@number}.txt")
       read_platform_from_txt(IO.read("apis/#{@number}.txt"))
-    elsif File.exists?("apis/#{@number}.xml")
+    elsif File.exist?("apis/#{@number}.xml")
       read_platform_from_xml(IO.read("apis/#{@number}.xml"))
     else
       url = Api.platform_url(number)

@@ -44,7 +44,7 @@ desc 'Generate bundle jar from Gemfile'
 task bundle: BUNDLE_JAR
 
 file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
-  next unless File.exists? GEM_FILE
+  next unless File.exist? GEM_FILE
   puts "Generating #{BUNDLE_JAR}"
   require 'bundler'
   Dir.chdir('app') do
@@ -119,7 +119,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   Dir.chdir gem_path do
     Dir['jruby-openssl-*/lib'].each do |g|
       rel_dir = "#{g}/lib/ruby"
-      unless File.exists? rel_dir
+      unless File.exist? rel_dir
         puts "Relocating #{g} files to match standard load path."
         dirs = Dir["#{g}/*"]
         FileUtils.mkdir_p rel_dir

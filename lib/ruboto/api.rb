@@ -11,7 +11,7 @@ module Ruboto
         @api ||= begin
           log_action("Loading Android API") do
             api = File.expand_path(Ruboto::GEM_ROOT + "/lib/java_class_gen/android_api.xml")
-            abort "cannot find android_api.xml to extract info from it." unless  File.exists? api
+            abort "cannot find android_api.xml to extract info from it." unless  File.exist? api
             scan_in_api(File.read(api))["api"][0]
           end
         end

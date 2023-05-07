@@ -15,7 +15,7 @@ module Ruboto
 
       def verify_manifest(reload: false)
         return @manifest if @manifest && !reload
-        unless File.exists? MANIFEST_FILE_NAME
+        unless File.exist? MANIFEST_FILE_NAME
           abort "cannot find your AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app"
         end
         @manifest = REXML::Document.new(File.read(MANIFEST_FILE_NAME)).root
@@ -30,7 +30,7 @@ module Ruboto
       
       def verify_test_manifest
         abort "cannot find your test AndroidManifest.xml to extract info from it. Make sure you're in the root directory of your app" \
-            unless File.exists? 'test/AndroidManifest.xml'
+            unless File.exist? 'test/AndroidManifest.xml'
         @manifest ||= REXML::Document.new(File.read('test/AndroidManifest.xml')).root
       end
 
@@ -74,7 +74,7 @@ module Ruboto
       end
 
       def verify_strings
-        abort "cannot find your strings.xml to extract info from it. Make sure you're in the root directory of your app" unless File.exists? 'res/values/strings.xml'
+        abort "cannot find your strings.xml to extract info from it. Make sure you're in the root directory of your app" unless File.exist? 'res/values/strings.xml'
         @strings ||= REXML::Document.new(File.read('res/values/strings.xml'))
       end
 
@@ -83,7 +83,7 @@ module Ruboto
       end
 
       def verify_ruboto_config
-        if File.exists? 'ruboto.yml'
+        if File.exist? 'ruboto.yml'
           @ruboto_config ||= (YAML::load_file('ruboto.yml') || {})
         else
           @ruboto_config = {}
@@ -96,13 +96,13 @@ module Ruboto
 
       def verify_project_properties
         return @project_properties if project_properties
-        abort "cannot find your #{properties_file_name} to extract info from it. Make sure you're in the root directory of your app." unless File.exists? properties_file_name
+        abort "cannot find your #{properties_file_name} to extract info from it. Make sure you're in the root directory of your app." unless File.exist? properties_file_name
       end
 
       def project_properties
         return @project_properties if @project_properties
         properties_file_name = 'project.properties'
-        return nil unless File.exists? properties_file_name
+        return nil unless File.exist? properties_file_name
         @project_properties = File.read(properties_file_name)
       end
 

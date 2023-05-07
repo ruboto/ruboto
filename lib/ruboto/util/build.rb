@@ -159,14 +159,14 @@ module Ruboto
         dest = '.'
         file = File.expand_path File.join(dest, "#{JAVA_SRC_DIR}/#{package.gsub('.', '/')}", "#{name}.java")
         text = File.read(File.join(Ruboto::ASSETS, "#{JAVA_SRC_DIR}/Inheriting#{klass}.java"))
-        file_existed = File.exists?(file)
+        file_existed = File.exist?(file)
         File.open(file, 'w') do |f|
           f << text.gsub('THE_PACKAGE', package).gsub("Sample#{klass}", name).gsub("Inheriting#{klass}", name).gsub("sample_#{underscore(klass)}.rb", script_name)
         end
         puts "#{file_existed ? 'Updated' : 'Added'} file #{file}."
 
         script_file = File.expand_path("#{SCRIPTS_DIR}/#{script_name}", dest)
-        unless File.exists? script_file
+        unless File.exist? script_file
           sample_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}.rb"))
           sample_source.gsub!('THE_PACKAGE', package)
           sample_source.gsub!("Sample#{klass}", name)
@@ -179,7 +179,7 @@ module Ruboto
         end
 
         # test_file = File.expand_path("test/src/#{script_name.chomp('.rb')}_test.rb", dest)
-        # unless File.exists? test_file
+        # unless File.exist? test_file
         #   sample_test_source = File.read(File.join(Ruboto::ASSETS, "samples/sample_#{underscore klass}_test.rb"))
         #   sample_test_source.gsub!('THE_PACKAGE', package)
         #   sample_test_source.gsub!("Sample#{klass}", name)

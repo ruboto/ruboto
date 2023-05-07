@@ -80,7 +80,7 @@ task :uninstall do
   ENV['RUBYOPT'] = old_rubyopt
 end
 
-task :reinstall => [:uninstall, :clean, :install]
+task :reinstall => %i[uninstall clean install]
 
 desc 'Generate an example app'
 task :example => :install do
@@ -318,7 +318,8 @@ task :stats do
         counts_per_month[date.year][date.month] += count
         total += count
       end
-      print '.'; STDOUT.flush
+      print '.'
+      STDOUT.flush
     end
     puts
   end
@@ -341,7 +342,7 @@ task :stats do
   years = counts_per_month.keys
   puts '    ' + years.map { |year| '%-12s' % year }.join
   (0..20).each do |l|
-    print (l % 10 == 0) ? '%4d' % ((20-l) * 100) : '    '
+    print l % 10 == 0 ? '%4d' % ((20-l) * 100) : '    '
     years.each do |year|
       (1..12).each do |month|
         count = counts_per_month[year][month]
@@ -424,7 +425,7 @@ namespace :platform do
   task PLATFORM_DEBUG_APK do
     Rake::Task[PLATFORM_PROJECT].invoke
     Dir.chdir(PLATFORM_PROJECT) do
-      if File.exists?(PLATFORM_DEBUG_APK_BAK)
+      if File.exist?(PLATFORM_DEBUG_APK_BAK)
         FileUtils.cp PLATFORM_DEBUG_APK_BAK, PLATFORM_DEBUG_APK
       else
         FileUtils.rm PLATFORM_DEBUG_APK
@@ -448,7 +449,7 @@ namespace :platform do
     puts 'Downloading the current RubotoCore platform release apk'
     uri = URI('https://raw.github.com/ruboto/ruboto.github.com/master/downloads/RubotoCore-release.apk')
     begin
-      headers = {'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'}
+      headers = { 'User-Agent' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10' }
       catch :download_ok do
         loop do
           Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https',
@@ -462,7 +463,7 @@ namespace :platform do
               if (cookie = response.response['set-cookie'])
                 headers.update('Cookie' => cookie)
               end
-              uri = URI(response['location'].gsub(/^\//, 'http://ruboto.org/'))
+              uri = URI(response['location'].gsub(%r{^/}, 'http://ruboto.org/'))
               puts "Following redirect to #{uri}."
             else
               puts "Got an unexpected response (#{response.code}).  Retrying download."
@@ -474,7 +475,7 @@ namespace :platform do
       end
     rescue Exception, SystemExit
       puts "Download failed: #{$!}"
-      FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exists?(PLATFORM_CURRENT_RELEASE_APK)
+      FileUtils.rm(PLATFORM_CURRENT_RELEASE_APK) if File.exist?(PLATFORM_CURRENT_RELEASE_APK)
       raise
     end
   end
@@ -501,14 +502,14 @@ end
 desc 'Download the latest jruby-jars snapshot'
 task :get_jruby_jars_snapshot do
   download_host = 'projectodd.ci.cloudbees.com'
-  download_dir = "view/JRuby/job/jruby-development-dist/lastSuccessfulBuild/artifact/release"
+  download_dir = 'view/JRuby/job/jruby-development-dist/lastSuccessfulBuild/artifact/release'
 
   https = Net::HTTP.new(download_host, 443)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
   req = Net::HTTP::Get.new("https://#{download_host}/#{download_dir}/")
   index = https.start { |http| http.request(req) }.body
-  all_gems = index.scan(%r{jruby-jars-.*?.gem}).sort_by{|v| Gem::Version.new(v[11..-5])}
+  all_gems = index.scan(/jruby-jars-.*?.gem/).sort_by{|v| Gem::Version.new(v[11..-5])}
   gem = all_gems.last
   FileUtils.rm_rf Dir['jruby-jars-*.gem']
   print "Downloading #{gem}: \r"
@@ -541,7 +542,7 @@ task :get_jruby_jars_snapshot do
 end
 
 def test_parts(api)
-  (api == 23) ? 6 : 3
+  api == 23 ? 6 : 3
 end
 
 def allow_failure(allow_failures, line)

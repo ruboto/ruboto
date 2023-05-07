@@ -21,7 +21,7 @@ class ServiceGenClassTest < Minitest::Test
       system "#{RUBOTO_CMD} gen class Service --name RubotoTestService"
 
       activity_filename = "#{SRC_DIR}/ruboto_test_app_activity.rb"
-      assert File.exists? activity_filename
+      assert File.exist? activity_filename
       File.open(activity_filename, 'w') { |f| f << <<EOF }
 require 'ruboto/activity'
 require 'ruboto/widget'
@@ -73,7 +73,7 @@ end
 EOF
 
       service_filename = "#{SRC_DIR}/ruboto_test_service.rb"
-      assert File.exists? service_filename
+      assert File.exist? service_filename
       File.open(service_filename, 'w') { |f| f << <<EOF }
 class RubotoTestService
   TARGET_TEXT = 'What hath Matz wrought!'
@@ -104,7 +104,7 @@ end
 EOF
 
       service_test_filename = "#{APP_DIR}/test/src/ruboto_test_app_activity_test.rb"
-      assert File.exists? service_test_filename
+      assert File.exist? service_test_filename
       File.open(service_test_filename, 'w') { |f| f << <<EOF }
 activity Java::org.ruboto.test_app.RubotoTestAppActivity
 

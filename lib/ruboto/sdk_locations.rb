@@ -5,10 +5,10 @@ module Ruboto
   module SdkLocations
     extend Ruboto::Util::Setup
     ANDROID_HOME = android_package_directory
-    unless File.exists?("#{ANDROID_HOME}/platform-tools/adb")
+    unless File.exist?("#{ANDROID_HOME}/platform-tools/adb")
       abort 'Unable to locate the "adb" command.  Either set the ANDROID_HOME environment variable or add the location of the "adb" command to your path.'
     end
-    unless File.exists? "#{ANDROID_HOME}/tools"
+    unless File.exist? "#{ANDROID_HOME}/tools"
       abort "The '<ANDROID_HOME>/tools' directory is missing.
 Please set the ANDROID_HOME environment variable to a proper Android SDK installation."
     end

@@ -37,10 +37,10 @@ module UpdateTestMethods
         install_ruboto_gem @old_ruboto_version
         system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
         fail 'Creation of broadcast receiver failed' if $? != 0
-        assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
-        assert File.exists? 'src/dummy_receiver.rb'
+        assert File.exist? 'src/org/ruboto/test_app/DummyReceiver.java'
+        assert File.exist? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
-        assert File.exists? test_file
+        assert File.exist? test_file
         update_app
       end
       run_app_tests
@@ -52,10 +52,10 @@ module UpdateTestMethods
         install_ruboto_gem @old_ruboto_version
         system "ruboto _#{@old_ruboto_version}_ gen class BroadcastReceiver --name DummyReceiver"
         fail 'Creation of broadcast receiver failed' if $? != 0
-        assert File.exists? 'src/org/ruboto/test_app/DummyReceiver.java'
-        assert File.exists? 'src/dummy_receiver.rb'
+        assert File.exist? 'src/org/ruboto/test_app/DummyReceiver.java'
+        assert File.exist? 'src/dummy_receiver.rb'
         test_file = 'test/src/dummy_receiver_test.rb'
-        assert File.exists? test_file
+        assert File.exist? test_file
         update_app
         update_app
       end
@@ -69,14 +69,14 @@ module UpdateTestMethods
       install_ruboto_gem @old_ruboto_version
       system "ruboto _#{@old_ruboto_version}_ gen subclass android.database.sqlite.SQLiteOpenHelper --name MyDatabaseHelper --method_base on"
       fail 'Creation of subclass failed' if $? != 0
-      assert File.exists? 'src/org/ruboto/test_app/MyDatabaseHelper.java'
+      assert File.exist? 'src/org/ruboto/test_app/MyDatabaseHelper.java'
       if Gem::Version.new(@old_ruboto_version) >= Gem::Version.new('0.8.1.rc.0')
-        assert File.exists? 'src/my_database_helper.rb'
-        assert File.exists? 'test/src/my_database_helper_test.rb'
+        assert File.exist? 'src/my_database_helper.rb'
+        assert File.exist? 'test/src/my_database_helper_test.rb'
       end
       update_app
-      assert File.exists? 'src/my_database_helper.rb'
-      assert File.exists? 'test/src/my_database_helper_test.rb'
+      assert File.exist? 'src/my_database_helper.rb'
+      assert File.exist? 'test/src/my_database_helper_test.rb'
       system 'rake debug'
       assert_equal 0, $?
     end

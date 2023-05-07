@@ -19,7 +19,7 @@ module AppTestMethods
       unless ANDROID_OS <= 15 && ON_LINUX && JRUBY_JARS_VERSION <= Gem::Version.new('1.7.13')
         assert_code 'ReadSourceFile', 'File.read(__FILE__)'
         # noinspection RubyExpressionInStringInspection
-        assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exists?(f)}'
+        assert_code 'DirListsFilesInApk', 'Dir["#{File.dirname(__FILE__)}/*"].each{|f| raise "File #{f.inspect} not found" unless File.exist?(f)}'
         assert_code('RepeatRubotoImportWidget', 'ruboto_import_widget :TextView ; ruboto_import_widget :TextView') unless has_stupid_crash
       end
     end
@@ -90,7 +90,7 @@ module AppTestMethods
           FileUtils.cp "#{snake_name}.rb", 'src/'
           FileUtils.cp file, 'test/src/'
         end
-      elsif !File.exists? "#{file.chomp('.rb')}'_test.rb'"
+      elsif !File.exist? "#{file.chomp('.rb')}'_test.rb'"
         Dir.chdir APP_DIR do
           FileUtils.cp file, 'src/'
         end
