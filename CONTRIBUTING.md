@@ -2,7 +2,7 @@ Contributing
 ============
 
 Want to contribute? Great!  We look forward to what you can do.
- 
+
 ## Communication
 
 Meet us in #ruboto on irc.freenode.net or on [https://gitter.im/ruboto/ruboto]

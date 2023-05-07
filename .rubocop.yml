@@ -1,31 +1,38 @@
 inherit_from: .rubocop_todo.yml
 
+require:
+  - rubocop-md
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rake
+
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.6
   DisplayCopNames: true
   DisplayStyleGuide: true
+  NewCops: enable
   Include:
     - 'Gemfile'
     - 'Rakefile'
   Exclude:
     - 'tmp/**/*'
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
   IndentationWidth: 4
 
 Layout/FirstParameterIndentation:
   IndentationWidth: 4
 
-Layout/IndentArray:
+Layout/FirstArrayElementIndentation:
   IndentationWidth: 4
 
 # Configuration parameters: EnforcedStyle, SupportedStyles, IndentationWidth.
 # SupportedStyles: special_inside_parentheses, consistent, align_braces
-Layout/IndentHash:
+Layout/FirstHashElementIndentation:
   IndentationWidth: 4
 
-Layout/IndentAssignment:
+Layout/AssignmentIndentation:
   IndentationWidth: 4
 
 Layout/MultilineMethodCallIndentation:
