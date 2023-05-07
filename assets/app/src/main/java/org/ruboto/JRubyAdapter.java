@@ -1,80 +1,40 @@
 package org.ruboto;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
-import android.os.Environment;
-import dalvik.system.PathClassLoader;
+
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.LocalVariableBehavior;
+
+import java.io.File;
+import java.io.PrintStream;
 
 public class JRubyAdapter {
-    private static Object ruby;
+    private static org.jruby.embed.ScriptingContainer ruby;
     private static boolean isDebugBuild = false;
     private static PrintStream output = null;
     private static boolean initialized = false;
-    private static String localContextScope = "SINGLETON"; // FIXME(uwe):  Why not CONCURRENT ?  Help needed!
-    private static String localVariableBehavior = "TRANSIENT";
-    private static String RUBOTO_CORE_VERSION_NAME;
+    private static LocalContextScope localContextScope = LocalContextScope.SINGLETON; // FIXME(uwe):  Why not CONCURRENT ?  Help needed!
+    private static LocalVariableBehavior localVariableBehavior = LocalVariableBehavior.TRANSIENT;
 
     public static Object get(String name) {
-        try {
-            Method getMethod = ruby.getClass().getMethod("get", String.class);
-            return getMethod.invoke(ruby, name);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
-        }
-    }
-
-    public static String getPlatformVersionName() {
-        return RUBOTO_CORE_VERSION_NAME;
+        return ruby.get(name);
     }
 
     public static String getScriptFilename() {
-        return (String) callScriptingContainerMethod(String.class, "getScriptFilename");
+        return ruby.getScriptFilename();
     }
 
     public static Object runRubyMethod(Object receiver, String methodName, Object... args) {
-        try {
-            Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
-            return m.invoke(ruby, Object.class, receiver, methodName, args);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-            if (isDebugBuild) {
-                throw new RuntimeException(ite);
-            }
-        }
-        return null;
+        return ruby.runRubyMethod(Object.class, receiver, methodName, args);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T runRubyMethod(Class<T> returnType, Object receiver, String methodName, Object... args) {
-        try {
-            Method m = ruby.getClass().getMethod("runRubyMethod", Class.class, Object.class, String.class, Object[].class);
-            return (T) m.invoke(ruby, returnType, receiver, methodName, args);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            printStackTrace(ite);
-        }
-        return null;
+        return ruby.runRubyMethod(returnType, receiver, methodName, args);
     }
 
     public static boolean isDebugBuild() {
@@ -86,150 +46,43 @@ public class JRubyAdapter {
     }
 
     public static void put(String name, Object object) {
-        try {
-            Method putMethod = ruby.getClass().getMethod("put", String.class, Object.class);
-            putMethod.invoke(ruby, name, object);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            throw new RuntimeException(ite);
-        }
+        ruby.put(name, object);
     }
 
     public static Object runScriptlet(String code) {
-        try {
-            Method runScriptletMethod = ruby.getClass().getMethod("runScriptlet", String.class);
-            return runScriptletMethod.invoke(ruby, code);
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (java.lang.reflect.InvocationTargetException ite) {
-            if (isDebugBuild) {
-                if (ite.getCause() instanceof RuntimeException) {
-                    throw ((RuntimeException) ite.getCause());
-                } else {
-                    throw ((Error) ite.getCause());
-                }
-            } else {
-                return null;
-            }
-        }
+        return ruby.runScriptlet(code);
     }
 
     public static boolean setUpJRuby(Context appContext) {
         return setUpJRuby(appContext, output == null ? System.out : output);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static synchronized boolean setUpJRuby(Context appContext, PrintStream out) {
         if (!initialized) {
-            Log.d("Max memory: " + (Runtime.getRuntime().maxMemory() / (1024 * 1024)) + "MB");
-            // BEGIN Ruboto HeapAlloc
-            // @SuppressWarnings("unused")
-            // byte[] arrayForHeapAllocation = new byte[13 * 1024 * 1024];
-            // arrayForHeapAllocation = null;
-            // END Ruboto HeapAlloc
-            Log.d("Memory allocation OK");
             setDebugBuild(appContext);
-            Log.d("Setting up JRuby runtime (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")");
-            System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
-            System.setProperty("jruby.bytecode.version", "1.6");
-            // BEGIN Ruboto RubyVersion
-            // System.setProperty("jruby.compat.version", "RUBY2_0"); // RUBY1_9 is the default in JRuby 1.7
-            // END Ruboto RubyVersion
-            // System.setProperty("jruby.compile.backend", "DALVIK");
-            System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCE FORCEIR
-            System.setProperty("jruby.interfaces.useProxy", "true");
-            System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
-            System.setProperty("jruby.management.enabled", "false");
-            System.setProperty("jruby.native.enabled", "false");
-            System.setProperty("jruby.objectspace.enabled", "false");
-            System.setProperty("jruby.rewrite.java.trace", "true");
-            System.setProperty("jruby.thread.pooling", "true");
-
-            // Uncomment these to debug/profile Ruby source loading
-            // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'
-            // System.setProperty("jruby.debug.loadService", "true");
-            // System.setProperty("jruby.debug.loadService.timing", "true");
-
-            // Used to enable JRuby to generate proxy classes
-            System.setProperty("jruby.ji.proxyClassFactory", "org.ruboto.DalvikProxyClassFactory");
-            System.setProperty("jruby.ji.upper.case.package.name.allowed", "true");
-            System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
-            System.setProperty("java.io.tmpdir", appContext.getCacheDir().getAbsolutePath());
-
-            // FIXME(uwe): Simplify when we stop supporting android-15
-            if (Build.VERSION.SDK_INT >= 16) {
-                DexDex.debug = true;
-                DexDex.validateClassPath(appContext);
-                while (DexDex.dexOptRequired) {
-                    System.out.println("Waiting for class loader setup...");
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ie) {}
-                }
-            }
-
-            ClassLoader classLoader;
-            Class<?> scriptingContainerClass;
-            String apkName = null;
+            Log.d("Setting up JRuby " + org.jruby.runtime.Constants.VERSION
+                    + " (" + (isDebugBuild ? "DEBUG" : "RELEASE") + ")"
+                    + "  Max memory: " + (Runtime.getRuntime().maxMemory() / (1024 * 1024)) + "MB");
+            setSystemProperties(appContext);
 
             try {
-                scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer");
-                System.out.println("Found JRuby in this APK");
-                classLoader = JRubyAdapter.class.getClassLoader();
-                try {
-                    apkName = appContext.getPackageManager().getApplicationInfo(appContext.getPackageName(), 0).sourceDir;
-                } catch (NameNotFoundException e) {}
-            } catch (ClassNotFoundException e1) {
-                String packageName = "org.ruboto.core";
-                try {
-                    PackageInfo pkgInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
-                    apkName = pkgInfo.applicationInfo.sourceDir;
-                    RUBOTO_CORE_VERSION_NAME = pkgInfo.versionName;
-                } catch (PackageManager.NameNotFoundException e2) {
-                    System.out.println("JRuby not found in local APK:");
-                    e1.printStackTrace();
-                    System.out.println("JRuby not found in platform APK:");
-                    e2.printStackTrace();
-                    return false;
-                }
-
-                System.out.println("Found JRuby in platform APK");
-                classLoader = new PathClassLoader(apkName, JRubyAdapter.class.getClassLoader());
-
-                try {
-                    scriptingContainerClass = Class.forName("org.jruby.embed.ScriptingContainer", true, classLoader);
-                } catch (ClassNotFoundException e) {
-                    // FIXME(uwe): ScriptingContainer not found in the platform APK...
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-
-            try {
-                String jrubyVersion = (String)
-                        Class.forName("org.jruby.runtime.Constants", true,
-                                scriptingContainerClass.getClassLoader())
-                        .getDeclaredField("VERSION").get(String.class);
-                System.out.println("JRuby version: " + jrubyVersion);
-
                 //////////////////////////////////
                 //
                 // Set jruby.home
-                //
-
-                // FIXME(uwe): Simplify when we stop support for JRuby 1.7.x
-                final String jrubyHome = (jrubyVersion.startsWith("9.") ?
-                        "jar:" : "file:") + apkName + "!/jruby.home";
-                // EMXIF
-
-                Log.i("Setting JRUBY_HOME: " + jrubyHome);
                 // This needs to be set before the ScriptingContainer is initialized
-                System.setProperty("jruby.home", jrubyHome);
+                //
+                String apkName;
+                try {
+                    apkName = appContext.getPackageManager()
+                            .getApplicationInfo(appContext.getPackageName(), 0).sourceDir;
+                    final String jrubyHome = "jar:" + apkName + "!/META-INF/jruby.home";
+                    Log.i("Setting JRUBY_HOME: " + jrubyHome);
+                    System.setProperty("jruby.home", jrubyHome);
+                } catch (NameNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException("Exception setting JRUBY_HOME", e);
+                }
 
                 //////////////////////////////////
                 //
@@ -237,111 +90,108 @@ public class JRubyAdapter {
                 //
 
                 if (out != null) {
-                  output = out;
+                    output = out;
                 }
 
                 //////////////////////////////////
                 //
                 // Disable rubygems
                 //
+                org.jruby.RubyInstanceConfig config = new org.jruby.RubyInstanceConfig();
+//                config.setDisableGems(true);
 
-                Class rubyClass = Class.forName("org.jruby.Ruby", true, scriptingContainerClass.getClassLoader());
-                Class rubyInstanceConfigClass = Class.forName("org.jruby.RubyInstanceConfig", true, scriptingContainerClass.getClassLoader());
-
-                Object config = rubyInstanceConfigClass.getConstructor().newInstance();
-                rubyInstanceConfigClass.getMethod("setDisableGems", boolean.class).invoke(config, true);
-                rubyInstanceConfigClass.getMethod("setLoader", ClassLoader.class).invoke(config, classLoader);
+                ClassLoader classLoader = JRubyAdapter.class.getClassLoader();
+                config.setLoader(classLoader);
 
                 if (output != null) {
-                    rubyInstanceConfigClass.getMethod("setOutput", PrintStream.class).invoke(config, output);
-                    rubyInstanceConfigClass.getMethod("setError", PrintStream.class).invoke(config, output);
+                    config.setOutput(output);
+                    config.setError(output);
                 }
 
-                System.out.println("Ruby version: " + rubyInstanceConfigClass
-                        .getMethod("getCompatVersion").invoke(config));
-
                 // This will become the global runtime and be used by our ScriptingContainer
-                rubyClass.getMethod("newInstance", rubyInstanceConfigClass).invoke(null, config);
+                org.jruby.Ruby.newInstance(config);
 
                 //////////////////////////////////
                 //
                 // Create the ScriptingContainer
                 //
-
-                Class scopeClass = Class.forName("org.jruby.embed.LocalContextScope", true, scriptingContainerClass.getClassLoader());
-                Class behaviorClass = Class.forName("org.jruby.embed.LocalVariableBehavior", true, scriptingContainerClass.getClassLoader());
-
-                ruby = scriptingContainerClass
-                         .getConstructor(scopeClass, behaviorClass)
-                         .newInstance(Enum.valueOf(scopeClass, localContextScope), 
-                                      Enum.valueOf(behaviorClass, localVariableBehavior));
+                ruby = new org.jruby.embed.ScriptingContainer(localContextScope, localVariableBehavior);
 
                 // FIXME(uwe): Write tutorial on profiling.
                 // container.getProvider().getRubyInstanceConfig().setProfilingMode(mode);
-
-                // callScriptingContainerMethod(Void.class, "setClassLoader", classLoader);
-                Method setClassLoaderMethod = ruby.getClass().getMethod("setClassLoader", ClassLoader.class);
-                setClassLoaderMethod.invoke(ruby, classLoader);
 
                 Thread.currentThread().setContextClassLoader(classLoader);
 
                 String scriptsDir = scriptsDirName(appContext);
                 addLoadPath(scriptsDir);
+                addLoadPath("jar:" + apkName + "!/");
+                addLoadPath("uri:classloader:/");
                 if (appContext.getFilesDir() != null) {
                     String defaultCurrentDir = appContext.getFilesDir().getPath();
                     Log.d("Setting JRuby current directory to " + defaultCurrentDir);
-                    callScriptingContainerMethod(Void.class, "setCurrentDirectory", defaultCurrentDir);
+                    ruby.setCurrentDirectory(defaultCurrentDir);
                 } else {
                     Log.e("Unable to find app files dir!");
                     if (new File(scriptsDir).exists()) {
                         Log.d("Changing JRuby current directory to " + scriptsDir);
-                        callScriptingContainerMethod(Void.class, "setCurrentDirectory", scriptsDir);
+                        ruby.setCurrentDirectory(scriptsDir);
                     }
                 }
 
                 put("$package_name", appContext.getPackageName());
+                put("APK_PATH", "jar:" + apkName + "!");
 
                 runScriptlet("::RUBOTO_JAVA_PROXIES = {}");
 
                 // TODO(uwe):  Add a way to display startup progress.
+                put("APPLICATION_CONTEXT", appContext.getApplicationContext());
                 put("$application_context", appContext.getApplicationContext());
                 runScriptlet("begin\n  require 'environment'\nrescue LoadError => e\n  puts e\nend");
 
                 initialized = true;
-            } catch (ClassNotFoundException e) {
-                handleInitException(e);
             } catch (IllegalArgumentException e) {
                 handleInitException(e);
             } catch (SecurityException e) {
-                handleInitException(e);
-            } catch (InstantiationException e) {
-                handleInitException(e);
-            } catch (IllegalAccessException e) {
-                handleInitException(e);
-            } catch (InvocationTargetException e) {
-                handleInitException(e);
-            } catch (NoSuchMethodException e) {
-                handleInitException(e);
-            } catch (NoSuchFieldException e) {
                 handleInitException(e);
             }
         }
         return initialized;
     }
 
-    public static void setScriptFilename(String name) {
-        callScriptingContainerMethod(Void.class, "setScriptFilename", name);
+    private static void setSystemProperties(Context appContext) {
+        System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
+        System.setProperty("jruby.bytecode.version", "1.6");
+        // System.setProperty("jruby.compile.backend", "DALVIK");
+        System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCE FORCEIR
+        System.setProperty("jruby.interfaces.useProxy", "true");
+        System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
+        System.setProperty("jruby.management.enabled", "false");
+        System.setProperty("jruby.native.enabled", "false");
+        System.setProperty("jruby.objectspace.enabled", "false");
+        System.setProperty("jruby.rewrite.java.trace", "true");
+        System.setProperty("jruby.thread.pooling", "true");
+
+        // Uncomment these to debug/profile Ruby source loading
+        // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'
+        // System.setProperty("jruby.debug.loadService", "true");
+        // System.setProperty("jruby.debug.loadService.timing", "true");
+
+        // Used to enable JRuby to generate proxy classes
+        System.setProperty("jruby.ji.upper.case.package.name.allowed", "true");
+        System.setProperty("jruby.class.cache.path", appContext.getDir("dex", 0).getAbsolutePath());
+        System.setProperty("java.io.tmpdir", appContext.getCacheDir().getAbsolutePath());
+        System.setProperty("sun.arch.data.model", "64");
     }
 
-    public static boolean usesPlatformApk() {
-        return RUBOTO_CORE_VERSION_NAME != null;
+    public static void setScriptFilename(String name) {
+        ruby.setScriptFilename(name);
     }
 
     public static Boolean addLoadPath(String scriptsDir) {
-        if (new File(scriptsDir).exists()) {
+        if (new File(scriptsDir).exists() || scriptsDir.equals("uri:classloader:/") || scriptsDir.endsWith("/base.apk!/")) {
             Log.i("Added directory to load path: " + scriptsDir);
             Script.addDir(scriptsDir);
-            runScriptlet("$:.unshift '" + scriptsDir + "' ; $:.uniq!");
+            runScriptlet("$:.unshift '" + scriptsDir + "' ; $:.uniq! ; p $:");
             return true;
         } else {
             Log.i("Extra scripts dir not present: " + scriptsDir);
@@ -349,29 +199,15 @@ public class JRubyAdapter {
         }
     }
 
-    // Private methods
-
-    @SuppressWarnings("unchecked")
-    private static <T> T callScriptingContainerMethod(Class<T> returnType, String methodName, Object... args) {
-        Class<?>[] argClasses = new Class[args.length];
-        for (int i = 0; i < argClasses.length; i++) {
-            argClasses[i] = args[i].getClass();
-        }
-        try {
-            Method method = ruby.getClass().getMethod(methodName, argClasses);
-            T result = (T) method.invoke(ruby, args);
-            return result;
-        } catch (RuntimeException re) {
-            re.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            printStackTrace(e);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static void setLocalContextScope(LocalContextScope val) {
+        localContextScope = val;
     }
+
+    public static void setLocalVariableBehavior(LocalVariableBehavior val) {
+        localVariableBehavior = val;
+    }
+
+    // Private methods
 
     private static void handleInitException(Exception e) {
         Log.e("Exception starting JRuby");
@@ -380,33 +216,8 @@ public class JRubyAdapter {
         ruby = null;
     }
 
-    // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
-    @Deprecated public static boolean isRubyOneEight() {
-        return ((String)get("RUBY_VERSION")).startsWith("1.8.");
-    }
-
-    // FIXME(uwe):  Remove when we stop supporting Ruby 1.8
-    @Deprecated public static boolean isRubyOneNine() {
-    String rv = ((String)get("RUBY_VERSION"));
-        return rv.startsWith("2.1.") || rv.startsWith("2.0.") || rv.startsWith("1.9.");
-    }
-
-    static void printStackTrace(Throwable t) {
-        // TODO(uwe):  Simplify this when Issue #144 is resolved
-        // TODO(scott):  printStackTrace is causing too many problems
-        //try {
-        //    t.printStackTrace(output);
-        //} catch (NullPointerException npe) {
-            // TODO(uwe): t.printStackTrace() should not fail
-            System.err.println(t.getClass().getName() + ": " + t);
-            for (java.lang.StackTraceElement ste : t.getStackTrace()) {
-                output.append(ste.toString() + "\n");
-            }
-        //}
-    }
-
     private static String scriptsDirName(Context context) {
-        File storageDir = null;
+        File storageDir;
         if (isDebugBuild()) {
             storageDir = context.getExternalFilesDir(null);
             if (storageDir == null) {
@@ -435,35 +246,12 @@ public class JRubyAdapter {
         }
     }
 
-    public static void setLocalContextScope(String val) {
-        localContextScope = val;
-    }
-
-    public static void setLocalVariableBehavior(String val) {
-        localVariableBehavior = val;
-    }
-
     public static void setOutputStream(PrintStream out) {
-      if (ruby == null) {
-        output = out;
-      } else {
-        try {
-          Method setOutputMethod = ruby.getClass().getMethod("setOutput", PrintStream.class);
-          setOutputMethod.invoke(ruby, out);
-          Method setErrorMethod = ruby.getClass().getMethod("setError", PrintStream.class);
-          setErrorMethod.invoke(ruby, out);
-        } catch (IllegalArgumentException e) {
-            handleInitException(e);
-        } catch (SecurityException e) {
-            handleInitException(e);
-        } catch (IllegalAccessException e) {
-            handleInitException(e);
-        } catch (InvocationTargetException e) {
-            handleInitException(e);
-        } catch (NoSuchMethodException e) {
-            handleInitException(e);
+        if (ruby == null) {
+            output = out;
+        } else {
+            ruby.setOutput(out);
+            ruby.setError(out);
         }
-      }
     }
-
 }

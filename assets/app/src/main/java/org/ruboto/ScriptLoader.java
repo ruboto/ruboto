@@ -1,11 +1,10 @@
 package org.ruboto;
 
-import java.io.IOException;
-import java.util.Map;
-
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.Bundle;
+
+import java.io.IOException;
+import java.util.Map;
 
 public class ScriptLoader {
    /**
@@ -47,18 +46,7 @@ public class ScriptLoader {
                             }
                         } else {
                             Log.d("Script defines methods on meta class");
-
-                            // FIXME(uwe): Simplify when we stop support for Ruby 1.8 mode.
-                            if (JRubyAdapter.isRubyOneEight()) {
-                                JRubyAdapter.put("$java_instance", component);
-                                rubyClass = JRubyAdapter.runScriptlet("class << $java_instance; self; end");
-                            } else if (JRubyAdapter.isRubyOneNine()) {
-                                rubyClass = JRubyAdapter.runRubyMethod(component, "singleton_class");
-                            } else {
-                                throw new RuntimeException("Unknown Ruby version: " + JRubyAdapter.get("RUBY_VERSION"));
-                            }
-                            // EMXIF
-
+                            rubyClass = JRubyAdapter.runRubyMethod(component, "singleton_class");
                         }
                     }
                     if (rubyClass == null || !hasBackingJavaClass) {
@@ -70,9 +58,11 @@ public class ScriptLoader {
                                 rubyClass = JRubyAdapter.runScriptlet("Java::" + component.getClass().getName());
                             }
                             Log.d("Set class: " + rubyClass);
-                            JRubyAdapter.put(component.getScriptInfo().getRubyClassName(), rubyClass);
+                            // FIXME(uwe): This should work
+                            // JRubyAdapter.put(component.getScriptInfo().getRubyClassName(), rubyClass);
+                            // EMXIF
 
-                            // FIXME(uwe): Workaround since setting the constant fails
+                            // FIXME(uwe): Workaround since setting the constant with `put` fails
                             JRubyAdapter.put("$" + component.getScriptInfo().getRubyClassName(), rubyClass);
                             JRubyAdapter.runScriptlet(component.getScriptInfo().getRubyClassName() + " = $" + component.getScriptInfo().getRubyClassName());
                             // EMXIF
@@ -115,8 +105,8 @@ public class ScriptLoader {
             persistObjectProxy(component);
         } catch(IOException e){
             e.printStackTrace();
-            if (component instanceof android.content.Context) {
-                ProgressDialog.show((android.content.Context) component, "Script failed", "Something bad happened", true, true);
+            if (component instanceof Context) {
+                ProgressDialog.show((Context) component, "Script failed", "Something bad happened", true, true);
             }
         }
     }
