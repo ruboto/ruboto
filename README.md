@@ -71,7 +71,7 @@ regular Android Studio projects.
   #!/usr/bin/env bash
   set -e
 
-  VERSION="9.2.9.0"
+  VERSION="9.2.21.0"
   FULL_VERSION="${VERSION}"
   # FULL_VERSION="${VERSION}-SNAPSHOT" # Uncomment to use a local snapshot
   # FULL_VERSION="${VERSION}-20190822.050313-17" # Uncomment to use a remote snapshot
