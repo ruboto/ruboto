@@ -5,9 +5,11 @@ require 'time'
 PROJECT_DIR = File.expand_path('..', __dir__)
 BUNDLE_JAR = File.expand_path 'app/libs/bundle.jar', PROJECT_DIR
 BUNDLE_PATH = File.join(PROJECT_DIR, 'app', 'build', 'bundle')
-GEM_FILE = File.expand_path 'app/Gemfile'
-GEM_LOCK_FILE = "#{GEM_FILE}.lock"
-RUBY_SOURCE_FILES = Dir[File.expand_path 'app/src/main/resources/**/*.rb']
+GEM_FILE, GEM_LOCK_FILE = [['gems.rb', 'gems.locked'],['Gemfile', "Gemfile.lock"]]
+    .map{|gf, lf| [File.expand_path("app/#{gf}", PROJECT_DIR), File.expand_path("app/#{lf}", PROJECT_DIR)]}
+    .find{|gf, lf| File.exists?(gf)}
+abort "#{PROJECT_DIR}/app/gems.rb not found." unless GEM_FILE
+RUBY_SOURCE_FILES = Dir[File.expand_path 'app/src/main/resources/**/*.rb', PROJECT_DIR]
 RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_activity.rb$/ }
 RUBOTO_ACTIVITY_FILE = "#{PROJECT_DIR}/app/src/main/java/org/ruboto/RubotoActivity.java"
 
@@ -49,11 +51,11 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
   require 'bundler'
   Dir.chdir('app') do
     if true
-      # FIXME(uwe): Issue #547 https://github.com/ruboto/ruboto/issues/547
-      # Bundler.settings[:platform] = Gem::Platform::DALVIK
-      # sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --platform=dalvik#{sdk_level} --without development test"
-      # sh "bundle package --path=#{BUNDLE_PATH} --all --all-platforms"
-      sh "bundle install --gemfile #{GEM_FILE} --path=#{BUNDLE_PATH} --without development test"
+      Bundler.with_unbundled_env do
+        ENV['BUNDLE_PATH'] = BUNDLE_PATH
+        ENV['BUNDLE_WITHOUT'] = 'development,test'
+        sh "bundle install"
+      end
     else
       # ENV["DEBUG"] = "true"
       require 'bundler/vendored_thor'
@@ -206,6 +208,7 @@ file BUNDLE_JAR => [GEM_FILE, GEM_LOCK_FILE] do
           elsif jar =~ %r{concurrent_ruby_ext.jar$}
             puts "Adding JRuby extension library initialization."
             jar_load_code = <<~END_CODE
+              require 'jruby'
               require 'ruboto/exception'
               require 'ruboto/stack'
               public

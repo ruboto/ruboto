@@ -105,7 +105,7 @@ public class RubyObjectSpecializer {
         try {
             int offset = 0;
             for (String name : foundVariables) {
-                klass.getVariableTableManager().getVariableAccessorForVar(
+                klass.getVariableTableManager().getVariableAccessorForRubyVar(
                         name,
                         LOOKUP.findGetter(cna.cls, "var" + offset, Object.class),
                         LOOKUP.findSetter(cna.cls, "var" + offset, Object.class));

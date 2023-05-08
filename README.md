@@ -170,6 +170,13 @@ regular Android Studio projects.
  
 * Start your app!
 
+## Updating app gems
+
+Update your `app/gems.rb` (or `app/Gemfile`) and run
+  ```shell
+  bundle exec rake bundle
+  ```
+
 ## Adding Ruboto to an existing Android Studio project
 
 HOWTO missing.  Pull requests welcome!
