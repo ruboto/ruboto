@@ -76,7 +76,7 @@ public class JRubyAdapter {
                 try {
                     apkName = appContext.getPackageManager()
                             .getApplicationInfo(appContext.getPackageName(), 0).sourceDir;
-                    final String jrubyHome = "jar:" + apkName + "!/META-INF/jruby.home";
+                    final String jrubyHome = "jar:file:" + apkName + "!/META-INF/jruby.home";
                     Log.i("Setting JRUBY_HOME: " + jrubyHome);
                     System.setProperty("jruby.home", jrubyHome);
                 } catch (NameNotFoundException e) {
@@ -124,7 +124,7 @@ public class JRubyAdapter {
 
                 String scriptsDir = scriptsDirName(appContext);
                 addLoadPath(scriptsDir);
-                addLoadPath("jar:" + apkName + "!/");
+                addLoadPath("jar:file:" + apkName + "!/");
                 addLoadPath("uri:classloader:/");
                 if (appContext.getFilesDir() != null) {
                     String defaultCurrentDir = appContext.getFilesDir().getPath();
@@ -139,7 +139,7 @@ public class JRubyAdapter {
                 }
 
                 put("$package_name", appContext.getPackageName());
-                put("APK_PATH", "jar:" + apkName + "!");
+                put("APK_PATH", "jar:file:" + apkName + "!");
 
                 runScriptlet("::RUBOTO_JAVA_PROXIES = {}");
 
