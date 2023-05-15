@@ -61,8 +61,8 @@ regular Android Studio projects.
   ```ruby
   source 'https://rubygems.org/'
 
-  gem 'activerecord', '~>5.2'
-  gem 'activerecord-jdbc-adapter', '~>52.6'
+  gem 'activerecord', '~>7.0'
+  gem 'activerecord-jdbc-adapter', '~>70.1'
   gem 'sqldroid', '~>1.0'
   ```
 
@@ -71,7 +71,7 @@ regular Android Studio projects.
   #!/usr/bin/env bash
   set -e
 
-  VERSION="9.2.21.0"
+  VERSION="9.4.2.0"
   FULL_VERSION="${VERSION}"
   # FULL_VERSION="${VERSION}-SNAPSHOT" # Uncomment to use a local snapshot
   # FULL_VERSION="${VERSION}-20190822.050313-17" # Uncomment to use a remote snapshot
@@ -96,7 +96,7 @@ regular Android Studio projects.
   fi
   cp ${DOWNLOADED_JAR} .
 
-  unzip -j ${JAR_FILE} '*.jar'
+  unzip -o -j ${JAR_FILE} '*.jar'
 
   # FIXME(uwe): Why do we delete these files?
   zip generator.jar -d json/ext/ByteListTranscoder.class
@@ -123,6 +123,10 @@ regular Android Studio projects.
   done < overridden_classes.txt
 
   rm overridden_classes.txt
+  
+  cd libs
+  rm -f digest.jar
+  cd - >/dev/null
   ```
 
 * Make `app/update_jruby_jar.sh` executable:

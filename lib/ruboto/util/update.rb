@@ -286,6 +286,7 @@ module Ruboto
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/*.java" }
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/jruby/**/*.java" }
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/java/**/*.java" }
+        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/com/sun/nio/**/*.java" }
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/sun/**/*.java" }
         log_action('Ruboto java test classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/test/*.java", 'test' }
         Dir["#{JAVA_SRC_DIR}/**/*.java"].each do |f|
