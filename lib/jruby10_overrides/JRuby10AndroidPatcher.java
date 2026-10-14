@@ -9,6 +9,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * Rewrites JVM-only API calls in a tree of .class files to Android-safe
@@ -18,6 +19,9 @@ import org.objectweb.asm.Opcodes;
  *
  *   Class.getModule()      becomes  POP; ACONST_NULL   (module = null)
  *   Module.canRead(Module) becomes  POP2; ICONST_1     (always readable)
+ *   ClassLoader.getUnnamedModule() becomes  POP; ACONST_NULL
+ *   any other Module method pops its arguments and receiver and pushes
+ *   null/false/0 (e.g. isNamed() is false, so addReads is skipped)
  *
  * Android's java.nio buffers lack the Java 9+ covariant overrides
  * (ByteBuffer.limit(int) returns Buffer, not ByteBuffer), and
@@ -77,6 +81,19 @@ public class JRuby10AndroidPatcher {
                                 super.visitInsn(Opcodes.POP2);
                                 super.visitInsn(Opcodes.ICONST_1);
                                 changed[0] = true;
+                            } else if (owner.equals("java/lang/ClassLoader") && mName.equals("getUnnamedModule")
+                                    && mDesc.equals("()Ljava/lang/Module;")) {
+                                super.visitInsn(Opcodes.POP);
+                                super.visitInsn(Opcodes.ACONST_NULL);
+                                changed[0] = true;
+                            } else if (op == Opcodes.INVOKEVIRTUAL && owner.equals("java/lang/Module")) {
+                                Type[] argTypes = Type.getArgumentTypes(mDesc);
+                                for (int i = argTypes.length - 1; i >= 0; i--) {
+                                    super.visitInsn(argTypes[i].getSize() == 2 ? Opcodes.POP2 : Opcodes.POP);
+                                }
+                                super.visitInsn(Opcodes.POP);
+                                pushDefault(Type.getReturnType(mDesc));
+                                changed[0] = true;
                             } else if (op == Opcodes.INVOKEVIRTUAL && BUFFER_OWNERS.contains(owner)
                                     && BUFFER_METHODS.contains(mName)
                                     && mDesc.endsWith(")L" + owner + ";")) {
@@ -93,6 +110,17 @@ public class JRuby10AndroidPatcher {
                                 changed[0] = true;
                             } else {
                                 super.visitMethodInsn(op, owner, mName, mDesc, itf);
+                            }
+                        }
+
+                        private void pushDefault(Type t) {
+                            switch (t.getSort()) {
+                                case Type.VOID: break;
+                                case Type.LONG: super.visitInsn(Opcodes.LCONST_0); break;
+                                case Type.FLOAT: super.visitInsn(Opcodes.FCONST_0); break;
+                                case Type.DOUBLE: super.visitInsn(Opcodes.DCONST_0); break;
+                                case Type.OBJECT: case Type.ARRAY: super.visitInsn(Opcodes.ACONST_NULL); break;
+                                default: super.visitInsn(Opcodes.ICONST_0);
                             }
                         }
 
