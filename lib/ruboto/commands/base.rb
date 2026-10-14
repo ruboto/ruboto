@@ -105,8 +105,8 @@ module Ruboto
               }
               option('min-sdk') {
                 argument :required
-                description "Minimum Android API level to support (default: #{MINIMUM_SUPPORTED_SDK_LEVEL})"
-                default MINIMUM_SUPPORTED_SDK_LEVEL.to_s
+                description "Minimum Android API level to support (default: #{DEFAULT_MIN_SDK_LEVEL}, lowest: #{MINIMUM_SUPPORTED_SDK_LEVEL})"
+                default DEFAULT_MIN_SDK_LEVEL.to_s
               }
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory. Optionally set the JRuby version.'

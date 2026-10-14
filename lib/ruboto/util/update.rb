@@ -337,8 +337,8 @@ module Ruboto
             min_sdk ||= sdk_element.attributes['android:minSdkVersion']
             target ||= sdk_element.attributes['android:targetSdkVersion']
           else
-            min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
-            target ||= MINIMUM_SUPPORTED_SDK_LEVEL
+            min_sdk ||= DEFAULT_MIN_SDK_LEVEL
+            target ||= DEFAULT_MIN_SDK_LEVEL
           end
 
           if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
@@ -426,7 +426,7 @@ module Ruboto
       end
 
       def reconfigure_jruby_libs(jruby_version)
-        reconfigure_jruby_core(jruby_version)
+        reconfigure_jruby_core(jruby_version, project_min_sdk_level)
         # JRuby finds its standard library via META-INF/jruby.home inside the
         # stdlib jar, so the jar is used as-is and needs no reconfiguration.
         if Gem::Version.new(jruby_version.to_s.tr('-', '.')) < Gem::Version.new('10.0.0.0')
@@ -434,10 +434,20 @@ module Ruboto
         end
       end
 
+      # The minSdk the app is built for: app/build.gradle wins (it is what the
+      # Android Gradle plugin uses), then the manifest.
+      def project_min_sdk_level
+        if File.exist?(APP_BUILD_GRADLE_FILE_NAME) && (level = File.read(APP_BUILD_GRADLE_FILE_NAME)[/^\s*minSdk(?:Version)?\s*=?\s*(\d+)/, 1])
+          return level.to_i
+        end
+
+        File.exist?(MANIFEST_FILE_NAME) ? verify_min_sdk.to_i : DEFAULT_MIN_SDK_LEVEL
+      end
+
       # - Removes unneeded code from jruby-core
       # - Split into smaller jars that can be used separately
       # FIXME(uwe): Refactor to take a Gem::Version as the parameter.
-      def reconfigure_jruby_core(jruby_core_version)
+      def reconfigure_jruby_core(jruby_core_version, min_sdk_level = DEFAULT_MIN_SDK_LEVEL)
         Dir.chdir 'libs' do
           jruby_core = Dir['jruby-core-*.jar'][-1]
           log_action("Removing unneeded classes from #{jruby_core}") do
@@ -750,7 +760,7 @@ module Ruboto
               #end
 
               if gem_version >= Gem::Version.new('10.0.0.0')
-                patch_jruby_core_for_android
+                patch_jruby_core_for_android(min_sdk_level)
               end
 
               # Add our proxy class factory.  JRuby 10 removed the APIs these
@@ -802,7 +812,9 @@ module Ruboto
       #   implementations from lib/jruby10_overrides.
       # - Rewrites Class.getModule()/Module.canRead() calls (java.lang.Module
       #   does not exist on ART) via an ASM-based bytecode patcher.
-      def patch_jruby_core_for_android
+      # - Below NATIVE_INVOKE_SDK_LEVEL, moves java.lang.invoke onto the
+      #   stand-in in lib/jruby10_legacy (see patch_jruby_core_for_legacy_android).
+      def patch_jruby_core_for_android(min_sdk_level = DEFAULT_MIN_SDK_LEVEL)
         overrides_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_overrides"
         asm_jar = "#{Ruboto::ASSETS}/libs/asm-9.7.1.jar"
 
@@ -836,6 +848,43 @@ module Ruboto
         print 'Patching java.lang.Module usage...'
         puts `java -cp #{asm_jar}#{File::PATH_SEPARATOR}#{tool_dir} JRuby10AndroidPatcher .`
         raise 'Patching classes for Android failed' unless $? == 0
+        FileUtils.rm_rf tool_dir
+
+        patch_jruby_core_for_legacy_android if min_sdk_level.to_i < NATIVE_INVOKE_SDK_LEVEL
+      end
+
+      # Makes the unpacked jruby-core classes in the current directory run on
+      # Android versions without java.lang.invoke (API < 26) or VarHandle
+      # (API < 33):
+      # - Compiles the reflection/Unsafe-based java.lang.invoke stand-in and
+      #   the API backports from lib/jruby10_legacy/runtime into the jar.
+      # - Relocates java.lang.invoke references to it and rewrites
+      #   signature-polymorphic calls (MethodHandle.invokeExact, VarHandle
+      #   access) into generated static bridges.
+      # The app must also enable core library desugaring below API 26; the
+      # generated app/build.gradle does that.
+      def patch_jruby_core_for_legacy_android
+        legacy_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_legacy"
+        tool_dir = '../legacy_patcher'
+        FileUtils.rm_rf tool_dir
+        # The patcher uses the ASM bundled in jruby-core.  It runs from a
+        # copy so it never loads classes from the tree it is rewriting.
+        asm_dir = "#{tool_dir}/asm/org/jruby/org"
+        FileUtils.mkdir_p asm_dir
+        FileUtils.cp_r 'org/jruby/org/objectweb', asm_dir
+        class_path = "#{tool_dir}/asm"
+
+        print 'Adding java.lang.invoke stand-in for older Android versions...'
+        runtime_sources = Dir["#{legacy_dir}/runtime/**/*.java"]
+        `javac --release 17 -nowarn -d . #{runtime_sources.join(' ')} 2>&1`
+        raise 'Compiling the java.lang.invoke stand-in failed' unless $? == 0
+
+        `javac -cp #{class_path} -d #{tool_dir} #{legacy_dir}/LegacyAndroidPatcher.java`
+        raise 'Compiling the legacy Android patcher failed' unless $? == 0
+
+        puts `java -cp #{class_path}#{File::PATH_SEPARATOR}#{tool_dir} LegacyAndroidPatcher .`
+        raise 'Patching classes for legacy Android failed' unless $? == 0
+
         FileUtils.rm_rf tool_dir
       end
 
