@@ -8,8 +8,9 @@ regular Android Studio projects.
 
 You need a JDK (17+), the Android SDK (set `ANDROID_HOME`), and Ruby.
 No Android Studio required.  Apps built with JRuby 10 run on
-**Android 13 (API 33) or newer** — JRuby 10 relies on
-`java.lang.invoke.VarHandle`, which became public Android API in 13.
+**Android 13 (API 33) or newer** by default, and on **Android 6.0 (API 23)
+or newer** when generated with `--min-sdk` — see
+[Older Android versions](#older-android-versions).
 
 ```shell
 # 1. Get ruboto
@@ -31,6 +32,50 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 The whole app is one Ruby file: [`assets/samples/todo_activity.rb`](assets/samples/todo_activity.rb).
 Edit it, rebuild, reinstall — that is the entire development cycle.
+
+### Older Android versions
+
+JRuby 10 uses `java.lang.invoke` (MethodHandles exist on Android from 8.0,
+VarHandles only from 13), `java.nio.file` and `java.time` (8.0) and a few
+newer JDK methods.  Pass a lower `--min-sdk` to build for older devices,
+down to Android 6.0 — e.g. a cheap digital photo frame:
+
+```shell
+ruby -Iruboto/lib ruboto/bin/ruboto gen app --package org.ruboto.todo --name Todo --path todo --min-sdk 23
+```
+
+For a minimum SDK below 33, `ruboto gen jruby` then rewrites the jruby-core
+jar so it does not need `java.lang.invoke` at all:
+
+* references to `java.lang.invoke` move to a small stand-in built on
+  reflection and `sun.misc.Unsafe`
+  ([`lib/jruby10_legacy/runtime`](lib/jruby10_legacy/runtime));
+* signature-polymorphic calls (`MethodHandle.invokeExact`, `VarHandle`
+  access) become calls to generated static bridges;
+* calls to JDK methods the device lacks (`InputStream.readAllBytes`,
+  `BigInteger.TWO`, `java.lang.ClassValue`, …) are retargeted to backports.
+
+Below API 26 the generated `app/build.gradle` also turns on core library
+desugaring for `java.nio.file`, `java.time` and `java.util.function`.
+
+JRuby's runtime is interpreted on Android either way, so this costs little
+speed; starting JRuby on an Android 6 quad-core Cortex-A7 takes about 20 seconds.
+
+### Calling Java with Ruby callbacks
+
+Android cannot load classes generated at runtime, so pass Java callbacks as
+procs, not blocks:
+
+```ruby
+button.setOnClickListener(proc { |view| toast 'clicked' })  # works
+button.setOnClickListener { |view| toast 'clicked' }        # needs runtime class generation
+```
+
+A proc is turned into a `java.lang.reflect.Proxy`; a block given directly
+to a Java method is not, and `SomeInterface.impl { }` currently fails with a
+`NullPointerException` in JRuby's interface template.  To cancel something
+later (e.g. `Handler#removeCallbacks`), keep the Java object rather than
+converting the proc again, or use `Handler` messages.
 
 ### Using gems
 
