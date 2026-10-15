@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,12 +62,19 @@ public class SplashActivity extends Activity {
     }
 
     // Fallback for user Activities that are not EntryPointActivities: once
-    // the splash is stopped after starting them, they cover it.
+    // the splash is stopped after starting them, they cover it.  Not while the
+    // screen is off: then the splash is stopped because of that, possibly
+    // before the user Activity exists.
     public void onStop() {
         super.onStop();
-        if (userActivityStarted) {
+        if (userActivityStarted && isInteractive()) {
             finish();
         }
+    }
+
+    private boolean isInteractive() {
+        PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
+        return power == null || power.isInteractive();
     }
 
     public void onDestroy() {
