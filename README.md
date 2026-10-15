@@ -51,7 +51,10 @@ installs JRuby so it does not need `java.lang.invoke` at all:
   reflection and `sun.misc.Unsafe`
   ([`lib/jruby10_legacy/runtime`](lib/jruby10_legacy/runtime));
 * signature-polymorphic calls (`MethodHandle.invokeExact`, `VarHandle`
-  access) become calls to generated static bridges.
+  access) become calls to generated static bridges;
+* JRuby's socket library gets stand-ins for the `java.net` socket option and
+  protocol family types (Android 7+), so `require 'socket'` and `net/http`
+  work on Android 6.
 
 At every minimum SDK, calls to JDK methods newer than the device
 (`java.lang.ClassValue` only exists from Android 14 and JRuby 10.1 needs it

@@ -175,6 +175,52 @@ public final class Backports {
         return channel.socket().getRemoteSocketAddress();
     }
 
+    // java.nio.channels.DatagramChannel#open(ProtocolFamily) (API 24).  The
+    // family only matters for the address the socket is bound to.
+    public static java.nio.channels.DatagramChannel open(org.ruboto.compat.net.ProtocolFamily family) throws IOException {
+        return java.nio.channels.DatagramChannel.open();
+    }
+
+    // java.nio.channels.DatagramChannel#bind (API 24)
+    public static java.nio.channels.DatagramChannel bind(java.nio.channels.DatagramChannel channel, java.net.SocketAddress local) throws IOException {
+        channel.socket().bind(local);
+        return channel;
+    }
+
+    // java.nio.channels.DatagramChannel#getLocalAddress (API 24)
+    public static java.net.SocketAddress getLocalAddress(java.nio.channels.DatagramChannel channel) throws IOException {
+        if (!channel.isOpen()) throw new java.nio.channels.ClosedChannelException();
+        return channel.socket().getLocalSocketAddress();
+    }
+
+    // java.nio.channels.SocketChannel#bind (API 24)
+    public static java.nio.channels.SocketChannel bind(java.nio.channels.SocketChannel channel, java.net.SocketAddress local) throws IOException {
+        channel.socket().bind(local);
+        return channel;
+    }
+
+    // java.nio.channels.SocketChannel#setOption (API 24), with the options of
+    // org.ruboto.compat.net.StandardSocketOptions.
+    public static java.nio.channels.SocketChannel setOption(java.nio.channels.SocketChannel channel,
+                                                            org.ruboto.compat.net.SocketOption<?> option, Object value) throws IOException {
+        java.net.Socket socket = channel.socket();
+        switch (option.name()) {
+            case "SO_REUSEADDR": socket.setReuseAddress((Boolean) value); break;
+            case "SO_KEEPALIVE": socket.setKeepAlive((Boolean) value); break;
+            case "TCP_NODELAY": socket.setTcpNoDelay((Boolean) value); break;
+            case "SO_SNDBUF": socket.setSendBufferSize((Integer) value); break;
+            case "SO_RCVBUF": socket.setReceiveBufferSize((Integer) value); break;
+            case "SO_LINGER": {
+                int seconds = (Integer) value;
+                socket.setSoLinger(seconds >= 0, Math.max(seconds, 0));
+                break;
+            }
+            case "IP_TOS": socket.setTrafficClass((Integer) value); break;
+            default: throw new UnsupportedOperationException("'" + option.name() + "' not supported");
+        }
+        return channel;
+    }
+
     // java.nio.channels.SocketChannel#shutdownOutput (API 24)
     public static java.nio.channels.SocketChannel shutdownOutput(java.nio.channels.SocketChannel channel) throws IOException {
         channel.socket().shutdownOutput();

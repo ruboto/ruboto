@@ -951,7 +951,7 @@ module Ruboto
           runtime_sources = Dir["#{legacy_dir}/runtime/**/*.java"]
         else
           print 'Adding JDK backports...'
-          runtime_sources = Dir["#{legacy_dir}/runtime/org/ruboto/compat/*.java"]
+          runtime_sources = Dir["#{legacy_dir}/runtime/org/ruboto/compat/**/*.java"]
         end
         run_java_tool('Compiling the java.lang.invoke stand-in',
                       ['javac', '--release', '17', '-nowarn', '-d', '.', *runtime_sources])

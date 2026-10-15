@@ -93,7 +93,29 @@ public class LegacyAndroidPatcher {
             "java/nio/ByteBuffer.put(I[BII)Ljava/nio/ByteBuffer;",
             "java/nio/ByteBuffer.put(ILjava/nio/ByteBuffer;II)Ljava/nio/ByteBuffer;",
             "java/nio/channels/SocketChannel.getRemoteAddress()Ljava/net/SocketAddress;",
-            "java/nio/channels/SocketChannel.shutdownOutput()Ljava/nio/channels/SocketChannel;");
+            "java/nio/channels/SocketChannel.shutdownOutput()Ljava/nio/channels/SocketChannel;",
+            "java/nio/channels/SocketChannel.bind(Ljava/net/SocketAddress;)Ljava/nio/channels/SocketChannel;",
+            "java/nio/channels/SocketChannel.setOption(Lorg/ruboto/compat/net/SocketOption;Ljava/lang/Object;)Ljava/nio/channels/SocketChannel;",
+            "java/nio/channels/DatagramChannel.bind(Ljava/net/SocketAddress;)Ljava/nio/channels/DatagramChannel;",
+            "java/nio/channels/DatagramChannel.getLocalAddress()Ljava/net/SocketAddress;");
+
+    /** owner.name+desc of static methods to retarget to Backports.name with the same descriptor. */
+    static final Set<String> BACKPORTED_STATIC_METHODS = Set.of(
+            "java/nio/channels/DatagramChannel.open(Lorg/ruboto/compat/net/ProtocolFamily;)Ljava/nio/channels/DatagramChannel;");
+
+    /**
+     * java.net socket types from API 24.  JRuby binds its socket classes by
+     * reflection, and on older Android getDeclaredMethods() fails for a class
+     * whose method signatures mention a missing type, so `require 'socket'`
+     * failed altogether.  Only JRuby's socket library is relocated; the
+     * channel methods taking these types are backported.
+     */
+    static final Map<String, String> SOCKET_TYPES = Map.of(
+            "java/net/ProtocolFamily", "org/ruboto/compat/net/ProtocolFamily",
+            "java/net/StandardProtocolFamily", "org/ruboto/compat/net/StandardProtocolFamily",
+            "java/net/SocketOption", "org/ruboto/compat/net/SocketOption",
+            "java/net/StandardSocketOptions", "org/ruboto/compat/net/StandardSocketOptions");
+    static final String SOCKET_PACKAGE = "org/jruby/ext/socket/";
 
     /** owner.name of static fields to replace with a Backports getter. */
     static final Map<String, String> BACKPORTED_FIELDS = Map.of(
@@ -102,16 +124,27 @@ public class LegacyAndroidPatcher {
     /** Whether java.lang.invoke is moved to the stand-in (false with --backports-only). */
     static boolean invokeShim = true;
 
-    static final Remapper REMAPPER = new Remapper(Opcodes.ASM9) {
+    static final Remapper REMAPPER = new LegacyRemapper(false);
+    static final Remapper SOCKET_REMAPPER = new LegacyRemapper(true);
+
+    static class LegacyRemapper extends Remapper {
+        private final boolean socketTypes;
+
+        LegacyRemapper(boolean socketTypes) {
+            super(Opcodes.ASM9);
+            this.socketTypes = socketTypes;
+        }
+
         @Override
         public String map(String internalName) {
             if (invokeShim && internalName.startsWith("java/lang/invoke/")) {
                 return SHIM + internalName.substring("java/lang/invoke/".length());
             }
             if (internalName.equals("java/lang/ClassValue")) return "org/ruboto/compat/ClassValue";
+            if (socketTypes && SOCKET_TYPES.containsKey(internalName)) return SOCKET_TYPES.get(internalName);
             return internalName;
         }
-    };
+    }
 
     /** Superclass and interfaces, and declared methods (name + desc), of the classes being patched. */
     static final Map<String, List<String>> treeSupers = new HashMap<>();
@@ -211,6 +244,8 @@ public class LegacyAndroidPatcher {
             byte[] bytes = Files.readAllBytes(path);
             final boolean[] changed = {false};
             ClassReader reader = new ClassReader(bytes);
+            Remapper classRemapper = invokeShim && reader.getClassName().startsWith(SOCKET_PACKAGE)
+                    ? SOCKET_REMAPPER : REMAPPER;
             ClassWriter writer = new ClassWriter(0);
             ClassVisitor rewriter = new ClassVisitor(Opcodes.ASM9, writer) {
                 @Override
@@ -218,7 +253,7 @@ public class LegacyAndroidPatcher {
                     return new CallRewriter(super.visitMethod(access, name, desc, sig, ex), changed);
                 }
             };
-            ClassRemapper remapper = new ClassRemapper(Opcodes.ASM9, rewriter, REMAPPER) {
+            ClassRemapper remapper = new ClassRemapper(Opcodes.ASM9, rewriter, classRemapper) {
                 @Override
                 protected MethodVisitor createMethodRemapper(MethodVisitor mv) {
                     return new MethodRemapper(Opcodes.ASM9, mv, remapper) {
@@ -235,7 +270,8 @@ public class LegacyAndroidPatcher {
             };
             reader.accept(remapper, 0);
             byte[] out = writer.toByteArray();
-            if (changed[0] || !java.util.Arrays.equals(out, bytes) && references(bytes)) {
+            if (changed[0] || !java.util.Arrays.equals(out, bytes)
+                    && (references(bytes) || classRemapper == SOCKET_REMAPPER)) {
                 Files.write(path, out);
                 return true;
             }
@@ -284,6 +320,10 @@ public class LegacyAndroidPatcher {
                 super.visitInsn(Opcodes.ICONST_1);
                 changed[0] = true;
                 count("ClassLoader.registerAsParallelCapable");
+            } else if (op == Opcodes.INVOKESTATIC && BACKPORTED_STATIC_METHODS.contains(owner + "." + name + desc)) {
+                super.visitMethodInsn(Opcodes.INVOKESTATIC, BACKPORTS, name, desc, false);
+                changed[0] = true;
+                count(owner.substring(owner.lastIndexOf('/') + 1) + "." + name);
             } else if ((op == Opcodes.INVOKEVIRTUAL || op == Opcodes.INVOKESPECIAL)
                     && (target = backportedOwner(owner, name + desc)) != null) {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, BACKPORTS, name, prepend(target, desc), false);
