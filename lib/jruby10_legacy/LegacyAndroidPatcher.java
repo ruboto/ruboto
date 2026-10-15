@@ -91,7 +91,9 @@ public class LegacyAndroidPatcher {
             "java/nio/ByteBuffer.get(I[BII)Ljava/nio/ByteBuffer;",
             "java/nio/ByteBuffer.put(I[B)Ljava/nio/ByteBuffer;",
             "java/nio/ByteBuffer.put(I[BII)Ljava/nio/ByteBuffer;",
-            "java/nio/ByteBuffer.put(ILjava/nio/ByteBuffer;II)Ljava/nio/ByteBuffer;");
+            "java/nio/ByteBuffer.put(ILjava/nio/ByteBuffer;II)Ljava/nio/ByteBuffer;",
+            "java/nio/channels/SocketChannel.getRemoteAddress()Ljava/net/SocketAddress;",
+            "java/nio/channels/SocketChannel.shutdownOutput()Ljava/nio/channels/SocketChannel;");
 
     /** owner.name of static fields to replace with a Backports getter. */
     static final Map<String, String> BACKPORTED_FIELDS = Map.of(

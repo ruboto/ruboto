@@ -136,6 +136,7 @@ public final class Backports {
     }
 
     public static ByteBuffer get(ByteBuffer bb, int index, byte[] dst, int offset, int length) {
+        checkRange(bb, index, length);
         for (int i = 0; i < length; i++) dst[offset + i] = bb.get(index + i);
         return bb;
     }
@@ -145,12 +146,38 @@ public final class Backports {
     }
 
     public static ByteBuffer put(ByteBuffer bb, int index, byte[] src, int offset, int length) {
-        for (int i = 0; i < length; i++) bb.put(index + i, src[offset + i]);
+        checkRange(bb, index, length);
+        // Copy first: src may be the buffer's own backing array.
+        byte[] copy = Arrays.copyOfRange(src, offset, offset + length);
+        for (int i = 0; i < length; i++) bb.put(index + i, copy[i]);
         return bb;
     }
 
     public static ByteBuffer put(ByteBuffer bb, int index, ByteBuffer src, int offset, int length) {
-        for (int i = 0; i < length; i++) bb.put(index + i, src.get(offset + i));
+        checkRange(bb, index, length);
+        checkRange(src, offset, length);
+        // Copy first: src may be bb itself (overlapping IO::Buffer#copy).
+        byte[] copy = new byte[length];
+        for (int i = 0; i < length; i++) copy[i] = src.get(offset + i);
+        for (int i = 0; i < length; i++) bb.put(index + i, copy[i]);
         return bb;
+    }
+
+    private static void checkRange(ByteBuffer bb, int index, int length) {
+        if (index < 0 || length < 0 || index > bb.limit() - length) {
+            throw new IndexOutOfBoundsException("index " + index + ", length " + length + ", limit " + bb.limit());
+        }
+    }
+
+    // java.nio.channels.SocketChannel#getRemoteAddress (API 24)
+    public static java.net.SocketAddress getRemoteAddress(java.nio.channels.SocketChannel channel) throws IOException {
+        if (!channel.isOpen()) throw new java.nio.channels.ClosedChannelException();
+        return channel.socket().getRemoteSocketAddress();
+    }
+
+    // java.nio.channels.SocketChannel#shutdownOutput (API 24)
+    public static java.nio.channels.SocketChannel shutdownOutput(java.nio.channels.SocketChannel channel) throws IOException {
+        channel.socket().shutdownOutput();
+        return channel;
     }
 }

@@ -80,6 +80,12 @@ public abstract class VarHandle {
     /** Entry point for the generated Poly bridges. */
     public final Object access(String methodName, Object[] args) {
         int n = coordinateTypes.length;
+        if (varType.isPrimitive() && args.length > n) {
+            // Call sites may box a narrower type (e.g. an int literal for a
+            // long field); compare and store values as varType.
+            args = args.clone();
+            for (int i = n; i < args.length; i++) args[i] = Primitives.convert(args[i], varType);
+        }
         switch (methodName) {
             case "get": case "getVolatile": case "getAcquire": case "getOpaque":
                 return get(args);
