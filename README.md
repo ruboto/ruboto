@@ -44,8 +44,8 @@ down to Android 6.0 — e.g. a cheap digital photo frame:
 ruby -Iruboto/lib ruboto/bin/ruboto gen app --package org.ruboto.todo --name Todo --path todo --min-sdk 23
 ```
 
-For a minimum SDK below 33, `ruboto gen jruby` then rewrites the jruby-core
-jar so it does not need `java.lang.invoke` at all:
+For a minimum SDK below 33, Ruboto then rewrites the jruby-core jar when it
+installs JRuby so it does not need `java.lang.invoke` at all:
 
 * references to `java.lang.invoke` move to a small stand-in built on
   reflection and `sun.misc.Unsafe`
@@ -61,24 +61,43 @@ at startup; `InputStream.readAllBytes`, `StringBuilder.isEmpty`,
 Below API 26 the generated `app/build.gradle` also turns on core library
 desugaring for `java.nio.file`, `java.time` and `java.util.function`.
 
-JRuby's runtime is interpreted on Android either way, so this costs little
-speed; starting JRuby on an Android 6 quad-core Cortex-A7 takes about 20 seconds.
+JRuby's runtime is interpreted on Android either way; the stand-in adds some
+reflection overhead (instance variables and Java calls are noticeably slower
+than on Android 13+).  Starting JRuby on an Android 6 quad-core Cortex-A7 takes
+about 20 seconds.
+
+The minimum SDK is read from `app/build.gradle` whenever JRuby is installed
+(`gen app`, `gen jruby`, `update jruby`).  To lower it for an existing app, set
+`minSdk` (and below 26 the desugaring lines a new app gets) in
+`app/build.gradle`, then run `ruboto update jruby --force` so the jar is
+rewritten.
 
 ### Calling Java with Ruby callbacks
 
-Android cannot load classes generated at runtime, so pass Java callbacks as
-procs, not blocks:
+Android cannot load classes generated at runtime, so Ruboto implements Java
+interfaces with `java.lang.reflect.Proxy`.  Blocks, procs,
+`SomeInterface.impl { }` and Ruby classes that `include` a Java interface all
+work:
 
 ```ruby
-button.setOnClickListener(proc { |view| toast 'clicked' })  # works
-button.setOnClickListener { |view| toast 'clicked' }        # needs runtime class generation
+button.setOnClickListener { |view| toast 'clicked' }
+button.setOnClickListener(proc { |view| toast 'clicked' })
+java.lang.Thread.new(java.lang.Runnable.impl { puts 'running' }).start
 ```
 
-A proc is turned into a `java.lang.reflect.Proxy`; a block given directly
-to a Java method is not, and `SomeInterface.impl { }` currently fails with a
-`NullPointerException` in JRuby's interface template.  To cancel something
-later (e.g. `Handler#removeCallbacks`), keep the Java object rather than
-converting the proc again, or use `Handler` messages.
+Each conversion creates a new proxy, so to cancel something later (e.g.
+`Handler#removeCallbacks`) keep the converted Java object
+(`proc.to_java(java.lang.Runnable)`) or use `Handler` messages.  Subclassing a
+Java class in Ruby (`class MyList < java.util.ArrayList`) still needs runtime
+class generation and does not work.
+
+### Standard library
+
+The Java parts of `stringio`, `strscan`, `json` and `psych` (YAML) ship as
+separate jars inside JRuby, which Android cannot load; Ruboto merges their
+classes into the app.  Default gems that live in JRuby's gem directory
+(`bigdecimal`, `base64`, `csv`, `logger`, …) are not packaged; vendor them as
+described in [Using gems](#using-gems).  `openssl` is not available.
 
 ### Using gems
 
