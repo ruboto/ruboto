@@ -51,9 +51,12 @@ jar so it does not need `java.lang.invoke` at all:
   reflection and `sun.misc.Unsafe`
   ([`lib/jruby10_legacy/runtime`](lib/jruby10_legacy/runtime));
 * signature-polymorphic calls (`MethodHandle.invokeExact`, `VarHandle`
-  access) become calls to generated static bridges;
-* calls to JDK methods the device lacks (`InputStream.readAllBytes`,
-  `BigInteger.TWO`, `java.lang.ClassValue`, …) are retargeted to backports.
+  access) become calls to generated static bridges.
+
+At every minimum SDK, calls to JDK methods newer than the device
+(`java.lang.ClassValue` only exists from Android 14 and JRuby 10.1 needs it
+at startup; `InputStream.readAllBytes`, `StringBuilder.isEmpty`,
+`BigInteger.TWO`, …) are retargeted to backports.
 
 Below API 26 the generated `app/build.gradle` also turns on core library
 desugaring for `java.nio.file`, `java.time` and `java.util.function`.

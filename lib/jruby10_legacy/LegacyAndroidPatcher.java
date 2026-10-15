@@ -50,7 +50,10 @@ import org.jruby.org.objectweb.asm.commons.Remapper;
  * extra library is needed.  Run it from a copy of those classes, not from the
  * tree being patched.
  *
- * Usage: java LegacyAndroidPatcher <class tree root>
+ * With --backports-only, only steps 3 and the ClassValue relocation run:
+ * that is what Android 13+ (which has java.lang.invoke) still needs.
+ *
+ * Usage: java LegacyAndroidPatcher <class tree root> [--backports-only]
  */
 public class LegacyAndroidPatcher {
     static final String SHIM = "org/ruboto/invoke/";
@@ -94,10 +97,15 @@ public class LegacyAndroidPatcher {
     static final Map<String, String> BACKPORTED_FIELDS = Map.of(
             "java/math/BigInteger.TWO", "bigIntegerTwo");
 
+    /** Whether java.lang.invoke is moved to the stand-in (false with --backports-only). */
+    static boolean invokeShim = true;
+
     static final Remapper REMAPPER = new Remapper(Opcodes.ASM9) {
         @Override
         public String map(String internalName) {
-            if (internalName.startsWith("java/lang/invoke/")) return SHIM + internalName.substring("java/lang/invoke/".length());
+            if (invokeShim && internalName.startsWith("java/lang/invoke/")) {
+                return SHIM + internalName.substring("java/lang/invoke/".length());
+            }
             if (internalName.equals("java/lang/ClassValue")) return "org/ruboto/compat/ClassValue";
             return internalName;
         }
@@ -113,6 +121,7 @@ public class LegacyAndroidPatcher {
 
     public static void main(String[] args) throws IOException {
         Path root = Paths.get(args[0]);
+        invokeShim = !java.util.Arrays.asList(args).contains("--backports-only");
         readHierarchy(root);
         final int[] patched = {0};
         try (Stream<Path> paths = Files.walk(root)) {
@@ -125,11 +134,13 @@ public class LegacyAndroidPatcher {
                         if (patch(p)) patched[0]++;
                     });
         }
-        Path poly = root.resolve(POLY + ".class");
-        Files.createDirectories(poly.getParent());
-        Files.write(poly, generatePoly());
-        System.out.println("Patched " + patched[0] + " classes for legacy Android: " + counts
-                + ", " + bridges.size() + " polymorphic bridges");
+        if (invokeShim) {
+            Path poly = root.resolve(POLY + ".class");
+            Files.createDirectories(poly.getParent());
+            Files.write(poly, generatePoly());
+        }
+        System.out.println("Patched " + patched[0] + " classes: " + counts
+                + (invokeShim ? ", " + bridges.size() + " polymorphic bridges" : ""));
     }
 
     static void readHierarchy(Path root) throws IOException {
@@ -236,7 +247,7 @@ public class LegacyAndroidPatcher {
     /** Whether the class constant pool mentions anything we relocate. */
     static boolean references(byte[] bytes) {
         String s = new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
-        return s.contains("java/lang/invoke/") || s.contains("java/lang/ClassValue");
+        return (invokeShim && s.contains("java/lang/invoke/")) || s.contains("java/lang/ClassValue");
     }
 
     static void count(String what) {

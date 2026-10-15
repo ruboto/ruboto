@@ -817,8 +817,9 @@ module Ruboto
       #   implementations from lib/jruby10_overrides.
       # - Rewrites Class.getModule()/Module.canRead() calls (java.lang.Module
       #   does not exist on ART) via an ASM-based bytecode patcher.
-      # - Below NATIVE_INVOKE_SDK_LEVEL, moves java.lang.invoke onto the
-      #   stand-in in lib/jruby10_legacy (see patch_jruby_core_for_legacy_android).
+      # - Backports JDK APIs newer than the device and, below
+      #   NATIVE_INVOKE_SDK_LEVEL, moves java.lang.invoke onto the stand-in in
+      #   lib/jruby10_legacy (see backport_jruby_core).
       def patch_jruby_core_for_android(min_sdk_level = DEFAULT_MIN_SDK_LEVEL)
         overrides_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_overrides"
         asm_jar = "#{Ruboto::ASSETS}/libs/asm-9.7.1.jar"
@@ -855,20 +856,21 @@ module Ruboto
         raise 'Patching classes for Android failed' unless $? == 0
         FileUtils.rm_rf tool_dir
 
-        patch_jruby_core_for_legacy_android if min_sdk_level.to_i < NATIVE_INVOKE_SDK_LEVEL
+        backport_jruby_core(min_sdk_level.to_i < NATIVE_INVOKE_SDK_LEVEL)
       end
 
       # Makes the unpacked jruby-core classes in the current directory run on
-      # Android versions without java.lang.invoke (API < 26) or VarHandle
-      # (API < 33):
-      # - Compiles the reflection/Unsafe-based java.lang.invoke stand-in and
-      #   the API backports from lib/jruby10_legacy/runtime into the jar.
-      # - Relocates java.lang.invoke references to it and rewrites
-      #   signature-polymorphic calls (MethodHandle.invokeExact, VarHandle
-      #   access) into generated static bridges.
-      # The app must also enable core library desugaring below API 26; the
-      # generated app/build.gradle does that.
-      def patch_jruby_core_for_legacy_android
+      # Android versions that lack newer JDK APIs:
+      # - Always: JDK methods newer than the device that d8 does not backport
+      #   (java.lang.ClassValue is API 34, StringBuilder#isEmpty API 35, ...)
+      #   are retargeted to org.ruboto.compat (lib/jruby10_legacy/runtime).
+      # - With invoke_shim (no java.lang.invoke below API 26, no VarHandle
+      #   below API 33): java.lang.invoke references move to the
+      #   reflection/Unsafe-based stand-in and signature-polymorphic calls
+      #   (MethodHandle.invokeExact, VarHandle access) become generated static
+      #   bridges.  The app must also enable core library desugaring below
+      #   API 26; the generated app/build.gradle does that.
+      def backport_jruby_core(invoke_shim)
         legacy_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_legacy"
         tool_dir = '../legacy_patcher'
         FileUtils.rm_rf tool_dir
@@ -879,16 +881,22 @@ module Ruboto
         FileUtils.cp_r 'org/jruby/org/objectweb', asm_dir
         class_path = "#{tool_dir}/asm"
 
-        print 'Adding java.lang.invoke stand-in for older Android versions...'
-        runtime_sources = Dir["#{legacy_dir}/runtime/**/*.java"]
+        if invoke_shim
+          print 'Adding java.lang.invoke stand-in and JDK backports for older Android versions...'
+          runtime_sources = Dir["#{legacy_dir}/runtime/**/*.java"]
+        else
+          print 'Adding JDK backports...'
+          runtime_sources = Dir["#{legacy_dir}/runtime/org/ruboto/compat/*.java"]
+        end
         `javac --release 17 -nowarn -d . #{runtime_sources.join(' ')} 2>&1`
         raise 'Compiling the java.lang.invoke stand-in failed' unless $? == 0
 
         `javac -cp #{class_path} -d #{tool_dir} #{legacy_dir}/LegacyAndroidPatcher.java`
         raise 'Compiling the legacy Android patcher failed' unless $? == 0
 
-        puts `java -cp #{class_path}#{File::PATH_SEPARATOR}#{tool_dir} LegacyAndroidPatcher .`
-        raise 'Patching classes for legacy Android failed' unless $? == 0
+        mode = invoke_shim ? '' : ' --backports-only'
+        puts `java -cp #{class_path}#{File::PATH_SEPARATOR}#{tool_dir} LegacyAndroidPatcher .#{mode}`
+        raise 'Backporting JDK APIs failed' unless $? == 0
 
         FileUtils.rm_rf tool_dir
       end

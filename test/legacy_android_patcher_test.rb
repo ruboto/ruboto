@@ -36,6 +36,14 @@ class LegacyAndroidPatcherTest < Minitest::Test
     assert_equal [EXPECTED_OUTPUT, 'org.ruboto.invoke'], summary(patched)
   end
 
+  def test_backports_only_keeps_java_lang_invoke
+    patch!('--backports-only')
+    disassembly = run!("javap -c -p -cp #{@dir}/classes Sample")
+
+    assert_equal [EXPECTED_OUTPUT, 'java.lang.invoke'], summary(run!("java -cp #{@dir}/classes Sample"))
+    assert_empty disassembly.lines.grep(%r{java/lang/ClassValue|BigInteger\.TWO|InputStream\.readAllBytes})
+  end
+
   def test_no_java_lang_invoke_references_remain_outside_invokedynamic
     patch!
     disassembly = run!("javap -c -p -cp #{@dir}/classes Sample")
@@ -48,11 +56,11 @@ class LegacyAndroidPatcherTest < Minitest::Test
   private
 
   # Compiles the stand-in into the class tree and runs the patcher over it.
-  def patch!
+  def patch!(mode = nil)
     runtime = Dir["#{LEGACY}/runtime/**/*.java"].join(' ')
     run!("javac --release 17 -nowarn -d #{@dir}/classes #{runtime}")
     run!("javac -cp #{@asm} -d #{@dir}/tool #{LEGACY}/LegacyAndroidPatcher.java")
-    report = run!("java -cp #{@asm}#{File::PATH_SEPARATOR}#{@dir}/tool LegacyAndroidPatcher #{@dir}/classes")
+    report = run!("java -cp #{@asm}#{File::PATH_SEPARATOR}#{@dir}/tool LegacyAndroidPatcher #{@dir}/classes #{mode}")
     raise "Unexpected patcher output: #{report}" unless report.include?('Patched')
   end
 

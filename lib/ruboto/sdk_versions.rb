@@ -25,6 +25,8 @@ module Ruboto
     # VarHandle from API level 33).  Below NATIVE_INVOKE_SDK_LEVEL the
     # jruby-core jar is rewritten to use a reflection-based stand-in
     # (lib/jruby10_legacy), which works down to Android 6.0 (API level 23).
+    # Newer JDK APIs (java.lang.ClassValue is API level 34, ...) are
+    # backported at every level.
     MINIMUM_SUPPORTED_SDK_LEVEL = 23
     MINIMUM_SUPPORTED_SDK = "android-#{MINIMUM_SUPPORTED_SDK_LEVEL}"
     NATIVE_INVOKE_SDK_LEVEL = 33
