@@ -856,9 +856,11 @@ module Ruboto
               name = e.name.delete_prefix(STDLIB_DIR)
               e.name.start_with?(STDLIB_DIR) && (jar.is_a?(Regexp) ? jar.match?(name) : name == jar)
             end
-            raise "#{jar.inspect} not found in #{stdlib_jar}" unless entry
-
-            extract_classes(entry.get_input_stream.read)
+            if entry
+              extract_classes(entry.get_input_stream.read)
+            else
+              print "#{jar.is_a?(Regexp) ? jar.source : jar} not found, skipped..."
+            end
           end
         end
       end
