@@ -175,6 +175,9 @@ public class JRubyAdapter {
         // ART has no java.lang.invoke.SwitchPoint, so keep JRuby off the
         // invokedynamic-based call site and constant caching paths.
         System.setProperty("jruby.compile.invokedynamic", "false");
+        // Android has no virtual threads (Thread.ofVirtual), so Fibers and
+        // external Enumerators must run on platform threads.
+        System.setProperty("jruby.fiber.vthread", "false");
         // ART cannot load bytecode generated at runtime, so bind the core
         // classes' methods with MethodHandles instead of generated invokers.
         System.setProperty("jruby.invokedynamic.handles", "true");
