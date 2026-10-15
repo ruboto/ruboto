@@ -23,6 +23,10 @@ public class EntryPointActivity extends org.ruboto.RubotoActivity {
         }
 
         super.onCreate(bundle);
+
+        if (JRubyAdapter.isInitialized()) {
+            SplashActivity.userActivityCreated();
+        }
     }
 
     private void showSplash() {

@@ -234,6 +234,18 @@ module Ruboto
           PROPS
         end
 
+        # JRuby 10 uses java.nio.file, java.time and java.util.function, which
+        # Android only has from API level 26.  Below that, d8 backports them.
+        if min_sdk_level.to_i < SdkVersions::DESUGARING_SDK_LEVEL
+          desugaring_lines = <<~GRADLE.chomp.gsub(/^/, ' ' * 8)
+            // Backports java.nio.file, java.time and java.util.function
+            // (used by JRuby) to Android versions before 8.0.
+            coreLibraryDesugaringEnabled true
+          GRADLE
+          desugaring_option = "\n#{desugaring_lines}"
+          desugaring_dependency = "\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'"
+        end
+
         # app/build.gradle
         app_dir = File.join(root, 'app')
         FileUtils.mkdir_p app_dir
@@ -264,7 +276,7 @@ module Ruboto
 
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17
-                    targetCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17#{desugaring_option}
                 }
 
                 sourceSets {
@@ -288,7 +300,10 @@ module Ruboto
                             // disabled.  Saves about 30 MB uncompressed.
                             'META-INF/jruby.home/bin/**',
                             'META-INF/jruby.home/lib/ruby/gems/**',
-                            'META-INF/jruby.home/lib/ruby/stdlib/org/**',
+                            // bouncycastle for jopenssl; snakeyaml-engine stays
+                            // because psych requires the jar (its classes are
+                            // merged into jruby-core).
+                            'META-INF/jruby.home/lib/ruby/stdlib/org/bouncycastle/**',
                             'META-INF/jruby.home/lib/ruby/stdlib/rubygems/**',
                             'META-INF/jruby.home/lib/ruby/stdlib/rubygems.rb',
                             'META-INF/jruby.home/lib/ruby/stdlib/bundler/**',
@@ -304,7 +319,7 @@ module Ruboto
             }
 
             dependencies {
-                implementation fileTree(dir: '../libs', include: ['*.jar'])
+                implementation fileTree(dir: '../libs', include: ['*.jar'])#{desugaring_dependency}
             }
           GRADLE
         end

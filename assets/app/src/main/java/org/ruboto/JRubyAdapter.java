@@ -175,6 +175,9 @@ public class JRubyAdapter {
         // ART has no java.lang.invoke.SwitchPoint, so keep JRuby off the
         // invokedynamic-based call site and constant caching paths.
         System.setProperty("jruby.compile.invokedynamic", "false");
+        // Android has no virtual threads (Thread.ofVirtual), so Fibers and
+        // external Enumerators must run on platform threads.
+        System.setProperty("jruby.fiber.vthread", "false");
         // ART cannot load bytecode generated at runtime, so bind the core
         // classes' methods with MethodHandles instead of generated invokers.
         System.setProperty("jruby.invokedynamic.handles", "true");
@@ -184,7 +187,6 @@ public class JRubyAdapter {
         System.setProperty("jruby.native.enabled", "false");
         System.setProperty("jruby.objectspace.enabled", "false");
         System.setProperty("jruby.rewrite.java.trace", "true");
-        System.setProperty("jruby.thread.pooling", "true");
 
         // Uncomment these to debug/profile Ruby source loading
         // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'

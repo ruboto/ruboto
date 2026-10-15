@@ -8,8 +8,9 @@ regular Android Studio projects.
 
 You need a JDK (17+), the Android SDK (set `ANDROID_HOME`), and Ruby.
 No Android Studio required.  Apps built with JRuby 10 run on
-**Android 13 (API 33) or newer** — JRuby 10 relies on
-`java.lang.invoke.VarHandle`, which became public Android API in 13.
+**Android 13 (API 33) or newer** by default, and on **Android 6.0 (API 23)
+or newer** when generated with `--min-sdk` — see
+[Older Android versions](#older-android-versions).
 
 ```shell
 # 1. Get ruboto
@@ -32,6 +33,82 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 The whole app is one Ruby file: [`assets/samples/todo_activity.rb`](assets/samples/todo_activity.rb).
 Edit it, rebuild, reinstall — that is the entire development cycle.
 
+### Older Android versions
+
+JRuby 10 uses `java.lang.invoke` (MethodHandles exist on Android from 8.0,
+VarHandles only from 13), `java.nio.file` and `java.time` (8.0) and a few
+newer JDK methods.  Pass a lower `--min-sdk` to build for older devices,
+down to Android 6.0 — e.g. a cheap digital photo frame:
+
+```shell
+ruby -Iruboto/lib ruboto/bin/ruboto gen app --package org.ruboto.todo --name Todo --path todo --min-sdk 23
+```
+
+For a minimum SDK below 33, Ruboto then rewrites the jruby-core jar when it
+installs JRuby so it does not need `java.lang.invoke` at all:
+
+* references to `java.lang.invoke` move to a small stand-in built on
+  reflection and `sun.misc.Unsafe`
+  ([`lib/jruby10_legacy/runtime`](lib/jruby10_legacy/runtime));
+* signature-polymorphic calls (`MethodHandle.invokeExact`, `VarHandle`
+  access) become calls to generated static bridges;
+* JRuby's socket library gets stand-ins for the `java.net` socket option and
+  protocol family types (Android 7+), so `require 'socket'` and `net/http`
+  work on Android 6.
+
+At every minimum SDK, calls to JDK methods newer than the device
+(`java.lang.ClassValue` only exists from Android 14 and JRuby 10.1 needs it
+at startup; `InputStream.readAllBytes`, `StringBuilder.isEmpty`,
+`BigInteger.TWO`, …) are retargeted to backports.
+
+Below API 26 the generated `app/build.gradle` also turns on core library
+desugaring for `java.nio.file`, `java.time` and `java.util.function`.
+
+JRuby's runtime is interpreted on Android either way; the stand-in adds some
+reflection overhead (instance variables and Java calls are noticeably slower
+than on Android 13+).  Starting JRuby on an Android 6 quad-core Cortex-A7 takes
+about 20 seconds.
+
+The minimum SDK is read from `app/build.gradle` whenever JRuby is installed
+(`gen app`, `gen jruby`, `update jruby`).  To lower it for an existing app, set
+`minSdk` (and below 26 the desugaring lines a new app gets) in
+`app/build.gradle`, then run `ruboto update jruby --force` so the jar is
+rewritten.
+
+### Calling Java with Ruby callbacks
+
+Android cannot load classes generated at runtime, so Ruboto implements Java
+interfaces with `java.lang.reflect.Proxy`.  Blocks, procs,
+`SomeInterface.impl { }` and Ruby classes that `include` a Java interface all
+work:
+
+```ruby
+button.setOnClickListener { |view| toast 'clicked' }
+button.setOnClickListener(proc { |view| toast 'clicked' })
+java.lang.Thread.new(java.lang.Runnable.impl { puts 'running' }).start
+```
+
+Java default methods are not forwarded automatically: if Java code calls a
+default method of the interface (e.g. `Predicate#negate`), define it in the Ruby
+class, or use `SomeInterface.impl { |name, *args| ... }`, which receives every
+call.  Each conversion creates a new proxy, so to cancel something later (e.g.
+`Handler#removeCallbacks`) keep the converted Java object
+(`proc.to_java(java.lang.Runnable)`) or use `Handler` messages.  Subclassing a
+Java class in Ruby (`class MyList < java.util.ArrayList`) still needs runtime
+class generation and does not work.
+
+### Standard library
+
+The Java parts of `stringio`, `strscan`, `json` and `psych` (YAML) ship as
+separate jars inside JRuby, which Android cannot load; Ruboto merges their
+classes into the app.  The bundled gems that work on Android (`abbrev`,
+`base64`, `benchmark`, `bigdecimal`, `csv`, `drb`, `getoptlong`, `logger`,
+`matrix`, `mutex_m`, `observer`, `ostruct`, `prime`, `pstore`,
+`resolv-replace`, `rexml`, `rinda`) are copied onto the standard library's
+load path, since RubyGems is off on Android.  Other gems, including bundled
+development tools like `minitest` or `rake`, can be vendored as described in
+[Using gems](#using-gems).  `openssl` is not available.
+
 ### Using gems
 
 RubyGems itself is disabled on Android (it cannot scan gem specifications
@@ -48,17 +125,13 @@ cp -r humanize-*/lib/* todo/app/src/main/resources/
 Vendor a gem's runtime dependencies the same way.  Gems with native (C)
 extensions do not work; look for a pure-Ruby or Java-based alternative.
 
-Watch out for dependencies that look like they are already there.  `humanize`
-requires `bigdecimal`, which JRuby ships as a *default gem* under
-`META-INF/jruby.home/lib/ruby/gems/`, and the generated `build.gradle` excludes
-that whole tree to keep the APK small.  So it is in JRuby but not in your APK,
-and the app dies on launch with `cannot load such file -- bigdecimal`.  Vendor
-it like any other gem:
-
-```shell
-gem fetch bigdecimal && gem unpack bigdecimal-*.gem
-cp -r bigdecimal-*/lib/* todo/app/src/main/resources/
-```
+Dependencies that JRuby bundles are mostly there already: `humanize` requires
+`bigdecimal`, which Ruboto copies into the app with the other bundled gems
+listed under [Standard library](#standard-library).  Gems in JRuby's gem
+directory that are not on that list (e.g. `minitest`) are left out of the APK,
+because the generated `build.gradle` excludes
+`META-INF/jruby.home/lib/ruby/gems/` to keep it small; if `require` fails with
+`cannot load such file`, vendor the gem like any other.
 
 ## Sample: an IRB console
 

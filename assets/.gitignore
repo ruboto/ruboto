@@ -7,3 +7,8 @@ bin
 gen
 local.properties
 tmp
+
+# Gradle build output
+.gradle
+build
+*.apk

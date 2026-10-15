@@ -44,7 +44,7 @@ module RubotoTest
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join TMP_DIR, APP_NAME
 
-  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
+  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || DEFAULT_MIN_SDK_LEVEL
 
   def self.version_from_device
     puts 'Reading OS version from device/emulator'

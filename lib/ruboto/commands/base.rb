@@ -105,8 +105,9 @@ module Ruboto
               }
               option('min-sdk') {
                 argument :required
-                description "Minimum Android API level to support (default: #{MINIMUM_SUPPORTED_SDK_LEVEL})"
-                default MINIMUM_SUPPORTED_SDK_LEVEL.to_s
+                description "Minimum Android API level to support (default: #{DEFAULT_MIN_SDK_LEVEL}, lowest: #{MINIMUM_SUPPORTED_SDK_LEVEL})"
+                default DEFAULT_MIN_SDK_LEVEL.to_s
+                validate { |v| v.to_s =~ /\A(?:android-)?(\d+)\z/ && $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL }
               }
               option('with-jruby') {
                 description 'Install the JRuby jars in your libs directory. Optionally set the JRuby version.'
@@ -126,7 +127,8 @@ module Ruboto
                 with_jruby = with_jruby.is_a?(Gem::Version) ? with_jruby.to_s : nil
 
                 target_level = target[API_NUMBER_PATTERN]
-                min_sdk_level = min_sdk.to_s[/\d+/]
+                min_sdk_level = min_sdk.to_s[/\d+/].to_i.to_s
+                abort "--min-sdk (#{min_sdk_level}) must not be above --target (#{target_level})" if min_sdk_level.to_i > target_level.to_i
 
                 root = File.expand_path(path)
                 abort "Path (#{path}) already exists." if File.exist?(root)

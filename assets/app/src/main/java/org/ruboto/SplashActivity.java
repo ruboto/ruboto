@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,6 +17,10 @@ public class SplashActivity extends Activity {
     private int splash = 0;
     private ProgressDialog loadingDialog;
     private boolean dialogCancelled = false;
+    // Set on the JRuby start-up thread, read on the UI thread.
+    private volatile boolean userActivityStarted = false;
+    private static SplashActivity current;
+    private static final long FALLBACK_FINISH_DELAY_MS = 5000;
     private static final int INSTALL_REQUEST_CODE = 4242;
 
     public void onCreate(Bundle bundle) {
@@ -23,6 +30,7 @@ public class SplashActivity extends Activity {
         } catch (Exception e) {
             splash = -1;
         }
+        current = this;
         requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         if (!JRubyAdapter.isInitialized()) {
             initJRuby(true);
@@ -40,8 +48,40 @@ public class SplashActivity extends Activity {
         super.onPause();
     }
 
+    // Called by EntryPointActivity once the user Activity exists.  Finishing
+    // the splash any earlier (right after startActivity, or through
+    // noHistory while the screen is off) leaves the process without an
+    // Activity until the new one attaches.  Devices that keep no background
+    // processes kill such an "empty" process at once, which turns the launch
+    // into an endless restart loop.
+    static void userActivityCreated() {
+        SplashActivity splash = current;
+        if (splash != null && splash.userActivityStarted) {
+            splash.finish();
+        }
+    }
+
+    // Fallback for user Activities that are not EntryPointActivities: once
+    // the splash is stopped after starting them, they cover it.  Not while the
+    // screen is off: then the splash is stopped because of that, possibly
+    // before the user Activity exists.
+    public void onStop() {
+        super.onStop();
+        if (userActivityStarted && isInteractive()) {
+            finish();
+        }
+    }
+
+    private boolean isInteractive() {
+        PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
+        return power == null || power.isInteractive();
+    }
+
     public void onDestroy() {
         Log.d("SplashActivity onDestroy: ");
+        if (current == this) {
+            current = null;
+        }
         super.onDestroy();
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
@@ -136,8 +176,18 @@ public class SplashActivity extends Activity {
 
     private void startUserActivity() {
         if (getIntent().hasExtra(Intent.EXTRA_INTENT)) {
+            userActivityStarted = true;
             startActivity((Intent)getIntent().getParcelableExtra(Intent.EXTRA_INTENT));
-            finish();
+            // Last resort for targets that neither report back nor cover the
+            // splash completely (e.g. a translucent non-Ruboto Activity); by
+            // now the new Activity has long been attached to the process.
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                public void run() {
+                    if (!isFinishing()) {
+                        finish();
+                    }
+                }
+            }, FALLBACK_FINISH_DELAY_MS);
         }
     }
 

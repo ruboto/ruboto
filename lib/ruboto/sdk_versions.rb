@@ -21,11 +21,19 @@ module Ruboto
         35 => '15', 36 => '16'
     }
 
-    # JRuby 10 uses java.lang.invoke.VarHandle, which is public Android API
-    # from API level 33 (Android 13).  On lower levels the ART verifier
-    # rejects the JRuby core classes.
-    MINIMUM_SUPPORTED_SDK_LEVEL = 33
+    # JRuby 10 uses java.lang.invoke (MethodHandle from API level 26,
+    # VarHandle from API level 33).  Below NATIVE_INVOKE_SDK_LEVEL the
+    # jruby-core jar is rewritten to use a reflection-based stand-in
+    # (lib/jruby10_legacy), which works down to Android 6.0 (API level 23).
+    # Newer JDK APIs (java.lang.ClassValue is API level 34, ...) are
+    # backported at every level.
+    MINIMUM_SUPPORTED_SDK_LEVEL = 23
     MINIMUM_SUPPORTED_SDK = "android-#{MINIMUM_SUPPORTED_SDK_LEVEL}"
+    NATIVE_INVOKE_SDK_LEVEL = 33
+    # Below this level java.nio.file, java.time and java.util.function need
+    # core library desugaring.
+    DESUGARING_SDK_LEVEL = 26
+    DEFAULT_MIN_SDK_LEVEL = NATIVE_INVOKE_SDK_LEVEL
     DEFAULT_TARGET_SDK_LEVEL = 36
     DEFAULT_TARGET_SDK = "android-#{DEFAULT_TARGET_SDK_LEVEL}"
   end
