@@ -127,7 +127,7 @@ module Ruboto
                 with_jruby = with_jruby.is_a?(Gem::Version) ? with_jruby.to_s : nil
 
                 target_level = target[API_NUMBER_PATTERN]
-                min_sdk_level = min_sdk.to_s[/\d+/]
+                min_sdk_level = min_sdk.to_s[/\d+/].to_i.to_s
                 abort "--min-sdk (#{min_sdk_level}) must not be above --target (#{target_level})" if min_sdk_level.to_i > target_level.to_i
 
                 root = File.expand_path(path)

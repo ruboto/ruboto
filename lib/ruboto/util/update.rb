@@ -424,7 +424,9 @@ module Ruboto
       end
 
       def reconfigure_jruby_libs(jruby_version)
-        reconfigure_jruby_core(jruby_version, project_min_sdk_level)
+        min_sdk_level = project_min_sdk_level
+        warn_about_missing_desugaring(min_sdk_level)
+        reconfigure_jruby_core(jruby_version, min_sdk_level)
         # JRuby finds its standard library via META-INF/jruby.home inside the
         # stdlib jar, so the jar is used as-is and needs no reconfiguration.
         if Gem::Version.new(jruby_version.to_s.tr('-', '.')) < Gem::Version.new('10.0.0.0')
@@ -442,11 +444,27 @@ module Ruboto
         end
       end
 
+      # Below API 26 JRuby needs core library desugaring, which new apps get in
+      # app/build.gradle; an existing app whose minSdk was lowered may not.
+      def warn_about_missing_desugaring(min_sdk_level)
+        return unless min_sdk_level < DESUGARING_SDK_LEVEL
+
+        gradle_files = [APP_BUILD_GRADLE_FILE_NAME, "#{APP_BUILD_GRADLE_FILE_NAME}.kts"].select { |f| File.exist?(f) }
+        return if gradle_files.any? { |f| File.read(f) =~ /coreLibraryDesugaringEnabled\s*(?:=\s*)?true/ }
+
+        puts <<~MESSAGE
+          WARNING: minSdk #{min_sdk_level} needs core library desugaring for JRuby.  Add to #{APP_BUILD_GRADLE_FILE_NAME}:
+              compileOptions { coreLibraryDesugaringEnabled true }
+              dependencies { coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5' }
+        MESSAGE
+      end
+
       def gradle_min_sdk_level
         [APP_BUILD_GRADLE_FILE_NAME, "#{APP_BUILD_GRADLE_FILE_NAME}.kts"].each do |file|
           next unless File.exist?(file)
 
-          gradle = File.read(file).gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+          # Drop comments, but not comment markers inside string literals.
+          gradle = File.read(file).gsub(%r{("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|/\*.*?\*/|//[^\n]*}m) { Regexp.last_match(1) || '' }
           level = gradle[/\bminSdk(?:Version)?\s*(?:=\s*|\(\s*)?(\d+)/, 1]
           return level.to_i if level
         end
@@ -457,7 +475,7 @@ module Ruboto
         return nil unless File.exist?(MANIFEST_FILE_NAME)
 
         level = verify_manifest.elements['uses-sdk']&.attributes&.[]('android:minSdkVersion')
-        level.to_s =~ /\A\d+\z/ ? level.to_i : nil
+        /\A\d+\z/.match?(level.to_s) ? level.to_i : nil
       end
 
       # - Removes unneeded code from jruby-core
@@ -827,14 +845,14 @@ module Ruboto
       # snakeyaml-engine with jar-dependencies).  Paths are relative to the
       # stdlib directory.
       STDLIB_EXTENSION_JARS = [
-        'stringio.jar',
-        'strscan.jar',
-        'json/ext/parser.jar',
-        'json/ext/generator.jar',
-        'psych.jar',
-        %r{\Aorg/snakeyaml/snakeyaml-engine/[^/]+/snakeyaml-engine-[^/]+\.jar\z},
+          'stringio.jar',
+          'strscan.jar',
+          'json/ext/parser.jar',
+          'json/ext/generator.jar',
+          'psych.jar',
+          %r{\Aorg/snakeyaml/snakeyaml-engine/[^/]+/snakeyaml-engine-[^/]+\.jar\z},
       ].freeze
-      STDLIB_DIR = 'META-INF/jruby.home/lib/ruby/stdlib/'
+      STDLIB_DIR = 'META-INF/jruby.home/lib/ruby/stdlib/'.freeze
 
       # Android cannot load jars at runtime, so `require 'stringio'` used to
       # fail with "Java class ... not found" (json with a missing
@@ -863,6 +881,7 @@ module Ruboto
             end
           end
         end
+        puts 'Done.'
       end
 
       def extract_classes(jar_bytes)

@@ -67,7 +67,7 @@ class InterfaceProxyPatchTest < Minitest::Test
     script = "#{@dir}/script.rb"
     File.write(script, SCRIPT)
     class_path = ["#{@dir}/classes", @core, @stdlib].join(File::PATH_SEPARATOR)
-    run!("java -Djruby.interfaces.useProxy=true -Djruby.compile.mode=OFF -Djruby.native.enabled=false " \
+    run!('java -Djruby.interfaces.useProxy=true -Djruby.compile.mode=OFF -Djruby.native.enabled=false ' \
          "-cp #{class_path} org.jruby.Main #{script}")
   end
 

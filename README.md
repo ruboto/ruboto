@@ -88,7 +88,10 @@ button.setOnClickListener(proc { |view| toast 'clicked' })
 java.lang.Thread.new(java.lang.Runnable.impl { puts 'running' }).start
 ```
 
-Each conversion creates a new proxy, so to cancel something later (e.g.
+Java default methods are not forwarded automatically: if Java code calls a
+default method of the interface (e.g. `Predicate#negate`), define it in the Ruby
+class, or use `SomeInterface.impl { |name, *args| ... }`, which receives every
+call.  Each conversion creates a new proxy, so to cancel something later (e.g.
 `Handler#removeCallbacks`) keep the converted Java object
 (`proc.to_java(java.lang.Runnable)`) or use `Handler` messages.  Subclassing a
 Java class in Ruby (`class MyList < java.util.ArrayList`) still needs runtime
