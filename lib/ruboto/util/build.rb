@@ -300,7 +300,10 @@ module Ruboto
                             // disabled.  Saves about 30 MB uncompressed.
                             'META-INF/jruby.home/bin/**',
                             'META-INF/jruby.home/lib/ruby/gems/**',
-                            'META-INF/jruby.home/lib/ruby/stdlib/org/**',
+                            // bouncycastle for jopenssl; snakeyaml-engine stays
+                            // because psych requires the jar (its classes are
+                            // merged into jruby-core).
+                            'META-INF/jruby.home/lib/ruby/stdlib/org/bouncycastle/**',
                             'META-INF/jruby.home/lib/ruby/stdlib/rubygems/**',
                             'META-INF/jruby.home/lib/ruby/stdlib/rubygems.rb',
                             'META-INF/jruby.home/lib/ruby/stdlib/bundler/**',

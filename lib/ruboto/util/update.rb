@@ -765,6 +765,7 @@ module Ruboto
               #end
 
               if gem_version >= Gem::Version.new('10.0.0.0')
+                merge_stdlib_extensions
                 patch_jruby_core_for_android(min_sdk_level)
               end
 
@@ -806,6 +807,58 @@ module Ruboto
               raise "Creating repackaged jruby-core jar failed: #$?" unless $? == 0
             end
             FileUtils.remove_dir 'tmp', true
+          end
+        end
+      end
+
+      # Java parts of stdlib libraries that JRuby ships as separate jars inside
+      # jruby-stdlib and loads with `require 'name.jar'` (psych also loads
+      # snakeyaml-engine with jar-dependencies).  Paths are relative to the
+      # stdlib directory.
+      STDLIB_EXTENSION_JARS = [
+        'stringio.jar',
+        'strscan.jar',
+        'json/ext/parser.jar',
+        'json/ext/generator.jar',
+        'psych.jar',
+        %r{\Aorg/snakeyaml/snakeyaml-engine/[^/]+/snakeyaml-engine-[^/]+\.jar\z},
+      ].freeze
+      STDLIB_DIR = 'META-INF/jruby.home/lib/ruby/stdlib/'
+
+      # Android cannot load jars at runtime, so `require 'stringio'` used to
+      # fail with "Java class ... not found" (json with a missing
+      # JSON::Ext::ParserConfig, yaml with a Jars::JarLoadError).  Merge the extension classes into the
+      # unpacked jruby-core in the current directory, before it is patched for
+      # Android, so they are dexed with it.  The `require` of the jar itself
+      # still succeeds, and JRuby then finds the classes through the app's
+      # class loader.  Classes jruby-core already has are kept.
+      def merge_stdlib_extensions
+        require 'stringio'
+        require 'zip'
+        stdlib_jar = Dir['../jruby-stdlib-*.jar'][-1]
+        return unless stdlib_jar
+
+        print 'Adding stdlib extensions (stringio, strscan, json, psych)...'
+        Zip::File.open(stdlib_jar) do |stdlib|
+          STDLIB_EXTENSION_JARS.each do |jar|
+            entry = stdlib.find do |e|
+              name = e.name.delete_prefix(STDLIB_DIR)
+              e.name.start_with?(STDLIB_DIR) && (jar.is_a?(Regexp) ? jar.match?(name) : name == jar)
+            end
+            raise "#{jar.inspect} not found in #{stdlib_jar}" unless entry
+
+            extract_classes(entry.get_input_stream.read)
+          end
+        end
+      end
+
+      def extract_classes(jar_bytes)
+        Zip::File.open_buffer(StringIO.new(jar_bytes)) do |jar|
+          jar.each do |entry|
+            next unless entry.name.end_with?('.class') && !File.exist?(entry.name)
+
+            FileUtils.mkdir_p(File.dirname(entry.name))
+            File.binwrite(entry.name, entry.get_input_stream.read)
           end
         end
       end
