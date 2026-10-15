@@ -125,17 +125,13 @@ cp -r humanize-*/lib/* todo/app/src/main/resources/
 Vendor a gem's runtime dependencies the same way.  Gems with native (C)
 extensions do not work; look for a pure-Ruby or Java-based alternative.
 
-Watch out for dependencies that look like they are already there.  `humanize`
-requires `bigdecimal`, which JRuby ships as a *default gem* under
-`META-INF/jruby.home/lib/ruby/gems/`, and the generated `build.gradle` excludes
-that whole tree to keep the APK small.  So it is in JRuby but not in your APK,
-and the app dies on launch with `cannot load such file -- bigdecimal`.  Vendor
-it like any other gem:
-
-```shell
-gem fetch bigdecimal && gem unpack bigdecimal-*.gem
-cp -r bigdecimal-*/lib/* todo/app/src/main/resources/
-```
+Dependencies that JRuby bundles are mostly there already: `humanize` requires
+`bigdecimal`, which Ruboto copies into the app with the other bundled gems
+listed under [Standard library](#standard-library).  Gems in JRuby's gem
+directory that are not on that list (e.g. `minitest`) are left out of the APK,
+because the generated `build.gradle` excludes
+`META-INF/jruby.home/lib/ruby/gems/` to keep it small; if `require` fails with
+`cannot load such file`, vendor the gem like any other.
 
 ## Sample: an IRB console
 
