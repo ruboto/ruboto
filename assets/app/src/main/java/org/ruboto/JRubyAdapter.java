@@ -187,7 +187,6 @@ public class JRubyAdapter {
         System.setProperty("jruby.native.enabled", "false");
         System.setProperty("jruby.objectspace.enabled", "false");
         System.setProperty("jruby.rewrite.java.trace", "true");
-        System.setProperty("jruby.thread.pooling", "true");
 
         // Uncomment these to debug/profile Ruby source loading
         // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'

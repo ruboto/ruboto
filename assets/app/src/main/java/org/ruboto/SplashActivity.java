@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +19,7 @@ public class SplashActivity extends Activity {
     // Set on the JRuby start-up thread, read on the UI thread.
     private volatile boolean userActivityStarted = false;
     private static SplashActivity current;
+    private static final long FALLBACK_FINISH_DELAY_MS = 5000;
     private static final int INSTALL_REQUEST_CODE = 4242;
 
     public void onCreate(Bundle bundle) {
@@ -167,6 +170,16 @@ public class SplashActivity extends Activity {
         if (getIntent().hasExtra(Intent.EXTRA_INTENT)) {
             userActivityStarted = true;
             startActivity((Intent)getIntent().getParcelableExtra(Intent.EXTRA_INTENT));
+            // Last resort for targets that neither report back nor cover the
+            // splash completely (e.g. a translucent non-Ruboto Activity); by
+            // now the new Activity has long been attached to the process.
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                public void run() {
+                    if (!isFinishing()) {
+                        finish();
+                    }
+                }
+            }, FALLBACK_FINISH_DELAY_MS);
         }
     }
 
