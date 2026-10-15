@@ -14,6 +14,9 @@ public class SplashActivity extends Activity {
     private int splash = 0;
     private ProgressDialog loadingDialog;
     private boolean dialogCancelled = false;
+    // Set on the JRuby start-up thread, read on the UI thread.
+    private volatile boolean userActivityStarted = false;
+    private static SplashActivity current;
     private static final int INSTALL_REQUEST_CODE = 4242;
 
     public void onCreate(Bundle bundle) {
@@ -23,6 +26,7 @@ public class SplashActivity extends Activity {
         } catch (Exception e) {
             splash = -1;
         }
+        current = this;
         requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         if (!JRubyAdapter.isInitialized()) {
             initJRuby(true);
@@ -40,8 +44,33 @@ public class SplashActivity extends Activity {
         super.onPause();
     }
 
+    // Called by EntryPointActivity once the user Activity exists.  Finishing
+    // the splash any earlier (right after startActivity, or through
+    // noHistory while the screen is off) leaves the process without an
+    // Activity until the new one attaches.  Devices that keep no background
+    // processes kill such an "empty" process at once, which turns the launch
+    // into an endless restart loop.
+    static void userActivityCreated() {
+        SplashActivity splash = current;
+        if (splash != null && splash.userActivityStarted) {
+            splash.finish();
+        }
+    }
+
+    // Fallback for user Activities that are not EntryPointActivities: once
+    // the splash is stopped after starting them, they cover it.
+    public void onStop() {
+        super.onStop();
+        if (userActivityStarted) {
+            finish();
+        }
+    }
+
     public void onDestroy() {
         Log.d("SplashActivity onDestroy: ");
+        if (current == this) {
+            current = null;
+        }
         super.onDestroy();
         if (dialogCancelled) {
             System.runFinalizersOnExit(true);
@@ -136,8 +165,8 @@ public class SplashActivity extends Activity {
 
     private void startUserActivity() {
         if (getIntent().hasExtra(Intent.EXTRA_INTENT)) {
+            userActivityStarted = true;
             startActivity((Intent)getIntent().getParcelableExtra(Intent.EXTRA_INTENT));
-            finish();
         }
     }
 

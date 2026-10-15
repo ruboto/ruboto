@@ -359,8 +359,13 @@ module Ruboto
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}
           end
 
-          unless app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"]
-            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation'), 'android:noHistory' => 'true'}
+          if (splash = app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"])
+            # The splash finishes itself once the user Activity exists; with
+            # noHistory Android may finish it earlier (e.g. while the screen
+            # is off) and leave the process without an Activity.
+            splash.attributes.delete('android:noHistory')
+          else
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation')}
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
