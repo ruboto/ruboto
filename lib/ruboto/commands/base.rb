@@ -45,8 +45,9 @@ module Ruboto
             }
             def run
               path = params['path'].value || Dir.getwd
+              # nil means "install the latest available jruby-jars version"
               with_jruby = params['with-jruby'].value
-              with_jruby = '9.2.9.0' unless with_jruby.is_a?(Gem::Version)
+              with_jruby = with_jruby.is_a?(Gem::Version) ? with_jruby.to_s : nil
 
               root = File.expand_path(path)
 
@@ -76,6 +77,97 @@ module Ruboto
           end
           mode 'gen' do
             require 'ruboto/util/update'
+
+            mode 'app' do
+              include Ruboto::Util::LogAction
+              include Ruboto::Util::Build
+              include Ruboto::Util::Update
+
+              option('package') {
+                required
+                argument :required
+                description 'the package name for the app (e.g., org.example.myapp)'
+              }
+              option('path') {
+                argument :required
+                description 'Path to where you want your app. Defaults to the last part of the package name.'
+              }
+              option('name') {
+                argument :required
+                description 'Name of the app. Defaults to a CamelCase version of the last part of the package name.'
+              }
+              option('target', 't') {
+                argument :required
+                description "Android version to target #{VERSION_HELP_TEXT}"
+                default DEFAULT_TARGET_SDK
+                cast { |t| t =~ API_NUMBER_PATTERN ? "android-#$1" : t }
+                validate { |t| t =~ API_LEVEL_PATTERN }
+              }
+              option('min-sdk') {
+                argument :required
+                description "Minimum Android API level to support (default: #{DEFAULT_MIN_SDK_LEVEL}, lowest: #{MINIMUM_SUPPORTED_SDK_LEVEL})"
+                default DEFAULT_MIN_SDK_LEVEL.to_s
+                validate { |v| v.to_s =~ /\A(?:android-)?(\d+)\z/ && $1.to_i >= MINIMUM_SUPPORTED_SDK_LEVEL }
+              }
+              option('with-jruby') {
+                description 'Install the JRuby jars in your libs directory. Optionally set the JRuby version.'
+                argument :optional
+                cast { |v| Gem::Version.new(v) }
+                validate { |v| Gem::Version.correct?(v) }
+              }
+
+              def run
+                package = params['package'].value
+                path = params['path'].value || package.split('.').last
+                name = params['name'].value || package.split('.').last.split('_').map(&:capitalize).join
+                target = params['target'].value
+                min_sdk = params['min-sdk'].value
+                # nil means "install the latest available jruby-jars version"
+                with_jruby = params['with-jruby'].value
+                with_jruby = with_jruby.is_a?(Gem::Version) ? with_jruby.to_s : nil
+
+                target_level = target[API_NUMBER_PATTERN]
+                min_sdk_level = min_sdk.to_s[/\d+/].to_i.to_s
+                abort "--min-sdk (#{min_sdk_level}) must not be above --target (#{target_level})" if min_sdk_level.to_i > target_level.to_i
+
+                root = File.expand_path(path)
+                abort "Path (#{path}) already exists." if File.exist?(root)
+
+                puts "\nGenerating Android app #{name} in #{root}..."
+
+                generate_gradle_project(root, package, name, target_level, min_sdk_level)
+
+                Dir.chdir root do
+                  update_assets
+                  update_ruboto true
+                  update_classes nil, 'exclude'
+                  update_core_classes 'exclude'
+                  update_jruby true, with_jruby
+
+                  update_manifest min_sdk_level, target_level
+
+                  log_action('Generating the default Activity and script') do
+                    activity_name = "#{name}Activity"
+                    generate_inheriting_file 'Activity', activity_name, package
+
+                    app_element = verify_manifest.elements['application']
+                    unless app_element.elements["activity[@android:name='#{activity_name}']"]
+                      app_element.add_element 'activity',
+                          {'android:name' => activity_name,
+                           'android:exported' => 'true',
+                           'android:label' => name}
+                      intent_filter = REXML::Element.new('intent-filter')
+                      intent_filter.add_element 'action', {'android:name' => 'android.intent.action.MAIN'}
+                      intent_filter.add_element 'category', {'android:name' => 'android.intent.category.LAUNCHER'}
+                      app_element.elements["activity[@android:name='#{activity_name}']"].add_element intent_filter
+                      save_manifest
+                    end
+                  end
+                end
+
+                puts "\nRuboto app #{name} created in #{path}."
+              end
+            end
 
             mode 'jruby' do
               include Ruboto::Util::LogAction
@@ -308,7 +400,7 @@ module Ruboto
                 if old_version && Gem::Version.new(old_version) < Gem::Version.new(Ruboto::UPDATE_VERSION_LIMIT)
                   puts "Detected old Ruboto version: #{old_version}"
                   puts "Will use Ruboto #{Ruboto::UPDATE_VERSION_LIMIT} to update it first."
-                  `gem query -i -n ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}`
+                  `gem list -i ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}`
                   system "gem install ruboto -v #{Ruboto::UPDATE_VERSION_LIMIT}" unless $? == 0
                   raise "Install of Ruboto #{Ruboto::UPDATE_VERSION_LIMIT} failed!" unless $? == 0
                   system "ruboto _#{Ruboto::UPDATE_VERSION_LIMIT}_ update app"

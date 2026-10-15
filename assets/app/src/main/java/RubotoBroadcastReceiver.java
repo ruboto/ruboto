@@ -33,10 +33,10 @@ public class THE_RUBOTO_CLASS THE_ACTION THE_ANDROID_CLASS {
             }
 
             // FIXME(uwe):  Simplify when we stop support for snake case aliasing interface callback methods.
-            if ((Boolean)JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :onReceive}")) {
+            if (ScriptLoader.hasRubyMethod(scriptInfo.getRubyClassName(), "onReceive", false)) {
                 Log.d("onReceive: call method");
     	        JRubyAdapter.runRubyMethod(this, "onReceive", new Object[]{context, intent});
-            } else if ((Boolean)JRubyAdapter.runScriptlet(scriptInfo.getRubyClassName() + ".instance_methods(false).any?{|m| m.to_sym == :on_receive}")) {
+            } else if (ScriptLoader.hasRubyMethod(scriptInfo.getRubyClassName(), "on_receive", false)) {
     	        JRubyAdapter.runRubyMethod(this, "on_receive", new Object[]{context, intent});
             }
             // EMXIF

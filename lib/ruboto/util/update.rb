@@ -196,6 +196,7 @@ module Ruboto
         log_action("Removing #{installed_jruby_core}") { File.delete *Dir.glob('libs/jruby-core-*.jar') } if installed_jruby_core
         log_action("Removing #{installed_jruby_stdlib}") { File.delete *Dir.glob('libs/jruby-stdlib-*.jar') } if installed_jruby_stdlib
         log_action("Copying #{JRubyJars::core_jar_path} to libs") { FileUtils.cp JRubyJars::core_jar_path, "libs/jruby-core-#{new_jruby_version}.jar" }
+        log_action("Copying #{JRubyJars::stdlib_jar_path} to libs") { FileUtils.cp JRubyJars::stdlib_jar_path, "libs/jruby-stdlib-#{new_jruby_version}.jar" }
 
         unless File.read('project.properties') =~ /^dex.force.jumbo=/
           log_action('Setting JUMBO dex file format') do
@@ -203,8 +204,11 @@ module Ruboto
           end
         end
 
-        log_action("Copying #{DX_JAR} to libs") do
-          copier.copy 'libs'
+        # The dx-based runtime proxy tooling only works with JRuby 9.x.
+        if Gem::Version.new(new_jruby_version.to_s.tr('-', '.')) < Gem::Version.new('10.0.0.0')
+          log_action("Copying #{DX_JAR} to libs") do
+            copier.copy 'libs'
+          end
         end
 
         reconfigure_jruby_libs(new_jruby_version)
@@ -217,7 +221,7 @@ module Ruboto
         if jruby_jars_version
           version_requirement = %{ -v "#{jruby_jars_version}"}
         end
-        `gem query -i -n jruby-jars#{version_requirement}`
+        `gem list -i jruby-jars#{version_requirement}`
         unless $? == 0
           local_gem_dir = ENV['LOCAL_GEM_DIR'] || Dir.getwd
           local_gem_file = "#{local_gem_dir}/jruby-jars-#{jruby_jars_version}.gem"
@@ -284,10 +288,6 @@ module Ruboto
       def update_classes(old_version, force = nil)
         copier = Ruboto::Util::AssetCopier.new Ruboto::ASSETS, '.'
         log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/*.java" }
-        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/org/jruby/**/*.java" }
-        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/java/**/*.java" }
-        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/com/sun/nio/**/*.java" }
-        log_action('Ruboto java classes') { copier.copy "#{JAVA_SRC_DIR}/sun/**/*.java" }
         log_action('Ruboto java test classes') { copier.copy "#{JAVA_SRC_DIR}/org/ruboto/test/*.java", 'test' }
         Dir["#{JAVA_SRC_DIR}/**/*.java"].each do |f|
           source_code = File.read(f)
@@ -329,25 +329,18 @@ module Ruboto
 
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
+          # Keep what the app already declares; project.properties only knows
+          # the compile target ("android-36").
           sdk_element = verify_manifest.elements['uses-sdk']
-          if project_api_level
-            min_sdk ||= project_api_level
-            target ||= project_api_level
-          elsif sdk_element
+          if sdk_element
             min_sdk ||= sdk_element.attributes['android:minSdkVersion']
             target ||= sdk_element.attributes['android:targetSdkVersion']
-          else
-            min_sdk ||= MINIMUM_SUPPORTED_SDK_LEVEL
-            target ||= MINIMUM_SUPPORTED_SDK_LEVEL
           end
+          min_sdk ||= gradle_min_sdk_level || DEFAULT_MIN_SDK_LEVEL
+          target ||= project_api_level.to_s[/\d+/] || DEFAULT_TARGET_SDK_LEVEL
 
-          if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
-          end
-
-          if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            target = MINIMUM_SUPPORTED_SDK_LEVEL
-          end
+          min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+          target = min_sdk if target.to_i < min_sdk.to_i
 
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
@@ -359,8 +352,13 @@ module Ruboto
             app_element.add_element 'activity', {'android:name' => 'org.ruboto.RubotoActivity', 'android:exported' => 'false'}
           end
 
-          unless app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"]
-            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation'), 'android:noHistory' => 'true'}
+          if (splash = app_element.elements["activity[@android:name='org.ruboto.SplashActivity']"])
+            # The splash finishes itself once the user Activity exists; with
+            # noHistory Android may finish it earlier (e.g. while the screen
+            # is off) and leave the process without an Activity.
+            splash.attributes.delete('android:noHistory')
+          else
+            app_element.add_element 'activity', {'android:name' => 'org.ruboto.SplashActivity', 'android:exported' => 'false', 'android:configChanges' => (target.to_i >= 13 ? 'orientation|screenSize' : 'orientation')}
           end
 
           unless app_element.elements["activity[@android:name='org.ruboto.RubotoDialog']"]
@@ -426,15 +424,64 @@ module Ruboto
       end
 
       def reconfigure_jruby_libs(jruby_version)
-        reconfigure_jruby_core(jruby_version)
-        reconfigure_jruby_stdlib(jruby_version)
-        reconfigure_dx_jar
+        min_sdk_level = project_min_sdk_level
+        warn_about_missing_desugaring(min_sdk_level)
+        reconfigure_jruby_core(jruby_version, min_sdk_level)
+        # JRuby finds its standard library via META-INF/jruby.home inside the
+        # stdlib jar, so the jar is used as-is and needs no reconfiguration.
+        if Gem::Version.new(jruby_version.to_s.tr('-', '.')) < Gem::Version.new('10.0.0.0')
+          reconfigure_dx_jar
+        end
+      end
+
+      # The minSdk the app is built for: app/build.gradle(.kts) wins (it is
+      # what the Android Gradle plugin uses), then the manifest.  Falls back to
+      # DEFAULT_MIN_SDK_LEVEL (with a warning) when neither has a literal value.
+      def project_min_sdk_level
+        gradle_min_sdk_level || manifest_min_sdk_level || begin
+          puts "Could not find a literal minSdk in app/build.gradle or the manifest; assuming #{DEFAULT_MIN_SDK_LEVEL}."
+          DEFAULT_MIN_SDK_LEVEL
+        end
+      end
+
+      # Below API 26 JRuby needs core library desugaring, which new apps get in
+      # app/build.gradle; an existing app whose minSdk was lowered may not.
+      def warn_about_missing_desugaring(min_sdk_level)
+        return unless min_sdk_level < DESUGARING_SDK_LEVEL
+
+        gradle_files = [APP_BUILD_GRADLE_FILE_NAME, "#{APP_BUILD_GRADLE_FILE_NAME}.kts"].select { |f| File.exist?(f) }
+        return if gradle_files.any? { |f| File.read(f) =~ /coreLibraryDesugaringEnabled\s*(?:=\s*)?true/ }
+
+        puts <<~MESSAGE
+          WARNING: minSdk #{min_sdk_level} needs core library desugaring for JRuby.  Add to #{APP_BUILD_GRADLE_FILE_NAME}:
+              compileOptions { coreLibraryDesugaringEnabled true }
+              dependencies { coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5' }
+        MESSAGE
+      end
+
+      def gradle_min_sdk_level
+        [APP_BUILD_GRADLE_FILE_NAME, "#{APP_BUILD_GRADLE_FILE_NAME}.kts"].each do |file|
+          next unless File.exist?(file)
+
+          # Drop comments, but not comment markers inside string literals.
+          gradle = File.read(file).gsub(%r{("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|/\*.*?\*/|//[^\n]*}m) { Regexp.last_match(1) || '' }
+          level = gradle[/\bminSdk(?:Version)?\s*(?:=\s*|\(\s*)?(\d+)/, 1]
+          return level.to_i if level
+        end
+        nil
+      end
+
+      def manifest_min_sdk_level
+        return nil unless File.exist?(MANIFEST_FILE_NAME)
+
+        level = verify_manifest.elements['uses-sdk']&.attributes&.[]('android:minSdkVersion')
+        /\A\d+\z/.match?(level.to_s) ? level.to_i : nil
       end
 
       # - Removes unneeded code from jruby-core
       # - Split into smaller jars that can be used separately
       # FIXME(uwe): Refactor to take a Gem::Version as the parameter.
-      def reconfigure_jruby_core(jruby_core_version)
+      def reconfigure_jruby_core(jruby_core_version, min_sdk_level = DEFAULT_MIN_SDK_LEVEL)
         Dir.chdir 'libs' do
           jruby_core = Dir['jruby-core-*.jar'][-1]
           log_action("Removing unneeded classes from #{jruby_core}") do
@@ -447,10 +494,37 @@ module Ruboto
               File.delete jruby_core
               gem_version = Gem::Version.new(jruby_core_version.to_s.tr('-', '.'))
 
-              puts "New code!!!  gem_version: #{gem_version.inspect}"
-              puts "gem_version >= Gem::Version.new('9.2.0.0'): #{gem_version >= Gem::Version.new('9.2.0.0')}"
+              puts "gem_version: #{gem_version.inspect}"
 
-              if gem_version >= Gem::Version.new('9.2.0.0')
+              if gem_version >= Gem::Version.new('10.0.0.0')
+                # JRuby 10 initializes jnr-ffi/jnr-posix eagerly, even with
+                # jruby.native.enabled=false, so the jnr/ffi and com/kenai/jffi
+                # packages must stay.  Only code for foreign platforms and
+                # on-demand integrations is removed.  Android is Linux, so the
+                # linux platform constants are kept.
+                #noinspection RubyLiteralArrayInspection
+                excluded_core_packages = [
+                    'META-INF/maven',
+                    'jni',
+                    'jnr/constants/platform/aix',
+                    'jnr/constants/platform/darwin',
+                    'jnr/constants/platform/dragonflybsd',
+                    'jnr/constants/platform/fake',
+                    'jnr/constants/platform/freebsd',
+                    'jnr/constants/platform/openbsd',
+                    'jnr/constants/platform/solaris',
+                    'jnr/constants/platform/windows',
+                    'jnr/posix/Aix*',
+                    'jnr/posix/DragonFly*',
+                    'jnr/posix/FreeBSD*',
+                    'jnr/posix/MacOS*',
+                    'jnr/posix/OpenBSD*',
+                    'jnr/posix/Solaris*',
+                    'org/jruby/ant',
+                    'org/jruby/embed/jsr223',
+                    'org/jruby/embed/osgi',
+                ]
+              elsif gem_version >= Gem::Version.new('9.2.0.0')
                 #noinspection RubyLiteralArrayInspection
                 excluded_core_packages = [
 
@@ -719,34 +793,45 @@ module Ruboto
               #  FileUtils.rm_rf dir
               #end
 
-              # Add our proxy class factory
-              android_jar = Dir["#{ANDROID_HOME.gsub("\\", '/')}/platforms/android-26/android.jar"][0]
-
-              puts "android_jar: #{android_jar.inspect}"
-
-              unless android_jar
-                puts
-                puts '*' * 80
-                puts "    Could not find any Android platforms in #{ANDROID_HOME}/platforms."
-                puts '    At least one Android Platform SDK must be installed to compile the Ruboto classes.'
-                puts '    Please install an Android Platform SDK using the "android" package manager.'
-                puts '*' * 80
-                puts
-                exit 1
+              if gem_version >= Gem::Version.new('10.0.0.0')
+                merge_stdlib_extensions
+                add_bundled_gems
+                patch_jruby_core_for_android(min_sdk_level)
               end
-              android_jar.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"]
-                  .join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              source_dirs = "#{Ruboto::GEM_ROOT}/lib/*.java"
-              # TODO(uwe): Remove when we stop supporting Android 6.0 and below
-              if project_api_level.to_i < 24
-                source_dirs << " #{Ruboto::GEM_ROOT}/lib/overrides_below_24/*.java"
+
+              # Add our proxy class factory.  JRuby 10 removed the APIs these
+              # classes depend on (JavaProxyClassFactory, jitescript), so the
+              # dx-based runtime code generation is only used with JRuby 9.x.
+              if gem_version < Gem::Version.new('10.0.0.0')
+                android_jar = Dir["#{ANDROID_HOME.gsub("\\", '/')}/platforms/android-*/android.jar"]
+                    .max_by { |f| f[/android-(\d+)/, 1].to_i }
+
+                puts "android_jar: #{android_jar.inspect}"
+
+                unless android_jar
+                  puts
+                  puts '*' * 80
+                  puts "    Could not find any Android platforms in #{ANDROID_HOME}/platforms."
+                  puts '    At least one Android Platform SDK must be installed to compile the Ruboto classes.'
+                  puts '    Please install an Android Platform SDK using the "android" package manager.'
+                  puts '*' * 80
+                  puts
+                  exit 1
+                end
+                android_jar.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+                class_path = ['.', "#{Ruboto::ASSETS}/libs/#{DX_JAR}", "#{Ruboto::ASSETS}/libs/#{DEXMAKER_JAR}"]
+                    .join(File::PATH_SEPARATOR).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+                source_dirs = "#{Ruboto::GEM_ROOT}/lib/*.java"
+                # TODO(uwe): Remove when we stop supporting Android 6.0 and below
+                if project_api_level.to_i < 24
+                  source_dirs << " #{Ruboto::GEM_ROOT}/lib/overrides_below_24/*.java"
+                end
+                # ODOT
+                sources = source_dirs.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+                puts "javac -source 8 -target 8 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}"
+                `javac -source 8 -target 8 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
+                raise 'Compile failed' unless $? == 0
               end
-              # ODOT
-              sources = source_dirs.gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-              puts "javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}"
-              `javac -source 1.7 -target 1.7 -cp #{class_path} -bootclasspath #{android_jar} -d . #{sources}`
-              raise 'Compile failed' unless $? == 0
 
               `jar -cf ..#{File::ALT_SEPARATOR || File::SEPARATOR}#{jruby_core} .`
               raise "Creating repackaged jruby-core jar failed: #$?" unless $? == 0
@@ -754,6 +839,202 @@ module Ruboto
             FileUtils.remove_dir 'tmp', true
           end
         end
+      end
+
+      # Java parts of stdlib libraries that JRuby ships as separate jars inside
+      # jruby-stdlib and loads with `require 'name.jar'` (psych also loads
+      # snakeyaml-engine with jar-dependencies).  Paths are relative to the
+      # stdlib directory.
+      STDLIB_EXTENSION_JARS = [
+          'stringio.jar',
+          'strscan.jar',
+          'json/ext/parser.jar',
+          'json/ext/generator.jar',
+          'psych.jar',
+          %r{\Aorg/snakeyaml/snakeyaml-engine/[^/]+/snakeyaml-engine-[^/]+\.jar\z},
+      ].freeze
+      STDLIB_DIR = 'META-INF/jruby.home/lib/ruby/stdlib/'.freeze
+
+      # Android cannot load jars at runtime, so `require 'stringio'` used to
+      # fail with "Java class ... not found" (json with a missing
+      # JSON::Ext::ParserConfig, yaml with a Jars::JarLoadError).  Merge the extension classes into the
+      # unpacked jruby-core in the current directory, before it is patched for
+      # Android, so they are dexed with it.  The `require` of the jar itself
+      # still succeeds, and JRuby then finds the classes through the app's
+      # class loader.  Classes jruby-core already has are kept.
+      def merge_stdlib_extensions
+        require 'stringio'
+        require 'zip'
+        stdlib_jar = Dir['../jruby-stdlib-*.jar'][-1]
+        return unless stdlib_jar
+
+        print 'Adding stdlib extensions (stringio, strscan, json, psych)...'
+        Zip::File.open(stdlib_jar) do |stdlib|
+          STDLIB_EXTENSION_JARS.each do |jar|
+            entry = stdlib.find do |e|
+              name = e.name.delete_prefix(STDLIB_DIR)
+              e.name.start_with?(STDLIB_DIR) && (jar.is_a?(Regexp) ? jar.match?(name) : name == jar)
+            end
+            if entry
+              extract_classes(entry.get_input_stream.read)
+            else
+              print "#{jar.is_a?(Regexp) ? jar.source : jar} not found, skipped..."
+            end
+          end
+        end
+        puts 'Done.'
+      end
+
+      # Bundled gems (Ruby 3.4 moved base64, bigdecimal, csv, ... out of the
+      # default gems) that work on Android: pure Ruby, or with their Java part
+      # already in jruby-core (bigdecimal).  Development tools and gems that
+      # need FFI, extra jars or openssl are left out.
+      BUNDLED_GEMS = %w[
+          abbrev base64 benchmark bigdecimal csv drb getoptlong logger matrix mutex_m
+          observer ostruct prime pstore resolv-replace rexml rinda
+      ].freeze
+      GEMS_DIR = 'META-INF/jruby.home/lib/ruby/gems/shared/gems/'.freeze
+
+      # JRuby finds bundled gems through RubyGems, which Ruboto disables, and
+      # the APK leaves out JRuby's gem directory.  Copy the gems' lib files
+      # into the stdlib directory inside the jruby-core jar instead: Android
+      # merges them into the APK, where JRuby's load path already looks, so
+      # `require 'bigdecimal'` works as on a desktop JRuby.  Files the stdlib
+      # already has are kept.
+      def add_bundled_gems
+        require 'zip'
+        stdlib_jar = Dir['../jruby-stdlib-*.jar'][-1]
+        return unless stdlib_jar
+
+        print 'Adding bundled gems...'
+        added = []
+        Zip::File.open(stdlib_jar) do |stdlib|
+          BUNDLED_GEMS.each do |gem_name|
+            lib = %r{\A#{Regexp.escape(GEMS_DIR)}#{Regexp.escape(gem_name)}-\d[^/]*/lib/(.+)\z}
+            files = stdlib.select { |e| e.file? && e.name =~ lib && !e.name.end_with?('.jrubydir') }
+            next print("#{gem_name} not found, skipped...") if files.empty?
+
+            files.each do |entry|
+              target = "#{STDLIB_DIR}#{entry.name[lib, 1]}"
+              next if File.exist?(target) || stdlib.find_entry(target)
+
+              FileUtils.mkdir_p(File.dirname(target))
+              File.binwrite(target, entry.get_input_stream.read)
+            end
+            added << gem_name
+          end
+        end
+        puts "#{added.join(', ')}.  Done."
+      end
+
+      def extract_classes(jar_bytes)
+        Zip::File.open_buffer(StringIO.new(jar_bytes)) do |jar|
+          jar.each do |entry|
+            next unless entry.name.end_with?('.class') && !File.exist?(entry.name)
+
+            FileUtils.mkdir_p(File.dirname(entry.name))
+            File.binwrite(entry.name, entry.get_input_stream.read)
+          end
+        end
+      end
+
+      # Makes the unpacked jruby-core classes in the current directory work on
+      # Android (ART):
+      # - Replaces classes that need java.lang.invoke.SwitchPoint or runtime
+      #   bytecode generation (both unavailable on ART) with Android-safe
+      #   implementations from lib/jruby10_overrides.
+      # - Rewrites Class.getModule()/Module.canRead() calls (java.lang.Module
+      #   does not exist on ART) via an ASM-based bytecode patcher.
+      # - Backports JDK APIs newer than the device and, below
+      #   NATIVE_INVOKE_SDK_LEVEL, moves java.lang.invoke onto the stand-in in
+      #   lib/jruby10_legacy (see backport_jruby_core).
+      def patch_jruby_core_for_android(min_sdk_level = DEFAULT_MIN_SDK_LEVEL)
+        overrides_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_overrides"
+        asm_jar = "#{Ruboto::ASSETS}/libs/asm-9.7.1.jar"
+
+        tool_sources = %w[JRuby10AndroidPatcher.java FramedMethodLister.java].map { |f| "#{overrides_dir}/#{f}" }
+        tool_dir = '../android_patcher'
+        FileUtils.rm_rf tool_dir
+        FileUtils.mkdir_p tool_dir
+        `javac -cp #{asm_jar} -d #{tool_dir} #{tool_sources.join(' ')}`
+        raise 'Compiling Android patcher failed' unless $? == 0
+
+        # In MethodHandles binding mode JRuby still generates invoker bytecode
+        # at runtime for @JRubyMethod(frame = true) methods.  ART cannot load
+        # generated bytecode, so those invokers are pregenerated here and baked
+        # into the jar, where the runtime's tryClass lookup finds them.  This
+        # runs before the overrides below because InvokerGenerator needs the
+        # original, still-functional class-defining loader.
+        print 'Pregenerating invokers for framed methods...'
+        framed_classes = `java -cp #{asm_jar}#{File::PATH_SEPARATOR}#{tool_dir} FramedMethodLister .`
+        raise 'Listing framed methods failed' unless $? == 0
+        File.write('../framed_classes.txt', framed_classes)
+        puts "#{framed_classes.lines.size} classes"
+        puts `java -cp . org.jruby.anno.InvokerGenerator ../framed_classes.txt .`
+        raise 'Pregenerating invokers failed' unless $? == 0
+        FileUtils.rm_f '../framed_classes.txt'
+
+        print 'Replacing SwitchPoint, scope generation, and class loading classes...'
+        override_sources = Dir["#{overrides_dir}/*.java"] - tool_sources
+        `javac -cp . -d . #{override_sources.join(' ')}`
+        raise 'Compiling Android overrides failed' unless $? == 0
+
+        print 'Patching java.lang.Module usage...'
+        puts `java -cp #{asm_jar}#{File::PATH_SEPARATOR}#{tool_dir} JRuby10AndroidPatcher .`
+        raise 'Patching classes for Android failed' unless $? == 0
+        FileUtils.rm_rf tool_dir
+
+        backport_jruby_core(min_sdk_level.to_i < NATIVE_INVOKE_SDK_LEVEL)
+      end
+
+      # Makes the unpacked jruby-core classes in the current directory run on
+      # Android versions that lack newer JDK APIs:
+      # - Always: JDK methods newer than the device that d8 does not backport
+      #   (java.lang.ClassValue is API 34, StringBuilder#isEmpty API 35, ...)
+      #   are retargeted to org.ruboto.compat (lib/jruby10_legacy/runtime).
+      # - With invoke_shim (no java.lang.invoke below API 26, no VarHandle
+      #   below API 33): java.lang.invoke references move to the
+      #   reflection/Unsafe-based stand-in and signature-polymorphic calls
+      #   (MethodHandle.invokeExact, VarHandle access) become generated static
+      #   bridges.  The app must also enable core library desugaring below
+      #   API 26; the generated app/build.gradle does that.
+      def backport_jruby_core(invoke_shim)
+        require 'shellwords'
+        legacy_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_legacy"
+        tool_dir = '../legacy_patcher'
+        FileUtils.rm_rf tool_dir
+        # The patcher uses the ASM bundled in jruby-core.  It runs from a
+        # copy so it never loads classes from the tree it is rewriting.
+        asm_dir = "#{tool_dir}/asm/org/jruby/org"
+        FileUtils.mkdir_p asm_dir
+        FileUtils.cp_r 'org/jruby/org/objectweb', asm_dir
+        class_path = "#{tool_dir}/asm"
+
+        if invoke_shim
+          print 'Adding java.lang.invoke stand-in and JDK backports for older Android versions...'
+          runtime_sources = Dir["#{legacy_dir}/runtime/**/*.java"]
+        else
+          print 'Adding JDK backports...'
+          runtime_sources = Dir["#{legacy_dir}/runtime/org/ruboto/compat/**/*.java"]
+        end
+        run_java_tool('Compiling the java.lang.invoke stand-in',
+                      ['javac', '--release', '17', '-nowarn', '-d', '.', *runtime_sources])
+        run_java_tool('Compiling the legacy Android patcher',
+                      ['javac', '-cp', class_path, '-d', tool_dir, "#{legacy_dir}/LegacyAndroidPatcher.java"])
+        mode = invoke_shim ? [] : ['--backports-only']
+        puts run_java_tool('Backporting JDK APIs',
+                           ['java', '-cp', [class_path, tool_dir].join(File::PATH_SEPARATOR), 'LegacyAndroidPatcher', '.', *mode])
+
+        FileUtils.rm_rf tool_dir
+      end
+
+      # Runs a javac/java command, returning its output; shows the output and
+      # raises if it fails.
+      def run_java_tool(what, command)
+        output = `#{command.shelljoin} 2>&1`
+        raise "#{what} failed:\n#{output}" unless $?.success?
+
+        output
       end
 
       def reconfigure_dx_jar

@@ -30,10 +30,10 @@ module RubotoTest
     Gem.refresh
   end
 
-  `gem query -i -n bundler`
+  `gem list -i bundler`
   system 'gem install bundler --no-document' unless $? == 0
   `bundle check`
-  system 'bundle --system' unless $? == 0
+  system 'bundle install' unless $? == 0
   lib_path = File.expand_path('lib', File.dirname(File.dirname(__FILE__)))
   $LOAD_PATH.unshift lib_path unless $LOAD_PATH.include?(lib_path)
   require 'ruboto'
@@ -44,7 +44,7 @@ module RubotoTest
   TMP_DIR = File.join PROJECT_DIR, 'tmp'
   APP_DIR = File.join TMP_DIR, APP_NAME
 
-  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || MINIMUM_SUPPORTED_SDK_LEVEL
+  ANDROID_TARGET = (ENV['ANDROID_TARGET'] && ENV['ANDROID_TARGET'].slice(/\d+/).to_i) || DEFAULT_MIN_SDK_LEVEL
 
   def self.version_from_device
     puts 'Reading OS version from device/emulator'
@@ -62,14 +62,14 @@ module RubotoTest
   end
 
   def uninstall_gem(name)
-    `gem query --no-installed -n #{name}`
-    system "gem uninstall -x --all #{name}" if $? != 0
+    `gem list -i #{name}`
+    system "gem uninstall -x --all #{name}" if $? == 0
     assert_equal 0, $?, "uninstall of #{name} failed with return code #$?"
   end
 
   def install_ruboto_gem(version)
     version_requirement = "-v #{version}"
-    `gem query -i -n ^ruboto$ #{version_requirement}`
+    `gem list -i ^ruboto$ #{version_requirement}`
     system "gem install ruboto #{version_requirement} --no-document" unless $? == 0
     raise "install of ruboto #{version} failed with return code #$?" unless $? == 0
   end
@@ -89,7 +89,7 @@ module RubotoTest
   puts "ANDROID_OS: #{ANDROID_OS}"
   puts "ANDROID_TARGET: #{ANDROID_TARGET}"
 
-  RUBOTO_CMD = "ruby -rubygems -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
+  RUBOTO_CMD = "ruby -I #{PROJECT_DIR}/lib #{PROJECT_DIR}/bin/ruboto"
 
   RUBOTO_PLATFORM = ENV['RUBOTO_PLATFORM'] || 'CURRENT'
   puts "RUBOTO_PLATFORM: #{RUBOTO_PLATFORM}"
@@ -161,7 +161,7 @@ class Minitest::Test
     raise "Unknown options: #{options.inspect}" unless options.empty?
     raise 'Inclusion/exclusion of libs requires standalone mode.' if (included_stdlibs || excluded_stdlibs) && !standalone
 
-    Dir.mkdir_p TMP_DIR
+    FileUtils.mkdir_p TMP_DIR
 
     FileUtils.rm_rf APP_DIR if File.exist? APP_DIR
     template_dir = "#{APP_DIR}_template_#{$$}"

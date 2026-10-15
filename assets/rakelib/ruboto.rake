@@ -7,7 +7,7 @@ BUNDLE_JAR = File.expand_path 'app/libs/bundle.jar', PROJECT_DIR
 BUNDLE_PATH = File.join(PROJECT_DIR, 'app', 'build', 'bundle')
 GEM_FILE, GEM_LOCK_FILE = [['gems.rb', 'gems.locked'],['Gemfile', "Gemfile.lock"]]
     .map{|gf, lf| [File.expand_path("app/#{gf}", PROJECT_DIR), File.expand_path("app/#{lf}", PROJECT_DIR)]}
-    .find{|gf, lf| File.exists?(gf)}
+    .find{|gf, lf| File.exist?(gf)}
 abort "#{PROJECT_DIR}/app/gems.rb not found." unless GEM_FILE
 RUBY_SOURCE_FILES = Dir[File.expand_path 'app/src/main/resources/**/*.rb', PROJECT_DIR]
 RUBY_ACTIVITY_SOURCE_FILES = RUBY_SOURCE_FILES.select { |fn| fn =~ /_activity.rb$/ }

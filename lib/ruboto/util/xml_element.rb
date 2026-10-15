@@ -201,13 +201,13 @@ module Ruboto
                 'String rubyClassName = scriptInfo.getRubyClassName();',
                 "if (rubyClassName == null) #{super_return}",
                 if_else(
-                    "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{attribute('name')}}\")",
+                    "ScriptLoader.hasRubyMethod(rubyClassName, \"#{attribute('name')}\", false)",
                     ruby_call,
                     if_else(
-                        "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(false).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                        "ScriptLoader.hasRubyMethod(rubyClassName, \"#{snake_case_attribute}\", false)",
                         ruby_call(true),
                         if_else(
-                            "(Boolean)JRubyAdapter.runScriptlet(rubyClassName + \".instance_methods(true).any?{|m| m.to_sym == :#{snake_case_attribute}}\")",
+                            "ScriptLoader.hasRubyMethod(rubyClassName, \"#{snake_case_attribute}\", true)",
                             ruby_call(true),
                             # FIXME(uwe):  Can the method be unimplemented?  Is the Ruby instance always an instance of this class?
                             #if_else(

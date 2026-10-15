@@ -97,8 +97,14 @@ public class JRubyAdapter {
                 //
                 // Disable rubygems
                 //
+                // RubyGems cannot scan gem specifications inside the APK's
+                // jar: URI (path expansion fails), so it must stay disabled.
+                // Bundled gems are loaded via the load path instead.
                 org.jruby.RubyInstanceConfig config = new org.jruby.RubyInstanceConfig();
-//                config.setDisableGems(true);
+                config.setDisableGems(true);
+                if (appContext.getFilesDir() != null) {
+                    config.setCurrentDirectory(appContext.getFilesDir().getPath());
+                }
 
                 ClassLoader classLoader = JRubyAdapter.class.getClassLoader();
                 config.setLoader(classLoader);
@@ -159,17 +165,28 @@ public class JRubyAdapter {
     }
 
     private static void setSystemProperties(Context appContext) {
+        // Android reports java.specification.version as "1.6" but JRuby 10
+        // expects a simple integer (e.g. "11"). Override before JRuby loads.
+        System.setProperty("java.specification.version", "11");
         System.setProperty("jruby.backtrace.style", "normal"); // normal raw full mri
-        System.setProperty("jruby.bytecode.version", "1.6");
+        System.setProperty("jruby.bytecode.version", "11");
         // System.setProperty("jruby.compile.backend", "DALVIK");
         System.setProperty("jruby.compile.mode", "OFF"); // OFF OFFIR JITIR? FORCE FORCEIR
+        // ART has no java.lang.invoke.SwitchPoint, so keep JRuby off the
+        // invokedynamic-based call site and constant caching paths.
+        System.setProperty("jruby.compile.invokedynamic", "false");
+        // Android has no virtual threads (Thread.ofVirtual), so Fibers and
+        // external Enumerators must run on platform threads.
+        System.setProperty("jruby.fiber.vthread", "false");
+        // ART cannot load bytecode generated at runtime, so bind the core
+        // classes' methods with MethodHandles instead of generated invokers.
+        System.setProperty("jruby.invokedynamic.handles", "true");
         System.setProperty("jruby.interfaces.useProxy", "true");
         System.setProperty("jruby.ir.passes", "LocalOptimizationPass,DeadCodeElimination");
         System.setProperty("jruby.management.enabled", "false");
         System.setProperty("jruby.native.enabled", "false");
         System.setProperty("jruby.objectspace.enabled", "false");
         System.setProperty("jruby.rewrite.java.trace", "true");
-        System.setProperty("jruby.thread.pooling", "true");
 
         // Uncomment these to debug/profile Ruby source loading
         // Analyse the output: grep "LoadService:   <-" | cut -f5 -d- | cut -c2- | cut -f1 -dm | awk '{total = total + $1}END{print total}'

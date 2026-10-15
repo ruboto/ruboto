@@ -45,7 +45,7 @@ end
 task :install => :gem do
   old_rubyopt = ENV['RUBYOPT']
   ENV['RUBYOPT'] = nil
-  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  `gem list -i ruboto -v #{Ruboto::VERSION}`
   if $? != 0
     puts 'Installing gem'
     cmd = "gem install ruboto-#{Ruboto::VERSION}.gem"
@@ -64,7 +64,7 @@ end
 task :uninstall do
   old_rubyopt = ENV['RUBYOPT']
   ENV['RUBYOPT'] = nil
-  `gem query -i -n ^ruboto$ -v #{Ruboto::VERSION}`
+  `gem list -i ruboto -v #{Ruboto::VERSION}`
   if $? == 0
     puts 'Uninstalling gem'
     cmd = "gem uninstall -x ruboto -v #{Ruboto::VERSION}"
@@ -415,7 +415,7 @@ namespace :platform do
   file PLATFORM_PROJECT do
     sh "git clone --depth 1 https://github.com/ruboto/ruboto-core.git #{PLATFORM_PROJECT}"
     Dir.chdir PLATFORM_PROJECT do
-      sh "ruby -rubygems -I#{File.expand_path('lib', File.dirname(__FILE__))} ../../bin/ruboto update app --force"
+      sh "ruby -I#{File.expand_path('lib', File.dirname(__FILE__))} ../../bin/ruboto update app --force"
     end
   end
 

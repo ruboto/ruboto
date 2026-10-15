@@ -5,10 +5,14 @@ class REXML::Formatters::OrderedAttributes < REXML::Formatters::Pretty
     att = elm.attributes
 
     class <<att
-      alias _each_attribute each_attribute
+      unless method_defined?(:_ruboto_each_attribute)
+        alias _ruboto_each_attribute each_attribute
 
-      def each_attribute(&b)
-        to_enum(:_each_attribute).sort_by { |x| [x.prefix, x.name] }.each(&b)
+        def each_attribute(&b)
+          attrs = []
+          _ruboto_each_attribute { |a| attrs << a }
+          attrs.sort_by { |x| [x.prefix, x.name] }.each(&b)
+        end
       end
     end
 

@@ -191,6 +191,205 @@ module Ruboto
         # end
       end
 
+      def generate_gradle_project(root, package, name, target_level, min_sdk_level)
+        FileUtils.mkdir_p root
+
+        # Root build.gradle
+        File.open(File.join(root, 'build.gradle'), 'w') do |f|
+          f << <<~GRADLE
+            // Top-level build file
+            plugins {
+                id 'com.android.application' version '8.9.0' apply false
+            }
+          GRADLE
+        end
+
+        # settings.gradle
+        File.open(File.join(root, 'settings.gradle'), 'w') do |f|
+          f << <<~GRADLE
+            pluginManagement {
+                repositories {
+                    google()
+                    mavenCentral()
+                    gradlePluginPortal()
+                }
+            }
+            dependencyResolutionManagement {
+                repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+            rootProject.name = '#{name}'
+            include ':app'
+          GRADLE
+        end
+
+        # gradle.properties
+        File.open(File.join(root, 'gradle.properties'), 'w') do |f|
+          f << <<~PROPS
+            android.useAndroidX=true
+            org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          PROPS
+        end
+
+        # JRuby 10 uses java.nio.file, java.time and java.util.function, which
+        # Android only has from API level 26.  Below that, d8 backports them.
+        if min_sdk_level.to_i < SdkVersions::DESUGARING_SDK_LEVEL
+          desugaring_lines = <<~GRADLE.chomp.gsub(/^/, ' ' * 8)
+            // Backports java.nio.file, java.time and java.util.function
+            // (used by JRuby) to Android versions before 8.0.
+            coreLibraryDesugaringEnabled true
+          GRADLE
+          desugaring_option = "\n#{desugaring_lines}"
+          desugaring_dependency = "\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'"
+        end
+
+        # app/build.gradle
+        app_dir = File.join(root, 'app')
+        FileUtils.mkdir_p app_dir
+        File.open(File.join(app_dir, 'build.gradle'), 'w') do |f|
+          f << <<~GRADLE
+            plugins {
+                id 'com.android.application'
+            }
+
+            android {
+                namespace '#{package}'
+                compileSdk #{target_level}
+
+                defaultConfig {
+                    applicationId '#{package}'
+                    minSdk #{min_sdk_level}
+                    targetSdk #{target_level}
+                    versionCode 1
+                    versionName '1.0'
+                    multiDexEnabled true
+                }
+
+                buildTypes {
+                    release {
+                        minifyEnabled false
+                    }
+                }
+
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17#{desugaring_option}
+                }
+
+                sourceSets {
+                    main {
+                        java.srcDirs = ['src/main/java']
+                        resources.srcDirs = ['src/main/resources']
+                    }
+                }
+
+                packaging {
+                    resources {
+                        excludes += [
+                            'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA',
+                            'META-INF/LICENSE', 'META-INF/LICENSE.txt',
+                            'META-INF/NOTICE', 'META-INF/NOTICE.txt',
+                            'META-INF/INDEX.LIST', 'META-INF/MANIFEST.MF',
+                            'META-INF/maven/**',
+                            'META-INF/services/javax.script.ScriptEngineFactory',
+                            // Parts of the JRuby standard library that cannot
+                            // work on Android or are unused with RubyGems
+                            // disabled.  Saves about 30 MB uncompressed.
+                            'META-INF/jruby.home/bin/**',
+                            'META-INF/jruby.home/lib/ruby/gems/**',
+                            // bouncycastle for jopenssl; snakeyaml-engine stays
+                            // because psych requires the jar (its classes are
+                            // merged into jruby-core).
+                            'META-INF/jruby.home/lib/ruby/stdlib/org/bouncycastle/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/rubygems/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/rubygems.rb',
+                            'META-INF/jruby.home/lib/ruby/stdlib/bundler/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/bundler.rb',
+                            'META-INF/jruby.home/lib/ruby/stdlib/jopenssl.jar',
+                            'META-INF/jruby.home/lib/ruby/stdlib/jline/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/libfixposix/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/ffi/**',
+                            'META-INF/jruby.home/lib/ruby/stdlib/syntax_suggest/**'
+                        ]
+                    }
+                }
+            }
+
+            dependencies {
+                implementation fileTree(dir: '../libs', include: ['*.jar'])#{desugaring_dependency}
+            }
+          GRADLE
+        end
+
+        # AndroidManifest.xml
+        manifest_dir = File.join(app_dir, 'src', 'main')
+        FileUtils.mkdir_p manifest_dir
+        File.open(File.join(manifest_dir, 'AndroidManifest.xml'), 'w') do |f|
+          f << <<~XML
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <uses-sdk android:minSdkVersion="#{min_sdk_level}" android:targetSdkVersion="#{target_level}"/>
+                <application
+                    android:icon="@drawable/ic_launcher"
+                    android:label="#{name}"
+                    android:hardwareAccelerated="true"
+                    android:largeHeap="true">
+                </application>
+            </manifest>
+          XML
+        end
+
+        # Java source directory
+        java_dir = File.join(manifest_dir, 'java', *package.split('.'))
+        FileUtils.mkdir_p java_dir
+
+        # Resources directory
+        FileUtils.mkdir_p File.join(manifest_dir, 'resources')
+
+        # res directories (under app/src/main/res/ for Gradle)
+        res_dir = File.join(manifest_dir, 'res')
+        FileUtils.mkdir_p File.join(res_dir, 'values')
+        File.open(File.join(res_dir, 'values', 'strings.xml'), 'w') do |f|
+          f << <<~XML
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources>
+                <string name="app_name">#{name}</string>
+            </resources>
+          XML
+        end
+
+        # Copy launcher icons into res
+        assets_res = File.join(Ruboto::ASSETS, 'res')
+        %w[drawable-hdpi drawable-mdpi drawable-ldpi].each do |dpi|
+          icon_src = File.join(assets_res, dpi, 'ic_launcher.png')
+          if File.exist?(icon_src)
+            icon_dest_dir = File.join(res_dir, dpi)
+            FileUtils.mkdir_p icon_dest_dir
+            FileUtils.cp icon_src, icon_dest_dir
+          end
+        end
+
+        # libs directory
+        FileUtils.mkdir_p File.join(root, 'libs')
+
+        # project.properties (for backward compat with ruboto tooling)
+        File.open(File.join(root, 'project.properties'), 'w') do |f|
+          f << "target=android-#{target_level}\n"
+        end
+
+        # Gemfile for the app's bundled gems
+        File.open(File.join(app_dir, 'gems.rb'), 'w') do |f|
+          f << <<~RUBY
+            source 'https://rubygems.org'
+          RUBY
+        end
+
+        puts "Created Gradle project structure in #{root}"
+      end
+
       def methods_header
         <<EOF
     private final ScriptInfo scriptInfo = new ScriptInfo();

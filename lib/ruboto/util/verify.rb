@@ -68,7 +68,6 @@ module Ruboto
       end
 
       def verify_min_sdk
-        return 27
         return @min_sdk if @min_sdk
         verify_sdk_versions
         min_sdk_attr = @uses_sdk.attribute('android:minSdkVersion').value
@@ -77,7 +76,6 @@ module Ruboto
       end
 
       def verify_target_sdk
-        return 30
         return @target_sdk if @target_sdk
         verify_sdk_versions
         target_sdk_attr = @uses_sdk.attribute('android:targetSdkVersion').value

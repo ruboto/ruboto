@@ -46,6 +46,15 @@ class Api
               when 21..22 then 'lollipop-release'
               when 23 then 'marshmallow-release'
               when 24..25 then 'nougat-release'
+              when 26..27 then 'oreo-release'
+              when 28    then 'pie-release'
+              when 29    then 'android10-release'
+              when 30    then 'android11-release'
+              when 31..32 then 'android12-release'
+              when 33    then 'android13-release'
+              when 34    then 'android14-release'
+              when 35    then 'android15-release'
+              when 36    then 'android16-release'
               #
               ################################
               else       return nil
