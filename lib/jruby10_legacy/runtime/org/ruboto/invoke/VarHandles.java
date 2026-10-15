@@ -66,7 +66,8 @@ final class VarHandles {
 
     static VarHandle byteArrayView(Class<?> viewArrayClass, ByteOrder order) {
         Class<?> c = viewArrayClass.getComponentType();
-        if (c != long.class && c != int.class && c != short.class && c != char.class) {
+        if (c != long.class && c != int.class && c != short.class && c != char.class
+                && c != float.class && c != double.class) {
             throw new UnsupportedOperationException("byteArrayViewVarHandle(" + viewArrayClass.getName() + ")");
         }
         return new ByteArrayView(c, order == ByteOrder.BIG_ENDIAN);
@@ -269,7 +270,8 @@ final class VarHandles {
 
         ByteArrayView(Class<?> component, boolean bigEndian) {
             super(component, byte[].class, int.class);
-            this.size = component == long.class ? 8 : component == int.class ? 4 : 2;
+            this.size = component == long.class || component == double.class ? 8
+                    : component == int.class || component == float.class ? 4 : 2;
             this.bigEndian = bigEndian;
         }
 
@@ -300,12 +302,17 @@ final class VarHandles {
         @Override
         Object get(Object[] args) {
             long v = read((byte[]) args[0], (Integer) args[1]);
+            if (varType == float.class) return Float.intBitsToFloat((int) v);
+            if (varType == double.class) return Double.longBitsToDouble(v);
             return Primitives.convert(v, varType);
         }
 
         @Override
         void set(Object[] args, Object value) {
-            long v = value instanceof Character ? (Character) value : ((Number) value).longValue();
+            long v;
+            if (varType == float.class) v = Float.floatToRawIntBits(((Number) value).floatValue());
+            else if (varType == double.class) v = Double.doubleToRawLongBits(((Number) value).doubleValue());
+            else v = value instanceof Character ? (Character) value : ((Number) value).longValue();
             synchronized (this) {
                 write((byte[]) args[0], (Integer) args[1], v);
             }

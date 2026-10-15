@@ -131,7 +131,8 @@ public class LegacyAndroidPatcher {
         private final boolean socketTypes;
 
         LegacyRemapper(boolean socketTypes) {
-            super(Opcodes.ASM9);
+            // Remapper(int) is not in the ASM that JRuby 10.0 bundles.
+            super();
             this.socketTypes = socketTypes;
         }
 
@@ -313,7 +314,8 @@ public class LegacyAndroidPatcher {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, POLY, bridge, prepend(VH, desc), false);
                 changed[0] = true;
                 count("VarHandle." + name);
-            } else if (op == Opcodes.INVOKESTATIC && name.equals("registerAsParallelCapable") && desc.equals("()Z")) {
+            } else if (op == Opcodes.INVOKESTATIC && name.equals("registerAsParallelCapable") && desc.equals("()Z")
+                    && resolvesTo(owner, "java/lang/ClassLoader", "registerAsParallelCapable()Z", new HashSet<>())) {
                 // ClassLoader.registerAsParallelCapable (API 24), usually called
                 // through a JRuby subclass.  Android class loaders are always
                 // parallel capable, so it is just `true`.

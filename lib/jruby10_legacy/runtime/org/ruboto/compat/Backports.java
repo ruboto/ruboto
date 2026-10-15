@@ -183,6 +183,8 @@ public final class Backports {
 
     // java.nio.channels.DatagramChannel#bind (API 24)
     public static java.nio.channels.DatagramChannel bind(java.nio.channels.DatagramChannel channel, java.net.SocketAddress local) throws IOException {
+        if (!channel.isOpen()) throw new java.nio.channels.ClosedChannelException();
+        if (channel.socket().isBound()) throw new java.nio.channels.AlreadyBoundException();
         channel.socket().bind(local);
         return channel;
     }
@@ -195,6 +197,8 @@ public final class Backports {
 
     // java.nio.channels.SocketChannel#bind (API 24)
     public static java.nio.channels.SocketChannel bind(java.nio.channels.SocketChannel channel, java.net.SocketAddress local) throws IOException {
+        if (!channel.isOpen()) throw new java.nio.channels.ClosedChannelException();
+        if (channel.socket().isBound()) throw new java.nio.channels.AlreadyBoundException();
         channel.socket().bind(local);
         return channel;
     }

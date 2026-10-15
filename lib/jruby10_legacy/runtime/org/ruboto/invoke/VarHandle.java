@@ -132,8 +132,11 @@ public abstract class VarHandle {
             boolean a = (Boolean) current, b = (Boolean) operand;
             return op == '|' ? a | b : op == '&' ? a & b : a ^ b;
         }
-        if (t == float.class) return ((Number) current).floatValue() + ((Number) operand).floatValue();
-        if (t == double.class) return ((Number) current).doubleValue() + ((Number) operand).doubleValue();
+        if (t == float.class || t == double.class) {
+            if (op != '+') throw new UnsupportedOperationException("bitwise access mode on " + t.getName());
+            if (t == float.class) return ((Number) current).floatValue() + ((Number) operand).floatValue();
+            return ((Number) current).doubleValue() + ((Number) operand).doubleValue();
+        }
         long a = current instanceof Character ? (Character) current : ((Number) current).longValue();
         long b = operand instanceof Character ? (Character) operand : ((Number) operand).longValue();
         long r = op == '+' ? a + b : op == '|' ? (a | b) : op == '&' ? (a & b) : (a ^ b);
@@ -166,6 +169,9 @@ public abstract class VarHandle {
     }
 
     public boolean isAccessModeSupported(AccessMode mode) {
+        String name = mode.methodName();
+        if (name.startsWith("getAndBitwise")) return !(varType == float.class || varType == double.class || !varType.isPrimitive());
+        if (name.startsWith("getAndAdd")) return varType.isPrimitive() && varType != boolean.class;
         return true;
     }
 
