@@ -329,25 +329,18 @@ module Ruboto
 
       def update_manifest(min_sdk, target, force = false)
         log_action("\nAdding RubotoActivity, RubotoDialog, RubotoService, and SDK versions to the manifest") do
+          # Keep what the app already declares; project.properties only knows
+          # the compile target ("android-36").
           sdk_element = verify_manifest.elements['uses-sdk']
-          if project_api_level
-            min_sdk ||= project_api_level
-            target ||= project_api_level
-          elsif sdk_element
+          if sdk_element
             min_sdk ||= sdk_element.attributes['android:minSdkVersion']
             target ||= sdk_element.attributes['android:targetSdkVersion']
-          else
-            min_sdk ||= DEFAULT_MIN_SDK_LEVEL
-            target ||= DEFAULT_MIN_SDK_LEVEL
           end
+          min_sdk ||= gradle_min_sdk_level || DEFAULT_MIN_SDK_LEVEL
+          target ||= project_api_level.to_s[/\d+/] || DEFAULT_TARGET_SDK_LEVEL
 
-          if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL
-          end
-
-          if target.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
-            target = MINIMUM_SUPPORTED_SDK_LEVEL
-          end
+          min_sdk = MINIMUM_SUPPORTED_SDK_LEVEL if min_sdk.to_i < MINIMUM_SUPPORTED_SDK_LEVEL
+          target = min_sdk if target.to_i < min_sdk.to_i
 
           app_element = verify_manifest.elements['application']
           app_element.attributes['android:icon'] ||= '@drawable/ic_launcher'
@@ -439,14 +432,32 @@ module Ruboto
         end
       end
 
-      # The minSdk the app is built for: app/build.gradle wins (it is what the
-      # Android Gradle plugin uses), then the manifest.
+      # The minSdk the app is built for: app/build.gradle(.kts) wins (it is
+      # what the Android Gradle plugin uses), then the manifest.  Falls back to
+      # DEFAULT_MIN_SDK_LEVEL (with a warning) when neither has a literal value.
       def project_min_sdk_level
-        if File.exist?(APP_BUILD_GRADLE_FILE_NAME) && (level = File.read(APP_BUILD_GRADLE_FILE_NAME)[/^\s*minSdk(?:Version)?\s*=?\s*(\d+)/, 1])
-          return level.to_i
+        gradle_min_sdk_level || manifest_min_sdk_level || begin
+          puts "Could not find a literal minSdk in app/build.gradle or the manifest; assuming #{DEFAULT_MIN_SDK_LEVEL}."
+          DEFAULT_MIN_SDK_LEVEL
         end
+      end
 
-        File.exist?(MANIFEST_FILE_NAME) ? verify_min_sdk.to_i : DEFAULT_MIN_SDK_LEVEL
+      def gradle_min_sdk_level
+        [APP_BUILD_GRADLE_FILE_NAME, "#{APP_BUILD_GRADLE_FILE_NAME}.kts"].each do |file|
+          next unless File.exist?(file)
+
+          gradle = File.read(file).gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+          level = gradle[/\bminSdk(?:Version)?\s*(?:=\s*|\(\s*)?(\d+)/, 1]
+          return level.to_i if level
+        end
+        nil
+      end
+
+      def manifest_min_sdk_level
+        return nil unless File.exist?(MANIFEST_FILE_NAME)
+
+        level = verify_manifest.elements['uses-sdk']&.attributes&.[]('android:minSdkVersion')
+        level.to_s =~ /\A\d+\z/ ? level.to_i : nil
       end
 
       # - Removes unneeded code from jruby-core
@@ -924,6 +935,7 @@ module Ruboto
       #   bridges.  The app must also enable core library desugaring below
       #   API 26; the generated app/build.gradle does that.
       def backport_jruby_core(invoke_shim)
+        require 'shellwords'
         legacy_dir = "#{Ruboto::GEM_ROOT}/lib/jruby10_legacy"
         tool_dir = '../legacy_patcher'
         FileUtils.rm_rf tool_dir
@@ -941,17 +953,24 @@ module Ruboto
           print 'Adding JDK backports...'
           runtime_sources = Dir["#{legacy_dir}/runtime/org/ruboto/compat/*.java"]
         end
-        `javac --release 17 -nowarn -d . #{runtime_sources.join(' ')} 2>&1`
-        raise 'Compiling the java.lang.invoke stand-in failed' unless $? == 0
-
-        `javac -cp #{class_path} -d #{tool_dir} #{legacy_dir}/LegacyAndroidPatcher.java`
-        raise 'Compiling the legacy Android patcher failed' unless $? == 0
-
-        mode = invoke_shim ? '' : ' --backports-only'
-        puts `java -cp #{class_path}#{File::PATH_SEPARATOR}#{tool_dir} LegacyAndroidPatcher .#{mode}`
-        raise 'Backporting JDK APIs failed' unless $? == 0
+        run_java_tool('Compiling the java.lang.invoke stand-in',
+                      ['javac', '--release', '17', '-nowarn', '-d', '.', *runtime_sources])
+        run_java_tool('Compiling the legacy Android patcher',
+                      ['javac', '-cp', class_path, '-d', tool_dir, "#{legacy_dir}/LegacyAndroidPatcher.java"])
+        mode = invoke_shim ? [] : ['--backports-only']
+        puts run_java_tool('Backporting JDK APIs',
+                           ['java', '-cp', [class_path, tool_dir].join(File::PATH_SEPARATOR), 'LegacyAndroidPatcher', '.', *mode])
 
         FileUtils.rm_rf tool_dir
+      end
+
+      # Runs a javac/java command, returning its output; shows the output and
+      # raises if it fails.
+      def run_java_tool(what, command)
+        output = `#{command.shelljoin} 2>&1`
+        raise "#{what} failed:\n#{output}" unless $?.success?
+
+        output
       end
 
       def reconfigure_dx_jar
