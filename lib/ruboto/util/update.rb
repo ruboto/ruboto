@@ -795,6 +795,7 @@ module Ruboto
 
               if gem_version >= Gem::Version.new('10.0.0.0')
                 merge_stdlib_extensions
+                add_bundled_gems
                 patch_jruby_core_for_android(min_sdk_level)
               end
 
@@ -882,6 +883,48 @@ module Ruboto
           end
         end
         puts 'Done.'
+      end
+
+      # Bundled gems (Ruby 3.4 moved base64, bigdecimal, csv, ... out of the
+      # default gems) that work on Android: pure Ruby, or with their Java part
+      # already in jruby-core (bigdecimal).  Development tools and gems that
+      # need FFI, extra jars or openssl are left out.
+      BUNDLED_GEMS = %w[
+          abbrev base64 benchmark bigdecimal csv drb getoptlong logger matrix mutex_m
+          observer ostruct prime pstore resolv-replace rexml rinda
+      ].freeze
+      GEMS_DIR = 'META-INF/jruby.home/lib/ruby/gems/shared/gems/'.freeze
+
+      # JRuby finds bundled gems through RubyGems, which Ruboto disables, and
+      # the APK leaves out JRuby's gem directory.  Copy the gems' lib files
+      # into the stdlib directory inside the jruby-core jar instead: Android
+      # merges them into the APK, where JRuby's load path already looks, so
+      # `require 'bigdecimal'` works as on a desktop JRuby.  Files the stdlib
+      # already has are kept.
+      def add_bundled_gems
+        require 'zip'
+        stdlib_jar = Dir['../jruby-stdlib-*.jar'][-1]
+        return unless stdlib_jar
+
+        print 'Adding bundled gems...'
+        added = []
+        Zip::File.open(stdlib_jar) do |stdlib|
+          BUNDLED_GEMS.each do |gem_name|
+            lib = %r{\A#{Regexp.escape(GEMS_DIR)}#{Regexp.escape(gem_name)}-\d[^/]*/lib/(.+)\z}
+            files = stdlib.select { |e| e.file? && e.name =~ lib && !e.name.end_with?('.jrubydir') }
+            next print("#{gem_name} not found, skipped...") if files.empty?
+
+            files.each do |entry|
+              target = "#{STDLIB_DIR}#{entry.name[lib, 1]}"
+              next if File.exist?(target) || stdlib.find_entry(target)
+
+              FileUtils.mkdir_p(File.dirname(target))
+              File.binwrite(target, entry.get_input_stream.read)
+            end
+            added << gem_name
+          end
+        end
+        puts "#{added.join(', ')}.  Done."
       end
 
       def extract_classes(jar_bytes)

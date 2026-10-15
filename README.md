@@ -101,9 +101,13 @@ class generation and does not work.
 
 The Java parts of `stringio`, `strscan`, `json` and `psych` (YAML) ship as
 separate jars inside JRuby, which Android cannot load; Ruboto merges their
-classes into the app.  Default gems that live in JRuby's gem directory
-(`bigdecimal`, `base64`, `csv`, `logger`, …) are not packaged; vendor them as
-described in [Using gems](#using-gems).  `openssl` is not available.
+classes into the app.  The bundled gems that work on Android (`abbrev`,
+`base64`, `benchmark`, `bigdecimal`, `csv`, `drb`, `getoptlong`, `logger`,
+`matrix`, `mutex_m`, `observer`, `ostruct`, `prime`, `pstore`,
+`resolv-replace`, `rexml`, `rinda`) are copied onto the standard library's
+load path, since RubyGems is off on Android.  Other gems, including bundled
+development tools like `minitest` or `rake`, can be vendored as described in
+[Using gems](#using-gems).  `openssl` is not available.
 
 ### Using gems
 
